@@ -148,6 +148,16 @@ export const DEPRECATED_PROVIDERS: Readonly<
       "under the `gemini` provider — it uses the same Google OAuth client, so the same " +
       "login works and the account becomes usable again.",
   },
+  agy: {
+    migrateTo: "antigravity",
+    // The `agy` provider was consolidated into `antigravity`: the CLI and the IDE
+    // authenticate against the same Google consumer-OAuth client and the same Cloud
+    // Code backend, so the same login works and quota is preserved.
+    reason:
+      "The agy provider was consolidated into `antigravity`. Re-add this account under " +
+      "`antigravity` — it uses the same Google OAuth client and Cloud Code backend, so " +
+      "the same login works and the account becomes usable again.",
+  },
 };
 
 /** Whether `provider` is a deprecated upstream that must not be refreshed. */
@@ -350,8 +360,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     }
 
     case "gemini":
-    case "antigravity":
-    case "agy": {
+    case "antigravity": {
       // Google binds each refresh token to the client that issued it. When
       // the operator overrides the client via env, connections authorized by
       // the built-in desktop client must not be refreshed against the custom
@@ -373,7 +382,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
       // Recover it via loadCodeAssist so downstream routing works.
       if (
         result?.accessToken &&
-        (provider === "antigravity" || provider === "agy") &&
+        provider === "antigravity" &&
         !credentials.providerSpecificData?.isProjectIdManual &&
         !(
           isUsableAntigravityProjectId(credentials.projectId) ||
@@ -484,7 +493,6 @@ export function supportsTokenRefresh(provider) {
   const explicitlySupported = new Set([
     "gemini",
     "antigravity",
-    "agy",
     "claude",
     "codex",
     "openference",
@@ -799,7 +807,6 @@ export function formatProviderCredentials(provider, credentials, log) {
       };
 
     case "antigravity":
-    case "agy":
       return {
         accessToken: credentials.accessToken,
         refreshToken: credentials.refreshToken,

@@ -56,6 +56,7 @@ import {
   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
 } from "@/domain/quotaCache";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
+import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 import {
   getQuotaScopeLabelForProvider,
   isAntigravityQuotaProvider,
@@ -394,6 +395,10 @@ export function evaluateQuotaLimitPolicy(
   // Extra-usage switch is opt-in billing, not a pre-dispatch skip. When the
   // operator allows extra usage, 5h/weekly bars must not hide the account.
   if (isClaudeExtraUsageAllowed(provider, connection.providerSpecificData)) {
+    return { blocked: false, reasons: [], resetAt: null };
+  }
+  if (isCodexPaidCreditsEnabled(provider, connection.providerSpecificData, requestedModel)) {
+    // Defer subscription-only snapshots to the mandatory credit-aware preflight.
     return { blocked: false, reasons: [], resetAt: null };
   }
   const policy = resolveQuotaLimitPolicy(provider, connection.providerSpecificData);
@@ -2401,7 +2406,12 @@ export async function getProviderCredentialsWithQuotaPreflight(
     const legacyForceDisable =
       (credentials as { providerSpecificData?: Record<string, unknown> }).providerSpecificData
         ?.quotaPreflightEnabled === false;
-    if (legacyForceDisable) {
+    const paidCreditsEnabled = isCodexPaidCreditsEnabled(
+      provider,
+      (credentials as { providerSpecificData?: unknown }).providerSpecificData,
+      requestedModel
+    );
+    if (legacyForceDisable && !paidCreditsEnabled) {
       const committed = await commitLease();
       if (committed === null) continue;
       return committed;
@@ -2414,6 +2424,7 @@ export async function getProviderCredentialsWithQuotaPreflight(
       !hasConnectionOverrides &&
       !providerHasDefaults &&
       !legacyForceEnable &&
+      !paidCreditsEnabled &&
       !globalCutoffEnabled &&
       !globalDefaultIsRestrictive
     ) {

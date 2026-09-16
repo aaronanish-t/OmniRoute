@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import React, { act } from "react";
+import React, { act, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -69,8 +69,11 @@ describe("Codex extra-credit account button", () => {
 
   async function mount(provider = "codex") {
     function Harness() {
-      hook = useProviderConnections(provider, false, true);
-      const target = hook.connections.find((c) => c.id === connection.id);
+      const hookResult = useProviderConnections(provider, false, true);
+      useEffect(() => {
+        hook = hookResult;
+      }, [hookResult]);
+      const target = hookResult.connections.find((c) => c.id === connection.id);
       return target ? (
         <ConnectionRow
           connection={target}
@@ -83,7 +86,7 @@ describe("Codex extra-credit account button", () => {
           onToggleActive={() => {}}
           onToggleRateLimit={() => {}}
           onToggleCodexPaidCredits={(enabled) =>
-            void hook.handleToggleCodexPaidCredits(target.id!, enabled)
+            void hookResult.handleToggleCodexPaidCredits(target.id!, enabled)
           }
           onRetest={() => {}}
           onEdit={() => {}}

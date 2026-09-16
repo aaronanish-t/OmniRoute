@@ -33,6 +33,7 @@ import {
 import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers";
 import { useProviderQuotaVisibility } from "./useProviderQuotaVisibility";
 import { useReorderByAvailability } from "./useReorderByAvailability";
+import { useCodexPaidCreditsToggle } from "./useCodexPaidCreditsToggle";
 import {
   useConnectionDeleteConfirm,
   type ConnectionDeleteConfirmState,
@@ -547,66 +548,14 @@ export function useProviderConnections(
     }
   };
 
-  const handleToggleCodexPaidCredits = async (connectionId: string, enabled: boolean) => {
-    try {
-      const target = connections.find((connection) => connection.id === connectionId);
-      if (!target) return;
-
-      const providerSpecificData =
-        target.providerSpecificData && typeof target.providerSpecificData === "object"
-          ? target.providerSpecificData
-          : {};
-
-      const res = await fetch(`/api/providers/${connectionId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          providerSpecificData: { ...providerSpecificData, allowPaidCredits: enabled },
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        notify.error(
-          data.error ||
-            providerText(
-              t,
-              "failedUpdateCodexPaidCredits",
-              "Failed to update Codex paid-credit policy"
-            )
-        );
-        return;
-      }
-
-      setConnections((prev) =>
-        prev.map((connection) =>
-          connection.id === connectionId
-            ? {
-                ...connection,
-                providerSpecificData: {
-                  ...(connection.providerSpecificData || {}),
-                  allowPaidCredits: enabled,
-                },
-              }
-            : connection
-        )
-      );
-      notify.success(
-        enabled
-          ? providerText(
-              t,
-              "codexPaidCreditsEnabled",
-              "Codex paid credits enabled (additional charges may apply)"
-            )
-          : providerText(t, "codexPaidCreditsDisabled", "Codex paid credits disabled")
-      );
-    } catch (error) {
-      console.error("Error toggling Codex paid-credit policy:", error);
-      notify.error(
-        providerText(t, "failedUpdateCodexPaidCredits", "Failed to update Codex paid-credit policy")
-      );
-    }
-  };
+  // Codex paid-credits toggle — extracted to its own hook (see
+  // useCodexPaidCreditsToggle.ts) to keep this file under the file-size cap.
+  const { handleToggleCodexPaidCredits } = useCodexPaidCreditsToggle({
+    connections,
+    setConnections,
+    notify,
+    t,
+  });
 
   const handleToggleCodexLimit = async (connectionId: string, field: string, enabled: boolean) => {
     try {

@@ -44,7 +44,9 @@ export function setConnectionRateLimitUntil(connectionId: string, until: number 
   db.prepare(
     "UPDATE provider_connections SET rate_limited_until = ?, updated_at = ? WHERE id = ?"
   ).run(until, new Date().toISOString(), connectionId);
-  invalidateDbCache("connections");
+  // rate_limited_until is runtime cooldown state the catalog never reads; keep
+  // the connection caches fresh without dropping the memoized /v1/models body.
+  invalidateDbCache("connections", connectionId, { skipModelCatalog: true });
 }
 
 /**
@@ -236,7 +238,7 @@ export function clearStaleCrashCooldowns(): { cleared: number } {
     stmt.run(now, row.id);
   }
 
-  invalidateDbCache("connections");
+  invalidateDbCache("connections", undefined, { skipModelCatalog: true });
 
   return { cleared: toReset.length };
 }
@@ -301,7 +303,7 @@ export async function clearConnectionErrorIfUnchanged(
     );
   const applied = (result.changes ?? 0) > 0;
   if (applied) {
-    invalidateDbCache("connections");
+    invalidateDbCache("connections", id, { skipModelCatalog: true });
     bumpProxyConfigGeneration();
   }
   return applied;

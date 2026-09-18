@@ -30,6 +30,25 @@ function firstCall(text: string) {
 }
 
 describe("deepseekWebTools — variants", () => {
+  test("full-width DeepSeek DSML preserves multiple parallel invocations", () => {
+    const text = `<｜｜DSML｜｜ calls><｜｜DSML｜｜ invoke name="bash"><｜｜DSML｜｜ parameter name="command" string="true">pwd<｜｜DSML｜｜ parameter></｜｜DSML｜｜ invoke><｜｜DSML｜｜ invoke name="bash"><｜｜DSML｜｜ parameter name="command" string="true">whoami<｜｜DSML｜｜ parameter></｜｜DSML｜｜ invoke></｜｜DSML｜｜ calls>`;
+    const { content, toolCalls } = parseDeepSeekToolCalls(text, "call", TOOLS);
+    assert.equal(content, "");
+    assert.equal(toolCalls?.length, 2);
+    assert.deepEqual(JSON.parse(toolCalls![0].function.arguments), { command: "pwd" });
+    assert.deepEqual(JSON.parse(toolCalls![1].function.arguments), { command: "whoami" });
+  });
+
+  test("full-width DeepSeek DSML preserves three calls and JSON arguments", () => {
+    const text = `<｜｜DSML｜｜ calls><｜｜DSML｜｜ invoke name="bash"><｜｜DSML｜｜ parameter name="command" string="true">pwd<｜｜DSML｜｜ parameter></｜｜DSML｜｜ invoke><｜｜DSML｜｜ invoke name="bash"><｜｜DSML｜｜ parameter name="command" string="true">whoami<｜｜DSML｜｜ parameter></｜｜DSML｜｜ invoke><｜｜DSML｜｜ invoke name="bash"><｜｜DSML｜｜ parameter name="command" string="true">printf TOOL_OK<｜｜DSML｜｜ parameter></｜｜DSML｜｜ invoke></｜｜DSML｜｜ calls>`;
+    const { toolCalls } = parseDeepSeekToolCalls(text, "call", TOOLS);
+    assert.equal(toolCalls?.length, 3);
+    assert.deepEqual(
+      toolCalls?.map((call) => JSON.parse(call.function.arguments)),
+      [{ command: "pwd" }, { command: "whoami" }, { command: "printf TOOL_OK" }]
+    );
+  });
+
   test("DSML tool call with string attributes works for any requested tool", () => {
     const text = `<|DSML|calls><|DSML|invoke name="browser"><|DSML|parameter name="action" string="true">act<|DSML|parameter><|DSML|parameter name="kind" string="false">click<|DSML|parameter></|DSML|invoke></|DSML|calls>`;
     const { content, toolCalls } = parseDeepSeekToolCalls(text, "call", [

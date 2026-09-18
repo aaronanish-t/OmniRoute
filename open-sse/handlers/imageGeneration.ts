@@ -192,7 +192,8 @@ const IMAGE_SIZE_PATTERN = /^(?:1K|2K|4K)$/;
  * in `credentials.providerSpecificData.baseUrl` (e.g. `https://example.com/v1`),
  * NOT as a top-level `credentials.baseUrl`. Older callers may still pass a
  * top-level `baseUrl`, so we honor that as a secondary source. When neither is
- * present we fall back to `fallback` (the built-in Gemini OpenAI endpoint).
+ * present the caller may use its explicit fallback. Custom-node callers use
+ * failClosed so they never route to a built-in provider endpoint.
  *
  * Resolution order: providerSpecificData.baseUrl → credentials.baseUrl → fallback.
  *
@@ -207,7 +208,8 @@ export function resolveImageBaseUrl(
   credentials:
     { baseUrl?: unknown; providerSpecificData?: { baseUrl?: unknown } | null } | null | undefined,
   fallback: string,
-  endpoint: "generations" | "edits" = "generations"
+  endpoint: "generations" | "edits" = "generations",
+  failClosed = false
 ): string {
   const psd = credentials?.providerSpecificData;
   const psdBaseUrl =
@@ -220,7 +222,7 @@ export function resolveImageBaseUrl(
       : null;
   const nodeBaseUrl = psdBaseUrl || topLevelBaseUrl;
 
-  if (!nodeBaseUrl) return fallback;
+  if (!nodeBaseUrl) return failClosed ? "" : fallback;
 
   // A single configured node serves both image routes: honor a base URL that already
   // points at the requested OpenAI image path, and rewrite one that points at the other
@@ -486,14 +488,19 @@ export async function handleImageGeneration({
       // Previously only the (always-absent) top-level credentials.baseUrl was
       // read, so every custom image node fell back to the Gemini endpoint and
       // returned "Please pass a valid API key".
-      baseUrl: resolveImageBaseUrl(
-        credentials,
-        `https://generativelanguage.googleapis.com/v1beta/openai/images/generations`
-      ),
+      baseUrl: resolveImageBaseUrl(credentials, "", "generations", true),
       authType: "apikey",
       authHeader: "bearer",
       format: "openai",
     };
+
+    if (!syntheticConfig.baseUrl) {
+      return {
+        success: false,
+        status: 501,
+        error: `Image generation is not configured for custom provider: ${provider}`,
+      };
+    }
 
     return handleOpenAIImageGeneration({
       model,

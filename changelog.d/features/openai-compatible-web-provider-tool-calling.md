@@ -1,17 +1,1 @@
----
-title: OpenAI-compatible web-provider contracts and tool calling
-type: feature
----
-
-Established canonical OpenAI-compatible request, response, error, model-capability,
-and web-provider tool-calling contracts, while documenting the existing auxiliary
-endpoints and unsupported realtime capability. Web-cookie providers now
-preserve stable tool-call IDs and indexes, parallel calls, tool results, streaming
-serialization, and terminal `finish_reason: "tool_calls"` while failing closed for
-unknown or malformed invocations.
-
-Closes #14033
-Closes #14034
-Closes #14035
-Closes #14036
-Closes #14037
+- **feat(providers):** DeepSeek-web tool-call parsing now recognizes native DSML `invoke`/`parameter` tokens (both the printable-ASCII and full-width tokenizer spellings) in addition to the existing `<tool>{json}</tool>` shapes, and preserves parallel tool calls and stable call IDs/indexes; custom OpenAI-compatible image/video generation providers now fail closed on a missing base URL instead of silently falling back to a built-in provider endpoint ([#14103](https://github.com/diegosouzapw/OmniRoute/pull/14103)) — thanks @arashashrafii

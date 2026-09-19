@@ -185,6 +185,27 @@ const IMAGE_ASPECT_RATIO_PATTERN = /^\d+:\d+$/;
 const IMAGE_SIZE_PATTERN = /^(?:1K|2K|4K)$/;
 
 /**
+ * Read the configured node base URL from a custom provider's credentials:
+ * `providerSpecificData.baseUrl` first, then the legacy top-level
+ * `credentials.baseUrl`. Returns null when neither is set, so callers can
+ * fall back to a default or fail closed.
+ */
+function pickConfiguredNodeBaseUrl(
+  credentials:
+    { baseUrl?: unknown; providerSpecificData?: { baseUrl?: unknown } | null } | null | undefined
+): string | null {
+  const psd = credentials?.providerSpecificData;
+  const psdBaseUrl =
+    psd && typeof psd === "object" && typeof psd.baseUrl === "string" && psd.baseUrl.trim()
+      ? psd.baseUrl.trim()
+      : null;
+  if (psdBaseUrl) return psdBaseUrl;
+  return typeof credentials?.baseUrl === "string" && credentials.baseUrl.trim()
+    ? credentials.baseUrl.trim()
+    : null;
+}
+
+/**
  * Resolve the upstream images endpoint for a custom (OpenAI-compatible) image
  * provider node (#3205).
  *
@@ -211,16 +232,7 @@ export function resolveImageBaseUrl(
   endpoint: "generations" | "edits" = "generations",
   failClosed = false
 ): string {
-  const psd = credentials?.providerSpecificData;
-  const psdBaseUrl =
-    psd && typeof psd === "object" && typeof psd.baseUrl === "string" && psd.baseUrl.trim()
-      ? psd.baseUrl.trim()
-      : null;
-  const topLevelBaseUrl =
-    typeof credentials?.baseUrl === "string" && credentials.baseUrl.trim()
-      ? credentials.baseUrl.trim()
-      : null;
-  const nodeBaseUrl = psdBaseUrl || topLevelBaseUrl;
+  const nodeBaseUrl = pickConfiguredNodeBaseUrl(credentials);
 
   if (!nodeBaseUrl) return failClosed ? "" : fallback;
 

@@ -66,6 +66,10 @@ import { handleAdobeFireflyImageGeneration } from "./imageGeneration/providers/a
 import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibabaImage.ts";
 import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihorde.ts";
 import {
+  handleCodexImagesApi,
+  isCodexImagesApiModel,
+} from "./imageGeneration/providers/codexImages.ts";
+import {
   applyPollinationsAnonymousFallback,
   reportPollinationsAnonOutcome,
 } from "./imageGeneration/pollinationsAnonAuth.ts";
@@ -273,7 +277,7 @@ function parseJsonOrNull(value: string): unknown | null {
   }
 }
 
-function sanitizeImageProviderError(errorText: string): unknown {
+export function sanitizeImageProviderError(errorText: string): unknown {
   const parsed = parseJsonOrNull(errorText);
   if (parsed !== null) {
     return sanitizeUpstreamDetails(parsed) || sanitizeErrorMessage(errorText);
@@ -286,7 +290,11 @@ function sanitizeImageProviderError(errorText: string): unknown {
 // (not a generic "invalid request"). Classify it so the caller can mark the failure
 // `retryable: true`, which routes it through the same sibling-account fallback that
 // already handles 401s (executeImageWithCredentialFallback, src/sse/services/imageCredentialRetry.ts).
-function isCodexChatGptModelAccessError(status: number, errorText: string, model: string): boolean {
+export function isCodexChatGptModelAccessError(
+  status: number,
+  errorText: string,
+  model: string
+): boolean {
   if (status !== 400) return false;
   const parsed = parseJsonOrNull(errorText);
   let detail: string | null = null;
@@ -2495,7 +2503,7 @@ export function extractImageGenerationCalls(
 // The image_generation hosted tool accepts { "auto" | "low" | "medium" | "high" }
 // for `quality`. Legacy image clients often send "standard" / "hd". Map those values
 // so OpenWebUI's quality dropdown doesn't silently get rejected upstream.
-function mapLegacyImageQualityToImageTool(value: string): string {
+export function mapLegacyImageQualityToImageTool(value: string): string {
   const normalized = value.toLowerCase();
   if (normalized === "standard") return "medium";
   if (normalized === "hd") return "high";
@@ -2566,10 +2574,14 @@ async function handleCodexImageGeneration({
       ? (credentials.providerSpecificData as Record<string, unknown>).workspaceId
       : undefined;
 
-  // Forward size/quality from the GPT-Image-style body into the hosted tool so
-  // OpenWebUI's size/quality selectors actually take effect. Everything else
-  // (model, n, background, moderation, output_compression) is left to the
-  // Codex backend's defaults — today that's `gpt-image-2`.
+  // GPT Image models go to the dedicated Codex Images routes, which honor `model`.
+  if (isCodexImagesApiModel(model)) {
+    const baseUrl = providerConfig.baseUrl;
+    const args = { model, provider, baseUrl, body, token, workspaceId, requestedCount };
+    return handleCodexImagesApi({ ...args, referenceImages, startTime, log, signal, logPath });
+  }
+
+  // Hosted-tool path: forward size/quality; the tool's image model is pinned server-side.
   const toolConfig: Record<string, unknown> = { type: "image_generation", output_format: "png" };
   if (referenceImages.length > 0) toolConfig.action = "edit";
   if (typeof body.size === "string" && body.size.trim()) {

@@ -225,8 +225,10 @@ export default function CompressionPanel() {
     configRef.current = config;
   }, [config]);
   const saveGenRef = useRef(0);
-  const lastConfirmedRef = useRef(config);
-  const lastAckedGenRef = useRef(0);
+  const savedRef = useRef(config);
+  const queuedRef = useRef<Partial<CompressionConfig>[]>([]);
+  const saveQueueRef = useRef(Promise.resolve());
+  const batchFailedRef = useRef(false);
 
   useEffect(() => {
     fetch("/api/settings/compression")
@@ -241,7 +243,7 @@ export default function CompressionPanel() {
             outputStyles: data.outputStyles ?? DEFAULT_CONFIG.outputStyles,
             contextBudget: { ...DEFAULT_CONTEXT_BUDGET, ...(data.contextBudget ?? {}) },
           };
-          lastConfirmedRef.current = hydrated;
+          savedRef.current = hydrated;
           setConfig(hydrated);
         }
       })
@@ -266,64 +268,52 @@ export default function CompressionPanel() {
       .catch(() => {});
   }, []);
 
-  // Persist a merge-patch. The DB persists `engines` as one whole row, so callers that
-  // touch an engine pass the full engines map to avoid dropping the other engines.
-  // Generation + configRef: a later in-flight save must not let an older failure
-  // roll back a newer optimistic (or already-acked) state.
-  const save = async (updates: Partial<CompressionConfig>) => {
+  const showQueued = () => {
+    const shown = queuedRef.current.reduce<CompressionConfig>(
+      (acc, queued) => ({ ...acc, ...queued }),
+      savedRef.current
+    );
+    configRef.current = shown;
+    setConfig(shown);
+  };
+
+  // Persist a merge-patch. The server replaces each top-level key the PUT carries, so callers
+  // that touch an engine pass the full engines map to avoid dropping the other engines.
+  // Saves go out one at a time and the panel shows the last saved config plus the saves still
+  // queued, so a failed save rolls back only its own fields. The status reads "error" when any
+  // save in the run that drained the queue failed. A PUT that never settles holds up the saves
+  // queued behind it.
+  const save = (updates: Partial<CompressionConfig>) => {
     const gen = ++saveGenRef.current;
-    const previous = configRef.current;
-    const next: CompressionConfig = {
-      ...previous,
-      ...updates,
-      ...(updates.contextBudget
-        ? {
-            contextBudget: {
-              ...(previous.contextBudget ?? DEFAULT_CONTEXT_BUDGET),
-              ...updates.contextBudget,
-            },
-          }
-        : {}),
-    };
-    configRef.current = next;
-    setConfig(next);
+    if (queuedRef.current.length === 0) batchFailedRef.current = false;
+    queuedRef.current.push(updates);
+    showQueued();
     setSaving(true);
     setStatus("");
-    try {
-      const res = await fetch("/api/settings/compression", {
+    saveQueueRef.current = saveQueueRef.current.then(async () => {
+      const ok = await fetch("/api/settings/compression", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
-      });
-      // Acked server state is recorded even when this gen is stale, so a
-      // later failure rolls back to the newest acked PUT, not the GET.
-      // lastAckedGenRef stops an older ack from overwriting a newer one.
-      if (res.ok && gen >= lastAckedGenRef.current) {
-        lastConfirmedRef.current = next;
-        lastAckedGenRef.current = gen;
-      }
-      if (gen === saveGenRef.current) {
-        if (res.ok) {
-          setStatus("saved");
-          const savedGen = gen;
-          setTimeout(() => {
-            if (savedGen === saveGenRef.current) setStatus("");
-          }, 2000);
-        } else {
-          configRef.current = lastConfirmedRef.current;
-          setConfig(lastConfirmedRef.current);
-          setStatus("error");
-        }
-      }
-    } catch {
-      if (gen === saveGenRef.current) {
-        configRef.current = lastConfirmedRef.current;
-        setConfig(lastConfirmedRef.current);
+      }).then(
+        (res) => res.ok,
+        () => false
+      );
+      queuedRef.current.shift();
+      if (ok) savedRef.current = { ...savedRef.current, ...updates };
+      else batchFailedRef.current = true;
+      showQueued();
+      if (queuedRef.current.length > 0) return;
+      setSaving(false);
+      if (batchFailedRef.current) {
         setStatus("error");
+        return;
       }
-    } finally {
-      if (gen === saveGenRef.current) setSaving(false);
-    }
+      setStatus("saved");
+      setTimeout(() => {
+        if (gen === saveGenRef.current) setStatus("");
+      }, 2000);
+    });
   };
 
   const setEngine = (id: string, patch: Partial<EngineToggle>) => {

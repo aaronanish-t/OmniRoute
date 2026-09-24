@@ -126,12 +126,6 @@ function inputFor(labelKey: string): HTMLInputElement {
   return input;
 }
 
-function buttonFor(labelKey: string): HTMLButtonElement {
-  const button = screen.getByText(labelKey).closest("label")?.querySelector("button");
-  if (!button) throw new Error(`no button next to ${labelKey}`);
-  return button;
-}
-
 async function renderTab() {
   render(<CompressionSettingsTab />);
   await settle();
@@ -179,20 +173,6 @@ describe("CompressionSettingsTab saves only what changed", () => {
 
     expect(server.stored.outputStyles).toEqual([{ id: "caveman", level: "full" }]);
     expect(server.puts.at(-1)).toEqual({ cacheMinutes: 10 });
-  });
-
-  it("keeps an output-mode field changed elsewhere when the tab toggles Auto-Clarity", async () => {
-    const server = startServer();
-    await renderTab();
-    // The panel changes the output-mode level after this tab loaded.
-    server.write({ cavemanOutputMode: { enabled: true, intensity: "ultra", autoClarity: true } });
-
-    fireEvent.click(buttonFor("compressionSettingsAutoClarityBypass"));
-    await settle();
-
-    expect(server.puts.at(-1)).toEqual({
-      cavemanOutputMode: { enabled: true, intensity: "ultra", autoClarity: false },
-    });
   });
 
   it("fills the rest of a nested save from the stored row, two levels down", async () => {

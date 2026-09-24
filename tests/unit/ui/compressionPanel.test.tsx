@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
+import { fireEvent } from "@testing-library/react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { ENGINE_IDS } from "../../../open-sse/services/compression/engineCatalog.ts";
 
@@ -56,15 +57,6 @@ async function flush() {
   await act(async () => {
     for (let i = 0; i < 10; i++) await Promise.resolve();
   });
-}
-
-// React listens for "change" on a <select> and "input" on an <input>. Set the value through the
-// native setter so React sees the change.
-function setValue(el: HTMLSelectElement | HTMLInputElement, value: string) {
-  const isSelect = el instanceof HTMLSelectElement;
-  const proto = isSelect ? HTMLSelectElement.prototype : HTMLInputElement.prototype;
-  Object.getOwnPropertyDescriptor(proto, "value")!.set!.call(el, value);
-  el.dispatchEvent(new Event(isSelect ? "change" : "input", { bubbles: true }));
 }
 
 // ── Fetch stub ────────────────────────────────────────────────────────────────
@@ -223,26 +215,30 @@ describe("CompressionPanel", () => {
     expect(preview?.textContent).not.toContain("caveman");
   });
 
-  // The ultra-engine select is disabled while a save is in flight, but the auto-trigger input
-  // never is, so a change there overlaps the ultra-engine save still waiting on the server.
-  async function changeUltraEngineThenAutoTrigger(failPutKey: string) {
-    const { puts } = setupFetchMock(failPutKey);
+  async function renderPanel() {
     const { default: CompressionPanel } =
       await import("../../../src/app/(dashboard)/dashboard/context/settings/CompressionPanel");
-
     let container!: HTMLElement;
     await act(async () => {
       container = mount(<CompressionPanel />);
     });
     await flush();
+    return container;
+  }
+
+  // The ultra-engine select is disabled while a save is in flight, but the auto-trigger input
+  // never is, so a change there queues behind the ultra-engine save still waiting on the server.
+  async function changeUltraEngineThenAutoTrigger(failPutKey: string) {
+    const { puts } = setupFetchMock(failPutKey);
+    const container = await renderPanel();
 
     const ultraEngine = container.querySelector(
       `[data-testid="ultra-engine-select"]`
     ) as HTMLSelectElement;
     const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
     await act(async () => {
-      setValue(ultraEngine, "slm");
-      setValue(autoTrigger, "500");
+      fireEvent.change(ultraEngine, { target: { value: "slm" } });
+      fireEvent.change(autoTrigger, { target: { value: "500" } });
     });
     for (let i = 0; i < 5; i++) await flush();
     return { container, puts, ultraEngine, autoTrigger };
@@ -265,6 +261,77 @@ describe("CompressionPanel", () => {
 
     expect(ultraEngine.value).toBe("slm");
     expect(autoTrigger.value).toBe("0");
+    expect(container.textContent).toContain("saveFailed");
+  });
+
+  it("skips a queued save that a later queued save replaces", async () => {
+    const { puts } = setupFetchMock();
+    const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    // Hold the first settings PUT so the next keystrokes queue behind it.
+    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
+      const res = await respond(input, init);
+      if (init?.method === "PUT" && puts.length === 1) await held;
+      return res;
+    });
+    const container = await renderPanel();
+
+    const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
+    for (const value of ["1", "10", "100"]) {
+      await act(async () => {
+        fireEvent.change(autoTrigger, { target: { value } });
+      });
+    }
+    await act(async () => release());
+    for (let i = 0; i < 5; i++) await flush();
+
+    // The held PUT plus one for the final value; the queued "10" never goes out.
+    expect(puts.map((p) => p.body)).toEqual([{ autoTriggerTokens: 1 }, { autoTriggerTokens: 100 }]);
+    expect(autoTrigger.value).toBe("100");
+  });
+
+  it("fails a PUT that outlives the save timeout and sends the save queued behind it", async () => {
+    const { puts } = setupFetchMock();
+    const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
+    const timeouts: AbortController[] = [];
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout").mockImplementation(() => {
+      const controller = new AbortController();
+      timeouts.push(controller);
+      return controller.signal;
+    });
+    // The first settings PUT never answers on its own; only its timeout signal ends it.
+    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
+      const res = await respond(input, init);
+      if (init?.method === "PUT" && puts.length === 1) {
+        await new Promise((_, reject) =>
+          init.signal?.addEventListener("abort", () => reject(init.signal?.reason))
+        );
+      }
+      return res;
+    });
+    const container = await renderPanel();
+
+    const ultraEngine = container.querySelector(
+      `[data-testid="ultra-engine-select"]`
+    ) as HTMLSelectElement;
+    const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(ultraEngine, { target: { value: "slm" } });
+      fireEvent.change(autoTrigger, { target: { value: "500" } });
+    });
+    await flush();
+    expect(puts, "the auto-trigger save waits behind the stalled PUT").toHaveLength(1);
+
+    await act(async () => timeouts[0].abort());
+    for (let i = 0; i < 5; i++) await flush();
+
+    expect(timeoutSpy).toHaveBeenCalledWith(15_000);
+    expect(puts.map((p) => p.body)).toEqual([{ ultraEngine: "slm" }, { autoTriggerTokens: 500 }]);
+    expect(ultraEngine.value).toBe("heuristic");
+    expect(autoTrigger.value).toBe("500");
     expect(container.textContent).toContain("saveFailed");
   });
 });

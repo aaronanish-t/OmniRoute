@@ -126,7 +126,13 @@ describe("ConnectionQuotaPanel", () => {
     expect(el.textContent).toContain("7d 20%");
   });
 
-  it("groups antigravity per-model windows behind a +N chip and shows credits", () => {
+  it("surfaces worst per-model windows as chips when no rolling windows exist (antigravity)", () => {
+    const modelQuota = (used: number, remaining: number) => ({
+      used,
+      total: 100,
+      remainingPercentage: remaining,
+      resetAt: futureReset(24),
+    });
     const el = mount(
       <ConnectionQuotaPanel
         {...panelProps({
@@ -138,6 +144,51 @@ describe("ConnectionQuotaPanel", () => {
           } as ConnectionRowConnection,
           cache: {
             quotas: {
+              "gemini-2.5-pro": modelQuota(10, 90),
+              "claude-4-sonnet": modelQuota(4, 96),
+              "gemini-3-flash": modelQuota(70, 30),
+              "gpt-oss-120b": modelQuota(2, 98),
+              "claude-opus-4-6": modelQuota(1, 99),
+              credits: { remaining: 120 },
+            },
+            plan: "Ultra",
+            message: null,
+            fetchedAt: new Date().toISOString(),
+          },
+        })}
+      />
+    );
+    // no 5h/7d keys → the 3 most-consumed model windows become chips directly
+    expect(el.textContent).toContain("gemini-3-flash 70%");
+    expect(el.textContent).toContain("gemini-2.5-pro 10%");
+    expect(el.textContent).toContain("claude-4-sonnet 4%");
+    // remaining two fold behind +2; credits stay a chip
+    expect(el.textContent).toContain("+2");
+    expect(el.textContent).toContain("120 credits");
+    // most-consumed first: flash before pro
+    expect(el.textContent!.indexOf("gemini-3-flash")).toBeLessThan(
+      el.textContent!.indexOf("gemini-2.5-pro")
+    );
+  });
+
+  it("shows only one model chip when rolling windows also exist (agy weekly + models)", () => {
+    const el = mount(
+      <ConnectionQuotaPanel
+        {...panelProps({
+          providerId: "agy",
+          connection: {
+            id: "c4",
+            provider: "agy",
+            name: "AGY account",
+          } as ConnectionRowConnection,
+          cache: {
+            quotas: {
+              gemini_weekly: {
+                used: 0,
+                total: 0,
+                remainingPercentage: 55,
+                resetAt: futureReset(90),
+              },
               "gemini-2.5-pro": {
                 used: 10,
                 total: 100,
@@ -150,17 +201,18 @@ describe("ConnectionQuotaPanel", () => {
                 remainingPercentage: 96,
                 resetAt: futureReset(24),
               },
-              credits: { remaining: 120 },
             },
-            plan: "Ultra",
+            plan: "Pro",
             message: null,
             fetchedAt: new Date().toISOString(),
           },
         })}
       />
     );
-    expect(el.textContent).toContain("120 credits");
-    expect(el.textContent).toContain("+2");
+    expect(el.textContent).toContain("7d 45%");
+    // single worst model chip (pro), the rest folded
+    expect(el.textContent).toContain("gemini-2.5-pro 10%");
+    expect(el.textContent).toContain("+1");
   });
 
   it("surfaces an upstream error message when only a message row exists", () => {

@@ -59,6 +59,27 @@ function usedPercent(row: QuotaRowLike): number | null {
   return null;
 }
 
+function remainingOf(row: QuotaRowLike): number {
+  if (typeof row.remainingPercentage === "number" && Number.isFinite(row.remainingPercentage)) {
+    return row.remainingPercentage;
+  }
+  const total = Number(row.total || 0);
+  const used = Number(row.used || 0);
+  return total > 0 ? (1 - used / total) * 100 : 100;
+}
+
+// How many non-window (per-model) rows become chips: more when they are the
+// only signal the provider reports, fewer when they supplement 5h/7d windows.
+const MAX_MODEL_CHIPS_ALONE = 3;
+const MAX_MODEL_CHIPS_WITH_WINDOWS = 1;
+
+const MODEL_CHIP_LABEL_MAX = 20;
+
+/** Compact chip label for a per-model bucket — truncated, full name in title. */
+function modelChipLabel(name: string): string {
+  return name.length > MODEL_CHIP_LABEL_MAX ? `${name.slice(0, MODEL_CHIP_LABEL_MAX - 1)}…` : name;
+}
+
 /** Compact chip label for a quota window: "5h", "7d", "Monthly", "Spark 5h". */
 function shortWindowLabel(name: string, monthlyLabel: string, sparkLabel: string): string {
   const key = name.trim().toLowerCase();
@@ -116,9 +137,18 @@ export default function ConnectionQuotaPanel({
   const windowRows = rows.filter(
     (r) => !r.isCredits && !r.isResetCredits && quotaWindowRank(r.name) !== null && !r.message
   );
-  const otherCount = rows.filter(
+  const otherRows = rows.filter(
     (r) => !r.isCredits && !r.isResetCredits && quotaWindowRank(r.name) === null && r !== messageRow
-  ).length;
+  );
+  // Providers like antigravity/agy report ONLY per-model buckets — no 5h/7d
+  // keys at all — so ranked windows can be empty. Surface the most-consumed
+  // model windows directly as chips (worst remaining first) instead of hiding
+  // everything behind a bare "+N", and fold the rest.
+  const worstOtherRows = [...otherRows]
+    .filter((r) => !r.unlimited)
+    .sort((a, b) => remainingOf(a) - remainingOf(b))
+    .slice(0, windowRows.length === 0 ? MAX_MODEL_CHIPS_ALONE : MAX_MODEL_CHIPS_WITH_WINDOWS);
+  const otherCount = Math.max(0, otherRows.length - worstOtherRows.length);
 
   const numberFmt = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const updatedAgo = formatAgo(cache?.fetchedAt, locale);
@@ -220,6 +250,21 @@ export default function ConnectionQuotaPanel({
             {renderUsedText(row)}
           </span>
         ))}
+        {worstOtherRows.map((row) => {
+          const pct = usedPercent(row);
+          const colors = getBarColor(remainingOf(row));
+          return (
+            <span
+              key={row.name}
+              title={chipTitle(row)}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-medium"
+              style={{ color: colors.text, background: colors.bg }}
+            >
+              {modelChipLabel(row.displayName || row.name)}
+              {pct === null ? " —" : ` ${pct}%`}
+            </span>
+          );
+        })}
         {otherCount > 0 && (
           <span
             className="px-1.5 py-0.5 rounded font-medium text-text-muted"

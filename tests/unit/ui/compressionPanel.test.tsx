@@ -58,6 +58,15 @@ async function flush() {
   });
 }
 
+// React listens for "change" on a <select> and "input" on an <input>. Set the value through the
+// native setter so React sees the change.
+function setValue(el: HTMLSelectElement | HTMLInputElement, value: string) {
+  const isSelect = el instanceof HTMLSelectElement;
+  const proto = isSelect ? HTMLSelectElement.prototype : HTMLInputElement.prototype;
+  Object.getOwnPropertyDescriptor(proto, "value")!.set!.call(el, value);
+  el.dispatchEvent(new Event(isSelect ? "change" : "input", { bubbles: true }));
+}
+
 // ── Fetch stub ────────────────────────────────────────────────────────────────
 
 interface CapturedPut {
@@ -65,7 +74,8 @@ interface CapturedPut {
   body: Record<string, unknown>;
 }
 
-function setupFetchMock(): { puts: CapturedPut[] } {
+// A settings PUT whose body carries `failPutKey` gets a 500, as when the server rejects that save.
+function setupFetchMock(failPutKey?: string): { puts: CapturedPut[] } {
   const puts: CapturedPut[] = [];
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {
@@ -105,6 +115,7 @@ function setupFetchMock(): { puts: CapturedPut[] } {
         if (method === "PUT") {
           const body = JSON.parse(String(init?.body ?? "{}"));
           puts.push({ url, body });
+          if (failPutKey && failPutKey in body) return json({ error: "rejected" }, 500);
           // Echo a merged config so the panel keeps a coherent state.
           return json({ ...initialConfig, ...body });
         }
@@ -210,5 +221,50 @@ describe("CompressionPanel", () => {
     // Only rtk is enabled in the initial config → preview mentions rtk, not caveman.
     expect(preview?.textContent).toContain("rtk");
     expect(preview?.textContent).not.toContain("caveman");
+  });
+
+  // The ultra-engine select is disabled while a save is in flight, but the auto-trigger input
+  // never is, so a change there overlaps the ultra-engine save still waiting on the server.
+  async function changeUltraEngineThenAutoTrigger(failPutKey: string) {
+    const { puts } = setupFetchMock(failPutKey);
+    const { default: CompressionPanel } =
+      await import("../../../src/app/(dashboard)/dashboard/context/settings/CompressionPanel");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mount(<CompressionPanel />);
+    });
+    await flush();
+
+    const ultraEngine = container.querySelector(
+      `[data-testid="ultra-engine-select"]`
+    ) as HTMLSelectElement;
+    const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
+    await act(async () => {
+      setValue(ultraEngine, "slm");
+      setValue(autoTrigger, "500");
+    });
+    for (let i = 0; i < 5; i++) await flush();
+    return { container, puts, ultraEngine, autoTrigger };
+  }
+
+  it("a failed save rolls back its own field and keeps a later save", async () => {
+    const { container, puts, ultraEngine, autoTrigger } =
+      await changeUltraEngineThenAutoTrigger("ultraEngine");
+
+    // Each PUT carries only its own field, so the server never stored ultraEngine "slm".
+    expect(puts.map((p) => p.body)).toEqual([{ ultraEngine: "slm" }, { autoTriggerTokens: 500 }]);
+    expect(ultraEngine.value).toBe("heuristic");
+    expect(autoTrigger.value).toBe("500");
+    expect(container.textContent).toContain("saveFailed");
+  });
+
+  it("a failed later save rolls back its own field and keeps the earlier save", async () => {
+    const { container, ultraEngine, autoTrigger } =
+      await changeUltraEngineThenAutoTrigger("autoTriggerTokens");
+
+    expect(ultraEngine.value).toBe("slm");
+    expect(autoTrigger.value).toBe("0");
+    expect(container.textContent).toContain("saveFailed");
   });
 });

@@ -16,10 +16,14 @@
 
 import { toRecord, toNumber, clampPercentage } from "./scalars.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 const APMIX_CONFIG = {
   usageUrl: "https://api.apmix.ai/v1/usage",
 };
+
+/** Bound the usage probe so a hung upstream cannot hold the limits panel. */
+const FETCH_TIMEOUT_MS = 10_000;
 
 /** Self-imposed daily caps reset at midnight UTC; weekly caps on Monday 00:00 UTC. */
 function nextMidnightUtc(now = new Date()): string {
@@ -50,6 +54,7 @@ export async function getApmixUsage(apiKey: string) {
   try {
     const res = await fetch(APMIX_CONFIG.usageUrl, {
       headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!res.ok) {
@@ -126,6 +131,10 @@ export async function getApmixUsage(apiKey: string) {
 
     return { plan, quotas };
   } catch (error) {
-    return { message: `Apmix connected. Unable to fetch usage: ${(error as Error).message}` };
+    return {
+      message: `Apmix connected. Unable to fetch usage: ${sanitizeErrorMessage(
+        error instanceof Error ? error.message : String(error)
+      )}`,
+    };
   }
 }

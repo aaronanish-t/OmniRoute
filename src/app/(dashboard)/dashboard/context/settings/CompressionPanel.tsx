@@ -82,6 +82,13 @@ const CAVEMAN_OUTPUT_LEVELS: CavemanIntensity[] = ["lite", "full", "ultra"];
 // A settings PUT that has not answered by then counts as failed, so one stalled request
 // cannot hold the save queue, and the controls it disables, indefinitely.
 const SAVE_TIMEOUT_MS = 15_000;
+// Every mounted panel shares one save queue. A panel that unmounts with saves still queued
+// keeps sending them, and a panel mounted afterwards queues behind them, so an older value
+// never lands after a newer one.
+let saveQueue: Promise<void> = Promise.resolve();
+function enqueueSave(send: () => Promise<void>) {
+  saveQueue = saveQueue.then(send);
+}
 
 const DEFAULT_CONFIG: CompressionConfig = {
   enabled: false,
@@ -226,7 +233,6 @@ export default function CompressionPanel() {
   const saveGenRef = useRef(0);
   const savedRef = useRef(config);
   const queuedRef = useRef<Partial<CompressionConfig>[]>([]);
-  const saveQueueRef = useRef(Promise.resolve());
   const batchFailedRef = useRef(false);
 
   useEffect(() => {
@@ -277,10 +283,11 @@ export default function CompressionPanel() {
 
   // Persist a merge-patch. The server replaces each top-level key the PUT carries, so callers
   // that touch an engine pass the full engines map to avoid dropping the other engines.
-  // Saves go out one at a time and the panel shows the last saved config plus the saves still
-  // queued, so a failed save rolls back only its own fields. A queued save whose keys a later
-  // queued save all carries is skipped, because that later PUT replaces those keys anyway.
-  // The status reads "error" when any save in the run that drained the queue failed.
+  // Saves go out one at a time through saveQueue, and the panel shows the last saved config plus
+  // the saves it still has queued, so a failed save rolls back only its own fields. A queued save
+  // whose keys a later queued save all carries is skipped, because that later PUT replaces those
+  // keys anyway. The status reads "error" when any save in the run that emptied the panel's
+  // queue failed.
   const save = (updates: Partial<CompressionConfig>) => {
     const gen = ++saveGenRef.current;
     if (queuedRef.current.length === 0) batchFailedRef.current = false;
@@ -288,7 +295,7 @@ export default function CompressionPanel() {
     showQueued();
     setSaving(true);
     setStatus("");
-    saveQueueRef.current = saveQueueRef.current.then(async () => {
+    enqueueSave(async () => {
       const replaced = queuedRef.current
         .slice(1)
         .some((later) => Object.keys(updates).every((key) => key in later));

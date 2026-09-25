@@ -334,4 +334,42 @@ describe("CompressionPanel", () => {
     expect(autoTrigger.value).toBe("500");
     expect(container.textContent).toContain("saveFailed");
   });
+
+  it("sends a remounted panel's save after the saves an unmounted panel still had queued", async () => {
+    const { puts } = setupFetchMock();
+    const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    // Hold the first settings PUT, as a slow response would.
+    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
+      const res = await respond(input, init);
+      if (init?.method === "PUT" && puts.length === 1) await held;
+      return res;
+    });
+
+    const first = await renderPanel();
+    const firstInput = first.querySelector(`input[type="number"]`) as HTMLInputElement;
+    for (const value of ["1", "100"]) {
+      await act(async () => {
+        fireEvent.change(firstInput, { target: { value } });
+      });
+    }
+    // Navigate away while "100" is still queued, then open the panel again and save.
+    await act(async () => {
+      roots.pop()?.unmount();
+    });
+    const second = await renderPanel();
+    const secondInput = second.querySelector(`input[type="number"]`) as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(secondInput, { target: { value: "1000" } });
+    });
+    await act(async () => release());
+    for (let i = 0; i < 5; i++) await flush();
+
+    // Saves land in the order they were made, so the newest value is the last one written.
+    expect(puts.map((p) => p.body.autoTriggerTokens)).toEqual([1, 100, 1000]);
+    expect(secondInput.value).toBe("1000");
+  });
 });

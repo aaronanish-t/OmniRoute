@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "გვერდზე გადადებული: {kind}",
     "poolSetAsideKindProxyUnreachable": "პროქსი მიუწვდომელია",
     "poolSetAsideKindIpQuota429": "IP სიჩქარის ლიმიტი (429)",
+    "poolSetAsideKindSlow": "ნელი პასუხები",
     "poolSetAsideUntil": "როტაციაში დაბრუნება {endsAt}",
     "poolSetAsideRepeat": "გვერდზე გადადებული {count, plural, one {# ჯერ} other {# ჯერ}}",
     "poolUnknownAddress": "უცნობი მისამართი",

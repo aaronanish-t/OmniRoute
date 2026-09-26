@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "Set aside: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy unreachable",
     "poolSetAsideKindIpQuota429": "IP rate-limited (429)",
+    "poolSetAsideKindSlow": "slow responses",
     "poolSetAsideUntil": "Back in rotation {endsAt}",
     "poolSetAsideRepeat": "Set aside {count, plural, one {# time} other {# times}}",
     "poolUnknownAddress": "Unknown address",

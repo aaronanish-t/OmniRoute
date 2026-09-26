@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "Відкладено: {kind}",
     "poolSetAsideKindProxyUnreachable": "проксі недоступний",
     "poolSetAsideKindIpQuota429": "обмеження частоти за IP (429)",
+    "poolSetAsideKindSlow": "повільні відповіді",
     "poolSetAsideUntil": "Знову в ротації {endsAt}",
     "poolSetAsideRepeat": "Відкладено {count, plural, one {# раз} other {# разів}}",
     "poolUnknownAddress": "Невідома адреса",

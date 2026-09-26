@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "ଅଲଗା ରଖାଯାଇଛି: {kind}",
     "poolSetAsideKindProxyUnreachable": "ପ୍ରକ୍ସିରେ ପହଞ୍ଚିହେଉନାହିଁ",
     "poolSetAsideKindIpQuota429": "IP ହାର ସୀମା (429)",
+    "poolSetAsideKindSlow": "ଧୀର ପ୍ରତିକ୍ରିୟା",
     "poolSetAsideUntil": "ଘୂର୍ଣ୍ଣନକୁ ଫେରନ୍ତୁ {endsAt}",
     "poolSetAsideRepeat": "ଅଲଗା ରଖାଯାଇଛି {count, plural, one {# ଥର} other {# ଥର}}",
     "poolUnknownAddress": "ଅଜଣା ଠିକଣା",

@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "הושם בצד: {kind}",
     "poolSetAsideKindProxyUnreachable": "לא ניתן להגיע לפרוקסי",
     "poolSetAsideKindIpQuota429": "הגבלת קצב לפי IP ‏(429)",
+    "poolSetAsideKindSlow": "תגובות איטיות",
     "poolSetAsideUntil": "חוזר לרוטציה {endsAt}",
     "poolSetAsideRepeat": "הושם בצד {count, plural, one {# פעם} other {# פעמים}}",
     "poolUnknownAddress": "כתובת לא ידועה",

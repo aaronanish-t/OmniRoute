@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "Diketepikan: {kind}",
     "poolSetAsideKindProxyUnreachable": "proksi tidak dapat dicapai",
     "poolSetAsideKindIpQuota429": "had kadar IP (429)",
+    "poolSetAsideKindSlow": "respons perlahan",
     "poolSetAsideUntil": "Kembali dalam putaran {endsAt}",
     "poolSetAsideRepeat": "Diketepikan {count, plural, one {# kali} other {# kali}}",
     "poolUnknownAddress": "Alamat tidak diketahui",

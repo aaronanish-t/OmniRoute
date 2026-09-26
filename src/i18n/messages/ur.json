@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "الگ رکھا گیا: {kind}",
     "poolSetAsideKindProxyUnreachable": "پراکسی تک رسائی نہیں ہو سکی",
     "poolSetAsideKindIpQuota429": "IP شرح کی حد (429)",
+    "poolSetAsideKindSlow": "سست جوابات",
     "poolSetAsideUntil": "روٹیشن میں واپس {endsAt}",
     "poolSetAsideRepeat": "الگ رکھا گیا {count, plural, one {# بار} other {# بار}}",
     "poolUnknownAddress": "نامعلوم پتہ",

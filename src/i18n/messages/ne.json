@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "छेउमा राखियो: {kind}",
     "poolSetAsideKindProxyUnreachable": "प्रोक्सीमा पुग्न सकिएन",
     "poolSetAsideKindIpQuota429": "IP दर सीमा (429)",
+    "poolSetAsideKindSlow": "ढिलो प्रतिक्रिया",
     "poolSetAsideUntil": "रोटेसनमा फर्कियो {endsAt}",
     "poolSetAsideRepeat": "छेउमा राखियो {count, plural, one {# पटक} other {# पटक}}",
     "poolUnknownAddress": "अज्ञात ठेगाना",

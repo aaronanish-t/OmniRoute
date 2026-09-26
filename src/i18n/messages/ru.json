@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "Отложен: {kind}",
     "poolSetAsideKindProxyUnreachable": "прокси недоступен",
     "poolSetAsideKindIpQuota429": "ограничение частоты по IP (429)",
+    "poolSetAsideKindSlow": "медленные ответы",
     "poolSetAsideUntil": "Снова в ротации {endsAt}",
     "poolSetAsideRepeat": "Отложен {count, plural, one {# раз} other {# раз}}",
     "poolUnknownAddress": "Неизвестный адрес",

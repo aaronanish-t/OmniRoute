@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "ஒதுக்கி வைக்கப்பட்டது: {kind}",
     "poolSetAsideKindProxyUnreachable": "ப்ராக்ஸியை அணுக முடியவில்லை",
     "poolSetAsideKindIpQuota429": "IP விகித வரம்பு (429)",
+    "poolSetAsideKindSlow": "மெதுவான பதில்கள்",
     "poolSetAsideUntil": "சுழற்சிக்கு திரும்பு {endsAt}",
     "poolSetAsideRepeat": "ஒதுக்கி வைக்கப்பட்டது {count, plural, one {# முறை} other {# முறை}}",
     "poolUnknownAddress": "தெரியாத முகவரி",

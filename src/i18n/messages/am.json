@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "ወደ ጎን ተቀምጧል: {kind}",
     "poolSetAsideKindProxyUnreachable": "ፕሮክሲው ሊደረስበት አልቻለም",
     "poolSetAsideKindIpQuota429": "የIP ፍጥነት ገደብ (429)",
+    "poolSetAsideKindSlow": "ዝግታ ምላሾች",
     "poolSetAsideUntil": "ወደ ሽክርክር ተመልሷል {endsAt}",
     "poolSetAsideRepeat": "ወደ ጎን ተቀምጧል {count, plural, one {# ጊዜ} other {# ጊዜ}}",
     "poolUnknownAddress": "ያልታወቀ አድራሻ",

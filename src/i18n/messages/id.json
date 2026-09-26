@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "Disisihkan: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy tidak dapat dijangkau",
     "poolSetAsideKindIpQuota429": "batas laju IP (429)",
+    "poolSetAsideKindSlow": "respon lambat",
     "poolSetAsideUntil": "Kembali ke rotasi {endsAt}",
     "poolSetAsideRepeat": "Disisihkan {count, plural, one {# kali} other {# kali}}",
     "poolUnknownAddress": "Alamat tidak dikenal",

@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "Terzijde gesteld: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy onbereikbaar",
     "poolSetAsideKindIpQuota429": "IP-snelheidslimiet (429)",
+    "poolSetAsideKindSlow": "trage reacties",
     "poolSetAsideUntil": "Terug in rotatie {endsAt}",
     "poolSetAsideRepeat": "Terzijde gesteld {count, plural, one {# keer} other {# keer}}",
     "poolUnknownAddress": "Onbekend adres",

@@ -11079,6 +11079,7 @@
     "poolSetAsideReason": "Στην άκρη: {kind}",
     "poolSetAsideKindProxyUnreachable": "ο διακομιστής μεσολάβησης δεν είναι προσβάσιμος",
     "poolSetAsideKindIpQuota429": "όριο ρυθμού ανά IP (429)",
+    "poolSetAsideKindSlow": "αργές απαντήσεις",
     "poolSetAsideUntil": "Πίσω σε rotation {endsAt}",
     "poolSetAsideRepeat": "Στην άκρη {count, plural, one {# φορά} other {# φορές}}",
     "poolUnknownAddress": "Άγνωστη διεύθυνση",

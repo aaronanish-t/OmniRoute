@@ -3,6 +3,7 @@ import { describe, test } from "node:test";
 
 import {
   PlaywrightChatGptWebBrowserSession,
+  parseChatGptWebDirectConversation,
   runChatGptWebBrowserTurn,
   type ChatGptWebBrowserSession,
   type ChatGptWebBrowserSessionHandlers,
@@ -82,6 +83,19 @@ class FakeBrowserSession implements ChatGptWebBrowserSession {
 }
 
 describe("ChatGPT Web clean-room browser-owned session", () => {
+  test("returns a complete client tool envelope before the first-party stream ends", () => {
+    const partialSse =
+      'event: delta_encoding\ndata: "v1"\n\n' +
+      'event: delta\ndata: {"p":"","o":"add","v":{"message":{' +
+      '"author":{"role":"assistant"},"content":{"content_type":"text",' +
+      '"parts":["<tool>{\\"name\\":\\"write\\",\\"arguments\\":{}}</tool>"]}}}}\n\n';
+
+    const result = parseChatGptWebDirectConversation(partialSse);
+
+    assert.equal(result.status, "tool_calls");
+    assert.equal(result.text, '<tool>{"name":"write","arguments":{}}</tool>');
+  });
+
   test("decodes a direct first-party conversation response without DOM or WebSocket handoff", async () => {
     const directSse =
       'event: delta_encoding\ndata: "v1"\n\n' +
@@ -151,6 +165,65 @@ describe("ChatGPT Web clean-room browser-owned session", () => {
       endTurn: true,
     });
     assert.equal(JSON.stringify(result).includes("resume-token"), false);
+  });
+
+  test("returns a browser-stream tool envelope before the upstream turn closes", async () => {
+    const toolCall =
+      'event: delta_encoding\ndata: "v1"\n\n' +
+      'event: delta\ndata: {"p":"","o":"add","v":{"message":{' +
+      '"author":{"role":"assistant"},"content":{"content_type":"text",' +
+      '"parts":["<tool>{\\"name\\":\\"write\\",\\"arguments\\":{}}</tool>"]},' +
+      '"status":"in_progress","end_turn":false}}}\n\n';
+    const session = new FakeBrowserSession((handlers) => {
+      handlers.onBootstrap(HANDOFF_SSE);
+      handlers.onWebSocketFrame(streamItem("tool-call", toolCall));
+    });
+
+    const result = await runChatGptWebBrowserTurn(session, {
+      prompt: "call write",
+      timeoutMs: 1_000,
+    });
+
+    assert.equal(result.status, "tool_calls");
+    assert.equal(result.text, '<tool>{"name":"write","arguments":{}}</tool>');
+    assert.equal(session.cleanupCount, 1);
+  });
+
+  // Regression guard for the #14375 infinite hang: the direct-response handler used to
+  // set `settled = true` BEFORE parsing, so a parse error stranded the turn promise and
+  // silently discarded every later settlement attempt — including the turn timeout.
+  test("a direct response the parser rejects cannot strand the turn", async () => {
+    const partialUserOnlySse =
+      'event: delta_encoding\ndata: "v1"\n\n' +
+      'event: delta\ndata: {"p":"","o":"add","v":{"message":{' +
+      '"author":{"role":"user"},"content":{"content_type":"text","parts":["hi"]},' +
+      '"status":"finished_successfully","end_turn":null}}}\n\n';
+    const session = {
+      url: () => "https://chatgpt.com/?temporary-chat=true",
+      start: async () => async () => {},
+      submitPrompt: async () => partialUserOnlySse,
+    } satisfies ChatGptWebBrowserSession;
+
+    // Must settle (bounded), not hang forever.
+    await assert.rejects(
+      () => runChatGptWebBrowserTurn(session, { prompt: "hi", timeoutMs: 200 }),
+      /timed out/
+    );
+  });
+
+  // A challenged/signed-out session answers with the ~600KB ChatGPT app shell instead of
+  // an SSE conversation stream; that must be reported, not waited on.
+  test("reports a non-SSE (app shell) direct response as a session failure", async () => {
+    const session = {
+      url: () => "https://chatgpt.com/?temporary-chat=true",
+      start: async () => async () => {},
+      submitPrompt: async () => '<!DOCTYPE html><html lang="en-US" data-build="prod-x">',
+    } satisfies ChatGptWebBrowserSession;
+
+    await assert.rejects(
+      () => runChatGptWebBrowserTurn(session, { prompt: "hi", timeoutMs: 1_000 }),
+      /non-SSE response/
+    );
   });
 
   test("fails closed for non-ChatGPT origins before starting the browser session", async () => {

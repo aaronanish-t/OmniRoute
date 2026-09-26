@@ -41,6 +41,8 @@ const HEADERS_TO_REMOVE = [
   // Encoding: Antigravity (Node.js) sends "gzip, deflate, br" by default;
   // Electron clients add "zstd" which is a fingerprint mismatch.
   "accept-encoding",
+  // Google Cloud project header — Antigravity backend throws HTTP 403 when present
+  "x-goog-user-project",
 ];
 
 /**

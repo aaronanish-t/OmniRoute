@@ -10,6 +10,7 @@ import {
   getAntigravityLoadCodeAssistMetadata,
   getAntigravityOAuthUserAgent,
 } from "../../open-sse/services/antigravityHeaders.ts";
+import { scrubProxyAndFingerprintHeaders } from "../../open-sse/services/antigravityHeaderScrub.ts";
 import {
   clearAntigravityVersionCaches,
   seedAntigravityCliVersionCache,
@@ -65,10 +66,21 @@ test("IDE and CLI content headers use independent cached versions", () => {
       "x-vscode-sessionid",
       "X-Goog-Api-Client",
       "Client-Metadata",
+      "x-goog-user-project",
     ]) {
       assert.equal(headers.get(absent), null, `${absent} must be absent from content headers`);
     }
   }
+});
+
+test("scrubProxyAndFingerprintHeaders strips x-goog-user-project header", () => {
+  const input = {
+    "Content-Type": "application/json",
+    "x-goog-user-project": "my-project-123",
+    Authorization: "Bearer token",
+  };
+  const scrubbed = scrubProxyAndFingerprintHeaders(input);
+  assert.equal(scrubbed["x-goog-user-project"], undefined);
 });
 
 test("IDE Node OAuth and onboarding headers use the captured Google Node identity", () => {

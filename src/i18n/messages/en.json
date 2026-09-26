@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Upstream status",
     "noResponse": "No response",
     "egressIp": "Egress IP",
+    "headersAfter": "Headers after",
+    "firstChunkAfter": "First chunk after",
     "servedBy": "Served by",
     "correlationId": "Correlation ID"
   },

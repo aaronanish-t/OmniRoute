@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Stádas uachtarach",
     "noResponse": "Níl freagra",
     "egressIp": "IP Egress",
+    "headersAfter": "Ceanntásca i ndiaidh",
+    "firstChunkAfter": "An chéad slabhra i ndiaidh",
     "servedBy": "Freastalaithe ag",
     "correlationId": "ID Comhoiriúnachta"
   },

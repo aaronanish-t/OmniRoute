@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Yukarı Akış Durumu",
     "noResponse": "Yanıt Yok",
     "egressIp": "Çıkış IP'si",
+    "headersAfter": "Başlıklar sonrası",
+    "firstChunkAfter": "İlk parça sonrası",
     "servedBy": "Tarafından Sunuldu",
     "correlationId": "Korelasyon ID"
   },

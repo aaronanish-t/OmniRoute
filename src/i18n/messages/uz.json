@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Oqim holati",
     "noResponse": "Javob yo'q",
     "egressIp": "Chiqish IP",
+    "headersAfter": "Sarlavhalar keyin",
+    "firstChunkAfter": "Birinchi bo'lak keyin",
     "servedBy": "Ta'minlovchi",
     "correlationId": "Korelatsiya ID"
   },

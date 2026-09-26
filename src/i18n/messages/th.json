@@ -14195,6 +14195,8 @@
     "upstreamStatus": "สถานะต้นน้ำ",
     "noResponse": "ไม่มีการตอบสนอง",
     "egressIp": "IP ออก",
+    "headersAfter": "ส่วนหัวหลัง",
+    "firstChunkAfter": "ชิ้นแรกหลัง",
     "servedBy": "ให้บริการโดย",
     "correlationId": "รหัสการเชื่อมโยง"
   },

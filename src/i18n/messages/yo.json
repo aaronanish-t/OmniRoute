@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Ipo isalẹ",
     "noResponse": "Ko si idahun",
     "egressIp": "IP Egress",
+    "headersAfter": "Àkọlé lẹ́yìn",
+    "firstChunkAfter": "Apá àkọ́kọ́ lẹ́yìn",
     "servedBy": "Ti a ṣe nipasẹ",
     "correlationId": "ID Iṣọkan"
   },

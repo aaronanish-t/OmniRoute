@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Stare ascendentă",
     "noResponse": "Fără răspuns",
     "egressIp": "IP de ieșire",
+    "headersAfter": "Antete după",
+    "firstChunkAfter": "Primul fragment după",
     "servedBy": "Servit de",
     "correlationId": "ID de corelare"
   },

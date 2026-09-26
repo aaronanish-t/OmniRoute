@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Ülesvoolu olek",
     "noResponse": "Ei vastata",
     "egressIp": "Väljaminev IP",
+    "headersAfter": "Päised pärast",
+    "firstChunkAfter": "Esimene tükk pärast",
     "servedBy": "Teenindab",
     "correlationId": "Korreleerimise ID"
   },

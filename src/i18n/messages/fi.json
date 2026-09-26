@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Ylävirran tila",
     "noResponse": "Ei vastausta",
     "egressIp": "Lähtö-IP",
+    "headersAfter": "Otsakkeet jälkeen",
+    "firstChunkAfter": "Ensimmäinen lohko jälkeen",
     "servedBy": "Palvelija",
     "correlationId": "Korrelaatio-ID"
   },

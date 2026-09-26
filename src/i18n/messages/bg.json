@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Статус на входящия",
     "noResponse": "Няма отговор",
     "egressIp": "Изходящ IP",
+    "headersAfter": "Заглавки след",
+    "firstChunkAfter": "Първи блок след",
     "servedBy": "Обслужвано от",
     "correlationId": "Идентификатор на корелацията"
   },

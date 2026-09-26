@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Status hulu",
     "noResponse": "Tiada respons",
     "egressIp": "IP Egress",
+    "headersAfter": "Header selepas",
+    "firstChunkAfter": "Keping pertama selepas",
     "servedBy": "Dihidangkan oleh",
     "correlationId": "ID Korelasi"
   },

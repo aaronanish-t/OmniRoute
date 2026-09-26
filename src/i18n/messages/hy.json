@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Վերին հոսքի կարգավիճակ",
     "noResponse": "Պատասխան չկա",
     "egressIp": "Ելքային IP",
+    "headersAfter": "Վերնագրերը հետո",
+    "firstChunkAfter": "Առաջին հատվածը հետո",
     "servedBy": "Մատակարարող",
     "correlationId": "Համապատասխանության ID"
   },

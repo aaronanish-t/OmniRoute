@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Estado do ajuste",
     "noResponse": "Sem resposta",
     "egressIp": "IP de saída",
+    "headersAfter": "Cabeçalhos após",
+    "firstChunkAfter": "Primeiro bloco após",
     "servedBy": "Servido por",
     "correlationId": "ID de correlação"
   },

@@ -14195,6 +14195,8 @@
     "upstreamStatus": "အထက်စီးအခြေအနေ",
     "noResponse": "တုံ့ပြန်မှုမရှိပါ",
     "egressIp": "Egress IP",
+    "headersAfter": "အခေါင်းစဉ်များ အပြီး",
+    "firstChunkAfter": "ပထမ အပိုင်း အပြီး",
     "servedBy": "ဆောင်ရွက်သူ",
     "correlationId": "ဆက်စပ်မှု ID"
   },

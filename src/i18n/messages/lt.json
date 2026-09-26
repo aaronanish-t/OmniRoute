@@ -14195,6 +14195,8 @@
     "upstreamStatus": "Aukštupio būsena",
     "noResponse": "Nėra atsakymo",
     "egressIp": "Išėjimo IP",
+    "headersAfter": "Antraštės po",
+    "firstChunkAfter": "Pirmas gabalas po",
     "servedBy": "Teikia",
     "correlationId": "Korelacijos ID"
   },

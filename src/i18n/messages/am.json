@@ -14195,6 +14195,8 @@
     "upstreamStatus": "ከላይ የሚገኝ ሁኔታ",
     "noResponse": "አንድ እንደማይመልስ",
     "egressIp": "ወጣት አይፒ",
+    "headersAfter": "አርከቶች በኋላ",
+    "firstChunkAfter": "የመጀመሪያ ቁርጽ በኋ�",
     "servedBy": "የተሰጠ በ",
     "correlationId": "የተያያዘ መለያ"
   },

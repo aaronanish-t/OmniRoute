@@ -14195,6 +14195,8 @@
     "upstreamStatus": "اوپر کی طرف کی حیثیت",
     "noResponse": "کوئی جواب نہیں",
     "egressIp": "ایگریس آئی پی",
+    "headersAfter": "ہیڈرز کے بعد",
+    "firstChunkAfter": "پہلا حصہ کے بعد",
     "servedBy": "کی طرف سے فراہم کردہ",
     "correlationId": "تعلق ID"
   },

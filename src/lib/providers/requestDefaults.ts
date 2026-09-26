@@ -197,6 +197,7 @@ export function normalizeProviderSpecificData(
   if (provider === "codex") {
     if (normalized.codexFingerprintMode === null) delete normalized.codexFingerprintMode;
     if (normalized.codex_fingerprint_mode === null) delete normalized.codex_fingerprint_mode;
+    if (normalized.codexPromptCacheKeyScope === null) delete normalized.codexPromptCacheKeyScope;
   }
 
   if (

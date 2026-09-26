@@ -16,6 +16,7 @@ function isHttpUrl(value: string): boolean {
 const CODEX_REASONING_EFFORT_VALUES = new Set(["none", "low", "medium", "high", "xhigh", "max"]);
 const REQUEST_DEFAULT_SERVICE_TIER_VALUES = new Set(["default", "priority", "fast", "flex"]);
 const CODEX_FINGERPRINT_MODE_VALUES = new Set(["off", "device", "session", "full"]);
+const CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES = new Set(["client", "thread"]);
 const CACHE_PASSTHROUGH_VALUES = new Set(["strip", "openai-format", "claude-format"]);
 const PEAK_HOUR_PROTECTION_MODES = new Set(["block", "avoid"]);
 const PEAK_HOUR_PROTECTION_DAYS = new Set(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
@@ -237,6 +238,21 @@ export function validateProviderSpecificData(
         message:
           "providerSpecificData.codexFingerprintMode must be one of off, device, session, full",
         path: ["codexFingerprintMode"],
+      });
+    }
+  }
+
+  const codexPromptCacheKeyScope = data.codexPromptCacheKeyScope;
+  if (codexPromptCacheKeyScope !== undefined && codexPromptCacheKeyScope !== null) {
+    const normalized =
+      typeof codexPromptCacheKeyScope === "string"
+        ? codexPromptCacheKeyScope.trim().toLowerCase()
+        : "";
+    if (!CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES.has(normalized)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "providerSpecificData.codexPromptCacheKeyScope must be one of client, thread",
+        path: ["codexPromptCacheKeyScope"],
       });
     }
   }

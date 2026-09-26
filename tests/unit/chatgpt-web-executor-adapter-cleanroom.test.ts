@@ -181,6 +181,29 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
       ),
       true
     );
+    assert.equal(
+      shouldRetryWithToolReminder(
+        {
+          text: "I couldn’t complete the requested workspace modification because the client tool calls did not execute.",
+        },
+        tools
+      ),
+      true
+    );
+    assert.equal(
+      shouldRetryWithToolReminder(
+        { text: "Built and verified index.html for the veterinary clinic." },
+        tools
+      ),
+      true
+    );
+    assert.equal(
+      shouldRetryWithToolReminder(
+        { text: "I’m unable to execute the workspace client protocol from this chat environment." },
+        tools
+      ),
+      true
+    );
     // Conversational replies stay untouched.
     assert.equal(
       shouldRetryWithToolReminder({ text: "The capital of France is Paris." }, tools),
@@ -403,6 +426,16 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
       messages: [{ role: "user", content: "Create the page" }],
     });
     assert.match(required.prompt, /A client tool is required for this turn/);
+  });
+
+  test("forces the first client tool turn when an auto request explicitly asks for workspace work", () => {
+    const prepared = prepareChatGptWebBrowserRequest("gpt-5.6-luna-free", {
+      tools: [{ type: "function", function: { name: "write" } }],
+      tool_choice: "auto",
+      messages: [{ role: "user", content: "Inspect the workspace and create index.html." }],
+    });
+
+    assert.match(prepared.prompt, /MUST emit exactly one valid <tool>/i);
   });
 
   test("extracts image and file inputs without serializing them into the prompt", async () => {

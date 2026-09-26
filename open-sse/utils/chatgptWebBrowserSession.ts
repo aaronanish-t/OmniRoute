@@ -612,13 +612,11 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
       if (this.closePageOnCleanup) await this.page.close().catch(() => {});
     };
     try {
-      let currentIsFirstParty = false;
-      try {
-        currentIsFirstParty = new URL(this.page.url()).origin === CHATGPT_WEB_ORIGIN;
-      } catch {
-        currentIsFirstParty = false;
-      }
-      if (!currentIsFirstParty) {
+      // A pooled page usually remains on the previous conversation URL, which has the same
+      // first-party origin. Always return it to the temporary-chat entry point between turns;
+      // otherwise a continuation is typed into stale rendered history and can wait forever for
+      // a new assistant node.
+      if (this.page.url() !== this.pageUrl) {
         await this.page.goto(this.pageUrl, { waitUntil: "domcontentloaded", timeout: 30_000 });
       }
       requireFirstPartyUrl(this.page.url());

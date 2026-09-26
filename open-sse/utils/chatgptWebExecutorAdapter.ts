@@ -32,6 +32,7 @@ const MAX_PROMPT_BYTES = 4 * 1024 * 1024;
  */
 const MAX_PROMPT_CHARS = 24_000;
 const SYSTEM_PROMPT_BUDGET_CHARS = 4_000;
+const TOOL_SYSTEM_PROMPT_BUDGET_CHARS = 1_600;
 const FIRST_PARTY_COOKIE_HOSTS = ["chatgpt.com", "openai.com"] as const;
 const DEFAULT_CHATGPT_WEB_TURN_TIMEOUT_MS = 180_000;
 // Measured live: an ordinary text turn on a Free Luna account takes 49-86s, so a
@@ -248,6 +249,16 @@ function toolChoiceInstruction(value: unknown): string {
   return "";
 }
 
+function hasExplicitClientToolIntent(messages: Array<{ role: string; text: string }>): boolean {
+  return messages.some(
+    ({ role, text }) =>
+      role === "user" &&
+      /\b(actual(?:ly)?|call|create|edit|execute|file|invoke|run|tool|verify|website|write|workspace)\b/i.test(
+        text
+      )
+  );
+}
+
 /** Trim a block of text to a character budget, keeping the head and the tail. */
 function clampText(text: string, budget: number): string {
   if (text.length <= budget) return text;
@@ -344,11 +355,19 @@ function buildPrompt(body: JsonRecord, tools: unknown[]): string {
 
   // Budget each section: the tool contract and the checkpoint are protocol-critical and stay
   // intact; the system prompt and the transcript absorb the trimming.
-  const toolPrompt = serializeToolsToPrompt(tools);
+  // OpenCode resends verbose descriptions for every client tool on each continuation. The
+  // ChatGPT Web composer has no native tool registry, so keep the names and exact parameter
+  // schemas but trim prose-only descriptions to avoid making follow-up turns stall on a large
+  // flattened prompt.
+  const toolPrompt = serializeToolsToPrompt(tools, { descriptionMaxChars: 360 });
   const continuationCheckpoint = messages.some(({ role }) => role === "tool")
     ? "Continue from the tool results above. Do not repeat a successful tool call; perform the next required step or give the final answer."
     : "";
-  const forcedToolInstruction = toolChoiceInstruction(body.tool_choice);
+  const forcedToolInstruction =
+    toolChoiceInstruction(body.tool_choice) ||
+    (body.tool_choice !== "none" && hasExplicitClientToolIntent(messages)
+      ? "The user's request explicitly requires workspace action. This turn MUST emit exactly one valid <tool> block for the next required client tool call before any prose. Do not claim that an action was completed; emit the tool call now."
+      : "");
   const userMessages = messages.filter(({ role }) => role === "user" || role === "tool");
   const singleUserOnly = userMessages.length === 1 && messages.length === 1;
   let transcript: string;
@@ -364,9 +383,11 @@ function buildPrompt(body: JsonRecord, tools: unknown[]): string {
       4_000,
       MAX_PROMPT_CHARS - fixed.length - SYSTEM_PROMPT_BUDGET_CHARS
     );
+    const systemPromptBudget =
+      tools.length > 0 ? TOOL_SYSTEM_PROMPT_BUDGET_CHARS : SYSTEM_PROMPT_BUDGET_CHARS;
     const normalized = messages.map(({ role, text }) =>
       role === "system" || role === "developer"
-        ? { role, text: clampText(text, SYSTEM_PROMPT_BUDGET_CHARS) }
+        ? { role, text: clampText(text, systemPromptBudget) }
         : { role, text }
     );
     transcript = compactTranscript(normalized, transcriptBudget);
@@ -673,7 +694,7 @@ export function shouldRetryWithToolReminder(
 
   // A claim of file work that no tool result supports is the miss we must correct.
   if (
-    /\b(created|wrote|written|saved|updated|added)\b[^.]*\b(file|page|index\.html|html|script)\b/i.test(
+    /\b(created|built|wrote|written|saved|updated|added|verified)\b[^.]*\b(file|page|index\.html|html|script)\b/i.test(
       text
     )
   ) {
@@ -684,7 +705,7 @@ export function shouldRetryWithToolReminder(
   // built-in features taking over ("Data analysis isn't available right now").
   if (!hasToolExchange) {
     if (
-      /\b(invoke|invoked|invocation|tool call|apply_patch|couldn't complete|cannot complete|unable to complete|not accepted)\b/i.test(
+      /\b(invoke|invoked|invocation|tool call|apply_patch|couldn['’]t complete|cannot complete|unable to complete|unable to execute|unable to perform|not accepted)\b/i.test(
         text
       )
     ) {
@@ -692,7 +713,9 @@ export function shouldRetryWithToolReminder(
     }
     if (/\b(data analysis|canvas|browsing|code interpreter)\b/i.test(text)) return true;
   } else if (
-    /\b(not accepted|invocation failed|couldn't complete|could not complete)\b/i.test(text)
+    /\b(not accepted|invocation failed|couldn['’]t complete|could not complete|unable to execute|unable to perform)\b/i.test(
+      text
+    )
   ) {
     return true;
   }
@@ -792,6 +815,7 @@ export async function executeChatGptWebCleanRoom(
   deps: ChatGptWebExecutorAdapterDeps = {}
 ): Promise<Response> {
   const prepared = prepareChatGptWebBrowserRequest(input.model, input.body);
+  const originalMessages = isRecord(input.body) ? input.body.messages : undefined;
   const attachments = await resolveChatGptWebAttachments(prepared.attachments);
   const storageState = readStorageState(input.credentials);
   const connectionId = optionalString(input.credentials.connectionId);
@@ -832,7 +856,7 @@ export async function executeChatGptWebCleanRoom(
         correctedPrompt === null &&
         attempt < maxAttempts &&
         !input.signal?.aborted &&
-        shouldRetryWithToolReminder(result, prepared.tools, input.body?.messages)
+        shouldRetryWithToolReminder(result, prepared.tools, originalMessages)
       ) {
         // Re-issue once, telling the model that describing work is not doing it.
         correctedPrompt = clampText(prepared.prompt + TOOL_REMINDER_PROMPT, MAX_PROMPT_CHARS);

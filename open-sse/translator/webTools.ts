@@ -25,6 +25,15 @@ interface OpenAIToolDef {
 
 const TOOL_OPEN_RE = /<tool>/g;
 const TOOL_CLOSE_RE = /<\/tool>/g;
+
+export interface SerializeToolsToPromptOptions {
+  /** Retained for callers that opt into the nonce-bound contract. */
+  hardened?: boolean;
+  /** Limit verbose client-tool descriptions without changing their parameter schemas. */
+  descriptionMaxChars?: number;
+}
+
+const TOOL_BLOCK_RE = /<tool>\s*([\s\S]*?)\s*<\/tool>/g;
 // Some web-cookie models (e.g. ds-web) wrap calls as `<tool_call name="...">{json}</tool_call>`
 // instead of the canonical `<tool>{json}</tool>`. Capture the JSON body — the real tool name
 // lives there, never in the tag's `name="..."` attribute (#3260).
@@ -420,70 +429,6 @@ export function parseLooseJsonObject(raw: string): Record<string, unknown> | nul
   return null;
 }
 
-function findBareJsonCandidates(text: string): ToolParseCandidate[] {
-  const candidates: ToolParseCandidate[] = [];
-  let start = -1;
-  let depth = 0;
-  let quote: '"' | "'" | "" = "";
-  let escaped = false;
-
-  for (let i = 0; i < text.length; i += 1) {
-    const ch = text[i];
-
-    if (depth === 0 && ch !== "{") {
-      continue;
-    }
-
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-
-    if (quote) {
-      if (ch === "\\") {
-        escaped = true;
-      } else if (ch === quote) {
-        quote = "";
-      }
-      continue;
-    }
-
-    if (ch === '"' || ch === "'") {
-      quote = ch;
-      continue;
-    }
-
-    if (ch === "{") {
-      if (depth === 0) start = i;
-      depth += 1;
-      continue;
-    }
-
-    if (ch === "}" && depth > 0) {
-      depth -= 1;
-      if (depth === 0 && start >= 0) {
-        const raw = text.slice(start, i + 1);
-        if (
-          /[{,]\s*["']?(name|command)["']?\s*:/i.test(raw) &&
-          /[{,]\s*["']?arguments["']?\s*:/i.test(raw)
-        ) {
-          candidates.push({ raw, start, end: i + 1, requireRequestedTool: true });
-        }
-        start = -1;
-      }
-    }
-  }
-
-  return candidates;
-}
-
-function rangesOverlap(
-  a: { start: number; end: number },
-  b: { start: number; end: number }
-): boolean {
-  return a.start < b.end && b.start < a.end;
-}
-
 export function stripRanges(text: string, ranges: Array<{ start: number; end: number }>): string {
   let content = text;
   const sorted = [...ranges].sort((a, b) => b.start - a.start);
@@ -529,7 +474,10 @@ export function toArgumentsString(value: unknown): string {
  * `<tool>` JSON to distinguish legitimate tool calls from bare JSON, code-fenced JSON,
  * or copy-attacked envelopes (#9343).
  */
-export function serializeToolsToPrompt(tools: unknown): string {
+export function serializeToolsToPrompt(
+  tools: unknown,
+  options: SerializeToolsToPromptOptions = {}
+): string {
   if (!Array.isArray(tools) || tools.length === 0) return "";
 
   const nonce = getToolNonce(tools);
@@ -539,7 +487,13 @@ export function serializeToolsToPrompt(tools: unknown): string {
   for (const t of tools as OpenAIToolDef[]) {
     const fn = t?.function;
     if (!fn?.name) continue;
-    const desc = typeof fn.description === "string" && fn.description ? fn.description : "";
+    const rawDescription =
+      typeof fn.description === "string" && fn.description ? fn.description : "";
+    const descriptionMaxChars = options.descriptionMaxChars;
+    const desc =
+      descriptionMaxChars !== undefined && rawDescription.length > descriptionMaxChars
+        ? `${rawDescription.slice(0, Math.max(0, descriptionMaxChars - 32))}\n…[description trimmed]`
+        : rawDescription;
     let params = "";
     try {
       params = fn.parameters ? JSON.stringify(fn.parameters) : "";
@@ -632,6 +586,8 @@ export function parseToolCallsFromText(
           ? parsed.command
           : null;
     if (!emittedName) continue;
+    // The contract's illustrative `<tool_name>` placeholder is not an invocation.
+    if (emittedName === "<tool_name>") continue;
 
     // Nonce binding check (#9343): when the tool prompt embedded a nonce, check
     // that any _nonce present in the JSON body matches. A wrong nonce (present but

@@ -446,4 +446,21 @@ describe("ChatGPT Web clean-room browser-owned session", () => {
       },
     ]);
   });
+
+  test("reloads a pooled page that is still on a prior conversation", async () => {
+    let currentUrl = "https://chatgpt.com/c/previous-conversation";
+    let navigatedTo = "";
+    const page = {
+      url: () => currentUrl,
+      goto: async (url: string) => {
+        navigatedTo = url;
+        currentUrl = url;
+      },
+    } as unknown as import("playwright").Page;
+    const session = new PlaywrightChatGptWebBrowserSession(page);
+
+    await session.start({});
+
+    assert.equal(navigatedTo, "https://chatgpt.com/?temporary-chat=true");
+  });
 });

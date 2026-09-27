@@ -12862,7 +12862,8 @@
     "inheritedProxy": "Inherits connection: {host}",
     "inheritedPool": "Inherits connection pool ({count})",
     "poolEmptyBlocked": "Pool empty — requests fail (not direct)",
-    "directEgress": "Direct (no proxy)"
+    "directEgress": "Direct (no proxy)",
+    "ownProxy": "Own proxy"
   },
   "gamification": {
     "leaderboardScopes": {

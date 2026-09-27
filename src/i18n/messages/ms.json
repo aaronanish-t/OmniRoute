@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Dek yang dikocok — menggunakan setiap model sekali sebelum dikocok semula",
     "fusion": "Gabungan",
     "fusionDesc": "Menyebarkan prom ke setiap model panel secara selari, kemudian model hakim mensintesis satu jawapan akhir",
+    "pipeline": "Talian Pemprosesan",
+    "pipelineDesc": "Menjalankan model secara berturutan, menyalurkan output setiap langkah ke langkah seterusnya; hanya jawapan akhir dikembalikan",
     "fusionJudgeModel": "Model hakim",
     "fusionJudgeModelHelp": "Model yang mensintesis jawapan panel menjadi satu respons akhir. Biarkan kosong untuk menggunakan model panel pertama.",
     "fusionMinPanel": "Panel minimum",

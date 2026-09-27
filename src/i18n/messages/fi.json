@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Sekoitettu pakka — käyttää kutakin mallia kerran ennen uudelleensekoitusta",
     "fusion": "Fuusio",
     "fusionDesc": "Jakaa kehotteen rinnakkain kaikille paneelin malleille, minkä jälkeen tuomari-malli syntetisoi yhden lopullisen vastauksen",
+    "pipeline": "Käsittelyketju",
+    "pipelineDesc": "Ajaa mallit peräkkäin ja syöttää kunkin vaiheen tuloksen seuraavalle; vain lopullinen vastaus palautetaan",
     "fusionJudgeModel": "Tuomarimalli",
     "fusionJudgeModelHelp": "Malli, joka syntetisoi paneelin vastaukset yhdeksi lopulliseksi vastaukseksi. Jätä tyhjäksi käyttääksesi ensimmäistä paneelin mallia.",
     "fusionMinPanel": "Paneelin minimi",

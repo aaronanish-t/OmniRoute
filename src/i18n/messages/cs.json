@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Zamíchejte balíček karet – každý model se před zamícháním jednou použije",
     "fusion": "Sloučení",
     "fusionDesc": "Rozešle prompt paralelně všem modelům v panelu a model rozhodčího pak syntetizuje jednu finální odpověď",
+    "pipeline": "Sekvence zpracování",
+    "pipelineDesc": "Spouští modely postupně a výstup každého kroku předává dalšímu; vrací se jen konečná odpověď",
     "fusionJudgeModel": "Model rozhodčího",
     "fusionJudgeModelHelp": "Model, který syntetizuje odpovědi panelu do jedné finální odpovědi. Ponechte prázdné pro použití prvního modelu v panelu.",
     "fusionMinPanel": "Min. panel",

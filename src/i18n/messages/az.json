@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Qarışdırılmış dəst — yenidən qarışdırmazdan əvvəl hər modeldən bir dəfə istifadə edir",
     "fusion": "Birləşmə",
     "fusionDesc": "Sorğunu paralel olaraq hər bir panel modelinə göndərir, sonra isə hakim model bir yekun cavab sintez edir",
+    "pipeline": "Emal ardıcıllığı",
+    "pipelineDesc": "Modelləri ardıcıl işlədir, hər addımın nəticəsini növbəti addıma ötürür; yalnız son cavab qaytarılır",
     "fusionJudgeModel": "Hakim model",
     "fusionJudgeModelHelp": "Panel cavablarını bir yekun cavaba sintez edən model. Birinci panel modelindən istifadə etmək üçün boş buraxın.",
     "fusionMinPanel": "Min. panel",

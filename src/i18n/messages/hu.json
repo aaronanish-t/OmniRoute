@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Paklikeverés — minden modellt egyszer használ, mielőtt újrakeverné őket",
     "fusion": "Fúzió",
     "fusionDesc": "Párhuzamosan kiküldi a promptot az összes panelmodellnek, majd egy bíró modell szintetizálja a végső választ",
+    "pipeline": "Folyamatlánc",
+    "pipelineDesc": "Sorban futtatja a modelleket, és minden lépés kimenetét a következőnek adja át; csak a végső válasz kerül visszaadásra",
     "fusionJudgeModel": "Bíró modell",
     "fusionJudgeModelHelp": "Modell, amely a panel válaszait egyetlen végső válasszá szintetizálja. Hagyja üresen az első panelmodell használatához.",
     "fusionMinPanel": "Min. panel",

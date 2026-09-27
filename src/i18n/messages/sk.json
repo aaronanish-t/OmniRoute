@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Zamiešaný balíček — každý model sa použije raz a potom sa modely znova zamiešajú",
     "fusion": "Fúzia",
     "fusionDesc": "Rozpošle prompt paralelne do každého modelu v paneli, a potom hodnotiaci model syntetizuje jednu finálnu odpoveď",
+    "pipeline": "Reťazec spracovania",
+    "pipelineDesc": "Spúšťa modely postupne a výstup každého kroku odovzdáva ďalšiemu; vracia sa len konečná odpoveď",
     "fusionJudgeModel": "Hodnotiaci model",
     "fusionJudgeModelHelp": "Model, ktorý syntetizuje odpovede panela do jednej finálnej odpovede. Ponechajte prázdne, ak chcete použiť prvý model panela.",
     "fusionMinPanel": "Min. panel",

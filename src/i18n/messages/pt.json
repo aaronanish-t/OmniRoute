@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Baralho embaralhado — usa cada modelo uma vez antes de reembaralhar",
     "fusion": "Fusão",
     "fusionDesc": "Distribui o prompt para todos os modelos do painel em paralelo, e depois um modelo juiz sintetiza uma resposta final",
+    "pipeline": "Fluxo",
+    "pipelineDesc": "Executa os modelos em sequência, passando o resultado de cada passo ao seguinte; apenas a resposta final é devolvida",
     "fusionJudgeModel": "Modelo juiz",
     "fusionJudgeModelHelp": "Modelo que sintetiza as respostas do painel numa resposta final. Deixe em branco para usar o primeiro modelo do painel.",
     "fusionMinPanel": "Mín. painel",

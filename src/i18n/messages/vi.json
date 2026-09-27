@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Trộn bài — sử dụng mỗi mô hình một lần trước khi trộn lại",
     "fusion": "Hợp nhất",
     "fusionDesc": "Gửi prompt song song đến mọi mô hình trong nhóm, sau đó một mô hình giám khảo sẽ tổng hợp thành một phản hồi cuối cùng",
+    "pipeline": "Quy trình",
+    "pipelineDesc": "Chạy các mô hình theo thứ tự, chuyển đầu ra của mỗi bước sang bước tiếp theo; chỉ trả về câu trả lời cuối cùng",
     "fusionJudgeModel": "Mô hình giám khảo",
     "fusionJudgeModelHelp": "Mô hình tổng hợp các phản hồi từ nhóm thành một phản hồi cuối cùng. Để trống để sử dụng mô hình đầu tiên trong nhóm.",
     "fusionMinPanel": "Số mô hình tối thiểu trong nhóm",

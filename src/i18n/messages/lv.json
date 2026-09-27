@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Sajauc modeļu secību — izmanto katru modeli vienreiz, pirms secību sajauc no jauna",
     "fusion": "Apvienošana",
     "fusionDesc": "Nosūta uzvedni paralēli visiem paneļa modeļiem, pēc tam vērtētāja modelis sintezē vienu galīgo atbildi",
+    "pipeline": "Konveijers",
+    "pipelineDesc": "Palaiž modeļus secīgi, katra soļa izvadi nododot nākamajam; tiek atgriezta tikai galīgā atbilde",
     "fusionJudgeModel": "Vērtētāja modelis",
     "fusionJudgeModelHelp": "Modelis, kas sintezē paneļa atbildes vienā galīgajā atbildē. Atstājiet tukšu, lai izmantotu pirmo paneļa modeli.",
     "fusionMinPanel": "Minimālais paneļa atbilžu skaits",

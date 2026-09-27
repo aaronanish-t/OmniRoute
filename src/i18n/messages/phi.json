@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Naka-shuffle na deck — ginagamit nang isang beses ang bawat modelo bago muling i-shuffle",
     "fusion": "Pagsasanib",
     "fusionDesc": "Ipinapadala ang prompt sa bawat panel model nang sabay-sabay, pagkatapos ay bubuo ang isang judge model ng isang pangwakas na sagot",
+    "pipeline": "Daloy ng proseso",
+    "pipelineDesc": "Pinapatakbo ang mga model nang sunud-sunod, ipinapasa ang output ng bawat hakbang sa susunod; ang huling sagot lamang ang ibinabalik",
     "fusionJudgeModel": "Modelong tagahatol",
     "fusionJudgeModelHelp": "Modelo na nagsasama-sama ng mga sagot ng panel sa isang pangwakas na tugon. Iwanang walang laman upang gamitin ang unang panel model.",
     "fusionMinPanel": "Minimum na panel",

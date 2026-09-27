@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Changanya karata — hutumia kila modeli mara moja kabla ya kuchanganya tena",
     "fusion": "Muunganisho",
     "fusionDesc": "Inasambaza kidokezo kwa kila modeli ya jopo kwa sambamba, kisha modeli ya mwamuzi inasanisi jibu moja la mwisho",
+    "pipeline": "Mtiririko wa Uchakataji",
+    "pipelineDesc": "Huendesha modeli kwa mfuatano, ikipitisha matokeo ya kila hatua kwa inayofuata; jibu la mwisho pekee ndilo hurejeshwa",
     "fusionJudgeModel": "Modeli ya mwamuzi",
     "fusionJudgeModelHelp": "Modeli inayosanisi majibu ya jopo kuwa jibu moja la mwisho. Wacha wazi ili kutumia modeli ya kwanza ya jopo.",
     "fusionMinPanel": "Kiwango cha chini cha jopo",

@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Kaardipaki segamine — kasutab iga mudelit ühe korra enne paki uuesti segamist",
     "fusion": "Fusioon",
     "fusionDesc": "Saadab viiba paralleelselt igale paneelimudelile, seejärel sünteesib hindajamudel ühe lõpliku vastuse",
+    "pipeline": "Töötlusahel",
+    "pipelineDesc": "Käivitab mudelid järjest ja annab iga sammu väljundi edasi järgmisele; tagastatakse ainult lõplik vastus",
     "fusionJudgeModel": "Hindajamudel",
     "fusionJudgeModelHelp": "Mudel, mis sünteesib paneeli vastustest ühe lõpliku vastuse. Esimese paneelimudeli kasutamiseks jätke väli tühjaks.",
     "fusionMinPanel": "Paneeli miinimum",

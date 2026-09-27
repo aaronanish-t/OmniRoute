@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "洗牌池模式：每個模型使用一次後再重新洗牌",
     "fusion": "融合",
     "fusionDesc": "將提示並行發送給面板中的每個模型，然後由評判模型綜整出一個最終答案",
+    "pipeline": "流水線",
+    "pipelineDesc": "依序執行各模型，將每一步的輸出作為下一步的輸入；只回傳最終答案",
     "fusionJudgeModel": "評判模型",
     "fusionJudgeModelHelp": "將小組回答整合為最終回應的模型。留空則使用第一個小組模型。",
     "fusionMinPanel": "最少小組",

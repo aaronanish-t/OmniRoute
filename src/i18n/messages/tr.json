@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Karıştırma destesi: yeniden karıştırmadan önce her modeli bir kez kullanır.",
     "fusion": "Füzyon",
     "fusionDesc": "İstemi tüm panel modellerine paralel olarak dağıtır, ardından bir hakem model tek bir nihai yanıt sentezler",
+    "pipeline": "İşlem Hattı",
+    "pipelineDesc": "Modelleri sırayla çalıştırır, her adımın çıktısını bir sonrakine aktarır; yalnızca son yanıt döndürülür",
     "fusionJudgeModel": "Hakem model",
     "fusionJudgeModelHelp": "Panel yanıtlarını tek bir nihai yanıtta sentezleyen model. İlk panel modelini kullanmak için boş bırakın.",
     "fusionMinPanel": "Minimum panel",

@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Tasowanie talii — używa każdego model raz przed ponownym przetasowaniem",
     "fusion": "Fuzja",
     "fusionDesc": "Wysyła prompt równolegle do każdego model panelu, a następnie model sędziowski syntetyzuje jedną ostateczną odpowiedź",
+    "pipeline": "Potok",
+    "pipelineDesc": "Uruchamia modele kolejno, przekazując wynik każdego kroku do następnego; zwracana jest tylko odpowiedź końcowa",
     "fusionJudgeModel": "Model sędziowski",
     "fusionJudgeModelHelp": "Model, który syntetyzuje odpowiedzi panelu w jedną ostateczną odpowiedź. Pozostaw puste, aby użyć pierwszego panel model.",
     "fusionMinPanel": "Minimalny panel",

@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Bland kortstokken – bruker hver modell én gang før ny blanding",
     "fusion": "Fusjon",
     "fusionDesc": "Sender prompten til alle panelmodeller parallelt, deretter syntetiserer en dommermodell ett endelig svar",
+    "pipeline": "Prosesslinje",
+    "pipelineDesc": "Kjører modellene i rekkefølge og sender resultatet fra hvert trinn videre til det neste; bare det endelige svaret returneres",
     "fusionJudgeModel": "Dommermodell",
     "fusionJudgeModelHelp": "Modell som syntetiserer panelsvarene til ett endelig svar. La stå tom for å bruke den første panelmodellen.",
     "fusionMinPanel": "Minste panel",

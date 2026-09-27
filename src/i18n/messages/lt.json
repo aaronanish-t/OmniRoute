@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Kaladės maišymas — kiekvienas modelis panaudojamas po kartą prieš maišant iš naujo",
     "fusion": "Sintezė",
     "fusionDesc": "Lygiagrečiai siunčia užklausą visiems grupės modeliams, tada vertinimo modelis apibendrina jų atsakymus į vieną galutinį atsakymą",
+    "pipeline": "Apdorojimo seka",
+    "pipelineDesc": "Paleidžia modelius paeiliui, kiekvieno žingsnio išvestį perduodama kitam; grąžinamas tik galutinis atsakymas",
     "fusionJudgeModel": "Vertinimo modelis",
     "fusionJudgeModelHelp": "Modelis, apibendrinantis grupės atsakymus į vieną galutinį atsakymą. Palikite tuščią, kad būtų naudojamas pirmasis grupės modelis.",
     "fusionMinPanel": "Mažiausias grupės atsakymų skaičius",

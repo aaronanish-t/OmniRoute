@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "셔플 덱 — 다시 섞기 전에 각 모델을 한 번씩 사용합니다",
     "fusion": "퓨전",
     "fusionDesc": "프롬프트를 모든 패널 모델에 병렬로 전송한 다음, 평가자 모델이 하나의 최종 답변을 합성합니다",
+    "pipeline": "파이프라인",
+    "pipelineDesc": "모델을 순서대로 실행하며 각 단계의 출력을 다음 단계에 전달합니다. 최종 답변만 반환됩니다",
     "fusionJudgeModel": "평가자 모델",
     "fusionJudgeModelHelp": "패널 답변을 하나의 최종 응답으로 합성하는 모델입니다. 첫 번째 패널 모델을 사용하려면 비워 두세요.",
     "fusionMinPanel": "최소 패널",

@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Aralashtirilgan dasta — qayta aralashtirishdan oldin har bir modeldan bir marta foydalanadi",
     "fusion": "Birlashtirish",
     "fusionDesc": "Promptni barcha panel modellariga parallel ravishda yuboradi, so‘ng hakam modeli javoblarni bitta yakuniy javobga birlashtiradi",
+    "pipeline": "Konveyer",
+    "pipelineDesc": "Modellarni ketma-ket ishga tushiradi, har bir qadam natijasini keyingisiga uzatadi; faqat yakuniy javob qaytariladi",
     "fusionJudgeModel": "Hakam modeli",
     "fusionJudgeModelHelp": "Panel javoblarini bitta yakuniy javobga birlashtiradigan model. Birinchi panel modelidan foydalanish uchun bo‘sh qoldiring.",
     "fusionMinPanel": "Minimal panel",

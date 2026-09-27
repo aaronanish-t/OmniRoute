@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Premešani komplet — vsak model se uporabi enkrat pred ponovnim mešanjem",
     "fusion": "Združevanje",
     "fusionDesc": "Poziv vzporedno pošlje vsem modelom v panelu, nato pa model razsodnik njihove odgovore združi v en končni odgovor",
+    "pipeline": "Cevovod",
+    "pipelineDesc": "Modele izvaja zaporedno in izhod vsakega koraka posreduje naslednjemu; vrne se samo končni odgovor",
     "fusionJudgeModel": "Model razsodnik",
     "fusionJudgeModelHelp": "Model, ki odgovore panela združi v en končni odgovor. Če želite uporabiti prvi model panela, pustite prazno.",
     "fusionMinPanel": "Najmanjše število odgovorov panela",

@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Mazzo mescolato: utilizza ogni modello una volta prima di rimescolare",
     "fusion": "Fusione",
     "fusionDesc": "Invia il prompt a ciascun modello del pannello in parallelo, quindi un modello giudice sintetizza una risposta finale",
+    "pipeline": "Pipeline",
+    "pipelineDesc": "Esegue i modelli in sequenza, passando l'output di ogni passaggio al successivo; viene restituita solo la risposta finale",
     "fusionJudgeModel": "Modello giudice",
     "fusionJudgeModelHelp": "Modello che sintetizza le risposte del panel in un'unica risposta finale. Lascia vuoto per usare il primo modello del panel.",
     "fusionMinPanel": "Panel minimo",

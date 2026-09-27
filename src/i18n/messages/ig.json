@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Gwakọta oche kaadị — na-eji model ọ bụla otu ugboro tupu ịgwakọta oche ahụ ọzọ",
     "fusion": "Njikọta",
     "fusionDesc": "Na-ezigara model panel niile prompt n'otu oge, mesịa judge model achịkọta otu azịza ikpeazụ",
+    "pipeline": "Usoro ọrụ",
+    "pipelineDesc": "Na-agba models n'usoro, na-enye nsonaazụ nke ọ bụla nzọụkwụ na nke na-esote; ọ bụ naanị azịza ikpeazụ ka a na-eweghachi",
     "fusionJudgeModel": "Model ikpe",
     "fusionJudgeModelHelp": "Model nke na-achịkọta azịza ndị dị na panel ka ha bụrụ otu nzaghachi ikpeazụ. Hapụ ya oghere iji model panel mbụ.",
     "fusionMinPanel": "Opekempe panel",

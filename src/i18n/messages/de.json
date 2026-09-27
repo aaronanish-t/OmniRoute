@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Mischverfahren – verwendet jedes Modell einmal, bevor neu gemischt wird",
     "fusion": "Fusion",
     "fusionDesc": "Verteilt den Prompt parallel an jedes Panel-Modell, anschließend fasst ein Judge-Modell die Antworten zu einer finalen Antwort zusammen",
+    "pipeline": "Pipeline",
+    "pipelineDesc": "Führt die Modelle nacheinander aus und gibt die Ausgabe jedes Schritts an den nächsten weiter; nur die finale Antwort wird zurückgegeben",
     "fusionJudgeModel": "Judge-Modell",
     "fusionJudgeModelHelp": "Modell, das die Panel-Antworten zu einer finalen Antwort zusammenfasst. Leer lassen, um das erste Panel-Modell zu verwenden.",
     "fusionMinPanel": "Min. Panel",

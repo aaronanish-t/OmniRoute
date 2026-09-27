@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Promiješaj špil — koristi svaki model jednom prije ponovnog miješanja",
     "fusion": "Fuzija",
     "fusionDesc": "Šalje prompt svakom modelu u panelu paralelno, nakon čega model sudije sintetizuje jedan konačni odgovor",
+    "pipeline": "Cjevovod",
+    "pipelineDesc": "Pokreće modele redom, prosljeđujući izlaz svakog koraka sljedećem; vraća se samo konačni odgovor",
     "fusionJudgeModel": "Model sudije",
     "fusionJudgeModelHelp": "Model koji sintetizuje odgovore panela u jedan konačni odgovor. Ostavite prazno da biste koristili prvi model panela.",
     "fusionMinPanel": "Minimalni panel",

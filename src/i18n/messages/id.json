@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Kocok dek — menggunakan setiap model satu kali sebelum mengocok ulang",
     "fusion": "Fusi",
     "fusionDesc": "Menyebarkan prompt ke setiap model panel secara paralel, lalu model juri menyintesis satu jawaban akhir",
+    "pipeline": "Alur Pemrosesan",
+    "pipelineDesc": "Menjalankan model secara berurutan, meneruskan keluaran setiap langkah ke langkah berikutnya; hanya jawaban akhir yang dikembalikan",
     "fusionJudgeModel": "Model juri",
     "fusionJudgeModelHelp": "Model yang menyintesis jawaban panel menjadi satu respons akhir. Biarkan kosong untuk menggunakan model panel pertama.",
     "fusionMinPanel": "Panel minimum",

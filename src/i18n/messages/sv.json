@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Blanda kortleken — använder varje modell en gång innan den blandas om",
     "fusion": "Fusion",
     "fusionDesc": "Skickar prompten till varje panelmodell parallellt, sedan syntetiserar en domarmodell ett slutgiltigt svar",
+    "pipeline": "Bearbetningskedja",
+    "pipelineDesc": "Kör modellerna i följd och skickar varje stegs utdata vidare till nästa; endast det slutliga svaret returneras",
     "fusionJudgeModel": "Domarmodell",
     "fusionJudgeModelHelp": "Modell som syntetiserar panelsvaren till ett slutgiltigt svar. Lämna tomt för att använda den första panelmodellen.",
     "fusionMinPanel": "Minsta panel",

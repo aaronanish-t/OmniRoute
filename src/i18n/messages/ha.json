@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Cakuɗa katunan — yana amfani da kowane model sau ɗaya kafin sake cakuɗawa",
     "fusion": "Haɗewa",
     "fusionDesc": "Yana aika prompt zuwa kowane model na panel a lokaci guda, sannan samfurin alƙali ya haɗa amsoshin ya samar da amsa ta ƙarshe guda ɗaya",
+    "pipeline": "Tsarin Aiki",
+    "pipelineDesc": "Yana gudanar da models a jere, yana miƙa sakamakon kowane mataki zuwa na gaba; amsar ƙarshe kaɗai ake mayarwa",
     "fusionJudgeModel": "Samfurin alƙali",
     "fusionJudgeModelHelp": "Model da ke haɗa amsoshin panel zuwa amsa ta ƙarshe guda ɗaya. A bar shi babu komai don amfani da model na farko a panel.",
     "fusionMinPanel": "Mafi ƙarancin amsoshin panel",

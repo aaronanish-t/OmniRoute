@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Gverta mħallta — juża kull mudell darba qabel ma jerġa' jħallat",
     "fusion": "Fużjoni",
     "fusionDesc": "Jibgħat il-prompt lil kull mudell tal-panel b'mod parallel, imbagħad mudell ġudikatur jissintetizza tweġiba finali waħda",
+    "pipeline": "Katina tal-ipproċessar",
+    "pipelineDesc": "Iħaddem il-mudelli f'sekwenza, u jgħaddi l-output ta' kull pass lill-pass li jmiss; titreġġa' lura biss it-tweġiba finali",
     "fusionJudgeModel": "Mudell ġudikatur",
     "fusionJudgeModelHelp": "Mudell li jissintetizza t-tweġibiet tal-panel fi tweġiba finali waħda. Ħallih vojt biex tuża l-ewwel mudell tal-panel.",
     "fusionMinPanel": "Minimu tal-panel",

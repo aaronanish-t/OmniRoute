@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Miješanje špila — koristi svaki model jednom prije ponovnog miješanja",
     "fusion": "Fuzija",
     "fusionDesc": "Paralelno šalje upit svim modelima panela, a zatim model ocjenjivač sintetizira jedan konačni odgovor",
+    "pipeline": "Tijek obrade",
+    "pipelineDesc": "Pokreće modele redom i prosljeđuje izlaz svakog koraka sljedećem; vraća se samo konačni odgovor",
     "fusionJudgeModel": "Model ocjenjivač",
     "fusionJudgeModelHelp": "Model koji sintetizira odgovore panela u jedan konačni odgovor. Ostavite prazno kako bi se upotrijebio prvi model panela.",
     "fusionMinPanel": "Min. odgovora panela",

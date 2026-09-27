@@ -3287,6 +3287,8 @@
     "strictRandomDesc": "Paquet mélangé — utilise chaque modèle une fois avant de mélanger à nouveau",
     "fusion": "Fusion",
     "fusionDesc": "Diffuse l'invite à tous les modèles du panel en parallèle, puis un modèle juge synthétise une réponse finale",
+    "pipeline": "Pipeline",
+    "pipelineDesc": "Exécute les modèles en séquence, en transmettant la sortie de chaque étape à la suivante ; seule la réponse finale est renvoyée",
     "fusionJudgeModel": "Modèle juge",
     "fusionJudgeModelHelp": "Modèle qui synthétise les réponses du panel en une réponse finale. Laisser vide pour utiliser le premier modèle du panel.",
     "fusionMinPanel": "Panel min.",

@@ -7,25 +7,66 @@
  * stalled, not thinking. Chat Completions streams are left alone: gateways may
  * legitimately hold them until the answer is ready.
  *
+ * Worst case on the stall arm: at most 2 first-byte waits per request (one
+ * rotation), each bounded by the window; the guarded final direct call can add
+ * one more wait without a rotation, so at most 3 waits mixed, all window-bounded.
+ *
  * Gated by OPENCODE_RESPONSES_STALL_ROTATION (default off). With the flag off
  * the window is 0 and every guard call hands back the very same result object,
  * so the stream readiness timeout stays the only bound, as before.
  */
 
 import { isOpencodeResponsesStallRotationEnabled } from "@/shared/utils/featureFlags";
-import { getResponsesFirstByteTimeoutMs } from "@/shared/utils/runtimeTimeouts";
+import {
+  DEFAULT_STREAM_READINESS_TIMEOUT_MS,
+  getResponsesFirstByteTimeoutMs,
+  getUpstreamTimeoutConfig,
+} from "@/shared/utils/runtimeTimeouts";
 import { guardResponsesStreamFirstByte } from "../utils/firstByteWatchdog.ts";
 
 export { isResponsesFirstByteTimeout } from "../utils/firstByteWatchdog.ts";
 
+export type StallGuardSetup = {
+  windowMs: number;
+  capped: boolean;
+};
+
+/**
+ * Reads the readiness bound, resolves the window, and reports whether the
+ * configured value was capped — so the call site stays a one-line wiring hunk
+ * on the frozen executor file. `readBound` / `readConfigured` default to the
+ * live getters; tests inject fakes. The cap notice is logged here (never in
+ * the pure `resolve` below) through the optional `log` sink, in generic
+ * English with no internal IDs beyond the caller's own prefix.
+ */
+export function setupStallGuard(
+  stream: boolean | undefined,
+  requestFormat: string | null,
+  log?: { warn?: (tag: string, message: string) => void } | null,
+  cid = "",
+  readBound: () => number = () => getUpstreamTimeoutConfig().streamReadinessTimeoutMs,
+  readConfigured: () => number = getResponsesFirstByteTimeoutMs
+): StallGuardSetup {
+  const capMs = readBound();
+  const windowMs = resolveResponsesStallWindowMs(stream, requestFormat, capMs);
+  const capped = windowMs > 0 && readConfigured() > capMs;
+  if (capped) log?.warn?.("OPENCODE", `${cid}stalled stream first-byte wait capped`);
+  return { windowMs, capped };
+}
+
 /** First-byte window (ms) for this request, or 0 when the guard does not apply. */
 export function resolveResponsesStallWindowMs(
   stream: boolean | undefined,
-  requestFormat: string | null
+  requestFormat: string | null,
+  capMs?: number
 ): number {
   if (!stream || requestFormat !== "openai-responses") return 0;
   if (!isOpencodeResponsesStallRotationEnabled()) return 0;
-  return getResponsesFirstByteTimeoutMs();
+  const configured = getResponsesFirstByteTimeoutMs();
+  if (configured === 0) return 0;
+  const cap = capMs ?? DEFAULT_STREAM_READINESS_TIMEOUT_MS;
+  if (!(cap > 0)) return 0;
+  return configured > cap ? cap : configured;
 }
 
 /**

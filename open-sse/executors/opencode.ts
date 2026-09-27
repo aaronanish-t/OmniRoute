@@ -89,7 +89,7 @@ export { isPremiumOpencodeModel };
 import {
   guardResponsesStall,
   isResponsesFirstByteTimeout,
-  resolveResponsesStallWindowMs,
+  setupStallGuard,
 } from "./opencodeResponsesStall.ts";
 import { discardResponseBody } from "./opencodeResponseBody.ts";
 import { headersWaitDispatch, headersWaitState } from "./opencodeHeadersWait.ts";
@@ -563,8 +563,8 @@ export class OpencodeExecutor extends BaseExecutor {
       const skippedCooldown = new Map<string, number>();
 
       const hasProxies = accounts.some((a) => a.proxy !== null);
-      // Opt-in Responses first-byte stall guard (#13484); a no-op when the window is 0.
-      const stallWindowMs = resolveResponsesStallWindowMs(input.stream, this._requestFormat);
+      // Opt-in Responses first-byte stall guard; 0 = no-op.
+      const stallWindowMs = setupStallGuard(input.stream, this._requestFormat, log, cid).windowMs;
       const guardStall = <T>(r: T) => guardResponsesStall(r, stallWindowMs, input.signal);
       const headersWait = headersWaitState(
         input,

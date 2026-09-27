@@ -1,0 +1,1 @@
+- **fix(opencode):** a streamed Responses reply that stays silent past the first-byte window no longer holds the request until the stream readiness timeout: the opt-in stall window is capped by the readiness bound, keeping one rotation then fail-fast. ([#14940](https://github.com/diegosouzapw/OmniRoute/pull/14940)) — thanks @maxmad64bis

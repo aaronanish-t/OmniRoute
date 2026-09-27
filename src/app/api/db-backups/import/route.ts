@@ -16,7 +16,7 @@ import { getSettings } from "@/lib/db/settings";
 import { setSystemPromptConfig } from "@omniroute/open-sse/services/systemPrompt.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
-const DEFAULT_MAX_UPLOAD_MB = 100;
+const DEFAULT_MAX_UPLOAD_MB = 1024;
 // Hard ceiling so a misconfigured/hostile value can't ask the route to buffer an
 // unbounded file into memory.
 const MAX_UPLOAD_MB_CEILING = 4096;

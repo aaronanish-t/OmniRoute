@@ -338,7 +338,21 @@ export function withDeadlineSignal(request: Request): {
   // admission rebuilds, which both copy headers but mint new signal objects.
   const token = `dl-${Date.now().toString(36)}-${(deadlineTokenSeq += 1)}`;
   headers.set(DEADLINE_TOKEN_HEADER, token);
-  const wrappedReq = new Request(request, { signal: combined, headers });
+  // Built from primitives (url/method/body), not `new Request(request, ...)`.
+  // The clone-constructor form reads private internal state off `request` that
+  // only a native, same-realm Request instance exposes -- a real Next.js route
+  // handler's `request` is a `NextRequest` (next/server), which throws
+  // "Cannot read private member #state from an object whose class did not
+  // declare it" there. The unit tests for this module only ever pass a plain
+  // `new Request(url, ...)`, which is why that gap wasn't caught before this
+  // reached a live route.
+  const wrappedReq = new Request(request.url, {
+    method: request.method,
+    headers,
+    body: request.body,
+    signal: combined,
+    ...(request.body ? { duplex: "half" as const } : {}),
+  });
   deadlineControllers.set(combined, deadlineController);
   deadlineControllersByToken.set(token, new WeakRef(deadlineController));
   deadlineTokenByController.set(deadlineController, token);

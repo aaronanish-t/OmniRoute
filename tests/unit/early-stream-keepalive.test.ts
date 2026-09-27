@@ -3,6 +3,8 @@
  * @description Unit tests for withEarlyStreamKeepalive (fast/slow path, frames, abort).
  *
  * @changes
+ * - [2026-09-27] - withDeadlineSignal: accept any Request-like object, not just a
+ *   native same-realm Request (#14808 follow-up; see the new test below)
  * - [2026-08-16] - Assert Responses startup and recurring keepalives are neutral JSON events
  */
 import test from "node:test";
@@ -605,6 +607,49 @@ test("client abort before the deadline emits no error frame and no deadline warn
     false,
     "client abort must not trip the deadline controller"
   );
+});
+
+// A real Next.js route handler's `request` is a `NextRequest` (next/server),
+// not a plain same-realm `Request`. `withDeadlineSignal`'s previous
+// implementation rebuilt via `new Request(request, { signal, headers })` --
+// the WHATWG "clone an existing Request" constructor form, which some
+// Request-like objects (confirmed live: a real NextRequest under Turbopack's
+// dev bundler) cannot satisfy, since it reads internal native slots the
+// clone-constructor path assumes are present. That produced
+// "Cannot read private member #state from an object whose class did not
+// declare it" on every real /v1/responses, /v1/chat/completions, and
+// /v1/messages call once this shipped (#14808) -- undetected here because
+// every existing test above builds `withDeadlineSignal`'s input with a plain
+// `new Request(url, ...)`, which is a native same-realm Request and never
+// exercises the clone path's assumption. This constructs a request-like
+// object that implements the same public interface (url/method/headers/body/
+// signal) without being `instanceof` this realm's `Request` at all, which is
+// enough to prove the fix no longer depends on cloning native internals.
+class RequestLikeButNotARequest {
+  url: string;
+  method: string;
+  headers: Headers;
+  body: ReadableStream | null;
+  signal?: AbortSignal;
+  constructor(url: string, init: { method: string; headers: HeadersInit; body: string }) {
+    this.url = url;
+    this.method = init.method;
+    this.headers = new Headers(init.headers);
+    this.body = new Request(url, init).body;
+  }
+}
+
+test("withDeadlineSignal accepts a Request-like object that is not a native Request (#14808)", () => {
+  const requestLike = new RequestLikeButNotARequest("http://localhost/v1/responses", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Custom": "keep-me" },
+    body: JSON.stringify({ model: "m" }),
+  });
+  assert.ok(!(requestLike instanceof Request), "test setup must not itself be a native Request");
+  const { wrappedReq } = withDeadlineSignal(requestLike as unknown as Request);
+  assert.equal(wrappedReq.url, "http://localhost/v1/responses");
+  assert.equal(wrappedReq.method, "POST");
+  assert.equal(wrappedReq.headers.get("X-Custom"), "keep-me");
 });
 
 // The rebuild-fallback token map is keyed by strings, so without an explicit

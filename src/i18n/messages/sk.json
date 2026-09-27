@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Povoliť {count} vybraných",
     "testPassed": "✓ OK",
     "sweepVerdict": "Posledná kontrola: {cause} ({code}) {age}",
+    "blockedHistory": "Zablokovaná história: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Od spustenia zatiaľ žiadna kontrola",
     "sweepLabel": {
       "unproven": "cieľ odmietnutý",

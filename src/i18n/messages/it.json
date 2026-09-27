@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Abilita {count} selezionati",
     "testPassed": "✓ OK",
     "sweepVerdict": "Ultima scansione: {cause} ({code}) {age}",
+    "blockedHistory": "Storia bloccata: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nessuna scansione dall'avvio",
     "sweepLabel": {
       "unproven": "destinazione rifiutata",

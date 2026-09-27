@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Включить {count} выбранных",
     "testPassed": "✓ ОК",
     "sweepVerdict": "Последнее сканирование: {cause} ({code}) {age}",
+    "blockedHistory": "Заблокированная история: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Сканирований с запуска не было",
     "sweepLabel": {
       "unproven": "цель отклонена",

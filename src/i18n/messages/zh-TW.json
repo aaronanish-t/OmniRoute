@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "啟用選取的 {count} 個",
     "testPassed": "✓ 正常",
     "sweepVerdict": "上次掃描：{cause} ({code}) {age}",
+    "blockedHistory": "被阻擋的歷史：{count}× {cause} ({code}) {age}",
     "sweepNoData": "啟動以來尚無掃描",
     "sweepLabel": {
       "unproven": "目標已拒絕",

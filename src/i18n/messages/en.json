@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Enable {count} selected",
     "testPassed": "✓ OK",
     "sweepVerdict": "Last sweep: {cause} ({code}) {age}",
+    "blockedHistory": "Blocked history: {count}× {cause} ({code}) {age}",
     "sweepNoData": "No sweep yet since startup",
     "sweepLabel": {
       "unproven": "target refused",

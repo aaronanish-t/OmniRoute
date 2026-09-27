@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Seçilmiş {count} elementi aktivləşdir",
     "testPassed": "✓ OK",
     "sweepVerdict": "Son yoxlama: {cause} ({code}) {age}",
+    "blockedHistory": "Bloklanmış tarix: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Başlanğıcdan bəri yoxlama yoxdur",
     "sweepLabel": {
       "unproven": "hədəf rədd etdi",

@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Kích hoạt {count} mục đã chọn",
     "testPassed": "✓ OK",
     "sweepVerdict": "Lần quét cuối: {cause} ({code}) {age}",
+    "blockedHistory": "Lịch sử bị chặn: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Chưa có lần quét nào kể từ khi khởi động",
     "sweepLabel": {
       "unproven": "máy chủ từ chối",

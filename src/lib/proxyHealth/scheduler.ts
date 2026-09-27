@@ -58,6 +58,7 @@ import {
   type ProxyRefusalKind,
 } from "@omniroute/open-sse/utils/proxyRefusalMemory";
 import { deleteSweepVerdict, recordSweepVerdict, toSweepVerdict } from "./sweepVerdict.ts";
+import { deleteBlockedHistory, recordBlockedObservation } from "./blockedHistory.ts";
 import {
   isProxyHealthBlockedResetsStreakEnabled,
   isProxySkipRecentlyFailedEnabled,
@@ -312,7 +313,13 @@ async function decideOneResult(
   // after the decision so the screen explains dead/blocked proxies without
   // triggering probes. Uses the final (possibly promoted) outcome, so a
   // promoted fail shows as fail. The cause stays a sidecar: never branched on.
-  recordSweepVerdict(id, toSweepVerdict(outcome, final.status, Date.now()));
+  // The per-sweep tally is intentionally discarded after logging below — the
+  // observable blocked history (blockedHistory.ts) is the persisted aggregate.
+  const verdict = toSweepVerdict(outcome, final.status, Date.now());
+  recordSweepVerdict(id, verdict);
+  if (verdict.verdict === "blocked") {
+    recordBlockedObservation(id, verdict.cause, verdict.status, verdict.at);
+  }
 
   if (decision.clearFailures) ctx.failureMap.delete(id);
   else ctx.failureMap.set(id, decision.failures);
@@ -330,6 +337,7 @@ async function decideOneResult(
     if (await deleteProxyById(id, { force: true }).catch(() => false)) {
       ctx.failureMap.delete(id);
       deleteSweepVerdict(id);
+      deleteBlockedHistory(id);
       tally.removed++;
       try {
         clearDispatcherCache();

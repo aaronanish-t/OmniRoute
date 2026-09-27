@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Aktifkan {count} yang dipilih",
     "testPassed": "✓ OK",
     "sweepVerdict": "Pemindaian terakhir: {cause} ({code}) {age}",
+    "blockedHistory": "Riwayat yang diblokir: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Belum ada pemindaian sejak mulai",
     "sweepLabel": {
       "unproven": "target menolak",

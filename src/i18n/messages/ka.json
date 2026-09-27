@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "არჩეული {count}-ის ჩართვა",
     "testPassed": "✓ OK",
     "sweepVerdict": "ბოლო სკანირება: {cause} ({code}) {age}",
+    "blockedHistory": "ბლოკირებული ისტორია: {count}× {cause} ({code}) {age}",
     "sweepNoData": "გაშვების შემდეგ სკანირება არ ყოფილა",
     "sweepLabel": {
       "unproven": "სამიზნემ უარყო",

@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Kwado {count} ahọpụtara",
     "testPassed": "✓ Ọ DỊ MMA",
     "sweepVerdict": "Nyocha ikpeazụ: {cause} ({code}) {age}",
+    "blockedHistory": "Emechiri akụkọ: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Enweghị nyocha kemgbe mmalite",
     "sweepLabel": {
       "unproven": "ebumnuche jụrụ",

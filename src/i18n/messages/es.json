@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Habilitar {count} seleccionados",
     "testPassed": "✓ OK",
     "sweepVerdict": "Último análisis: {cause} ({code}) {age}",
+    "blockedHistory": "Historial bloqueado: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Sin análisis desde el inicio",
     "sweepLabel": {
       "unproven": "objetivo rechazado",

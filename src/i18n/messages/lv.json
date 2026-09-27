@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Iespējot atlasītos ({count})",
     "testPassed": "✓ Labi",
     "sweepVerdict": "Pēdējā skenēšana: {cause} ({code}) {age}",
+    "blockedHistory": "Bloķētā vēsture: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Kopš palaišanas vēl nav skenēšanas",
     "sweepLabel": {
       "unproven": "mērķis noraidīja",

@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "የተመረጡትን {count} አንቃ",
     "testPassed": "✓ ትክክል",
     "sweepVerdict": "የመጨረሻ ማጣሪያ፡ {cause} ({code}) {age}",
+    "blockedHistory": "የተከለከለ ታሪክ: {count}× {cause} ({code}) {age}",
     "sweepNoData": "ከመነሳት ጀምሮ ምንም ማጣሪያ የለም",
     "sweepLabel": {
       "unproven": "ዒላማው ውድቅ አደረገ",

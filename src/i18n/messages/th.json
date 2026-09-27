@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "เปิดใช้งาน {count} รายการที่เลือก",
     "testPassed": "✓ ตกลง",
     "sweepVerdict": "สแกนล่าสุด: {cause} ({code}) {age}",
+    "blockedHistory": "ประวัติที่ถูกบล็อก: {count}× {cause} ({code}) {age}",
     "sweepNoData": "ยังไม่มีการสแกนตั้งแต่เริ่มระบบ",
     "sweepLabel": {
       "unproven": "เป้าหมายปฏิเสธ",

@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "បើកដំណើរការធាតុដែលបានជ្រើសរើស {count}",
     "testPassed": "✓ OK",
     "sweepVerdict": "ការស្កេនចុងក្រោយ: {cause} ({code}) {age}",
+    "blockedHistory": "ប្រវត្តិដែលបានបិទ: {count}× {cause} ({code}) {age}",
     "sweepNoData": "មិនទាន់មានការស្កេនតាំងពីចាប់ផ្តើម",
     "sweepLabel": {
       "unproven": "គោលដៅបានបដិសេធ",

@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Activer {count} sélectionné(s)",
     "testPassed": "✓ OK",
     "sweepVerdict": "Dernier balayage : {cause} ({code}) {age}",
+    "blockedHistory": "Historique bloqué : {count}× {cause} ({code}) {age}",
     "sweepNoData": "Aucun balayage depuis le démarrage",
     "sweepLabel": {
       "unproven": "cible refusée",

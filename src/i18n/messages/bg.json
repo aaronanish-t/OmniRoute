@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Активиране на {count} избрани",
     "testPassed": "✓ ОК",
     "sweepVerdict": "Последно сканиране: {cause} ({code}) {age}",
+    "blockedHistory": "Блокирана история: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Няма сканиране от стартирането",
     "sweepLabel": {
       "unproven": "целта отказа",

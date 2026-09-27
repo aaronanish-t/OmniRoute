@@ -1,0 +1,1 @@
+- **fix(proxyHealth):** a proxy that relays but whose target refuses the egress address now keeps a bounded per-proxy history (count, first and last seen, last cause) across sweeps and restarts, so repeated refusals stay visible without changing selection. ([#14938](https://github.com/diegosouzapw/OmniRoute/pull/14938)) — thanks @maxmad64bis

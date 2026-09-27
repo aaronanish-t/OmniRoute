@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "પસંદ કરેલ {count} ને સક્ષમ કરો",
     "testPassed": "✓ બરાબર",
     "sweepVerdict": "છેલ્લું સ્કેન: {cause} ({code}) {age}",
+    "blockedHistory": "બંધિત ઇતિહાસ: {count}× {cause} ({code}) {age}",
     "sweepNoData": "સ્ટાર્ટઅપથી હજુ સ્કેન થયું નથી",
     "sweepLabel": {
       "unproven": "લક્ષ્યે નકાર્યું",

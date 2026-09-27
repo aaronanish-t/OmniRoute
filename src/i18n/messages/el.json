@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Ενεργοποίηση {count} επιλεγμένων",
     "testPassed": "✓ ΟΚ",
     "sweepVerdict": "Τελευταία σάρωση: {cause} ({code}) {age}",
+    "blockedHistory": "Αποκλεισμένο ιστορικό: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Καμία σάρωση ακόμη από την εκκίνηση",
     "sweepLabel": {
       "unproven": "ο στόχος αρνήθηκε",

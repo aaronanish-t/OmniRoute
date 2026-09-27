@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "تفعيل {count} المحددة",
     "testPassed": "✓ موافق",
     "sweepVerdict": "آخر فحص: {cause} ({code}) {age}",
+    "blockedHistory": "تاريخ محظور: {count}× {cause} ({code}) {age}",
     "sweepNoData": "لا يوجد فحص بعد منذ بدء التشغيل",
     "sweepLabel": {
       "unproven": "الهدف رفض",

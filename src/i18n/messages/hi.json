@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "चयनित {count} को सक्षम करें",
     "testPassed": "✓ ठीक है",
     "sweepVerdict": "अंतिम स्कैन: {cause} ({code}) {age}",
+    "blockedHistory": "ब्लॉक किया गया इतिहास: {count}× {cause} ({code}) {age}",
     "sweepNoData": "स्टार्टअप के बाद अभी तक कोई स्कैन नहीं",
     "sweepLabel": {
       "unproven": "लक्ष्य ने मना किया",

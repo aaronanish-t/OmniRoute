@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Attiva {count} magħżula",
     "testPassed": "✓ Tajjeb",
     "sweepVerdict": "L-aħħar skan: {cause} ({code}) {age}",
+    "blockedHistory": "Storia blokkata: {count}× {cause} ({code}) {age}",
     "sweepNoData": "L-ebda skan mit-tnedija",
     "sweepLabel": {
       "unproven": "il-mira rrifjutat",

@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Aktivér {count} valgte",
     "testPassed": "✓ OK",
     "sweepVerdict": "Seneste scanning: {cause} ({code}) {age}",
+    "blockedHistory": "Blokeret historik: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ingen scanning endnu siden opstart",
     "sweepLabel": {
       "unproven": "målet afviste",

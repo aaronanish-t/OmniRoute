@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Omogući odabrane stavke ({count})",
     "testPassed": "✓ U redu",
     "sweepVerdict": "Zadnje skeniranje: {cause} ({code}) {age}",
+    "blockedHistory": "Blokirana povijest: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nema skeniranja od pokretanja",
     "sweepLabel": {
       "unproven": "meta odbila",

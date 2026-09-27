@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "فعال‌سازی {count} مورد انتخاب شده",
     "testPassed": "✓ تایید",
     "sweepVerdict": "آخرین پایش: {cause} ({code}) {age}",
+    "blockedHistory": "تاریخچه مسدود شده: {count}× {cause} ({code}) {age}",
     "sweepNoData": "از زمان راه‌اندازی هنوز پایشی انجام نشده",
     "sweepLabel": {
       "unproven": "هدف رد کرد",

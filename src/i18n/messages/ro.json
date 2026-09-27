@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Activează {count} selectate",
     "testPassed": "✓ OK",
     "sweepVerdict": "Ultima scanare: {cause} ({code}) {age}",
+    "blockedHistory": "Istoric blocat: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nicio scanare de la pornire",
     "sweepLabel": {
       "unproven": "țintă refuzată",

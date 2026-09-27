@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Dayakan {count} yang dipilih",
     "testPassed": "✓ OK",
     "sweepVerdict": "Imbasan terakhir: {cause} ({code}) {age}",
+    "blockedHistory": "Sejarah yang disekat: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Tiada imbasan lagi sejak mula",
     "sweepLabel": {
       "unproven": "sasaran menolak",

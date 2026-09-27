@@ -11033,6 +11033,7 @@
     "batchActivateSelected": "Wezesha {count} zilizochaguliwa",
     "testPassed": "✓ Sawa",
     "sweepVerdict": "Uchunguzi wa mwisho: {cause} ({code}) {age}",
+    "blockedHistory": "Historia iliyozuiliwa: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Hakuna uchunguzi tangu kuanza",
     "sweepLabel": {
       "unproven": "lengo limekataa",

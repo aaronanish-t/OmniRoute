@@ -645,7 +645,11 @@ export default function SystemStorageTab() {
         await loadStorageHealth();
         if (backupsExpanded) await loadBackups();
       } else {
-        setImportStatus({ type: "error", message: data.error || t("importFailed") });
+        const errorMsg =
+          typeof data?.error === "string"
+            ? data.error
+            : data?.error?.message || t("importFailed");
+        setImportStatus({ type: "error", message: errorMsg });
       }
     } catch {
       setImportStatus({ type: "error", message: t("errorDuringImport") });
@@ -699,13 +703,18 @@ export default function SystemStorageTab() {
           ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
           : "bg-red-500/10 text-red-500 border border-red-500/20");
 
+    const displayMessage =
+      typeof status.message === "object"
+        ? status.message?.message || JSON.stringify(status.message)
+        : String(status.message);
+
     return (
       <div key={index} className={className} role="alert">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
             {isSuccess ? "check_circle" : isInfo ? "info" : "error"}
           </span>
-          {status.message}
+          {displayMessage}
         </div>
       </div>
     );

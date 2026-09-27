@@ -49,6 +49,30 @@ test("normalizeDiscoveredModels reads Vercel AI Gateway input/output pricing and
   assert.equal(byId.get("vendor/paid")?.isFree, undefined);
 });
 
+test("normalizeDiscoveredModels honors provider free:false vetoes and non-token billing", () => {
+  // Real shapes: Kilo marks per-generation models isFree:false with 0/0 token prices,
+  // LLM Gateway marks routers free:false, EUrouter bills per request.
+  const models = normalizeDiscoveredModels(
+    [
+      {
+        id: "google/lyria-3-pro-preview",
+        isFree: false,
+        pricing: { prompt: "0", completion: "0" },
+      },
+      { id: "auto", free: false, pricing: { prompt: "0", completion: "0", request: "0" } },
+      { id: "deepseek-ocr-2", pricing: { prompt: "0", completion: "0", request: "0.02" } },
+      { id: "agnes-3-0-flash", pricing: { free: true, input: null, output: null } },
+    ],
+    "generic-gateway"
+  );
+  const byId = new Map(models.map((model) => [model.id, model]));
+
+  assert.equal(byId.get("google/lyria-3-pro-preview")?.isFree, undefined);
+  assert.equal(byId.get("auto")?.isFree, undefined);
+  assert.equal(byId.get("deepseek-ocr-2")?.isFree, undefined);
+  assert.equal(byId.get("agnes-3-0-flash")?.isFree, true);
+});
+
 test("normalizeSyncedAvailableModels preserves discovery free metadata", () => {
   const [model] = normalizeSyncedAvailableModels([
     { id: "live-free", name: "Live Free", source: "imported", isFree: true },

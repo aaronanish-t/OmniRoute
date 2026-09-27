@@ -104,6 +104,7 @@ import {
   isEarlyEofSiblingFailoverOn,
   withSessionHeader,
   withSelectedConnectionHeader,
+  withEmergencyFallbackHeader,
   withCorrelationId,
   withModalityBridgeHeader,
   withConversationId,
@@ -2380,7 +2381,15 @@ async function handleSingleModelChat(
             );
 
             if (fallbackResponse.ok) {
-              return fallbackResponse;
+              log.warn(
+                "EMERGENCY_FALLBACK",
+                `Served by emergency fallback: ${currentModelStr} -> ${fallbackModelStr}`
+              );
+              return withEmergencyFallbackHeader(
+                fallbackResponse,
+                currentModelStr,
+                fallbackModelStr
+              );
             }
 
             log.warn(

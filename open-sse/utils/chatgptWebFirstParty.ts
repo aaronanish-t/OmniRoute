@@ -376,7 +376,10 @@ async function ensureFirstPartyBridge(page: Page): Promise<void> {
                 headers: {
                   Accept: "application/json, text/plain, */*",
                   ...(requestBody === undefined ? {} : { "Content-Type": "application/json" }),
-                  ...(options.additionalHeaders ?? {}),
+                  ...(typeof options.additionalHeaders === "object" &&
+                  options.additionalHeaders !== null
+                    ? (options.additionalHeaders as Record<string, string>)
+                    : {}),
                 },
                 ...(requestBody === undefined ? {} : { body: JSON.stringify(requestBody) }),
                 ...(options.signal ? { signal: options.signal } : {}),

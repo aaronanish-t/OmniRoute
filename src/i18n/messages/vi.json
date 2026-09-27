@@ -4960,6 +4960,7 @@
     "export": "Xuất",
     "exporting": "Đang xuất...",
     "exportFailed": "Xuất thất bại",
+    "exportTruncated": "Bản xuất đã bị cắt bớt: chỉ có {exported} trên {total} mục nhật ký được đưa vào. Hãy chọn khoảng thời gian ngắn hơn để xuất phần còn lại.",
     "cleanHistoryButton": "Xóa lịch sử",
     "cleanHistoryTitle": "Xóa lịch sử nhật ký?",
     "cleanHistoryMessage": "Thao tác này sẽ xóa vĩnh viễn tất cả các dòng nhật ký yêu cầu, các dòng chi tiết cũ và các tệp tạo tác cục bộ trong DATA_DIR/call_logs. Trang đang mở sẽ làm mới sau khi dọn dẹp.",

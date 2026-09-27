@@ -4960,6 +4960,7 @@
     "export": "Izvezi",
     "exporting": "Izvoz u tijeku...",
     "exportFailed": "Izvoz nije uspio",
+    "exportTruncated": "Izvoz je skraćen: uključeno je samo {exported} od {total} zapisa dnevnika. Odaberite kraći vremenski raspon za izvoz ostatka.",
     "cleanHistoryButton": "Očisti povijest",
     "cleanHistoryTitle": "Očistiti povijest zapisa?",
     "cleanHistoryMessage": "Ovo trajno briše sve retke zapisa zahtjeva, naslijeđene retke s pojedinostima i lokalne datoteke artefakata u DATA_DIR/call_logs. Prikaz uživo osvježit će se nakon čišćenja.",

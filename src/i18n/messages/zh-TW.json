@@ -4960,6 +4960,7 @@
     "export": "匯出",
     "exporting": "正在匯出...",
     "exportFailed": "匯出失敗",
+    "exportTruncated": "匯出已截斷：{total} 筆日誌中僅包含 {exported} 筆。請選擇較短的時間範圍以匯出其餘部分。",
     "cleanHistoryButton": "清理歷史記錄",
     "cleanHistoryTitle": "清理記錄歷史？",
     "cleanHistoryMessage": "這會永久清除 DATA_DIR/call_logs 下的所有請求記錄行、舊版詳細資料行和本地工件檔案。清理後即時頁面將重新整理。",

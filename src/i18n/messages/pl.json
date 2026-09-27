@@ -4960,6 +4960,7 @@
     "export": "Eksportuj",
     "exporting": "Eksportowanie...",
     "exportFailed": "Eksport nie powiódł się",
+    "exportTruncated": "Eksport został obcięty: uwzględniono tylko {exported} z {total} wpisów dziennika. Wybierz krótszy zakres czasu, aby wyeksportować resztę.",
     "cleanHistoryButton": "Wyczyść historię",
     "cleanHistoryTitle": "Wyczyścić historię logów?",
     "cleanHistoryMessage": "Spowoduje to trwałe wyczyszczenie wszystkich wierszy logów żądań, starszych wierszy szczegółów oraz lokalnych plików artefaktów w katalogu DATA_DIR/call_logs. Po wyczyszczeniu strona zostanie odświeżona.",

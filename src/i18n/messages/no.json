@@ -4960,6 +4960,7 @@
     "export": "Eksporter",
     "exporting": "Eksporterer...",
     "exportFailed": "Eksport mislyktes",
+    "exportTruncated": "Eksporten ble avkortet: bare {exported} av {total} loggoppføringer kom med. Velg et kortere tidsrom for å eksportere resten.",
     "cleanHistoryButton": "Tøm historikk",
     "cleanHistoryTitle": "Tøm logghistorikk?",
     "cleanHistoryMessage": "Dette sletter permanent alle forespørselsloggrader, eldre detaljrader og lokale artefaktfiler under DATA_DIR/call_logs. Live-siden vil oppdateres etter opprydding.",

@@ -4960,6 +4960,7 @@
     "export": "Exporter",
     "exporting": "Exportation en cours...",
     "exportFailed": "Échec de l’exportation",
+    "exportTruncated": "Export tronqué : seules {exported} entrées de journal sur {total} ont été incluses. Choisissez une plage horaire plus courte pour exporter le reste.",
     "cleanHistoryButton": "Nettoyer l'historique",
     "cleanHistoryTitle": "Nettoyer l'historique des journaux ?",
     "cleanHistoryMessage": "Cette action efface définitivement toutes les lignes de journal de requêtes, les lignes de détails héritées et les fichiers d'artefacts locaux sous DATA_DIR/call_logs. La page en direct s'actualisera après le nettoyage.",

@@ -4960,6 +4960,7 @@
     "export": "Exportovať",
     "exporting": "Exportuje sa...",
     "exportFailed": "Export zlyhal",
+    "exportTruncated": "Export bol skrátený: zahrnutých bolo iba {exported} z {total} záznamov denníka. Zvyšok exportujete výberom kratšieho časového rozsahu.",
     "cleanHistoryButton": "Vyčistiť históriu",
     "cleanHistoryTitle": "Vyčistiť históriu záznamov?",
     "cleanHistoryMessage": "Týmto sa natrvalo vymažú všetky riadky záznamov požiadaviek, staršie riadky podrobností a lokálne súbory artefaktov v DATA_DIR/call_logs. Živá stránka sa po vyčistení obnoví.",

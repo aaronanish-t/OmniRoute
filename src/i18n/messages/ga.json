@@ -4960,6 +4960,7 @@
     "export": "Easpórtáil",
     "exporting": "Ag easpórtáil...",
     "exportFailed": "Theip ar an easpórtáil",
+    "exportTruncated": "Teasctha an easpórtáil: níor cuireadh san áireamh ach {exported} as {total} iontráil loga. Roghnaigh raon ama níos giorra chun an chuid eile a easpórtáil.",
     "cleanHistoryButton": "Glan an stair",
     "cleanHistoryTitle": "Glan stair an loga?",
     "cleanHistoryMessage": "Glanann sé seo go buan gach ró loga iarratais, gach seanró mionsonraí, agus gach comhad déantáin áitiúil faoi DATA_DIR/call_logs. Athnuafar an leathanach beo tar éis an ghlantacháin.",

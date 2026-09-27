@@ -4960,6 +4960,7 @@
     "export": "ወደ ውጭ ላክ",
     "exporting": "ወደ ውጭ በመላክ ላይ...",
     "exportFailed": "ወደ ውጭ መላክ አልተሳካም",
+    "exportTruncated": "ወደ ውጭ መላኩ ተቆርጧል፦ ከ{total} የምዝግብ ማስታወሻ ግቤቶች ውስጥ {exported} ብቻ ተካተዋል። ቀሪውን ለመላክ አጭር የጊዜ ክልል ይምረጡ።",
     "cleanHistoryButton": "ታሪክን አጽዳ",
     "cleanHistoryTitle": "የምዝግብ ታሪኩ ይጽዳ?",
     "cleanHistoryMessage": "ይህ ሁሉንም የጥያቄ ምዝግብ ረድፎች፣ የቆዩ ዝርዝር ረድፎች እና በDATA_DIR/call_logs ስር ያሉ የአካባቢ አርቲፋክት ፋይሎችን በቋሚነት ያጸዳል። ከማጽዳቱ በኋላ ቀጥታ ገጹ ይታደሳል።",

@@ -4960,6 +4960,7 @@
     "export": "导出",
     "exporting": "正在导出...",
     "exportFailed": "导出失败",
+    "exportTruncated": "导出已截断：{total} 条日志中仅包含 {exported} 条。请选择更短的时间范围以导出其余部分。",
     "cleanHistoryButton": "清除历史记录",
     "cleanHistoryTitle": "清除日志历史记录吗？",
     "cleanHistoryMessage": "这将永久清除 DATA_DIR/call_logs 下的所有请求日志行、遗留详细信息行和本地产物文件。清理后页面将自动刷新。",

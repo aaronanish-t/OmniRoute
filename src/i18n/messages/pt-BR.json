@@ -4960,6 +4960,7 @@
     "export": "Exportar",
     "exporting": "Exportando...",
     "exportFailed": "Falha ao exportar",
+    "exportTruncated": "Exportação truncada: apenas {exported} de {total} entradas de log foram incluídas. Escolha um intervalo de tempo menor para exportar o restante.",
     "cleanHistoryButton": "Limpar histórico",
     "cleanHistoryTitle": "Limpar histórico de logs?",
     "cleanHistoryMessage": "Isso limpa permanentemente todas as linhas de log de requisições, linhas de detalhes legados e arquivos de artefatos locais em DATA_DIR/call_logs. A página ao vivo será atualizada após a limpeza.",

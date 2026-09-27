@@ -4960,6 +4960,7 @@
     "export": "Exportovat",
     "exporting": "Exportuje se...",
     "exportFailed": "Export se nezdařil",
+    "exportTruncated": "Export byl zkrácen: zahrnuto bylo pouze {exported} z {total} záznamů protokolu. Zbytek exportujete výběrem kratšího časového rozsahu.",
     "cleanHistoryButton": "Vyčistit historii",
     "cleanHistoryTitle": "Vyčistit historii logů?",
     "cleanHistoryMessage": "Tímto trvale vymažete všechny řádky logů požadavků, starší řádky podrobností a místní soubory artefaktů v DATA_DIR/call_logs. Živá stránka se po vyčištění obnoví.",

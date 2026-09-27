@@ -4960,6 +4960,7 @@
     "export": "Ekspor",
     "exporting": "Mengekspor...",
     "exportFailed": "Ekspor gagal",
+    "exportTruncated": "Ekspor terpotong: hanya {exported} dari {total} entri log yang disertakan. Pilih rentang waktu yang lebih pendek untuk mengekspor sisanya.",
     "cleanHistoryButton": "Bersihkan riwayat",
     "cleanHistoryTitle": "Bersihkan riwayat log?",
     "cleanHistoryMessage": "Ini akan menghapus secara permanen semua baris log permintaan, baris detail lama, dan file artefak lokal di bawah DATA_DIR/call_logs. Halaman langsung akan dimuat ulang setelah pembersihan.",

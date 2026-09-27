@@ -4960,6 +4960,7 @@
     "export": "Ekspordi",
     "exporting": "Eksporditakse...",
     "exportFailed": "Eksportimine ebaõnnestus",
+    "exportTruncated": "Eksport kärbiti: kaasati ainult {exported} logikirjet {total}-st. Ülejäänu eksportimiseks valige lühem ajavahemik.",
     "cleanHistoryButton": "Kustuta ajalugu",
     "cleanHistoryTitle": "Kas kustutada logiajalugu?",
     "cleanHistoryMessage": "See kustutab jäädavalt kõik päringulogi read, pärandvormingus detailiread ja kohalikud artefaktifailid kaustas DATA_DIR/call_logs. Pärast puhastamist värskendatakse reaalajavaadet.",

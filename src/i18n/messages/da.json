@@ -4960,6 +4960,7 @@
     "export": "Eksportér",
     "exporting": "Eksporterer...",
     "exportFailed": "Eksport mislykkedes",
+    "exportTruncated": "Eksporten blev afkortet: kun {exported} af {total} logposter kom med. Vælg et kortere tidsinterval for at eksportere resten.",
     "cleanHistoryButton": "Ryd historik",
     "cleanHistoryTitle": "Ryd loghistorik?",
     "cleanHistoryMessage": "Dette rydder permanent alle anmodningslogrækker, ældre detaljerækker og lokale artefaktfiler under DATA_DIR/call_logs. Livesiden opdateres efter oprydning.",

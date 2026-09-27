@@ -4960,6 +4960,7 @@
     "export": "Fitarwa",
     "exporting": "Ana fitarwa...",
     "exportFailed": "Fitarwa ta gaza",
+    "exportTruncated": "An yanke fitarwa: shigarwar log {exported} kawai daga cikin {total} aka haɗa. Zaɓi gajeren lokaci don fitar da sauran.",
     "cleanHistoryButton": "Share tarihi",
     "cleanHistoryTitle": "A share tarihin rajista?",
     "cleanHistoryMessage": "Wannan zai share duk layukan rajistar buƙatu, tsoffin layukan bayanai dalla-dalla, da fayilolin kayan cikin gida da ke ƙarƙashin DATA_DIR/call_logs har abada. Shafin kai-tsaye zai sabunta bayan sharewar.",

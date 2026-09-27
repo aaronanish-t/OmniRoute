@@ -4960,6 +4960,7 @@
     "export": "Izvezi",
     "exporting": "Izvoz u toku...",
     "exportFailed": "Izvoz nije uspeo",
+    "exportTruncated": "Извоз је скраћен: укључено је само {exported} од {total} уноса дневника. Изаберите краћи временски опсег да бисте извезли остатак.",
     "cleanHistoryButton": "Očisti istoriju",
     "cleanHistoryTitle": "Očistiti istoriju logova?",
     "cleanHistoryMessage": "Ovo trajno briše sve redove logova zahteva, zastarele redove detalja i lokalne fajlove artefakata u DATA_DIR/call_logs. Aktuelna stranica će se osvežiti nakon čišćenja.",

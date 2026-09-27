@@ -4960,6 +4960,7 @@
     "export": "Eksport qilish",
     "exporting": "Eksport qilinmoqda...",
     "exportFailed": "Eksport amalga oshmadi",
+    "exportTruncated": "Eksport qisqartirildi: {total} ta jurnal yozuvidan faqat {exported} tasi kiritildi. Qolganini eksport qilish uchun qisqaroq vaqt oralig‘ini tanlang.",
     "cleanHistoryButton": "Tarixni tozalash",
     "cleanHistoryTitle": "Jurnal tarixini tozalaysizmi?",
     "cleanHistoryMessage": "Bu barcha so‘rov jurnali qatorlari, eski tafsilot qatorlari va DATA_DIR/call_logs ichidagi mahalliy artefakt fayllarini butunlay o‘chiradi. Tozalashdan keyin joriy sahifa yangilanadi.",

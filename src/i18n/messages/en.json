@@ -4960,6 +4960,7 @@
     "export": "Export",
     "exporting": "Exporting...",
     "exportFailed": "Export failed",
+    "exportTruncated": "Export truncated: only {exported} of {total} log entries were included. Pick a shorter time range to export the rest.",
     "cleanHistoryButton": "Clean history",
     "cleanHistoryTitle": "Clean log history?",
     "cleanHistoryMessage": "This permanently clears all request log rows, legacy detail rows, and local artifact files under DATA_DIR/call_logs. The live page will refresh after cleanup.",

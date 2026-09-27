@@ -4960,6 +4960,7 @@
     "export": "Bupụ",
     "exporting": "Na-ebupụ...",
     "exportFailed": "Mbupụ dara",
+    "exportTruncated": "E bepụrụ mbupụ: naanị {exported} n'ime ndenye ndekọ {total} ka etinyere. Họrọ oge dị mkpụmkpụ iji bupụ ndị fọdụrụ.",
     "cleanHistoryButton": "Hichapụ akụkọ",
     "cleanHistoryTitle": "Hichapụ akụkọ ndekọ?",
     "cleanHistoryMessage": "Nke a ga-ehichapụ kpamkpam ahịrị ndekọ arịrịọ niile, ahịrị nkọwa ochie, na faịlụ artifact mpaghara dị n'okpuru DATA_DIR/call_logs. Ihuakwụkwọ dị ugbu a ga-emegharị mgbe nhichapụ ahụ gasịrị.",

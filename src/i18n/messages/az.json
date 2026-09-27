@@ -4960,6 +4960,7 @@
     "export": "İxrac et",
     "exporting": "İxrac edilir...",
     "exportFailed": "İxrac baş tutmadı",
+    "exportTruncated": "İxrac kəsildi: {total} jurnal qeydindən yalnız {exported} daxil edildi. Qalanını ixrac etmək üçün daha qısa zaman aralığı seçin.",
     "cleanHistoryButton": "Tarixçəni təmizlə",
     "cleanHistoryTitle": "Jurnal tarixçəsi təmizlənsin?",
     "cleanHistoryMessage": "Bu, DATA_DIR/call_logs altındakı bütün sorğu jurnalı sətirlərini, köhnə təfərrüat sətirlərini və yerli artefakt fayllarını həmişəlik təmizləyir. Canlı səhifə təmizləmədən sonra yenilənəcək.",

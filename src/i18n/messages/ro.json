@@ -4960,6 +4960,7 @@
     "export": "Exportă",
     "exporting": "Se exportă...",
     "exportFailed": "Exportul a eșuat",
+    "exportTruncated": "Export trunchiat: au fost incluse doar {exported} din {total} intrări de jurnal. Alegeți un interval de timp mai scurt pentru a exporta restul.",
     "cleanHistoryButton": "Curăță istoricul",
     "cleanHistoryTitle": "Curățați istoricul jurnalelor?",
     "cleanHistoryMessage": "Această acțiune șterge definitiv toate rândurile de jurnal de solicitări, rândurile de detalii moștenite și fișierele de artefacte locale din DATA_DIR/call_logs. Pagina live se va reîmprospăta după curățare.",

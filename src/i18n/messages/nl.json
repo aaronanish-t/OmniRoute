@@ -4960,6 +4960,7 @@
     "export": "Exporteren",
     "exporting": "Bezig met exporteren...",
     "exportFailed": "Exporteren mislukt",
+    "exportTruncated": "Export ingekort: slechts {exported} van {total} logregels zijn opgenomen. Kies een kortere periode om de rest te exporteren.",
     "cleanHistoryButton": "Geschiedenis opschonen",
     "cleanHistoryTitle": "Loggeschiedenis opschonen?",
     "cleanHistoryMessage": "Dit wist permanent alle verzoeklogrijen, verouderde detailrijen en lokale artefactbestanden onder DATA_DIR/call_logs. De livepagina wordt na het opschonen vernieuwd.",

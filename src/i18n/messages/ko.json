@@ -4960,6 +4960,7 @@
     "export": "내보내기",
     "exporting": "내보내는 중...",
     "exportFailed": "내보내기 실패",
+    "exportTruncated": "내보내기가 잘렸습니다: 로그 항목 {total}개 중 {exported}개만 포함되었습니다. 나머지를 내보내려면 더 짧은 시간 범위를 선택하세요.",
     "cleanHistoryButton": "기록 정리",
     "cleanHistoryTitle": "로그 기록을 정리하시겠습니까?",
     "cleanHistoryMessage": "이 작업은 DATA_DIR/call_logs 아래의 모든 요청 로그 행, 레거시 상세 행 및 로컬 아티팩트 파일을 영구적으로 삭제합니다. 정리 후 실시간 페이지가 새로고침됩니다.",

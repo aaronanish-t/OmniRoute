@@ -4960,6 +4960,7 @@
     "export": "Hamisha",
     "exporting": "Inahamisha...",
     "exportFailed": "Uhamishaji umeshindikana",
+    "exportTruncated": "Uhamishaji umekatwa: ni maingizo {exported} tu kati ya {total} ya kumbukumbu yaliyojumuishwa. Chagua kipindi kifupi zaidi ili kuhamisha yaliyobaki.",
     "cleanHistoryButton": "Futa historia",
     "cleanHistoryTitle": "Futa historia ya kumbukumbu?",
     "cleanHistoryMessage": "Hii inafuta kabisa safu mlalo zote za kumbukumbu za maombi, safu mlalo za maelezo ya zamani, na faili za mabaki ya ndani chini ya DATA_DIR/call_logs. Ukurasa wa moja kwa moja utapakiwa upya baada ya kusafisha.",

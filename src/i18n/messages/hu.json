@@ -4960,6 +4960,7 @@
     "export": "Exportálás",
     "exporting": "Exportálás...",
     "exportFailed": "Az exportálás sikertelen",
+    "exportTruncated": "Az exportálás csonkolva: a(z) {total} naplóbejegyzésből csak {exported} került bele. A többi exportálásához válasszon rövidebb időtartományt.",
     "cleanHistoryButton": "Előzmények törlése",
     "cleanHistoryTitle": "Törli a naplózási előzményeket?",
     "cleanHistoryMessage": "Ez véglegesen törli az összes kérésnapló-sort, a korábbi részletsorokat és a DATA_DIR/call_logs alatti helyi artifact fájlokat. Az élő oldal a tisztítás után frissülni fog.",

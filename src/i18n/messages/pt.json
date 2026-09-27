@@ -4960,6 +4960,7 @@
     "export": "Exportar",
     "exporting": "A exportar...",
     "exportFailed": "Falha na exportação",
+    "exportTruncated": "Exportação truncada: apenas {exported} de {total} entradas de registo foram incluídas. Escolha um intervalo de tempo mais curto para exportar o resto.",
     "cleanHistoryButton": "Limpar histórico",
     "cleanHistoryTitle": "Limpar histórico de registos?",
     "cleanHistoryMessage": "Isto limpa permanentemente todas as linhas de registo de pedidos, linhas de detalhes legadas e ficheiros de artefactos locais em DATA_DIR/call_logs. A página em tempo real será atualizada após a limpeza.",

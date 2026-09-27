@@ -4960,6 +4960,7 @@
     "export": "Esporta",
     "exporting": "Esportazione in corso...",
     "exportFailed": "Esportazione non riuscita",
+    "exportTruncated": "Esportazione troncata: sono state incluse solo {exported} voci di log su {total}. Scegli un intervallo di tempo più breve per esportare il resto.",
     "cleanHistoryButton": "Pulisci cronologia",
     "cleanHistoryTitle": "Pulire la cronologia dei log?",
     "cleanHistoryMessage": "Questa operazione cancella definitivamente tutte le righe dei log delle richieste, le righe di dettaglio legacy e i file di artefatti locali in DATA_DIR/call_logs. La pagina live si aggiornerà dopo la pulizia.",

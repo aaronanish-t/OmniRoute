@@ -4960,6 +4960,7 @@
     "export": "Exportera",
     "exporting": "Exporterar...",
     "exportFailed": "Exporten misslyckades",
+    "exportTruncated": "Exporten kortades: endast {exported} av {total} loggposter togs med. Välj ett kortare tidsintervall för att exportera resten.",
     "cleanHistoryButton": "Rensa historik",
     "cleanHistoryTitle": "Rensa logghistorik?",
     "cleanHistoryMessage": "Detta rensar permanent alla anropsloggrader, äldre detaljrader och lokala artefaktfiler under DATA_DIR/call_logs. Livesidan kommer att uppdateras efter rensningen.",

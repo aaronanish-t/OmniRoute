@@ -4960,6 +4960,7 @@
     "export": "Vie",
     "exporting": "Viedään...",
     "exportFailed": "Vienti epäonnistui",
+    "exportTruncated": "Vienti katkaistiin: mukaan otettiin vain {exported}/{total} lokimerkintää. Valitse lyhyempi aikaväli viedäksesi loput.",
     "cleanHistoryButton": "Tyhjennä historia",
     "cleanHistoryTitle": "Tyhjennetäänkö lokihistoria?",
     "cleanHistoryMessage": "Tämä poistaa pysyvästi kaikki pyyntölokirivit, vanhat yksityiskohtarivit ja paikalliset artefaktitiedostot polusta DATA_DIR/call_logs. Reaaliaikainen sivu päivittyy puhdistuksen jälkeen.",

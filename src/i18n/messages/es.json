@@ -4960,6 +4960,7 @@
     "export": "Exportar",
     "exporting": "Exportando...",
     "exportFailed": "Error de exportación",
+    "exportTruncated": "Exportación truncada: solo se incluyeron {exported} de {total} entradas de registro. Elige un intervalo de tiempo más corto para exportar el resto.",
     "cleanHistoryButton": "Limpiar historial",
     "cleanHistoryTitle": "¿Limpiar el historial de registros?",
     "cleanHistoryMessage": "Esto elimina permanentemente todas las filas del registro de solicitudes, las filas de detalles heredadas y los archivos de artefactos locales en DATA_DIR/call_logs. La página se actualizará después de la limpieza.",

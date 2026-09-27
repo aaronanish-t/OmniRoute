@@ -4960,6 +4960,7 @@
     "export": "I-export",
     "exporting": "Ini-export...",
     "exportFailed": "Nabigo ang pag-export",
+    "exportTruncated": "Naputol ang pag-export: {exported} lang sa {total} na log entry ang naisama. Pumili ng mas maikling saklaw ng oras para i-export ang natitira.",
     "cleanHistoryButton": "Linisin ang history",
     "cleanHistoryTitle": "Linisin ang history ng log?",
     "cleanHistoryMessage": "Permanenteng buburahin nito ang lahat ng row ng log ng kahilingan, mga legacy detail row, at mga lokal na artifact file sa ilalim ng DATA_DIR/call_logs. Magre-refresh ang live page pagkatapos ng paglilinis.",

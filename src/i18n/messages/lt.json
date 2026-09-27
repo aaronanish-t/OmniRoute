@@ -4960,6 +4960,7 @@
     "export": "Eksportuoti",
     "exporting": "Eksportuojama...",
     "exportFailed": "Eksportuoti nepavyko",
+    "exportTruncated": "Eksportas sutrumpintas: įtraukta tik {exported} iš {total} žurnalo įrašų. Norėdami eksportuoti likusius, pasirinkite trumpesnį laikotarpį.",
     "cleanHistoryButton": "Išvalyti istoriją",
     "cleanHistoryTitle": "Išvalyti žurnalo istoriją?",
     "cleanHistoryMessage": "Bus visam laikui išvalytos visos užklausų žurnalo eilutės, senosios išsamios informacijos eilutės ir vietiniai artefaktų failai, esantys DATA_DIR/call_logs. Išvalius, dabartinis puslapis bus atnaujintas.",

@@ -4960,6 +4960,7 @@
     "export": "Izvezi",
     "exporting": "Izvoz u toku...",
     "exportFailed": "Izvoz nije uspio",
+    "exportTruncated": "Izvoz je skraćen: uključeno je samo {exported} od {total} zapisa dnevnika. Odaberite kraći vremenski raspon da izvezete ostatak.",
     "cleanHistoryButton": "Očisti historiju",
     "cleanHistoryTitle": "Očistiti historiju logova?",
     "cleanHistoryMessage": "Ovo trajno briše sve redove logova zahtjeva, stare redove detalja i lokalne artifact datoteke u DATA_DIR/call_logs. Aktivna stranica će se osvježiti nakon čišćenja.",

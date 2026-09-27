@@ -61,6 +61,20 @@ const STORED: Settings = {
   rtkConfig: { enabled: true, intensity: "standard" },
 };
 
+const AGGRESSIVE = {
+  thresholds: { fullSummary: 5, moderate: 3, light: 2, verbatim: 2 },
+  toolStrategies: {
+    fileContent: true,
+    grepSearch: true,
+    shellOutput: true,
+    json: true,
+    errorMessage: true,
+  },
+  summarizerEnabled: true,
+  maxTokensPerMessage: 2048,
+  minSavingsThreshold: 0.05,
+};
+
 // Stands in for the compression settings route. Like updateCompressionSettings, a PUT
 // overwrites every key in its body. /api/context/caveman/config re-exports the same handler.
 function startServer(failPut: (body: Settings) => boolean = () => false) {
@@ -112,6 +126,12 @@ function inputFor(labelKey: string): HTMLInputElement {
   return input;
 }
 
+function buttonFor(labelKey: string): HTMLButtonElement {
+  const button = screen.getByText(labelKey).closest("label")?.querySelector("button");
+  if (!button) throw new Error(`no button next to ${labelKey}`);
+  return button;
+}
+
 async function renderTab() {
   render(<CompressionSettingsTab />);
   await settle();
@@ -123,26 +143,31 @@ afterEach(() => {
 });
 
 describe("CompressionSettingsTab saves only what changed", () => {
-  it("keeps Auto-Clarity off on the caveman page when the embedded tab saves", async () => {
-    const server = startServer();
-    render(<CavemanContextPageClient />);
-    await settle();
-    fireEvent.click(screen.getByText("advancedMode"));
-    await settle();
+  // Rendering the whole caveman page takes over 5 seconds on a cold run.
+  it(
+    "keeps Auto-Clarity off on the caveman page when the embedded tab saves",
+    { timeout: 30_000 },
+    async () => {
+      const server = startServer();
+      render(<CavemanContextPageClient />);
+      await settle();
+      fireEvent.click(screen.getByText("advancedMode"));
+      await settle();
 
-    const autoClarity = screen.getByLabelText("autoClarity") as HTMLInputElement;
-    expect(autoClarity.checked).toBe(true);
-    fireEvent.click(autoClarity);
-    await settle();
-    expect(server.stored.cavemanOutputMode).toMatchObject({ autoClarity: false });
+      const autoClarity = screen.getByLabelText("autoClarity") as HTMLInputElement;
+      expect(autoClarity.checked).toBe(true);
+      fireEvent.click(autoClarity);
+      await settle();
+      expect(server.stored.cavemanOutputMode).toMatchObject({ autoClarity: false });
 
-    fireEvent.change(inputFor("compressionCacheTTL"), { target: { value: "10" } });
-    await settle();
+      fireEvent.change(inputFor("compressionCacheTTL"), { target: { value: "10" } });
+      await settle();
 
-    expect(server.stored.cacheMinutes).toBe(10);
-    expect(server.stored.cavemanOutputMode).toMatchObject({ autoClarity: false });
-    expect(autoClarity.checked).toBe(false);
-  });
+      expect(server.stored.cacheMinutes).toBe(10);
+      expect(server.stored.cavemanOutputMode).toMatchObject({ autoClarity: false });
+      expect(autoClarity.checked).toBe(false);
+    }
+  );
 
   it("leaves outputStyles saved from another tab in place", async () => {
     const server = startServer();
@@ -154,6 +179,45 @@ describe("CompressionSettingsTab saves only what changed", () => {
 
     expect(server.stored.outputStyles).toEqual([{ id: "caveman", level: "full" }]);
     expect(server.puts.at(-1)).toEqual({ cacheMinutes: 10 });
+  });
+
+  it("keeps an output-mode field changed elsewhere when the tab toggles Auto-Clarity", async () => {
+    const server = startServer();
+    await renderTab();
+    // The panel changes the output-mode level after this tab loaded.
+    server.write({ cavemanOutputMode: { enabled: true, intensity: "ultra", autoClarity: true } });
+
+    fireEvent.click(buttonFor("compressionSettingsAutoClarityBypass"));
+    await settle();
+
+    expect(server.puts.at(-1)).toEqual({
+      cavemanOutputMode: { enabled: true, intensity: "ultra", autoClarity: false },
+    });
+  });
+
+  it("fills the rest of a nested save from the stored row, two levels down", async () => {
+    const server = startServer();
+    server.write({ defaultMode: "aggressive", aggressive: AGGRESSIVE });
+    await renderTab();
+    // Another tab changes a sibling threshold and another aggressive field.
+    server.write({
+      aggressive: {
+        ...AGGRESSIVE,
+        maxTokensPerMessage: 4096,
+        thresholds: { ...AGGRESSIVE.thresholds, moderate: 9 },
+      },
+    });
+
+    fireEvent.change(inputFor("full Summary"), { target: { value: "7" } });
+    await settle();
+
+    expect(server.stored.aggressive).toEqual({
+      ...AGGRESSIVE,
+      maxTokensPerMessage: 4096,
+      thresholds: { ...AGGRESSIVE.thresholds, fullSummary: 7, moderate: 9 },
+    });
+    // The tab now shows the stored row it saved into.
+    expect(inputFor("moderate").value).toBe("9");
   });
 
   it("rolls the field back when its save fails", async () => {

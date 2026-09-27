@@ -965,10 +965,7 @@ export default function CombosPage() {
       const filteredModels = (combo.models || []).filter((_entry, index) => {
         // Build the stepId the same way resolveNestedComboTargets would:
         // "<comboName>-model-<1-based-index>-<modelStr>"
-        const modelStr =
-          typeof _entry === "string"
-            ? _entry
-            : _entry?.model || "";
+        const modelStr = typeof _entry === "string" ? _entry : _entry?.model || "";
         const stepId = `${combo.name}-model-${index + 1}-${modelStr}`;
         return !errorModels.has(stepId);
       });
@@ -985,7 +982,11 @@ export default function CombosPage() {
         });
         if (fallbackFiltered.length < (combo.models || []).length) {
           if (fallbackFiltered.length === 0) {
-            notify.error(t.has?.("cannotRemoveAllModels") ? t("cannotRemoveAllModels") : "Cannot remove all models from combo");
+            notify.error(
+              t.has?.("cannotRemoveAllModels")
+                ? t("cannotRemoveAllModels")
+                : "Cannot remove all models from combo"
+            );
             return;
           }
           await handleUpdate(combo.id, {
@@ -1001,7 +1002,11 @@ export default function CombosPage() {
         return;
       }
       if (filteredModels.length === 0) {
-        notify.error(t.has?.("cannotRemoveAllModels") ? t("cannotRemoveAllModels") : "Cannot remove all models from combo");
+        notify.error(
+          t.has?.("cannotRemoveAllModels")
+            ? t("cannotRemoveAllModels")
+            : "Cannot remove all models from combo"
+        );
         return;
       }
       await handleUpdate(combo.id, {
@@ -1950,7 +1955,11 @@ function ComboCardInner({
 }
 const ComboCard = memo(ComboCardInner);
 
-function TestResultsView({ results, onRemoveErrorModels, removingErrorModels }: {
+function TestResultsView({
+  results,
+  onRemoveErrorModels,
+  removingErrorModels,
+}: {
   results: any;
   onRemoveErrorModels?: (errorStepIds: string[]) => void;
   removingErrorModels?: boolean;
@@ -1980,65 +1989,80 @@ function TestResultsView({ results, onRemoveErrorModels, removingErrorModels }: 
           <div className="min-w-0">
             <div>
               Resolved by:{" "}
-              <code className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded">
+              <code className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-mono">
                 {results.resolvedBy}
               </code>
             </div>
-            {results.resolvedByTarget?.connectionId || results.resolvedByTarget?.stepId ? (
+            {results.resolvedByTarget?.connectionId || results.resolvedByTarget?.label ? (
               <div className="mt-1 text-xs text-text-muted">
-                {results.resolvedByTarget?.connectionId
-                  ? `account ${results.resolvedByTarget.connectionId.slice(0, 8)}`
-                  : "dynamic account"}
-                {results.resolvedByTarget?.stepId
-                  ? ` · step ${results.resolvedByTarget.stepId}`
+                {results.resolvedByTarget?.label
+                  ? pickDisplayValue(
+                      [results.resolvedByTarget.label],
+                      emailsVisible,
+                      results.resolvedByTarget.label
+                    )
+                  : results.resolvedByTarget?.connectionId
+                    ? `account ${results.resolvedByTarget.connectionId.slice(0, 8)}`
+                    : "dynamic account"}
+                {results.resolvedByTarget?.connectionId && results.resolvedByTarget?.label
+                  ? ` (acct ${results.resolvedByTarget.connectionId.slice(0, 8)})`
                   : ""}
               </div>
             ) : null}
           </div>
         </div>
       )}
-      {results.results?.map((r, i) => (
-        <div
-          key={i}
-          title={r.error || undefined}
-          className="flex items-center gap-2 text-xs px-2 py-1.5 rounded bg-black/[0.02] dark:bg-white/[0.02]"
-        >
-          <span
-            className={`material-symbols-outlined text-[14px] ${
-              r.status === "ok"
-                ? "text-emerald-500"
-                : r.status === "skipped"
-                  ? "text-text-muted"
-                  : "text-red-500"
-            }`}
+      {results.results?.map((r, i) => {
+        const displayLabel = r.label ? pickDisplayValue([r.label], emailsVisible, r.label) : null;
+        const accountStr = r.connectionId
+          ? `acct ${r.connectionId.slice(0, 8)}`
+          : "dynamic account";
+
+        return (
+          <div
+            key={i}
+            title={r.error || undefined}
+            className="flex items-center gap-2 text-xs px-2 py-1.5 rounded bg-black/[0.02] dark:bg-white/[0.02]"
           >
-            {r.status === "ok" ? "check_circle" : r.status === "skipped" ? "skip_next" : "error"}
-          </span>
-          <div className="min-w-0 flex-1">
-            <code className="font-mono block truncate">
-              {pickDisplayValue([r.label], emailsVisible, r.model)}
-            </code>
-            {r.connectionId || r.stepId ? (
-              <div className="mt-0.5 text-[10px] text-text-muted">
-                {r.connectionId ? `acct ${r.connectionId.slice(0, 8)}` : "dynamic account"}
-                {r.stepId ? ` · ${r.stepId}` : ""}
+            <span
+              className={`material-symbols-outlined text-[14px] shrink-0 ${
+                r.status === "ok"
+                  ? "text-emerald-500"
+                  : r.status === "skipped"
+                    ? "text-text-muted"
+                    : "text-red-500"
+              }`}
+            >
+              {r.status === "ok" ? "check_circle" : r.status === "skipped" ? "skip_next" : "error"}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <code className="font-mono font-medium block truncate text-text-main">
+                  {r.model}
+                </code>
               </div>
-            ) : null}
+              <div className="mt-0.5 text-[10px] text-text-muted truncate">
+                {displayLabel ? `${displayLabel} · ` : ""}
+                {accountStr}
+              </div>
+            </div>
+            {r.latencyMs !== undefined && (
+              <span className="text-text-muted shrink-0">{r.latencyMs}ms</span>
+            )}
+            <span
+              className={`text-[10px] uppercase font-medium shrink-0 ${
+                r.status === "ok"
+                  ? "text-emerald-500"
+                  : r.status === "skipped"
+                    ? "text-text-muted"
+                    : "text-red-500"
+              }`}
+            >
+              {r.status}
+            </span>
           </div>
-          {r.latencyMs !== undefined && <span className="text-text-muted">{r.latencyMs}ms</span>}
-          <span
-            className={`text-[10px] uppercase font-medium ${
-              r.status === "ok"
-                ? "text-emerald-500"
-                : r.status === "skipped"
-                  ? "text-text-muted"
-                  : "text-red-500"
-            }`}
-          >
-            {r.status}
-          </span>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Delete error models button */}
       {hasErrors && onRemoveErrorModels && (
@@ -2052,8 +2076,12 @@ function TestResultsView({ results, onRemoveErrorModels, removingErrorModels }: 
               {removingErrorModels ? "progress_activity" : "delete_sweep"}
             </span>
             {removingErrorModels
-              ? (t.has?.("removingErrorModels") ? t("removingErrorModels") : "Removing…")
-              : (t.has?.("removeErrorModels") ? t("removeErrorModels", { count: errorResults.length }) : `Delete ${errorResults.length} failed model(s)`)}
+              ? t.has?.("removingErrorModels")
+                ? t("removingErrorModels")
+                : "Removing…"
+              : t.has?.("removeErrorModels")
+                ? t("removeErrorModels", { count: errorResults.length })
+                : `Delete ${errorResults.length} failed model(s)`}
           </button>
         </div>
       )}

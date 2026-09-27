@@ -49,6 +49,7 @@ export { classifyFailure, projectProviderRuntimeForPublicResponse } from "./publ
 const OAUTH_TEST_TIMEOUT_MS = 30_000;
 
 import { CLI_RUNTIME_PROVIDER_MAP } from "./cliRuntimeProviderMap";
+import { isOperatorDisabled } from "@/lib/providers/operatorDisable";
 
 /** POST body is optional; when present, only known fields are validated. */
 const providerConnectionTestBodySchema = z.object({
@@ -1036,8 +1037,11 @@ export async function testSingleConnection(connectionId: string, validationModel
   // from /v1/models forever under the "only advertise tested connections"
   // default (isActive starts false on creation — see POST /api/providers),
   // silently regressing every provider without a test surface.
+  // Activation is only for connections that were never switched on: one an
+  // operator turned off on purpose stays off (see lib/providers/operatorDisable).
+  const operatorDisabled = isOperatorDisabled(connection);
   if (result.skipped === true) {
-    if (connection.isActive !== true) {
+    if (connection.isActive !== true && !operatorDisabled) {
       try {
         await updateProviderConnection(connectionId, { isActive: true });
       } catch (activateError) {
@@ -1098,7 +1102,8 @@ export async function testSingleConnection(connectionId: string, validationModel
     // failure on an already-active, already-working connection must not take
     // it out of rotation — that's what the cooldown/rateLimitedUntil below is
     // for), so this never deactivates anything.
-    ...(result.valid ? { isActive: true } : {}),
+    // It also never overrides an operator who switched the connection off.
+    ...(result.valid && !operatorDisabled ? { isActive: true } : {}),
     lastError: clearErrorState ? null : result.valid ? connection.lastError : result.error,
     lastErrorAt: clearErrorState ? null : result.valid ? connection.lastErrorAt : now,
     lastTested: now,

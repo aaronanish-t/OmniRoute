@@ -20,18 +20,18 @@ export default function MaintenanceBanner() {
   const t = useTranslations("common");
 
   useEffect(() => {
+    let active = true;
+
     const checkHealth = async () => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort("Health check timeout"), 8000);
       try {
         // Use lightweight liveness probe (single SELECT 1) instead of the
         // heavy /api/monitoring/health observability endpoint. The heavy
         // endpoint can exceed the 8s client timeout under normal load
         // (e.g. Logs page 3s polling), causing false-positive banners.
         const res = await fetch("/api/health/ping", {
-          signal: controller.signal,
           cache: "no-store",
         });
+        if (!active) return;
         if (res.ok) {
           consecutiveFailuresRef.current = 0;
           dismissedUntilRecoveryRef.current = false;
@@ -46,20 +46,22 @@ export default function MaintenanceBanner() {
           }
         }
       } catch {
+        if (!active) return;
         consecutiveFailuresRef.current += 1;
         if (consecutiveFailuresRef.current >= 2 && !dismissedUntilRecoveryRef.current) {
           setShow(true);
           setMessage(t("maintenanceServerUnreachable"));
         }
-      } finally {
-        clearTimeout(timeoutId);
       }
     };
 
     // Run immediately on mount, then every 10 seconds
     checkHealth();
     const interval = setInterval(checkHealth, 10000);
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [t]);
 
   if (!show) return null;

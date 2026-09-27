@@ -9,6 +9,7 @@ import {
   type CSSProperties,
 } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { getActiveSidebarHref } from "@/shared/utils/sidebarRouteMatch";
@@ -464,7 +465,7 @@ export default function Sidebar({
     setIsShuttingDown(true);
     try {
       await fetch("/api/shutdown", { method: "POST" });
-    } catch (e) {
+    } catch (_e) {
       // Expected to fail as server shuts down
     }
     setIsShuttingDown(false);
@@ -476,7 +477,7 @@ export default function Sidebar({
     setIsRestarting(true);
     try {
       await fetch("/api/restart", { method: "POST" });
-    } catch (e) {
+    } catch (_e) {
       // Expected to fail as server restarts
     }
     setIsRestarting(false);
@@ -517,11 +518,23 @@ export default function Sidebar({
       "material-symbols-outlined text-[18px] shrink-0",
       active ? "fill-1" : "group-hover/nav-item:text-primary transition-colors"
     );
+    const icon = item.iconImageSrc ? (
+      <Image
+        src={item.iconImageSrc}
+        alt=""
+        aria-hidden="true"
+        width={22}
+        height={22}
+        className="size-[22px] shrink-0 rounded-full border border-white/20 object-cover"
+      />
+    ) : (
+      <span className={iconClassName} style={getIconStyle(item.id)}>
+        {item.icon}
+      </span>
+    );
     const content = (
       <>
-        <span className={iconClassName} style={getIconStyle(item.id)}>
-          {item.icon}
-        </span>
+        {icon}
         {!collapsed && (
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-sm font-medium">{item.label}</span>
@@ -701,10 +714,13 @@ export default function Sidebar({
           >
             <div className="flex items-center justify-center size-8 rounded bg-linear-to-br from-[#E54D5E] to-[#C93D4E] shrink-0">
               {customLogo ? (
-                <img
+                <Image
                   src={customLogo}
                   alt={customAppName || APP_CONFIG.name}
+                  width={20}
+                  height={20}
                   className="size-5 object-contain"
+                  unoptimized
                 />
               ) : (
                 <OmniRouteLogo size={18} className="text-white" />
@@ -772,7 +788,7 @@ export default function Sidebar({
             }
 
             // Sections without a visible title (e.g. Home) render items directly
-            if (section.showTitle === false) {
+            if ("showTitle" in section && section.showTitle === false) {
               return (
                 <div key={section.id} className={cn("space-y-0.5", !isFirst && "mt-1")}>
                   {sectionItems.map((item: any) =>

@@ -9,9 +9,15 @@ process.env.DATA_DIR = tmpDir;
 
 const core = await import("../../../src/lib/db/core.ts");
 core.resetDbInstance();
-const { insertCompressionAnalyticsRow, getCompressionAnalyticsSummary } =
-  await import("../../../src/lib/db/compressionAnalytics.ts");
+const {
+  insertCompressionAnalyticsRow,
+  insertCompressionEngineBreakdown,
+  getCompressionAnalyticsSummary,
+  getGrevCachingAnalytics,
+} = await import("../../../src/lib/db/compressionAnalytics.ts");
 const { attachCompressionUsageReceipt } =
+  await import("../../../src/lib/db/compressionAnalytics.ts");
+const { attachEstimatedCacheHitTokens } =
   await import("../../../src/lib/db/compressionAnalytics.ts");
 const { getDbInstance } = core;
 
@@ -89,6 +95,104 @@ describe("compressionAnalytics", () => {
     assert.doesNotThrow(() => insertCompressionAnalyticsRow(row));
     const summary = getCompressionAnalyticsSummary();
     assert.equal(summary.totalRequests, 1);
+  });
+
+  it("summarizes Grev runs and provider usage receipts without mixing other compression modes", () => {
+    const timestamp = new Date().toISOString();
+    insertCompressionAnalyticsRow({
+      timestamp,
+      mode: "grevcaching",
+      provider: "llamacpp",
+      original_tokens: 100_000,
+      compressed_tokens: 20_000,
+      tokens_saved: 80_000,
+      actual_prompt_tokens: 25_000,
+      actual_cache_read_tokens: 12_000,
+      estimated_cache_hit_tokens: 200_000,
+    });
+    insertCompressionAnalyticsRow({
+      timestamp,
+      mode: "lite",
+      original_tokens: 1000,
+      compressed_tokens: 900,
+      tokens_saved: 100,
+    });
+
+    assert.deepEqual(getGrevCachingAnalytics("all"), {
+      totalRuns: 1,
+      originalTokens: 100_000,
+      compressedTokens: 20_000,
+      tokensSaved: 80_000,
+      averageSavingsPercent: 80,
+      requestsWithUsage: 1,
+      actualPromptTokens: 25_000,
+      cacheReadTokens: 12_000,
+      estimatedCacheHitTokens: 200_000,
+      engines: [],
+      recentRuns: [
+        {
+          timestamp,
+          provider: "llamacpp",
+          originalTokens: 100_000,
+          compressedTokens: 20_000,
+          tokensSaved: 80_000,
+          actualPromptTokens: 25_000,
+          cacheReadTokens: 12_000,
+          estimatedCacheHitTokens: 200_000,
+        },
+      ],
+    });
+  });
+
+  it("includes only per-engine breakdowns attached to GrevCaching requests", () => {
+    const timestamp = new Date().toISOString();
+    insertCompressionAnalyticsRow({
+      timestamp,
+      mode: "grevcaching",
+      engine: "stacked",
+      original_tokens: 1000,
+      compressed_tokens: 600,
+      tokens_saved: 400,
+      request_id: "grev-request",
+    });
+    insertCompressionAnalyticsRow({
+      timestamp,
+      mode: "lite",
+      engine: "lite",
+      original_tokens: 500,
+      compressed_tokens: 450,
+      tokens_saved: 50,
+      request_id: "normal-request",
+    });
+    insertCompressionEngineBreakdown([
+      {
+        timestamp,
+        request_id: "grev-request",
+        engine: "relevance",
+        original_tokens: 1000,
+        compressed_tokens: 600,
+        tokens_saved: 400,
+      },
+      {
+        timestamp,
+        request_id: "normal-request",
+        engine: "lite",
+        original_tokens: 500,
+        compressed_tokens: 450,
+        tokens_saved: 50,
+      },
+    ]);
+
+    assert.deepEqual(getGrevCachingAnalytics("all").engines, [
+      {
+        engine: "relevance",
+        runs: 1,
+        originalTokens: 1000,
+        compressedTokens: 600,
+        tokensSaved: 400,
+        averageSavingsPercent: 40,
+      },
+    ]);
   });
 
   it("stores all RTK raw output pointers when provided", () => {
@@ -330,6 +434,24 @@ describe("compressionAnalytics", () => {
     assert.equal(summary.realUsage.cacheReadTokens, 100);
     assert.equal(summary.realUsage.cacheWriteTokens, 12);
     assert.equal(summary.realUsage.bySource.provider, 1);
+  });
+
+  it("attaches estimated stable-prefix reuse independently of provider usage receipts", () => {
+    insertCompressionAnalyticsRow({
+      timestamp: new Date().toISOString(),
+      mode: "grevcaching",
+      original_tokens: 40_000,
+      compressed_tokens: 40_000,
+      tokens_saved: 0,
+      request_id: "req-prefix-estimate",
+    });
+    attachEstimatedCacheHitTokens("req-prefix-estimate", 20_500);
+
+    const analytics = getGrevCachingAnalytics("all");
+    assert.equal(analytics.estimatedCacheHitTokens, 20_500);
+    assert.equal(analytics.cacheReadTokens, 0);
+    assert.equal(analytics.recentRuns[0].estimatedCacheHitTokens, 20_500);
+    assert.equal(analytics.recentRuns[0].cacheReadTokens, null);
   });
 
   it("aggregates estimated USD savings separately from token estimates", () => {

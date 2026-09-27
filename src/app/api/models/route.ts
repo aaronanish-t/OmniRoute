@@ -149,16 +149,15 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
         staticModelId: m.model,
         syncedModelIds: syncedForProvider ? [...syncedForProvider] : [],
       });
-      const available =
-        (!activeProviders || activeProviders.has(m.provider)) && !suppressedBySync;
+      const available = (!activeProviders || activeProviders.has(m.provider)) && !suppressedBySync;
+      const capabilities = getResolvedModelCapabilities(fullModel, undefined, capabilitySnapshot);
       return {
         ...m,
         fullModel,
         alias: modelAliases[fullModel] || m.model,
         available,
-        supportsVision:
-          getResolvedModelCapabilities(fullModel, undefined, capabilitySnapshot).supportsVision ===
-          true,
+        supportsVision: capabilities.supportsVision === true,
+        supportsTools: capabilities.toolCalling,
       };
     });
 

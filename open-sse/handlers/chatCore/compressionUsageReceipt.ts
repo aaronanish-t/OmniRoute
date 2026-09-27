@@ -10,16 +10,26 @@
  */
 
 export function attachCompressionUsageReceiptAfterAnalytics(
-  usage: Record<string, unknown>,
+  usage: Record<string, unknown> | null,
   source: "provider" | "estimated" | "stream",
-  ctx: { pendingWrite: Promise<void> | null; skillRequestId: string }
+  ctx: {
+    pendingWrite: Promise<void> | null;
+    skillRequestId: string;
+    estimatedCacheHitTokens?: number | null;
+  }
 ) {
-  const { pendingWrite, skillRequestId } = ctx;
+  const { pendingWrite, skillRequestId, estimatedCacheHitTokens } = ctx;
   void (async () => {
     try {
       if (pendingWrite) await pendingWrite;
-      const { attachCompressionUsageReceipt } = await import("@/lib/db/compressionAnalytics.ts");
-      attachCompressionUsageReceipt(skillRequestId, usage, source);
+      const {
+        attachCompressionUsageReceipt,
+        attachEstimatedCacheHitTokens,
+      } = await import("@/lib/db/compressionAnalytics.ts");
+      if (usage) attachCompressionUsageReceipt(skillRequestId, usage, source);
+      if (estimatedCacheHitTokens !== null && estimatedCacheHitTokens !== undefined) {
+        attachEstimatedCacheHitTokens(skillRequestId, estimatedCacheHitTokens);
+      }
     } catch {
       // Compression analytics are best-effort and must never affect responses.
     }

@@ -34,6 +34,9 @@ const SETTINGS_SUBOBJECT: Record<string, string> = {
   headroom: "headroom",
   "session-dedup": "sessionDedup",
   ccr: "ccr",
+  "append-preserving-ccr": "appendPreservingCcr",
+  "codex-responses": "codexResponsesConfig",
+  relevance: "relevanceConfig",
 };
 
 interface CompressionSettings {
@@ -47,6 +50,12 @@ interface Analytics {
   tokensSaved: number;
   avgSavingsPercent: number;
   days: number;
+}
+
+interface ModelOption {
+  fullModel: string;
+  contextLength?: number;
+  available?: boolean;
 }
 
 interface PreviewDiffSegment {
@@ -120,6 +129,8 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
   const [engine, setEngine] = useState<EngineEntry | null>(null);
   const [configState, setConfigState] = useState<Record<string, unknown>>({});
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [selectedModel, setSelectedModel] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -141,10 +152,10 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       setLoading(true);
       setLoadError(null);
 
-      // Fire the three independent reads in parallel — load time is the slowest
+      // Fire the independent reads in parallel — load time is the slowest
       // single request, not their sum. Each resolves to null on failure (fail-soft).
       const asJson = (r: Response) => (r.ok ? r.json() : null);
-      const [enginesData, settingsData, analyticsData] = await Promise.all([
+      const [enginesData, settingsData, analyticsData, modelData] = await Promise.all([
         fetch("/api/compression/engines")
           .then(asJson)
           .catch(() => null) as Promise<{ engines: EngineEntry[] } | null>,
@@ -154,6 +165,9 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
         fetch(`/api/context/analytics/engine?engineId=${engineId}&days=7`)
           .then(asJson)
           .catch(() => null) as Promise<Analytics | null>,
+        fetch("/api/models")
+          .then(asJson)
+          .catch(() => null) as Promise<{ models: ModelOption[] } | null>,
       ]);
 
       let foundEngine: EngineEntry | null = null;
@@ -171,6 +185,11 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
         stored && typeof stored === "object" ? (stored as Record<string, unknown>) : {};
 
       if (!cancelled) {
+        const availableModels = (modelData?.models ?? []).filter(
+          (model) => model.available !== false && typeof model.contextLength === "number"
+        );
+        setModels(availableModels);
+        setSelectedModel((current) => current || availableModels[0]?.fullModel || "");
         if (analyticsData) setAnalytics(analyticsData);
         setEngine(foundEngine);
         // Seed configState from defaultValues then override with the stored sub-object.
@@ -336,6 +355,12 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
     });
   // Only engines with a dedicated settings sub-object can persist their detail here.
   const persistable = Boolean(SETTINGS_SUBOBJECT[engineId]);
+  const selectedModelOption = models.find((model) => model.fullModel === selectedModel);
+  const selectedContextLength = selectedModelOption?.contextLength ?? 0;
+  const triggerPercent = Number(configState.triggerPercent ?? 90);
+  const preserveRecentPercent = Number(configState.preserveRecentPercent ?? 10);
+  const archiveAtTokens = Math.floor((selectedContextLength * triggerPercent) / 100);
+  const directTailTokens = Math.floor((selectedContextLength * preserveRecentPercent) / 100);
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-3xl">
@@ -371,6 +396,50 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
           {t("panelPointerSuffix")}
         </p>
       </div>
+
+      {engineId === "append-preserving-ccr" && (
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+          <div>
+            <h2 className="text-sm font-semibold text-text">{t("modelPlannerTitle")}</h2>
+            <p className="text-xs text-text-muted">{t("modelPlannerDescription")}</p>
+          </div>
+          {models.length > 0 ? (
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium text-text">{t("modelPlannerModel")}</span>
+              <select
+                data-testid="append-ccr-model-select"
+                value={selectedModel}
+                onChange={(event) => setSelectedModel(event.target.value)}
+                className="rounded border border-border bg-background px-2 py-1.5 text-text"
+              >
+                {models.map((model) => (
+                  <option key={model.fullModel} value={model.fullModel}>
+                    {model.fullModel}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <p className="text-sm text-text-muted">{t("modelPlannerUnavailable")}</p>
+          )}
+          {selectedContextLength > 0 && (
+            <dl className="grid grid-cols-3 gap-3 text-sm" data-testid="append-ccr-model-plan">
+              <div>
+                <dt className="text-xs text-text-muted">{t("modelPlannerContext")}</dt>
+                <dd className="font-medium text-text">{selectedContextLength.toLocaleString(locale)}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-text-muted">{t("modelPlannerArchiveAt")}</dt>
+                <dd className="font-medium text-text">{archiveAtTokens.toLocaleString(locale)}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-text-muted">{t("modelPlannerDirectTail")}</dt>
+                <dd className="font-medium text-text">{directTailTokens.toLocaleString(locale)}</dd>
+              </div>
+            </dl>
+          )}
+        </div>
+      )}
 
       {/* ── Config form ── */}
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">

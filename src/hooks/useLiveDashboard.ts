@@ -160,6 +160,7 @@ export function useLiveDashboard({
   const failedAttemptsRef = useRef(0);
   // Each bump makes the connect effect open a fresh socket (backoff timer, reconnect()).
   const [reconnectTick, setReconnectTick] = useState(0);
+  const authorizationRejectedRef = useRef(false);
 
   const stopPingHeartbeat = useCallback(() => {
     if (pingIntervalRef.current) {
@@ -265,7 +266,17 @@ export function useLiveDashboard({
               }
             }
           } else if (msg.type === "error") {
-            console.error("[LiveWS] Server error:", msg.code, msg.message);
+            if (msg.code === "UNAUTHORIZED") {
+              authorizationRejectedRef.current = true;
+              setConnection((prev) => ({
+                ...prev,
+                isConnecting: false,
+                error: msg.message || "Unauthorized",
+              }));
+              ws.close();
+            } else {
+              console.error("[LiveWS] Server error:", msg.code, msg.message);
+            }
           }
         } catch {
           // Ignore parse errors
@@ -284,7 +295,7 @@ export function useLiveDashboard({
           isConnecting: false,
         }));
 
-        if (autoReconnect) {
+        if (autoReconnect && !authorizationRejectedRef.current) {
           const attempt = failedAttemptsRef.current;
           failedAttemptsRef.current = attempt + 1;
           const delay = WS_RECONNECT_DELAYS[Math.min(attempt, WS_RECONNECT_DELAYS.length - 1)];
@@ -316,6 +327,7 @@ export function useLiveDashboard({
   useEffect(() => {
     mountedRef.current = true;
     if (!enabled) {
+      authorizationRejectedRef.current = false;
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;

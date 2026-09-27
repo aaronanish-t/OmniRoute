@@ -17,6 +17,7 @@ export interface CompressionAnalyticsRow {
   actual_completion_tokens?: number | null;
   actual_total_tokens?: number | null;
   actual_cache_read_tokens?: number | null;
+  estimated_cache_hit_tokens?: number | null;
   actual_cache_write_tokens?: number | null;
   estimated_usd_saved?: number | null;
   mcp_description_tokens_saved?: number | null;
@@ -86,6 +87,36 @@ export interface CompressionAnalyticsSummary {
   };
 }
 
+export interface GrevCachingAnalytics {
+  totalRuns: number;
+  originalTokens: number;
+  compressedTokens: number;
+  tokensSaved: number;
+  averageSavingsPercent: number;
+  requestsWithUsage: number;
+  actualPromptTokens: number;
+  cacheReadTokens: number;
+  estimatedCacheHitTokens: number;
+  engines: Array<{
+    engine: string;
+    runs: number;
+    originalTokens: number;
+    compressedTokens: number;
+    tokensSaved: number;
+    averageSavingsPercent: number;
+  }>;
+  recentRuns: Array<{
+    timestamp: string;
+    provider: string | null;
+    originalTokens: number;
+    compressedTokens: number;
+    tokensSaved: number;
+    actualPromptTokens: number | null;
+    cacheReadTokens: number | null;
+    estimatedCacheHitTokens: number | null;
+  }>;
+}
+
 let columnsEnsuredForDb: unknown = null;
 
 const COMPRESSION_ANALYTICS_COLUMNS = [
@@ -93,6 +124,7 @@ const COMPRESSION_ANALYTICS_COLUMNS = [
   ["actual_completion_tokens", "INTEGER"],
   ["actual_total_tokens", "INTEGER"],
   ["actual_cache_read_tokens", "INTEGER"],
+  ["estimated_cache_hit_tokens", "INTEGER"],
   ["actual_cache_write_tokens", "INTEGER"],
   ["estimated_usd_saved", "REAL"],
   ["mcp_description_tokens_saved", "INTEGER DEFAULT 0"],
@@ -124,6 +156,97 @@ function ensureCompressionAnalyticsColumns(): void {
   columnsEnsuredForDb = db;
 }
 
+export function getGrevCachingAnalytics(
+  since: "24h" | "7d" | "30d" | "all" = "7d"
+): GrevCachingAnalytics {
+  const db = getDbInstance();
+  ensureCompressionAnalyticsColumns();
+  ensureCompressionEngineBreakdownTable();
+  const durations: Record<Exclude<typeof since, "all">, number> = {
+    "24h": 24 * 60 * 60 * 1000,
+    "7d": 7 * 24 * 60 * 60 * 1000,
+    "30d": 30 * 24 * 60 * 60 * 1000,
+  };
+  const cutoff = since === "all" ? null : new Date(Date.now() - durations[since]).toISOString();
+  const where = cutoff ? "mode = ? AND timestamp >= ?" : "mode = ?";
+  const params = cutoff ? ["grevcaching", cutoff] : ["grevcaching"];
+  const totals = db
+    .prepare(
+      `SELECT COUNT(*) AS total_runs,
+              COALESCE(SUM(original_tokens), 0) AS original_tokens,
+              COALESCE(SUM(compressed_tokens), 0) AS compressed_tokens,
+              COALESCE(SUM(tokens_saved), 0) AS tokens_saved,
+              COALESCE(AVG(CASE WHEN original_tokens > 0
+                THEN 100.0 * tokens_saved / original_tokens END), 0) AS average_savings_percent,
+              COUNT(CASE WHEN actual_prompt_tokens IS NOT NULL
+                OR actual_cache_read_tokens IS NOT NULL THEN 1 END) AS requests_with_usage,
+              COALESCE(SUM(actual_prompt_tokens), 0) AS actual_prompt_tokens,
+              COALESCE(SUM(actual_cache_read_tokens), 0) AS cache_read_tokens,
+              COALESCE(SUM(estimated_cache_hit_tokens), 0) AS estimated_cache_hit_tokens
+       FROM compression_analytics WHERE ${where}`
+    )
+    .get(...params) as Record<string, number>;
+  const recentRuns = db
+    .prepare(
+      `SELECT timestamp, provider, original_tokens, compressed_tokens, tokens_saved,
+              actual_prompt_tokens, actual_cache_read_tokens, estimated_cache_hit_tokens
+       FROM compression_analytics WHERE ${where} ORDER BY timestamp DESC, id DESC LIMIT 50`
+    )
+    .all(...params) as Array<Record<string, string | number | null>>;
+  const engineRows = db
+    .prepare(
+      `SELECT b.engine,
+              COUNT(*) AS runs,
+              COALESCE(SUM(b.original_tokens), 0) AS original_tokens,
+              COALESCE(SUM(b.compressed_tokens), 0) AS compressed_tokens,
+              COALESCE(SUM(b.tokens_saved), 0) AS tokens_saved,
+              COALESCE(AVG(CASE WHEN b.original_tokens > 0
+                THEN 100.0 * b.tokens_saved / b.original_tokens END), 0) AS average_savings_percent
+       FROM compression_engine_breakdown b
+       WHERE b.request_id IN (
+         SELECT DISTINCT request_id FROM compression_analytics
+         WHERE ${where} AND request_id IS NOT NULL
+       )
+       GROUP BY b.engine
+       ORDER BY runs DESC, b.engine ASC`
+    )
+    .all(...params) as Array<Record<string, string | number>>;
+  return {
+    totalRuns: totals.total_runs,
+    originalTokens: totals.original_tokens,
+    compressedTokens: totals.compressed_tokens,
+    tokensSaved: totals.tokens_saved,
+    averageSavingsPercent: Math.round(totals.average_savings_percent * 100) / 100,
+    requestsWithUsage: totals.requests_with_usage,
+    actualPromptTokens: totals.actual_prompt_tokens,
+    cacheReadTokens: totals.cache_read_tokens,
+    estimatedCacheHitTokens: totals.estimated_cache_hit_tokens,
+    engines: engineRows.map((row) => ({
+      engine: String(row.engine),
+      runs: Number(row.runs),
+      originalTokens: Number(row.original_tokens),
+      compressedTokens: Number(row.compressed_tokens),
+      tokensSaved: Number(row.tokens_saved),
+      averageSavingsPercent: Math.round(Number(row.average_savings_percent) * 100) / 100,
+    })),
+    recentRuns: recentRuns.map((row) => ({
+      timestamp: String(row.timestamp),
+      provider: typeof row.provider === "string" ? row.provider : null,
+      originalTokens: Number(row.original_tokens ?? 0),
+      compressedTokens: Number(row.compressed_tokens ?? 0),
+      tokensSaved: Number(row.tokens_saved ?? 0),
+      actualPromptTokens:
+        typeof row.actual_prompt_tokens === "number" ? row.actual_prompt_tokens : null,
+      cacheReadTokens:
+        typeof row.actual_cache_read_tokens === "number" ? row.actual_cache_read_tokens : null,
+      estimatedCacheHitTokens:
+        typeof row.estimated_cache_hit_tokens === "number"
+          ? row.estimated_cache_hit_tokens
+          : null,
+    })),
+  };
+}
+
 export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): void {
   const db = getDbInstance();
   ensureCompressionAnalyticsColumns();
@@ -132,12 +255,12 @@ export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): voi
     INSERT INTO compression_analytics (
       timestamp, combo_id, compression_combo_id, engine, provider, mode, original_tokens, compressed_tokens, tokens_saved,
       duration_ms, request_id, actual_prompt_tokens, actual_completion_tokens,
-      actual_total_tokens, actual_cache_read_tokens, actual_cache_write_tokens,
+      actual_total_tokens, actual_cache_read_tokens, estimated_cache_hit_tokens, actual_cache_write_tokens,
       estimated_usd_saved, mcp_description_tokens_saved, multimodal_skip_count,
       receipt_source, validation_fallback, output_mode, rtk_raw_output_pointer, rtk_raw_output_bytes,
       rtk_raw_output_pointers, rtk_raw_output_total_bytes, skip_reason
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     row.timestamp,
@@ -155,6 +278,7 @@ export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): voi
     row.actual_completion_tokens ?? null,
     row.actual_total_tokens ?? null,
     row.actual_cache_read_tokens ?? null,
+    row.estimated_cache_hit_tokens ?? null,
     row.actual_cache_write_tokens ?? null,
     row.estimated_usd_saved ?? null,
     row.mcp_description_tokens_saved ?? 0,
@@ -303,6 +427,27 @@ export function attachCompressionUsageReceipt(
     requestId,
     requestId
   );
+}
+
+/** Attach the per-request stable-prefix reuse estimate to the latest analytics row. */
+export function attachEstimatedCacheHitTokens(
+  requestId: string | null | undefined,
+  estimatedTokens: number | null | undefined
+): void {
+  if (!requestId || typeof estimatedTokens !== "number" || !Number.isFinite(estimatedTokens)) return;
+  const db = getDbInstance();
+  ensureCompressionAnalyticsColumns();
+  db.prepare(
+    `UPDATE compression_analytics
+     SET estimated_cache_hit_tokens = ?
+     WHERE request_id = ?
+       AND id = (
+         SELECT id FROM compression_analytics
+         WHERE request_id = ?
+         ORDER BY id DESC
+         LIMIT 1
+       )`
+  ).run(Math.max(0, Math.floor(estimatedTokens)), requestId, requestId);
 }
 
 function toFiniteInt(value: unknown): number | null {

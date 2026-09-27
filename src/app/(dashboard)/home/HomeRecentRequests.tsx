@@ -99,23 +99,21 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
     return () => clearInterval(id);
   }, [enabled]);
 
-  const load = useCallback(async (signal: AbortSignal) => {
+  const load = useCallback(async (isActive: () => boolean) => {
     try {
       const res = await fetch(`/api/usage/call-logs?limit=${FETCH_LIMIT}&excludeTests=1`, {
         cache: "no-store",
-        signal,
       });
       if (!res.ok) return;
       const data = await res.json();
-      if (signal.aborted) return;
+      if (!isActive()) return;
       const filtered = Array.isArray(data)
         ? (data as CallLogRow[]).filter((row) => !isConnectionTestRow(row)).slice(0, RECENT_LIMIT)
         : [];
       setRows(filtered);
       setLoaded(true);
     } catch (error) {
-      const isAbort = error instanceof DOMException && error.name === "AbortError";
-      if (!isAbort) console.error("Failed to load recent requests:", error);
+      console.error("Failed to load recent requests:", error);
     }
   }, []);
 
@@ -124,15 +122,11 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
 
     let cancelled = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    let controller: AbortController | null = null;
 
     const tick = async () => {
       // Pause polling while the tab is backgrounded; resume on next tick.
       if (document.visibilityState === "visible") {
-        const currentController = new AbortController();
-        controller = currentController;
-        await load(currentController.signal);
-        if (controller === currentController) controller = null;
+        await load(() => !cancelled);
       }
       if (!cancelled) timeoutId = setTimeout(tick, POLL_INTERVAL_MS);
     };
@@ -141,7 +135,6 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
     return () => {
       cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
-      controller?.abort();
     };
   }, [enabled, load]);
 

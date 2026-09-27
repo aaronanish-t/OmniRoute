@@ -66,6 +66,7 @@ interface CompressionConfig {
   // Phase 4 (C): adaptive context-budget. Absent / mode:"off" = legacy auto-trigger.
   contextBudget?: ContextBudgetConfig;
   liveZone?: { enabled: boolean };
+  grevCaching?: { enabled: boolean; newBlockPipeline?: string[] };
 }
 
 const CONTEXT_BUDGET_MODES = new Set<ContextBudgetConfig["mode"]>([
@@ -92,6 +93,7 @@ const DEFAULT_CONFIG: CompressionConfig = {
   ultraSlmPrewarm: false,
   contextBudget: { ...DEFAULT_CONTEXT_BUDGET },
   liveZone: { enabled: false },
+  grevCaching: { enabled: false },
 };
 
 function normalizeEngines(raw: unknown): Record<string, EngineToggle> {
@@ -136,10 +138,12 @@ function LiveZoneToggle({
 function AdaptiveContextBudgetDial({
   contextBudget,
   saving,
+  disabled = false,
   onChange,
 }: {
   contextBudget: ContextBudgetConfig;
   saving: boolean;
+  disabled?: boolean;
   onChange: (patch: Partial<ContextBudgetConfig>) => void;
 }) {
   const t = useTranslations("settings");
@@ -159,7 +163,7 @@ function AdaptiveContextBudgetDial({
               onChange({ mode: mode as ContextBudgetConfig["mode"] });
             }
           }}
-          disabled={saving}
+          disabled={saving || disabled}
           className="w-44 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
         >
           <option value="off">{t("compressionAdaptiveModeOff")}</option>
@@ -181,7 +185,7 @@ function AdaptiveContextBudgetDial({
                 onChange({ policy: policy as ContextBudgetConfig["policy"] });
               }
             }}
-            disabled={saving}
+            disabled={saving || disabled}
             className="w-44 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
           >
             <option value="reserve-output">{t("compressionAdaptivePolicyReserve")}</option>
@@ -372,9 +376,13 @@ export default function CompressionPanel() {
     }
   };
 
+  const grevCachingEnabled = config.grevCaching?.enabled === true;
   const derived = deriveEffectivePreviewPlan(config, namedCombos);
-  const derivedText =
-    derived.mode === "off"
+  const derivedText = grevCachingEnabled
+    ? (config.grevCaching?.newBlockPipeline?.length ?? 0) > 0
+      ? `GrevCaching → ${config.grevCaching?.newBlockPipeline?.join(" → ")}`
+      : t("grevCachingEffectivePipeline")
+    : derived.mode === "off"
       ? t("compressionDerivedOff")
       : derived.stackedPipeline.length > 0
         ? t("compressionDerivedRuns", {
@@ -391,6 +399,40 @@ export default function CompressionPanel() {
 
   return (
     <Card className="p-6" data-testid="compression-panel">
+      {/* GrevCaching is deliberately above the normal compression master: it owns
+          context handling for its selected targets and disables this pipeline. */}
+      <div className="mb-5 flex items-start justify-between gap-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+              inventory_2
+            </span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold">{t("grevCachingTitle")}</h3>
+              <Link
+                href="/dashboard/context/grevcaching"
+                className="rounded border border-border bg-bg-subtle px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-text-muted hover:border-primary/40 hover:text-primary"
+              >
+                {t("grevCachingConfigure")}
+              </Link>
+            </div>
+            <p className="text-sm text-text-muted">{t("grevCachingDescription")}</p>
+          </div>
+        </div>
+        <Toggle
+          size="md"
+          checked={grevCachingEnabled}
+          onChange={(enabled) =>
+            save({
+              grevCaching: { ...(config.grevCaching ?? { enabled: false }), enabled },
+            })
+          }
+          disabled={saving}
+          ariaLabel={t("grevCachingTitle")}
+        />
+      </div>
       {/* Master */}
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -430,9 +472,9 @@ export default function CompressionPanel() {
           )}
           <Toggle
             size="md"
-            checked={config.enabled}
+            checked={!grevCachingEnabled && config.enabled}
             onChange={(enabled) => save({ enabled })}
-            disabled={saving}
+            disabled={saving || grevCachingEnabled}
             ariaLabel={t("compressionTitle")}
           />
         </div>
@@ -451,11 +493,17 @@ export default function CompressionPanel() {
       <AdaptiveContextBudgetDial
         contextBudget={config.contextBudget ?? DEFAULT_CONTEXT_BUDGET}
         saving={saving}
+        disabled={grevCachingEnabled}
         onChange={(patch) => {
           const current = configRef.current.contextBudget ?? DEFAULT_CONTEXT_BUDGET;
           save({ contextBudget: { ...current, ...patch } });
         }}
       />
+      {grevCachingEnabled && (
+        <p className="-mt-2 mb-4 text-xs text-text-muted">
+          Adaptive context budget is inactive while GrevCaching owns context handling.
+        </p>
+      )}
 
       {/* Engine grid */}
       <div className={`divide-y divide-border ${config.enabled ? "" : "opacity-60"}`}>
@@ -495,7 +543,7 @@ export default function CompressionPanel() {
                   <select
                     value={level}
                     onChange={(e) => setEngine(id, { level: e.target.value })}
-                    disabled={!config.enabled || !engine.enabled || saving}
+                    disabled={!config.enabled || !engine.enabled || saving || grevCachingEnabled}
                     className="w-28 rounded border border-border bg-surface px-2 py-1 text-xs text-text-main"
                   >
                     {levels.map((lvl) => (
@@ -510,7 +558,7 @@ export default function CompressionPanel() {
                     size="sm"
                     checked={engine.enabled}
                     onChange={(enabled) => setEngine(id, { enabled })}
-                    disabled={!config.enabled || saving}
+                    disabled={!config.enabled || saving || grevCachingEnabled}
                     ariaLabel={engineLabel}
                   />
                 </span>
@@ -555,7 +603,7 @@ export default function CompressionPanel() {
                   onChange={(e) =>
                     setOutputStyle(id, { level: e.target.value as CavemanIntensity })
                   }
-                  disabled={!sel || saving}
+                  disabled={!sel || saving || grevCachingEnabled}
                   className="w-28 rounded border border-border bg-surface px-2 py-1 text-xs text-text-main"
                 >
                   {CAVEMAN_OUTPUT_LEVELS.map((lvl) => (
@@ -569,7 +617,7 @@ export default function CompressionPanel() {
                     size="sm"
                     checked={Boolean(sel)}
                     onChange={(enabled) => setOutputStyle(id, { enabled })}
-                    disabled={saving}
+                    disabled={saving || grevCachingEnabled}
                     ariaLabel={styleLabel}
                   />
                 </span>
@@ -588,7 +636,7 @@ export default function CompressionPanel() {
             data-testid="ultra-engine-select"
             value={config.ultraEngine ?? "heuristic"}
             onChange={(e) => save({ ultraEngine: e.target.value === "slm" ? "slm" : "heuristic" })}
-            disabled={saving}
+            disabled={saving || grevCachingEnabled}
             className="w-44 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
           >
             <option value="heuristic">{t("compressionUltraEngineHeuristic")}</option>
@@ -606,7 +654,7 @@ export default function CompressionPanel() {
                   size="sm"
                   checked={config.ultraSlmPrewarm ?? false}
                   onChange={(ultraSlmPrewarm) => save({ ultraSlmPrewarm })}
-                  disabled={saving}
+                  disabled={saving || grevCachingEnabled}
                   ariaLabel={t("compressionUltraSlmPrewarm")}
                 />
               </span>
@@ -626,6 +674,7 @@ export default function CompressionPanel() {
             size="sm"
             checked={mcpAccessibility}
             onChange={toggleMcpAccessibility}
+            disabled={saving || grevCachingEnabled}
             ariaLabel={t("mcpAccessibilityTitle")}
           />
         </span>
@@ -643,6 +692,7 @@ export default function CompressionPanel() {
               max={100000}
               value={config.autoTriggerTokens}
               onChange={(e) => save({ autoTriggerTokens: parseInt(e.target.value) || 0 })}
+              disabled={saving || grevCachingEnabled}
               className="w-24 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
             />
             <span className="text-xs text-text-muted">{t("tokens")}</span>
@@ -660,7 +710,7 @@ export default function CompressionPanel() {
                 preserveSystemPromptMode: e.target.value as "always" | "whenNoCache" | "never",
               })
             }
-            disabled={saving}
+            disabled={saving || grevCachingEnabled}
             aria-label={t("compressionPreserveSystem")}
             data-testid="preserve-system-mode-select"
             className="w-36 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
@@ -672,7 +722,7 @@ export default function CompressionPanel() {
         </label>
         <LiveZoneToggle
           enabled={config.liveZone?.enabled === true}
-          saving={saving}
+          saving={saving || grevCachingEnabled}
           onChange={(enabled) => save({ liveZone: { enabled } })}
         />
       </div>

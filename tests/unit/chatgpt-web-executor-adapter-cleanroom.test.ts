@@ -261,6 +261,33 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
       ),
       true
     );
+    // Captured live on a continuation turn: the model declared the client tools missing.
+    // The task ended with no file written until this was corrected.
+    const afterReadOnly = [
+      { role: "user", content: "create index.html" },
+      {
+        role: "assistant",
+        content: null,
+        tool_calls: [{ id: "c1", function: { name: "glob" } }],
+      },
+      { role: "tool", tool_call_id: "c1", content: "No files found" },
+    ];
+    assert.equal(
+      shouldRetryWithToolReminder(
+        {
+          text: "I can\u2019t continue the requested workspace operation from this chat because the required client-side workspace tool isn\u2019t available in my current tool registry.",
+        },
+        tools,
+        afterReadOnly
+      ),
+      true
+    );
+    // But a refusal AFTER a successful write must still not loop.
+    assert.equal(
+      shouldRetryWithToolReminder({ text: "I can't continue further on this." }, tools, ranTool),
+      false
+    );
+
     // Before any tool runs, the original tool-work triggers still apply.
     assert.equal(
       shouldRetryWithToolReminder(

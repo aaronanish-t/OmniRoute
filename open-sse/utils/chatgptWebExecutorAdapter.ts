@@ -692,6 +692,21 @@ export function shouldRetryWithToolReminder(
     return false;
   }
 
+  // The model declaring the client tools missing/absent is always a miss — the contract exists
+  // precisely to tell it they are available. Captured live on a continuation turn after a
+  // read-only call: "I can't continue … the required client-side workspace tool isn't available
+  // in my current tool registry", which previously ended the task with no file written.
+  if (
+    /\b(tool registry|client-side tool|available tools|tools?\s+(?:are|is)\s+not\s+available|tools?\s+(?:aren['’]t|isn['’]t)\s+available|no\s+(?:access to|such)\s+tool)\b/i.test(
+      text
+    ) ||
+    /\b(can['’]t|cannot|unable to|won['’]t be able to)\s+(?:continue|proceed|complete|perform|execute)\b/i.test(
+      text
+    )
+  ) {
+    return true;
+  }
+
   // A claim of file work that no tool result supports is the miss we must correct.
   if (
     /\b(created|built|wrote|written|saved|updated|added|verified)\b[^.]*\b(file|page|index\.html|html|script)\b/i.test(

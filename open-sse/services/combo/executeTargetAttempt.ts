@@ -87,6 +87,7 @@ import {
 import { markAccountExhaustedFromCredits } from "../../../src/domain/quotaCache.ts";
 import { classifyComboOutcome, redactConnectionLabel } from "./comboErrorAggregation.ts";
 import { readConnectionForCooldownGate } from "./executeTargetGates.ts";
+import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   buildComboDiag,
   handlePreContentStreamRetry,
@@ -661,23 +662,15 @@ export async function executeTargetAttempt(opts: {
         recordStickyBinding(deps.sticky.messageHash, target.connectionId); // LKGP (#919):
       if (provider) {
         const connId = effectiveConnectionId || undefined;
-        void (async () => {
-          try {
-            const { setLKGP } = await import("@/lib/db/settings");
-            await Promise.all([
-              setLKGP(deps.combo.name, target.executionKey, provider, connId),
-              setLKGP(deps.combo.name, deps.combo.id || deps.combo.name, provider, connId),
-            ]);
-          } catch (err) {
-            deps.log.warn(
-              "COMBO",
-              "Failed to record Last Known Good Provider. This is non-fatal.",
-              {
-                err,
-              }
-            );
-          }
-        })();
+        recordLkgpPin({
+          comboName: deps.combo.name,
+          executionKey: target.executionKey,
+          comboId: deps.combo.id,
+          provider,
+          connectionId: connId,
+          log: deps.log,
+          tag: "COMBO",
+        });
       }
 
       return { ok: true, response: result };

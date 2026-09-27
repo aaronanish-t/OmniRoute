@@ -1,0 +1,1 @@
+- **fix(providers):** Model discovery marks free models on catalogs that publish `pricing.input`/`pricing.output` or a `free` tag (Vercel AI Gateway), and the provider-page Free badge honors explicit `isFree` on every provider ([#14930](https://github.com/diegosouzapw/OmniRoute/pull/14930)) — thanks @aldoeliacim

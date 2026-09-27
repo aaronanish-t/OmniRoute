@@ -97,6 +97,21 @@ interface RuleMetadata {
   description: string;
 }
 
+// A save names only the fields it changes, including fields inside nested objects.
+type SettingsPatch<T> = {
+  [K in keyof T]?: T[K] extends unknown[] ? T[K] : T[K] extends object ? SettingsPatch<T[K]> : T[K];
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+function withPatch<T>(base: T, patch: unknown): T {
+  if (!isRecord(base) || !isRecord(patch)) return patch as T;
+  const merged: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(patch)) merged[key] = withPatch(base[key], value);
+  return merged as T;
+}
+
 const MODES: { value: CompressionMode; labelKey: string; descKey: string; icon: string }[] = [
   {
     value: "off",
@@ -220,7 +235,7 @@ export default function CompressionSettingsTab() {
   // shows the last saved config plus the saves still queued, so a failed save rolls back only
   // its own fields. A PUT that never settles holds up the saves queued behind it.
   const savedRef = useRef(config);
-  const queuedRef = useRef<Partial<CompressionConfig>[]>([]);
+  const queuedRef = useRef<SettingsPatch<CompressionConfig>[]>([]);
   const saveQueueRef = useRef(Promise.resolve());
 
   useEffect(() => {
@@ -242,11 +257,11 @@ export default function CompressionSettingsTab() {
       .catch(() => {});
   }, []);
 
-  const save = (updates: Partial<CompressionConfig>) => {
+  const save = (updates: SettingsPatch<CompressionConfig>) => {
     const showQueued = () =>
       setConfig(
         queuedRef.current.reduce<CompressionConfig>(
-          (shown, queued) => ({ ...shown, ...queued }),
+          (shown, queued) => withPatch(shown, queued),
           savedRef.current
         )
       );
@@ -255,16 +270,32 @@ export default function CompressionSettingsTab() {
     setSaving(true);
     setStatus("");
     saveQueueRef.current = saveQueueRef.current.then(async () => {
-      const ok = await fetch("/api/settings/compression", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      }).then(
-        (res) => res.ok,
-        () => false
-      );
+      // The server stores each nested object as one row, so a PUT carries the whole object.
+      // Its other fields come from the server's current row, not this tab's copy, so a sibling
+      // field saved elsewhere since the tab loaded is not written back.
+      const current: CompressionConfig | null = Object.values(updates).some(isRecord)
+        ? await fetch("/api/settings/compression")
+            .then((res) => (res.ok ? res.json() : null))
+            .catch(() => null)
+        : savedRef.current;
+      const merged = current && withPatch(current, updates);
+      const body =
+        merged &&
+        Object.fromEntries(
+          Object.keys(updates).map((key) => [key, merged[key as keyof CompressionConfig]])
+        );
+      const ok =
+        !!body &&
+        (await fetch("/api/settings/compression", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(
+          (res) => res.ok,
+          () => false
+        ));
       queuedRef.current.shift();
-      if (ok) savedRef.current = { ...savedRef.current, ...updates };
+      if (ok) savedRef.current = { ...savedRef.current, ...body };
       showQueued();
       setSaving(queuedRef.current.length > 0);
       // A failure stays on screen until the next edit, so a queued success or an earlier
@@ -280,7 +311,7 @@ export default function CompressionSettingsTab() {
       ? currentRoles.filter((r) => r !== role)
       : [...currentRoles, role];
     save({
-      cavemanConfig: { ...config.cavemanConfig!, compressRoles: newRoles },
+      cavemanConfig: { compressRoles: newRoles },
     });
   };
 
@@ -290,7 +321,7 @@ export default function CompressionSettingsTab() {
       ? currentSkip.filter((r) => r !== rule)
       : [...currentSkip, rule];
     save({
-      cavemanConfig: { ...config.cavemanConfig!, skipRules: newSkip },
+      cavemanConfig: { skipRules: newSkip },
     });
   };
 
@@ -512,7 +543,6 @@ export default function CompressionSettingsTab() {
                     onChange={(e) =>
                       save({
                         cavemanConfig: {
-                          ...config.cavemanConfig!,
                           minMessageLength: parseInt(e.target.value) || 50,
                         },
                       })
@@ -558,7 +588,6 @@ export default function CompressionSettingsTab() {
                         .filter(Boolean);
                       save({
                         cavemanConfig: {
-                          ...config.cavemanConfig!,
                           preservePatterns: patterns,
                         },
                       });
@@ -591,7 +620,6 @@ export default function CompressionSettingsTab() {
                 onClick={() =>
                   save({
                     cavemanOutputMode: {
-                      ...config.cavemanOutputMode!,
                       autoClarity: !config.cavemanOutputMode!.autoClarity,
                     },
                   })
@@ -629,7 +657,6 @@ export default function CompressionSettingsTab() {
                 onClick={() =>
                   save({
                     aggressive: {
-                      ...config.aggressive!,
                       summarizerEnabled: !config.aggressive!.summarizerEnabled,
                     },
                   })
@@ -657,7 +684,6 @@ export default function CompressionSettingsTab() {
                   onChange={(e) =>
                     save({
                       aggressive: {
-                        ...config.aggressive!,
                         maxTokensPerMessage: parseInt(e.target.value) || 2048,
                       },
                     })
@@ -680,7 +706,6 @@ export default function CompressionSettingsTab() {
                   onChange={(e) =>
                     save({
                       aggressive: {
-                        ...config.aggressive!,
                         minSavingsThreshold: parseFloat(e.target.value) || 0.05,
                       },
                     })
@@ -713,9 +738,7 @@ export default function CompressionSettingsTab() {
                       onChange={(e) =>
                         save({
                           aggressive: {
-                            ...config.aggressive!,
                             thresholds: {
-                              ...config.aggressive!.thresholds,
                               [tier]: parseInt(e.target.value) || 2,
                             },
                           },
@@ -740,9 +763,7 @@ export default function CompressionSettingsTab() {
                     onClick={() =>
                       save({
                         aggressive: {
-                          ...config.aggressive!,
                           toolStrategies: {
-                            ...config.aggressive!.toolStrategies,
                             [strategy]: !config.aggressive!.toolStrategies[strategy],
                           },
                         },
@@ -775,7 +796,6 @@ export default function CompressionSettingsTab() {
                 onClick={() =>
                   save({
                     ultra: {
-                      ...config.ultra!,
                       enabled: !config.ultra!.enabled,
                     },
                   })
@@ -803,7 +823,6 @@ export default function CompressionSettingsTab() {
                 onChange={(e) =>
                   save({
                     ultra: {
-                      ...config.ultra!,
                       compressionRate: parseFloat(e.target.value) || 0,
                     },
                   })
@@ -823,7 +842,6 @@ export default function CompressionSettingsTab() {
                 onChange={(e) =>
                   save({
                     ultra: {
-                      ...config.ultra!,
                       minScoreThreshold: parseFloat(e.target.value) || 0,
                     },
                   })
@@ -843,7 +861,6 @@ export default function CompressionSettingsTab() {
                   onChange={(e) =>
                     save({
                       ultra: {
-                        ...config.ultra!,
                         maxTokensPerMessage: parseInt(e.target.value) || 0,
                       },
                     })
@@ -860,7 +877,6 @@ export default function CompressionSettingsTab() {
                 onClick={() =>
                   save({
                     ultra: {
-                      ...config.ultra!,
                       slmFallbackToAggressive: !config.ultra!.slmFallbackToAggressive,
                     },
                   })
@@ -885,7 +901,6 @@ export default function CompressionSettingsTab() {
                 onChange={(e) =>
                   save({
                     ultra: {
-                      ...config.ultra!,
                       modelPath: e.target.value.trim() || undefined,
                     },
                   })

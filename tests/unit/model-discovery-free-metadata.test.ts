@@ -24,6 +24,31 @@ test("normalizeDiscoveredModels records only free evidence present in discovery 
   assert.equal(byId.get("paid")?.isFree, undefined);
 });
 
+test("normalizeDiscoveredModels reads Vercel AI Gateway input/output pricing and free tags", () => {
+  // Shape of https://ai-gateway.vercel.sh/v1/models: `pricing.input` / `pricing.output`
+  // (not OpenRouter's prompt/completion) plus an optional `tags` array.
+  const models = normalizeDiscoveredModels(
+    [
+      { id: "stealth/pixel-canary", pricing: { input: "0", output: "0" } },
+      { id: "poolside/laguna-s-2.1-free", pricing: { input: "0", output: "0" }, tags: ["free"] },
+      { id: "vendor/tagged-no-price", tags: ["tool-use", "free"] },
+      { id: "vendor/tagged-but-priced", pricing: { input: "0.1", output: "0.4" }, tags: ["free"] },
+      { id: "vendor/half-free", pricing: { input: "0", output: "0.4" } },
+      { id: "vendor/paid", pricing: { input: "0.1", output: "0.4" }, tags: ["reasoning"] },
+    ],
+    "vercel-ai-gateway"
+  );
+  const byId = new Map(models.map((model) => [model.id, model]));
+
+  assert.equal(byId.get("stealth/pixel-canary")?.isFree, true);
+  assert.equal(byId.get("poolside/laguna-s-2.1-free")?.isFree, true);
+  assert.equal(byId.get("vendor/tagged-no-price")?.isFree, true);
+  // A published non-zero price outranks a tag: never badge a model that bills.
+  assert.equal(byId.get("vendor/tagged-but-priced")?.isFree, undefined);
+  assert.equal(byId.get("vendor/half-free")?.isFree, undefined);
+  assert.equal(byId.get("vendor/paid")?.isFree, undefined);
+});
+
 test("normalizeSyncedAvailableModels preserves discovery free metadata", () => {
   const [model] = normalizeSyncedAvailableModels([
     { id: "live-free", name: "Live Free", source: "imported", isFree: true },

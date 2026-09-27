@@ -128,7 +128,8 @@ export const FREE_BADGE_STRICT_FLAG = "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER";
 /**
  * Whether the provider-page model list shows the "Free" badge for a model row.
  *
- * Default (`strict: false`) is the historical rule, unchanged: any truthy `free` field,
+ * Default (`strict: false`) is the historical rule: any truthy `free` field, an explicit
+ * `isFree === true` (live discovery evidence, honored on every provider as in strict mode),
  * a `:free` id suffix, "free"/"grátis" in the display name, or `isFreeModel`.
  *
  * With `strict: true` (feature flag FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER) only badges
@@ -149,6 +150,7 @@ export function isModelFreeBadge(
   if (!options.strict) {
     return (
       Boolean(model.free) ||
+      model.isFree === true ||
       model.id.endsWith(":free") ||
       /\bgr[aá]tis\b|\bfree\b/i.test(model.name || "") ||
       isFreeModel(provider, { id: model.id, isFree: model.isFree as boolean | undefined })

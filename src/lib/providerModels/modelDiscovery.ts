@@ -27,17 +27,53 @@ function isZeroPrice(value: unknown): boolean {
   return Number.isFinite(parsed) && parsed === 0;
 }
 
+function isPositivePrice(value: unknown): boolean {
+  if (typeof value === "number") return Number.isFinite(value) && value > 0;
+  if (typeof value !== "string" || value.trim().length === 0) return false;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0;
+}
+
+type DiscoveredPrice = string | number | undefined;
+
+function readPrice(value: unknown): DiscoveredPrice {
+  return typeof value === "string" || typeof value === "number" ? value : undefined;
+}
+
+/**
+ * Per-token prompt/completion prices from a /models entry. OpenRouter-shaped catalogs publish
+ * `pricing.prompt` / `pricing.completion`; Vercel AI Gateway publishes `pricing.input` /
+ * `pricing.output`. The OpenRouter names win when both are present.
+ */
+function readDiscoveredPricing(record: JsonRecord): {
+  prompt: DiscoveredPrice;
+  completion: DiscoveredPrice;
+} {
+  const pricing = asRecord(record.pricing);
+  return {
+    prompt: readPrice(pricing.prompt) ?? readPrice(pricing.input),
+    completion: readPrice(pricing.completion) ?? readPrice(pricing.output),
+  };
+}
+
+function hasFreeTag(record: JsonRecord): boolean {
+  return (
+    Array.isArray(record.tags) &&
+    record.tags.some((tag) => typeof tag === "string" && tag.trim().toLowerCase() === "free")
+  );
+}
+
 function hasLiveFreeEvidence(
   id: string,
   record: JsonRecord,
-  promptPrice: string | number | undefined,
-  completionPrice: string | number | undefined
+  promptPrice: DiscoveredPrice,
+  completionPrice: DiscoveredPrice
 ): boolean {
-  return (
-    record.isFree === true ||
-    id.endsWith(":free") ||
-    (isZeroPrice(promptPrice) && isZeroPrice(completionPrice))
-  );
+  if (record.isFree === true || id.endsWith(":free")) return true;
+  if (isZeroPrice(promptPrice) && isZeroPrice(completionPrice)) return true;
+  // A `free` tag (Vercel AI Gateway) counts only when the same payload does not publish a
+  // non-zero price for the model: a tag must never badge a model that bills per token.
+  return hasFreeTag(record) && !isPositivePrice(promptPrice) && !isPositivePrice(completionPrice);
 }
 
 /**
@@ -668,15 +704,7 @@ export function normalizeDiscoveredModels(
     // models reached the catalog with no vision flag and vision-capable models
     // (which work at request time) showed up as non-vision after import.
     const supportsVision = detectVisionInput(record);
-    const pricing = asRecord(record.pricing);
-    const promptPrice =
-      typeof pricing.prompt === "string" || typeof pricing.prompt === "number"
-        ? pricing.prompt
-        : undefined;
-    const completionPrice =
-      typeof pricing.completion === "string" || typeof pricing.completion === "number"
-        ? pricing.completion
-        : undefined;
+    const { prompt: promptPrice, completion: completionPrice } = readDiscoveredPricing(record);
     // Persist only evidence present in this discovery payload. Static catalog
     // membership is intentionally not evidence about this connection's economics.
     const isFree = hasLiveFreeEvidence(id, record, promptPrice, completionPrice);

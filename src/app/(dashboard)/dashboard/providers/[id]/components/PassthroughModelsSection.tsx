@@ -130,7 +130,7 @@ export default function PassthroughModelsSection({
   const [modelFilter, setModelFilter] = useState("");
   const [testingAll, setTestingAll] = useState(false);
   const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
-  const [localAutoHideFailed, setLocalAutoHideFailed] = useState(false);
+  const [localAutoHideFailed, setLocalAutoHideFailed] = useState(true);
   const autoHideFailed =
     autoHideFailedProp !== undefined ? autoHideFailedProp : localAutoHideFailed;
   const setAutoHideFailed = onAutoHideFailedChange ?? setLocalAutoHideFailed;

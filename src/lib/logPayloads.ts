@@ -3,6 +3,7 @@ import {
   sanitizeUpstreamDetails,
 } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import { projectResponsesFailureOutput } from "@omniroute/open-sse/utils/responsesFailureOutput.ts";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { sanitizePII } from "./piiSanitizer";
 
 const SENSITIVE_KEYS = new Set([
@@ -436,7 +437,19 @@ export function redactPayload(payload: unknown): unknown {
   return redacted;
 }
 
+/**
+ * PII-sanitize every string of a log payload. PII sanitization is opt-in (Hard Rule #20): when
+ * `PII_RESPONSE_SANITIZATION` is off the payload itself is returned (no copy, binary views left
+ * as-is), so callers must copy before mutating — protectPayloadForLog does via redactPayload.
+ * Resolving the flag once here: once per string it was ~32% of the router's main-thread busy
+ * time at peak in production.
+ */
 export function sanitizePayloadPII(payload: unknown): unknown {
+  if (!isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) return payload;
+  return sanitizePayloadPIIWalk(payload);
+}
+
+function sanitizePayloadPIIWalk(payload: unknown): unknown {
   if (typeof payload === "string") {
     return sanitizePII(payload).text;
   }
@@ -447,12 +460,12 @@ export function sanitizePayloadPII(payload: unknown): unknown {
     return describeOpaqueBinary(payload);
   }
   if (Array.isArray(payload)) {
-    return payload.map(sanitizePayloadPII);
+    return payload.map(sanitizePayloadPIIWalk);
   }
 
   const sanitized: JsonRecord = {};
   for (const [key, value] of Object.entries(payload)) {
-    sanitized[key] = sanitizePayloadPII(value);
+    sanitized[key] = sanitizePayloadPIIWalk(value);
   }
   return sanitized;
 }

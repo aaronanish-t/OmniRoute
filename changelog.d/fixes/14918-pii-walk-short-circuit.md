@@ -1,0 +1,1 @@
+- **perf(logs):** skip the log-payload PII walk when `PII_RESPONSE_SANITIZATION` is off — it resolved the flag from SQLite once per string and was ~32% of main-thread time at peak ([#14918](https://github.com/diegosouzapw/OmniRoute/pull/14918))

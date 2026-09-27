@@ -34,7 +34,7 @@ test.after(() => {
   } catch {
     /* ignore */
   }
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("#3496 GET /api/guardrails lists the registered guardrails with status", async () => {

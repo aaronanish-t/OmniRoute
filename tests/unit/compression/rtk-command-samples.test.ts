@@ -35,7 +35,7 @@ beforeEach(() => {
 afterEach(() => {
   if (prevDataDir === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = prevDataDir;
-  fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(tmp, { recursive: true, force: true });
 });
 
 describe("maybePersistRtkRawOutput — command sidecar", () => {

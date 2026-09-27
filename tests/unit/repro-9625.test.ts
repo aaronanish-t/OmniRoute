@@ -28,7 +28,7 @@ const { getDbInstance, resetDbInstance } = await import("../../src/lib/db/core.t
 
 test.after(() => {
   resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 const DAY_MS = 86_400_000; // milliseconds

@@ -33,7 +33,7 @@ if (!process.env.DATA_DIR) {
   // Best-effort cleanup so a long suite run does not leak hundreds of temp DBs.
   process.on("exit", () => {
     try {
-      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      fs.rmSync(dir, { recursive: true, force: true });
     } catch {
       // ignore — the OS reaps its temp dir eventually.
     }

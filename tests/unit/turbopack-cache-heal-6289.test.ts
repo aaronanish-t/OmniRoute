@@ -66,7 +66,7 @@ test("purgeTurbopackCache removes an existing cache/turbopack dir", () => {
   assert.equal(removed, true);
   assert.equal(fs.existsSync(cacheDir), false);
 
-  fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(tmp, { recursive: true, force: true });
 });
 
 test("purgeTurbopackCache is a no-op (returns false) when the dir is absent", () => {

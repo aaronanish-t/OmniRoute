@@ -24,7 +24,7 @@ const builtinCatalog = await import("../../open-sse/services/autoCombo/builtinCa
 
 function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -34,7 +34,7 @@ test.beforeEach(() => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("#4235 Phase A: README-advertised cheap/offline/smart are in the built-in catalog", () => {

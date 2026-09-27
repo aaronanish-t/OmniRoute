@@ -13,14 +13,14 @@ const proxyLogsRoute = await import("../../src/app/api/usage/proxy-logs/route.ts
 
 test.beforeEach(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   proxyLogger.clearProxyLogs();
 });
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("proxy logger public surface excludes removed stats helper", () => {

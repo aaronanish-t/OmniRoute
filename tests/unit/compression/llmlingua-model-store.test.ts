@@ -87,7 +87,7 @@ describe("getLlmlinguaModelCacheDir", () => {
     }
     if (tmpDir) {
       try {
-        fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        fs.rmSync(tmpDir, { recursive: true, force: true });
       } catch {
         /* ignore cleanup errors */
       }

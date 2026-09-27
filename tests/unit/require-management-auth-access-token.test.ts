@@ -31,7 +31,7 @@ test.after(() => {
     core.resetDbInstance();
   } catch {}
   try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
   } catch {}
   delete process.env.INITIAL_PASSWORD;
   delete process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN;

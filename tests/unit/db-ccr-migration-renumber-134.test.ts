@@ -49,7 +49,7 @@ function createLegacyDb(appliedName: string) {
 }
 
 test.after(() => {
-  fs.rmSync(migrationsDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(migrationsDir, { recursive: true, force: true });
   if (originalMigrationsDir === undefined) delete process.env.OMNIROUTE_MIGRATIONS_DIR;
   else process.env.OMNIROUTE_MIGRATIONS_DIR = originalMigrationsDir;
 });

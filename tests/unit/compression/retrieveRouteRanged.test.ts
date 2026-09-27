@@ -24,7 +24,7 @@ test.beforeEach(() => {
 });
 test.after(() => {
   core.resetDbInstance();
-  rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("mode:head n:2 returns first 2 lines", async () => {

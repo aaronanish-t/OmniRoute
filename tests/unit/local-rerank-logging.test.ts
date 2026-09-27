@@ -35,7 +35,7 @@ test.describe("Local rerank provider logging and fallback", () => {
     globalThis.fetch = originalFetch;
     core.resetDbInstance();
     try {
-      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
     } catch {
       // ignore
     }

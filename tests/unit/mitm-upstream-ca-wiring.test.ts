@@ -205,7 +205,7 @@ test("POST upstream-ca route — error response does not leak stack trace when c
 
 test.after(() => {
   try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
   } catch {
     // ignore
   }

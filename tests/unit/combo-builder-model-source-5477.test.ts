@@ -22,7 +22,7 @@ const { getComboBuilderOptions } = await import("../../src/lib/combos/builderOpt
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("#5477 buildModelOptions classifies custom-model source (manual -> custom, api-sync -> imported)", async () => {

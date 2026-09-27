@@ -57,7 +57,7 @@ describe("getModelsDevPricing caching (#9300)", () => {
     // Clean up DB handles
     dbCore.resetDbInstance();
     try {
-      fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      fs.rmSync(testDataDir, { recursive: true, force: true });
     } catch {
       // ignore
     }

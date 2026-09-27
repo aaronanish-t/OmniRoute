@@ -12,7 +12,7 @@ function makeTempDir(prefix: string): string {
 }
 
 function removePath(targetPath: string) {
-  fs.rmSync(targetPath, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(targetPath, { recursive: true, force: true });
 }
 
 const originalEnv = {

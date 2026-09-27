@@ -19,7 +19,7 @@ test.after(() => {
     process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   }
   try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
   } catch {
     // Best effort cleanup
   }

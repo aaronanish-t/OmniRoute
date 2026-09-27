@@ -22,7 +22,7 @@ async function withEmptyAliasDb(fn: () => Promise<void>) {
     resetDbInstance?.();
     await fn();
   } finally {
-    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(dataDir, { recursive: true, force: true });
     const { resetDbInstance } = await import("../../src/lib/db/core");
     resetDbInstance?.();
     if (prevDataDir === undefined) delete process.env.DATA_DIR;

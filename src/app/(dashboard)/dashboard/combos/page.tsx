@@ -733,6 +733,7 @@ export default function CombosPage() {
   const [metrics, setMetrics] = useState({});
   const [testResults, setTestResults] = useState(null);
   const [testingCombo, setTestingCombo] = useState(null);
+  const [removingErrorModels, setRemovingErrorModels] = useState(false);
   const { copied, copy } = useCopyToClipboard();
   const notify = useNotificationStore();
   const [proxyTargetCombo, setProxyTargetCombo] = useState(null);
@@ -947,6 +948,73 @@ export default function CombosPage() {
     } catch (error) {
       setTestResults({ error: t("testFailed") });
       notify.error(t("testFailed"));
+    }
+  };
+
+  const handleRemoveErrorModels = async (errorStepIds: string[]) => {
+    if (!testingCombo || errorStepIds.length === 0) return;
+    const combo = combos.find((c) => c.name === testingCombo);
+    if (!combo) return;
+    setRemovingErrorModels(true);
+    try {
+      // Filter out models whose stepId matches an error result.
+      // stepId format is typically "free-manifest-model-N-provider/model"
+      // combo.models entries have an index-derived stepId; match via the
+      // model string that was used to generate the stepId.
+      const errorModels = new Set(errorStepIds);
+      const filteredModels = (combo.models || []).filter((_entry, index) => {
+        // Build the stepId the same way resolveNestedComboTargets would:
+        // "<comboName>-model-<1-based-index>-<modelStr>"
+        const modelStr =
+          typeof _entry === "string"
+            ? _entry
+            : _entry?.model || "";
+        const stepId = `${combo.name}-model-${index + 1}-${modelStr}`;
+        return !errorModels.has(stepId);
+      });
+      if (filteredModels.length === (combo.models || []).length) {
+        // Fallback: match by model string directly from testResults
+        const errorModelStrs = (testResults?.results || [])
+          .filter((r) => r.status === "error")
+          .map((r) => r.model)
+          .filter(Boolean);
+        const errorModelSet = new Set(errorModelStrs);
+        const fallbackFiltered = (combo.models || []).filter((entry) => {
+          const modelStr = typeof entry === "string" ? entry : entry?.model || "";
+          return !errorModelSet.has(modelStr);
+        });
+        if (fallbackFiltered.length < (combo.models || []).length) {
+          if (fallbackFiltered.length === 0) {
+            notify.error(t.has?.("cannotRemoveAllModels") ? t("cannotRemoveAllModels") : "Cannot remove all models from combo");
+            return;
+          }
+          await handleUpdate(combo.id, {
+            ...combo,
+            models: fallbackFiltered,
+          });
+          setTestResults(null);
+          setTestingCombo(null);
+          notify.success(t("errorModelsRemoved"));
+          return;
+        }
+        notify.error(t("noErrorModelsFound"));
+        return;
+      }
+      if (filteredModels.length === 0) {
+        notify.error(t.has?.("cannotRemoveAllModels") ? t("cannotRemoveAllModels") : "Cannot remove all models from combo");
+        return;
+      }
+      await handleUpdate(combo.id, {
+        ...combo,
+        models: filteredModels,
+      });
+      setTestResults(null);
+      setTestingCombo(null);
+      notify.success(t("errorModelsRemoved"));
+    } catch {
+      notify.error(t("failedUpdate"));
+    } finally {
+      setRemovingErrorModels(false);
     }
   };
 
@@ -1316,7 +1384,11 @@ export default function CombosPage() {
           }}
           title={t("testResults", { name: testingCombo })}
         >
-          <TestResultsView results={testResults} />
+          <TestResultsView
+            results={testResults}
+            onRemoveErrorModels={handleRemoveErrorModels}
+            removingErrorModels={removingErrorModels}
+          />
         </Modal>
       )}
 
@@ -1878,7 +1950,12 @@ function ComboCardInner({
 }
 const ComboCard = memo(ComboCardInner);
 
-function TestResultsView({ results }) {
+function TestResultsView({ results, onRemoveErrorModels, removingErrorModels }: {
+  results: any;
+  onRemoveErrorModels?: (errorStepIds: string[]) => void;
+  removingErrorModels?: boolean;
+}) {
+  const t = useTranslations("combos");
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
 
   if (results.error) {
@@ -1889,6 +1966,9 @@ function TestResultsView({ results }) {
       </div>
     );
   }
+
+  const errorResults = (results.results || []).filter((r) => r.status === "error");
+  const hasErrors = errorResults.length > 0;
 
   return (
     <div className="flex flex-col gap-2">
@@ -1959,6 +2039,24 @@ function TestResultsView({ results }) {
           </span>
         </div>
       ))}
+
+      {/* Delete error models button */}
+      {hasErrors && onRemoveErrorModels && (
+        <div className="mt-3 pt-3 border-t border-border">
+          <button
+            onClick={() => onRemoveErrorModels(errorResults.map((r) => r.stepId).filter(Boolean))}
+            disabled={removingErrorModels}
+            className="flex items-center gap-2 w-full justify-center px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="material-symbols-outlined text-[18px]">
+              {removingErrorModels ? "progress_activity" : "delete_sweep"}
+            </span>
+            {removingErrorModels
+              ? (t.has?.("removingErrorModels") ? t("removingErrorModels") : "Removing…")
+              : (t.has?.("removeErrorModels") ? t("removeErrorModels", { count: errorResults.length }) : `Delete ${errorResults.length} failed model(s)`)}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

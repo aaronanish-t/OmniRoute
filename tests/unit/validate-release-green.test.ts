@@ -7,7 +7,6 @@ const mod = await import("../../scripts/quality/validate-release-green.mjs");
 const {
   firstFailureLine,
   eslintCounts,
-  evaluateEslintRun,
   parseEslintJson,
   parseCognitiveCount,
   isDrift,
@@ -18,7 +17,6 @@ const {
   fullCiTimeoutFor,
   curatedEquivalentId,
   fullCiKindFor,
-  ESLINT_TIMEOUT_MS,
 } = mod;
 
 const extract = extractCiGates as (
@@ -50,22 +48,6 @@ test("parseEslintJson tolerates ESLint's trailing unpruned-suppressions stderr s
   assert.deepEqual(parseEslintJson(eslintJsonReport + stderrTail), [
     { filePath: "open-sse/executors/example.ts", errorCount: 0, warningCount: 0, messages: [] },
   ]);
-});
-
-test("evaluateEslintRun preserves an ESLint timeout instead of misreporting invalid JSON", () => {
-  const timedOut = classifyRunError({ killed: true, code: "ETIMEDOUT" }, 30 * 60 * 1000);
-
-  assert.deepEqual(evaluateEslintRun(timedOut, 0), [
-    {
-      id: "lint",
-      label: "ESLint",
-      kind: "hard",
-      ok: false,
-      detail:
-        "gate exceeded its 1800s ceiling and was killed — treat as a hung/failed gate (e.g. an unreleased DB handle in the unit suite); does NOT pass",
-    },
-  ]);
-  assert.equal(ESLINT_TIMEOUT_MS, 60 * 60 * 1000, "cold release lint needs >30m headroom");
 });
 
 test("parseCognitiveCount reads the gate's count (en + pt)", () => {
@@ -380,16 +362,6 @@ test("extractCiGates: the REAL ci.yml yields the base-reds that leaked in v3.8.4
     assert.ok(ids.has(g), `real ci.yml must expose ${g} to --full-ci`);
   }
   assert.ok(ids.size >= 20, "the real gate set is substantial (>= 20 static gates)");
-});
-
-test("validate-release-green parses workflow YAML via the declared js-yaml dependency", async () => {
-  const fs = await import("node:fs");
-  const src = fs.readFileSync(
-    new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
-    "utf8"
-  );
-  assert.match(src, /from ["']js-yaml["']/);
-  assert.doesNotMatch(src, /from ["']yaml["']/);
 });
 
 // ─── Verdict accuracy (review of the #9985 release-green verdict) ────────────

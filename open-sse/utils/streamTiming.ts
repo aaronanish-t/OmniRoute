@@ -19,13 +19,7 @@
  *
  * The object is cheap to construct, plain mutable state, and safe under the
  * event loop's single thread (each stream owns its own instance).
- *
- * Tests may pass a clock so assertions do not depend on wall-clock `setTimeout`
- * (CI runners can fire a 15ms timer before `Date.now()` advances 15ms).
  */
-/** Milliseconds since epoch; same contract as Date.now. */
-export type StreamClock = () => number;
-
 export interface StreamTiming {
   startedAt: number;
   firstByteAt: number | null;
@@ -49,9 +43,9 @@ export interface StreamTiming {
 /** Max number of inter-chunk samples kept (bounds memory). */
 const MAX_INTER_CHUNK_GAPS = 32;
 
-export function createStreamTiming(now: StreamClock = Date.now): StreamTiming {
+export function createStreamTiming(): StreamTiming {
   const timing: StreamTiming = {
-    startedAt: now(),
+    startedAt: Date.now(),
     firstByteAt: null,
     firstForwardAt: null,
     lastForwardAt: null,
@@ -59,15 +53,15 @@ export function createStreamTiming(now: StreamClock = Date.now): StreamTiming {
     forwardedChunks: 0,
     interrupted: false,
     markByte() {
-      if (this.firstByteAt === null) this.firstByteAt = now();
+      if (this.firstByteAt === null) this.firstByteAt = Date.now();
     },
     markForward() {
-      const t = now();
-      if (this.firstForwardAt === null) this.firstForwardAt = t;
+      const now = Date.now();
+      if (this.firstForwardAt === null) this.firstForwardAt = now;
       if (this.lastForwardAt !== null && this.interChunkGaps.length < MAX_INTER_CHUNK_GAPS) {
-        this.interChunkGaps.push(t - this.lastForwardAt);
+        this.interChunkGaps.push(now - this.lastForwardAt);
       }
-      this.lastForwardAt = t;
+      this.lastForwardAt = now;
       this.forwardedChunks += 1;
     },
     markInterrupted() {
@@ -82,7 +76,7 @@ export function createStreamTiming(now: StreamClock = Date.now): StreamTiming {
       return sum / this.interChunkGaps.length;
     },
     totalMs() {
-      return now() - this.startedAt;
+      return Date.now() - this.startedAt;
     },
   };
   return timing;

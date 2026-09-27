@@ -37,7 +37,7 @@ test.after(() => {
   if (origPath === undefined) delete process.env.PATH;
   else process.env.PATH = origPath;
   try {
-    rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    rmSync(tmpDir, { recursive: true, force: true });
   } catch {}
 });
 

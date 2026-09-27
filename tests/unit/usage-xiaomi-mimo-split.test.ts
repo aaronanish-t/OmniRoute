@@ -40,7 +40,7 @@ describe("xiaomi-mimo leaf self-tracked quota", () => {
   after(() => {
     core.resetDbInstance();
     try {
-      fs.rmSync(TMP, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      fs.rmSync(TMP, { recursive: true, force: true });
     } catch {
       // best-effort temp cleanup
     }

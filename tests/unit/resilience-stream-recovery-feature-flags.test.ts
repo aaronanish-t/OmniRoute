@@ -14,7 +14,7 @@ const { resolveResilienceSettings } = await import("../../src/lib/resilience/set
 
 after(() => {
   core.resetDbInstance();
-  fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 test("stream recovery feature flags seed resilience defaults", () => {

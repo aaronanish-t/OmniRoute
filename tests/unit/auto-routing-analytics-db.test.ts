@@ -17,7 +17,7 @@ test.before(() => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(testDataDir, { recursive: true, force: true });
   if (originalDataDir === undefined) {
     delete process.env.DATA_DIR;
   } else {

@@ -20,7 +20,7 @@ const { isManagedProviderConnectionId } = await import("../../src/lib/providers/
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("aihorde treats a registered key as optional, not required", () => {

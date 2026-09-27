@@ -231,7 +231,7 @@ test("isReactive400Recoverable fixtures compile with the real helper signature",
 });
 
 test.after(() => {
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("isTokenExpired treats a corrupt expiresAt string as expired (refreshable)", () => {

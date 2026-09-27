@@ -23,7 +23,7 @@ async function resetStorage() {
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       if (fs.existsSync(TEST_DATA_DIR)) {
-        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
       }
       break;
     } catch (error: any) {
@@ -227,7 +227,7 @@ async function withPatchedProvider(providerId, config, fn) {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("extractResolvedProxyConfig unwraps proxy resolution metadata", () => {

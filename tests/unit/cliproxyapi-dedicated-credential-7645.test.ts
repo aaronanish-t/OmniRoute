@@ -50,7 +50,7 @@ afterEach(async () => {
 
 after(() => {
   coreDb.resetDbInstance();
-  if (fs.existsSync(testDataDir)) fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (fs.existsSync(testDataDir)) fs.rmSync(testDataDir, { recursive: true, force: true });
 });
 
 type ExecuteInput = {

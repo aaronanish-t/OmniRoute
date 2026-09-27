@@ -23,7 +23,7 @@ function clearSkillRegistry() {
 
 function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(tmpDir, { recursive: true, force: true });
   fs.mkdirSync(tmpDir, { recursive: true });
   clearSkillRegistry();
   core.getDbInstance();
@@ -42,7 +42,7 @@ test.after(() => {
   clearSkillRegistry();
   globalThis.fetch = originalFetch;
   process.env.DATA_DIR = originalDataDir;
-  fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 // ── Zod schema validation tests ──

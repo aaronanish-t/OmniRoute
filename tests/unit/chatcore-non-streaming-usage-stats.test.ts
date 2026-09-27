@@ -54,7 +54,7 @@ before(async () => {
 after(() => {
   coreDb.resetDbInstance();
   try {
-    fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(testDataDir, { recursive: true, force: true });
   } catch {
     // best-effort cleanup
   }

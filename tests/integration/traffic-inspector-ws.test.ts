@@ -33,7 +33,7 @@ function makeRequest(upgrade = "websocket", clientKey = "dGhlIHNhbXBsZSBub25jZQ=
 }
 
 test.after(() => {
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("ws/route: rejects non-WebSocket GET with 426", async () => {

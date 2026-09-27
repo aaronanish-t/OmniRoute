@@ -38,7 +38,7 @@ const { setModelContextOverride, removeModelContextOverride } =
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("computeComboContextLength resolves a registry-known, prefixed member (glm/glm-5.2) to its real context window", () => {

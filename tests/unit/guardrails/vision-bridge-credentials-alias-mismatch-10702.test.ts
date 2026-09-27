@@ -16,7 +16,7 @@ const { hasUsableCredentialsForModel } = await import(
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("issue #10702: hasUsableCredentialsForModel resolves alias-prefixed model to the raw provider id (command-code / alias cmd)", async () => {

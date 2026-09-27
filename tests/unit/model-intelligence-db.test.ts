@@ -23,7 +23,7 @@ function resetStorage(): void {
   core.resetDbInstance();
   try {
     if (fs.existsSync(TEST_DATA_DIR)) {
-      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
     }
   } catch { /* EBUSY — ignore */ }
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });

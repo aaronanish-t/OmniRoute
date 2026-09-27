@@ -15,7 +15,7 @@ const { createConnectionFromAgyToken } = await import(
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("#9204: reimporting an inactive Antigravity CLI account reactivates it", async () => {

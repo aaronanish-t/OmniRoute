@@ -24,7 +24,7 @@ const core = await import("../../src/lib/db/core.ts");
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("getClientIdentityProfileHeaders: default profile adds no headers", () => {

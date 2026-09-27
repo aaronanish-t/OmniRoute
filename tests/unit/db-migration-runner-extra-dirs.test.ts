@@ -85,7 +85,7 @@ const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
 process.on("exit", () => {
   for (const dir of tempDirs) {
     try {
-      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      fs.rmSync(dir, { recursive: true, force: true });
     } catch {
       /* ignore */
     }
@@ -258,7 +258,7 @@ test("diretório core ausente não impede as migrations dos extras", async () =>
     name: f,
     body: fs.readFileSync(path.join(CORE_DIR, f), "utf-8"),
   }));
-  fs.rmSync(CORE_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(CORE_DIR, { recursive: true, force: true });
   try {
     const r = runWithExtras(`ee=${eeDir}`);
     assert.ok(r.tables.includes("ee_solo"), `tabelas: ${r.tables.join(", ")}`);

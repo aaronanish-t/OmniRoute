@@ -31,7 +31,7 @@ const { markAccountUnavailable } = await import("../../src/sse/services/auth.ts"
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 const HOUR = 3_600_000;

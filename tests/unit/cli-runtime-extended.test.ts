@@ -50,7 +50,7 @@ test.afterEach(() => {
   restoreEnv();
 
   for (const dir of tempDirs) {
-    fs.rmSync(dir as any, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(dir as any, { recursive: true, force: true });
   }
   tempDirs.clear();
 });

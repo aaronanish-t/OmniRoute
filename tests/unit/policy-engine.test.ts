@@ -18,7 +18,7 @@ beforeEach(() => {
 
 afterEach(() => {
   delete process.env.DATA_DIR;
-  if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 describe("policyEngine", async () => {

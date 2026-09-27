@@ -35,7 +35,7 @@ const { createWebhook } = await import("../../../../src/lib/db/webhooks.ts");
 
 after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 function jsonRequest(url: string, method: string, body: unknown): Request {

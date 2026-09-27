@@ -13,7 +13,7 @@ const { emitGamificationEvent } = await import("../../src/lib/gamification/event
 
 test.after(() => {
   resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("Radar supporter has a dedicated badge and zero-XP idempotent action", async () => {

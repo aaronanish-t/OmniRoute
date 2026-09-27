@@ -32,7 +32,7 @@ async function withProvidersEnv(fn: (dataDir: string) => Promise<void>) {
   try {
     await fn(dataDir);
   } finally {
-    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(dataDir, { recursive: true, force: true });
     globalThis.fetch = ORIGINAL_FETCH;
 
     if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;

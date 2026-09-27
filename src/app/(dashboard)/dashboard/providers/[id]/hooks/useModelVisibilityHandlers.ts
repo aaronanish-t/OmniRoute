@@ -119,7 +119,7 @@ export function useModelVisibilityHandlers({
   const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>({});
   const [testingAll, setTestingAll] = useState(false);
   const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
-  const [autoHideFailed, setAutoHideFailed] = useState(false);
+  const [autoHideFailed, setAutoHideFailed] = useState(true);
   const [visibilityFilter, setVisibilityFilter] = useState<"all" | "visible" | "hidden">("all");
 
   const providerAliasEntries = useMemo(

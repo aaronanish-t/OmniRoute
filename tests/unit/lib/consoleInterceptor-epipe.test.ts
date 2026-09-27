@@ -155,7 +155,7 @@ test("a non-EPIPE stream error is still fatal: it must be re-raised (#8181)", as
     env: { ...process.env, DISABLE_SQLITE_AUTO_BACKUP: "true" },
   });
 
-  rmSync(childDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  rmSync(childDir, { recursive: true, force: true });
 
   assert.notEqual(
     result.status,
@@ -197,7 +197,7 @@ test("the stdio guard is installed even when file logging is disabled (#8181)", 
     env: { ...process.env, DISABLE_SQLITE_AUTO_BACKUP: "true", APP_LOG_TO_FILE: "false" },
   });
 
-  rmSync(childDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  rmSync(childDir, { recursive: true, force: true });
 
   assert.equal(
     result.status,
@@ -259,5 +259,5 @@ test.after(() => {
   if (prevLogFilePath === undefined) delete process.env.APP_LOG_FILE_PATH;
   else process.env.APP_LOG_FILE_PATH = prevLogFilePath;
 
-  if (existsSync(dir)) rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
 });

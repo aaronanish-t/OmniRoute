@@ -23,7 +23,7 @@ const { buildKiroImportError } = await import("../../src/app/api/oauth/kiro/impo
 
 test.after(() => {
   try {
-    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   } catch {
     // best effort
   }

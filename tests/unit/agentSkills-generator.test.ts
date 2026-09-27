@@ -30,7 +30,7 @@ function mkTmpDir(): string {
 /** Cleanup a tmp directory. */
 function rmTmpDir(dir: string): void {
   try {
-    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(dir, { recursive: true, force: true });
   } catch {
     // best-effort cleanup
   }

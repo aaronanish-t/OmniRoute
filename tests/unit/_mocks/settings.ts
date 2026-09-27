@@ -46,11 +46,11 @@ export function setupSettingsFixture(slug: string): SettingsFixture {
       const runtime = await import("../../../src/lib/config/runtimeSettings.ts");
       core.resetDbInstance();
       runtime.resetRuntimeSettingsStateForTests();
-      fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      fs.rmSync(testDataDir, { recursive: true, force: true });
       fs.mkdirSync(testDataDir, { recursive: true });
     },
     cleanup() {
-      fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      fs.rmSync(testDataDir, { recursive: true, force: true });
     },
   };
   activeFixture = fixture;

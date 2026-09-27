@@ -57,7 +57,7 @@ test.afterEach(() => {
 
 test.after(() => {
   core.closeDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("video route diverts a combo name to the combo executor and honors the ComfyUI local-override base URL", async () => {

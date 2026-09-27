@@ -64,12 +64,12 @@ afterEach(() => {
 });
 
 after(() => {
-  if (fs.existsSync(fileTmpDir)) fs.rmSync(fileTmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (fs.existsSync(fileTmpDir)) fs.rmSync(fileTmpDir, { recursive: true, force: true });
 });
 
 async function resetModuleStorage() {
   coreDb.resetDbInstance();
-  fs.rmSync(moduleDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(moduleDataDir, { recursive: true, force: true });
   fs.mkdirSync(moduleDataDir, { recursive: true });
 }
 
@@ -395,7 +395,7 @@ describe("db/versionManager (module coverage)", () => {
 
   after(async () => {
     coreDb.resetDbInstance();
-    fs.rmSync(moduleDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(moduleDataDir, { recursive: true, force: true });
   });
 
   it("round-trips inserts, updates and status listings through the production module", async () => {

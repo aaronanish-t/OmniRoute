@@ -20,13 +20,13 @@ async function createSettingsApiHarness() {
 
   async function resetStorage() {
     core.resetDbInstance();
-    fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(testDataDir, { recursive: true, force: true });
     fs.mkdirSync(testDataDir, { recursive: true });
   }
 
   function cleanup() {
     core.resetDbInstance();
-    fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(testDataDir, { recursive: true, force: true });
   }
 
   return {

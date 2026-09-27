@@ -15,7 +15,7 @@ const { createEmbeddingResponse } = await import("../../src/lib/embeddings/servi
 
 test.after(() => {
   core.resetDbInstance();
-  rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 // Issue #11233: the dashboard stores LM Studio connections under the provider

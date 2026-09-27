@@ -30,7 +30,7 @@ function certFilePath() {
 }
 
 function resetCertDir() {
-  fs.rmSync(certDir(), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(certDir(), { recursive: true, force: true });
   fs.mkdirSync(certDir(), { recursive: true });
 }
 
@@ -39,7 +39,7 @@ test.beforeEach(() => {
 });
 
 test.after(() => {
-  try { fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); } catch { /* noop */ }
+  try { fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true }); } catch { /* noop */ }
 });
 
 // ── GET /cert ─────────────────────────────────────────────────────────────

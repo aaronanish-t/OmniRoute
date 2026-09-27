@@ -38,7 +38,7 @@ test.after(async () => {
     /* core never loaded */
   }
   try {
-    fs.rmSync(TEMP_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(TEMP_DIR, { recursive: true, force: true });
   } catch {
     /* best-effort */
   }

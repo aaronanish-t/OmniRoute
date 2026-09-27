@@ -38,7 +38,7 @@ function writeJson(filePath, value) {
 
 function removePath(targetPath) {
   if (!targetPath) return;
-  fs.rmSync(targetPath, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(targetPath, { recursive: true, force: true });
 }
 
 function resetDbTables() {

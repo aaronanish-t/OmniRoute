@@ -33,7 +33,7 @@ function buildLiteLLMFixture() {
 async function resetStorage() {
   pricingSync.stopPeriodicSync();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -49,7 +49,7 @@ test.after(async () => {
   globalThis.fetch = originalFetch;
   console.warn = originalWarn;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("fetchLiteLLMPricing parses JSON and rejects invalid payloads", async () => {

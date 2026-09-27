@@ -63,7 +63,7 @@ test("lockfile marks the whole ONNX chain optional", () => {
         dependencies?: Record<string, string>;
         optionalDependencies?: Record<string, string>;
       }
-    >;
+      >;
   }>("package-lock.json");
 
   assert.equal(
@@ -105,20 +105,10 @@ test("every @huggingface/transformers consumer loads it lazily so absent install
     /^\s*import\s+(?:[^'"]*?\s+from\s+)?["']@huggingface\/transformers["']/m,
     "transformersLocal.ts must not statically import @huggingface/transformers"
   );
-  assert.doesNotMatch(
-    embeddingSrc,
-    /import\(\s*["']@huggingface\/transformers["']\s*\)/,
-    "transformersLocal.ts must not pass a literal specifier to import() - Next traces it at compile time"
-  );
   assert.match(
     embeddingSrc,
-    /webpackIgnore:\s*true/,
-    "transformersLocal.ts must mark the optional import webpackIgnore so Next does not resolve it during /health"
-  );
-  assert.match(
-    embeddingSrc,
-    /["']@huggingface\/["']\s*\+\s*["']transformers["']/,
-    "transformersLocal.ts must assemble the specifier at runtime"
+    /await import\(["']@huggingface\/transformers["']\)/,
+    "transformersLocal.ts must load @huggingface/transformers via await import()"
   );
 
   const workerSrc = readFileSync(

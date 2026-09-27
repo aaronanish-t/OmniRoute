@@ -63,7 +63,7 @@ const { checkCertInstalled, certutilThumbprint, buildWindowsDelstoreScript } = a
 test.after(() => {
   Object.defineProperty(process, "platform", originalPlatformDescriptor);
   process.env.PATH = originalPath;
-  fs.rmSync(tmpRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(tmpRoot, { recursive: true, force: true });
 });
 
 function fakeCertFile(seed: string): string {

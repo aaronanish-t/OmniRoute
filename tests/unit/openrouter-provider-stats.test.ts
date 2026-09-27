@@ -139,7 +139,7 @@ describe("getOpenRouterProviderStats / refreshOpenRouterProviderStats (cache + T
 
   afterEach(() => {
     restoreFetch();
-    fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(tempDir, { recursive: true, force: true });
     if (originalDataDir === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = originalDataDir;
     if (originalTtl === undefined) delete process.env.OPENROUTER_PROVIDER_STATS_TTL_MS;

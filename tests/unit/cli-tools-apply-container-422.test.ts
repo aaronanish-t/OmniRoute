@@ -38,7 +38,7 @@ test.after(async () => {
   } catch {
     // the DB was never opened
   }
-  for (const dir of tempDirs) fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  for (const dir of tempDirs) fs.rmSync(dir, { recursive: true, force: true });
 });
 
 function applyRequest(body: Record<string, unknown>) {

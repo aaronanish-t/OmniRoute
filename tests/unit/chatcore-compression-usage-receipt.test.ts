@@ -28,7 +28,7 @@ before(async () => {
 
 after(() => {
   coreDb.resetDbInstance();
-  fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(testDataDir, { recursive: true, force: true });
 });
 
 test("attaches the usage receipt only after pendingWrite resolves", async () => {

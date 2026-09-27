@@ -36,7 +36,7 @@ function toolOutputs(input: InputItem[]): InputItem[] {
 
 test.after(() => {
   core.resetDbInstance();
-  rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
 test("Codex strips function_call_output items without matching function calls", () => {

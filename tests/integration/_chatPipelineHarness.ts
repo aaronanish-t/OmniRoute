@@ -286,7 +286,7 @@ export async function createChatPipelineHarness(prefix) {
     clearSkillState();
     await new Promise((resolve) => setTimeout(resolve, 20));
     core.resetDbInstance();
-    fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(testDataDir, { recursive: true, force: true });
     fs.mkdirSync(testDataDir, { recursive: true });
     initTranslators();
   }
@@ -300,7 +300,7 @@ export async function createChatPipelineHarness(prefix) {
     clearSkillState();
     resetAllCircuitBreakers();
     core.resetDbInstance();
-    fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(testDataDir, { recursive: true, force: true });
   }
 
   async function seedConnection(provider: string, overrides: SeedConnectionOverrides = {}) {

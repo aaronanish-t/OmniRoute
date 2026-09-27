@@ -478,17 +478,23 @@ export function sanitizeReasoningEffortForProvider(
 
   // Providers and model families whose top reasoning tier is `max` natively
   // (or whose gateways expect `max` rather than OmniRoute's internal `xhigh`):
-  //   - Command Code (`command-code` / `cmd`)
   //   - Ollama Cloud (`ollama-cloud` / `ollamacloud`)
   //   - OpenCode Go (`opencode-go` / `opencode-zen` / `opencode`)
   //   - GLM 5.1+ / 6.0+ (Z.AI / Zhipu GLM-5.1, GLM-5.2, GLM-5.3, GLM-5.4...)
   //   - DeepSeek V4+ (Flash, Pro, Vision, ...)
   //   - Kimi K3+ (Moonshot AI K3, K4, ...)
   // OpenRouter (pi#4055) is excluded because OpenRouter's normalized API expects xhigh.
+  //
+  // Command Code is deliberately NOT in this list. Its own validator advertises
+  // `low|medium|high|xhigh|max` (the quoted enum in the `minimal` mapping above),
+  // so `xhigh` is a native and distinct tier there. Rewriting it onto `max`
+  // silently spends a different reasoning level than the caller asked for, and it
+  // also overwrote the nested `reasoning.effort` carrier that the Responses path
+  // reads. Unlisted models already pass `xhigh` through unchanged below via
+  // supportsXHighEffort(); this early return used to preempt that.
   const isMaxTierTarget =
     provider !== "openrouter" &&
-    (isCommandCodeProvider(provider) ||
-      isOllamaCloudProvider(provider) ||
+    (isOllamaCloudProvider(provider) ||
       isOpencodeGoProvider(provider) ||
       MAX_TIER_REASONING_MODEL_PATTERN.test(modelStr));
 

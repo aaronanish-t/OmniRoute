@@ -282,6 +282,15 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
       ),
       true
     );
+    // Second captured phrasing: the refusal list would have missed this one.
+    assert.equal(
+      shouldRetryWithToolReminder(
+        { text: "I can\u2019t emit the required workspace <tool> protocol from this interface." },
+        tools,
+        afterReadOnly
+      ),
+      true
+    );
     // But a refusal AFTER a successful write must still not loop.
     assert.equal(
       shouldRetryWithToolReminder({ text: "I can't continue further on this." }, tools, ranTool),

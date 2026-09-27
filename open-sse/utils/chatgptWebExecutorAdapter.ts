@@ -663,8 +663,10 @@ export function shouldRetryWithToolReminder(
   if (result.toolCalls?.length) return false;
   const text = typeof result.text === "string" ? result.text : "";
   if (!text.trim()) return false;
-  // A real envelope is handled by the parser downstream; never nudge on top of one.
-  if (/<tool>|<tool_call>/i.test(text)) return false;
+  // A real envelope is handled by the parser downstream; never nudge on top of one. A closed
+  // block is required: prose that merely names the protocol ("I can't emit the required
+  // workspace <tool> protocol") is exactly the refusal this predicate must catch.
+  if (/<tool>[\s\S]*<\/tool>|<tool_call>[\s\S]*<\/tool_call>/i.test(text)) return false;
 
   const history = Array.isArray(messages) ? messages : [];
   const hasToolExchange = history.some(
@@ -692,20 +694,12 @@ export function shouldRetryWithToolReminder(
     return false;
   }
 
-  // The model declaring the client tools missing/absent is always a miss — the contract exists
-  // precisely to tell it they are available. Captured live on a continuation turn after a
-  // read-only call: "I can't continue … the required client-side workspace tool isn't available
-  // in my current tool registry", which previously ended the task with no file written.
-  if (
-    /\b(tool registry|client-side tool|available tools|tools?\s+(?:are|is)\s+not\s+available|tools?\s+(?:aren['’]t|isn['’]t)\s+available|no\s+(?:access to|such)\s+tool)\b/i.test(
-      text
-    ) ||
-    /\b(can['’]t|cannot|unable to|won['’]t be able to)\s+(?:continue|proceed|complete|perform|execute)\b/i.test(
-      text
-    )
-  ) {
-    return true;
-  }
+  // Any reply that talks ABOUT the client tools (or the tool protocol) instead of emitting an
+  // envelope is a miss. Enumerating refusal phrasings was whack-a-mole — two captures alone were
+  // "the client-side workspace tool isn't available in my current tool registry" and "I can't
+  // emit the required workspace <tool> protocol from this interface". A bare mention is the
+  // signal; the post-success guard above still suppresses nudges once a write has landed.
+  if (/\btools?\b|tool_call/i.test(text)) return true;
 
   // A claim of file work that no tool result supports is the miss we must correct.
   if (

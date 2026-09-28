@@ -427,8 +427,10 @@ async function handleChatImplementation(
   clientRawRequest: any = null,
   preParsedBody: any = null,
   correlationId: string | undefined,
-  admissionContext: chatAdmission.ChatAdmissionContext
+  admissionContext: chatAdmission.ChatAdmissionContext,
+  lifecycleSignal?: AbortSignal | null
 ) {
+  const effectiveSignal = lifecycleSignal ?? request?.signal ?? null;
   const peerRejection = rejectPeerRequest(request?.headers, log.warn, errorResponse);
   if (peerRejection) return peerRejection;
 
@@ -782,10 +784,16 @@ async function handleChatImplementation(
       true;
   }
 
-  const admissionRejection = await admissionContext.acquire(apiKeyInfo?.id, request, body);
+  const admissionRejection = await admissionContext.acquire(
+    apiKeyInfo?.id,
+    { signal: effectiveSignal },
+    body
+  );
   if (admissionRejection) return admissionRejection;
   clientRawRequest = chatAdmission.resolveClientRawAfterAdmission(clientRawRequest, () =>
-    deferredClientRawBody.withClientBody((clientBody) => buildClientRawRequest(request, clientBody))
+    deferredClientRawBody.withClientBody((clientBody) =>
+      buildClientRawRequest(request, clientBody, effectiveSignal)
+    )
   );
   // Sibling of clientRawRequest.body, not a replacement: .body stays the raw
   // pre-reconstruction client bytes (see captureDeferredClientRawBody), while
@@ -813,7 +821,7 @@ async function handleChatImplementation(
     log,
     method: request.method,
     model: modelStr,
-    signal: request.signal,
+    signal: effectiveSignal,
     stream: body?.stream === true,
   });
   if (preCallGuardrails.blocked) {
@@ -1208,6 +1216,7 @@ async function handleChatImplementation(
             reasoningRequestTags: requestRoutingTags.tags,
             managedLease,
             videoBridgeLog,
+            lifecycleSignal: effectiveSignal,
             // #7360 follow-up: without this, a target dispatch abandoned by
             // targetTimeoutRunner.ts's per-target timeout (comboTargetTimeoutMs)
             // never learns it was abandoned — it only watches the ORIGINAL
@@ -1239,10 +1248,12 @@ async function handleChatImplementation(
       allCombos,
       apiKeyAllowedConnections: apiKeyInfo?.allowedConnections ?? null,
       relayOptions,
-      signal: request?.signal ?? null,
+      signal: effectiveSignal,
       correlationId: reqId,
       // #9654 Wave 2: per-target lane-aware admission probe for combo fan-out.
-      perTargetAdmission: admissionContext.createPerTargetAdmissionHook(apiKeyInfo?.id, request),
+      perTargetAdmission: admissionContext.createPerTargetAdmissionHook(apiKeyInfo?.id, {
+        signal: effectiveSignal,
+      }),
     });
 
     for (const credentials of comboPreselectedCredentials.values()) {
@@ -1282,11 +1293,12 @@ async function handleChatImplementation(
                 conversationId,
                 managedLease,
                 videoBridgeLog,
+                lifecycleSignal: effectiveSignal,
               },
               combo.strategy,
               true
             ),
-          { signal: request?.signal, source: "global-fallback" }
+          { signal: effectiveSignal ?? undefined, source: "global-fallback" }
         );
         if (fallbackResponse.ok) {
           log.info("GLOBAL_FALLBACK", `Global fallback ${fallbackModel} succeeded`);
@@ -1378,6 +1390,7 @@ async function handleChatImplementation(
       reasoningRequestTags: requestRoutingTags.tags,
       managedLease,
       videoBridgeLog,
+      lifecycleSignal: effectiveSignal,
       previousResponseResumed:
         (body as { _omniroutePreviousResponseResumed?: unknown })
           ._omniroutePreviousResponseResumed === true || undefined,
@@ -1443,6 +1456,8 @@ async function handleSingleModelChat(
      * the signal used for the actual dispatch, not left unused.
      */
     modelAbortSignal?: AbortSignal | null;
+    /** Route-owned stream deadline/client signal, propagated without rebuilding Request. */
+    lifecycleSignal?: AbortSignal | null;
     fallbackAttempts?: number;
   } = {},
   comboStrategy: string | null = null,
@@ -1516,6 +1531,7 @@ async function handleSingleModelChat(
             managedLease: runtimeOptions.managedLease ?? null,
             videoBridgeLog: runtimeOptions.videoBridgeLog,
             previousResponseResumed: runtimeOptions.previousResponseResumed,
+            lifecycleSignal: runtimeOptions.lifecycleSignal ?? null,
             // #7360 follow-up — see the primary handleSingleModel closure above.
             modelAbortSignal: target?.modelAbortSignal ?? null,
             fallbackAttempts: target?.fallbackAttempts,
@@ -1529,12 +1545,11 @@ async function handleSingleModelChat(
       settings: {},
       allCombos: [],
       relayOptions: undefined,
-      signal: request?.signal ?? null,
+      signal: runtimeOptions.lifecycleSignal ?? request?.signal ?? null,
       // #9654 Wave 2: safety-net redirect — same per-target probe as the primary path.
-      perTargetAdmission: chatAdmission.createPerTargetAdmissionHookForRequest(
-        apiKeyInfo?.id,
-        request
-      ),
+      perTargetAdmission: chatAdmission.createPerTargetAdmissionHookForRequest(apiKeyInfo?.id, {
+        signal: runtimeOptions.lifecycleSignal ?? request?.signal ?? null,
+      }),
     });
   }
 
@@ -1655,7 +1670,7 @@ async function handleSingleModelChat(
       forceLiveComboTest ||
       runtimeOptions.emergencyFallbackTried === true
   );
-  const requestSignal = request?.signal ?? null;
+  const requestSignal = runtimeOptions.lifecycleSignal ?? request?.signal ?? null;
   // Cumulative cap across all waits for this request (#7360 follow-up) — mirrors
   // combo.ts's comboCooldownBudgetLeftMs. Declared outside requestAttemptLoop so
   // it persists (and only decreases) across `continue requestAttemptLoop` retries.

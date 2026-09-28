@@ -14198,6 +14198,8 @@
     "upstreamStatus": "Augšupe status",
     "noResponse": "Nav atbildes",
     "egressIp": "Izvades IP",
+    "headersAfter": "Virsraksti pēc",
+    "firstChunkAfter": "Pirmais gabals pēc",
     "servedBy": "Piegādā",
     "correlationId": "Korelācijas ID"
   },

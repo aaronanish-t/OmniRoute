@@ -14198,6 +14198,8 @@
     "upstreamStatus": "Status nihala",
     "noResponse": "Brez odgovora",
     "egressIp": "Egress IP",
+    "headersAfter": "Glave po",
+    "firstChunkAfter": "Prvi del po",
     "servedBy": "Servira",
     "correlationId": "ID korelacije"
   },

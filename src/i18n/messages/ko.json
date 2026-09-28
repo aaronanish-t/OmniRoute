@@ -14198,6 +14198,8 @@
     "upstreamStatus": "업스트림 상태",
     "noResponse": "응답 없음",
     "egressIp": "Egress IP",
+    "headersAfter": "헤더 이후",
+    "firstChunkAfter": "첫 번째 청크 이후",
     "servedBy": "제공자",
     "correlationId": "상관관계 ID"
   },

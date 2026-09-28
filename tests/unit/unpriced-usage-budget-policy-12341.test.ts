@@ -189,7 +189,71 @@ test("a priced weekly overage is reported even when the daily window is blocked 
   );
   const message = JSON.stringify(await result.rejection!.json());
   assert.match(message, /reached its weekly usage quota/);
-  assert.doesNotMatch(message, /daily usage quota/);
+  assert.match(message, /daily window also blocks/);
+  assert.doesNotMatch(message, /daily usage quota|Resets in/);
+});
+
+test("two unpriced windows do not promise the daily reset as recovery", async () => {
+  const created = await makeMeteredKeyWithUnpricedUsage();
+  await apiKeysDb.updateApiKeyPermissions(created.id, { dailyUsageLimitUsd: 100 });
+  apiKeysDb.clearApiKeyCaches();
+
+  const status = await getApiKeyUsageLimitStatus({
+    id: created.id,
+    usageLimitEnabled: true,
+    dailyUsageLimitUsd: 100,
+    weeklyUsageLimitUsd: 100,
+  });
+  assert.equal(status.dailyExceeded, true);
+  assert.equal(status.weeklyExceeded, true);
+  assert.ok(status.dailyResetAtIso, "the daily reset exists but cannot lift the weekly block");
+
+  for (const request of [chatRequest(created.key), new Request("http://localhost/v1/messages")]) {
+    const rejection = buildApiKeyUsageLimitRejection(request, status);
+    assert.equal(rejection.status, 400);
+    assert.equal(rejection.headers.get("Retry-After"), null);
+    const body = (await rejection.json()) as {
+      error: { message: string; reset_at?: string; retry_after?: number };
+    };
+    assert.match(body.error.message, /daily and weekly/);
+    assert.doesNotMatch(body.error.message, /Resets in/);
+    assert.equal(body.error.reset_at, undefined);
+    assert.equal(body.error.retry_after, undefined);
+  }
+});
+
+test("two priced windows do not promise recovery at the earlier daily reset", async () => {
+  const created = await makeMeteredKeyWithUnpricedUsage();
+  await apiKeysDb.updateApiKeyPermissions(created.id, {
+    dailyUsageLimitUsd: 0.5,
+    weeklyUsageLimitUsd: 0.5,
+  });
+  apiKeysDb.clearApiKeyCaches();
+  featureFlagsDb.setFeatureFlagOverride("UNPRICED_USAGE_BUDGET_POLICY", "count_as_zero");
+
+  const status = await getApiKeyUsageLimitStatus({
+    id: created.id,
+    usageLimitEnabled: true,
+    dailyUsageLimitUsd: 0.5,
+    weeklyUsageLimitUsd: 0.5,
+  });
+  assert.equal(status.dailyExceeded, true);
+  assert.equal(status.weeklyExceeded, true);
+  assert.ok(status.dailyResetAtIso);
+
+  for (const request of [chatRequest(created.key), new Request("http://localhost/v1/messages")]) {
+    const rejection = buildApiKeyUsageLimitRejection(request, status);
+    assert.equal(rejection.status, request.url.endsWith("/v1/messages") ? 400 : 429);
+    assert.equal(rejection.headers.get("Retry-After"), null);
+    const body = (await rejection.json()) as {
+      error: { message: string; reset_at?: string; retry_after?: number };
+    };
+    assert.match(body.error.message, /daily (?:USD )?usage quota/);
+    assert.match(body.error.message, /weekly window/);
+    assert.doesNotMatch(body.error.message, /Resets in/);
+    assert.equal(body.error.reset_at, undefined);
+    assert.equal(body.error.retry_after, undefined);
+  }
 });
 
 test("count_as_zero still fails closed when a cost lookup throws, and says so", async () => {

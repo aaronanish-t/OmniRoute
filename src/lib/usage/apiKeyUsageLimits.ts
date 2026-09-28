@@ -617,10 +617,7 @@ function formatUnpricedModelList(models: string[] | undefined): string {
  * A genuine priced overage in any window always wins and keeps the regular
  * quota message.
  */
-function buildUnpricedUsageBlockedMessage(
-  status: ApiKeyUsageLimitStatus,
-  now: number
-): string | null {
+function buildUnpricedUsageBlockedMessage(status: ApiKeyUsageLimitStatus): string | null {
   const windows = [
     {
       label: "daily",
@@ -629,7 +626,6 @@ function buildUnpricedUsageBlockedMessage(
       spent: status.dailySpentUsd,
       models: status.dailyUnpricedModels,
       failed: status.dailyPricingFailure === true,
-      resetAt: status.dailyResetAtIso,
     },
     {
       label: "weekly",
@@ -638,7 +634,6 @@ function buildUnpricedUsageBlockedMessage(
       spent: status.weeklySpentUsd,
       models: status.weeklyUnpricedModels,
       failed: status.weeklyPricingFailure === true,
-      resetAt: status.weeklyResetAtIso,
     },
   ];
   const pricedOverage = windows.some((w) => w.exceeded && w.limit !== null && w.spent >= w.limit);
@@ -651,11 +646,16 @@ function buildUnpricedUsageBlockedMessage(
     (w) => w.exceeded && w.limit !== null && (w.models?.length ?? 0) > 0
   );
   if (!blocked) return null;
-  const resetIn = formatResetIn(blocked.resetAt, now);
-  // A rolling weekly window (no provider quota reset) has no fixed reset time;
-  // "Resets in unknown" would read as a bug, so the clause is only added when known.
-  const resetClause = resetIn === "unknown" ? "" : ` Resets in ${resetIn}.`;
-  return `This API key's ${blocked.label} usage includes models with no configured price (${formatUnpricedModelList(blocked.models)}), so its usage quota cannot be enforced. Ask an administrator to add pricing for these models.${resetClause}`;
+  const bothBlocked = status.dailyExceeded && status.weeklyExceeded;
+  const label = bothBlocked ? "daily and weekly" : blocked.label;
+  const models = bothBlocked
+    ? [
+        ...new Set([...(status.dailyUnpricedModels ?? []), ...(status.weeklyUnpricedModels ?? [])]),
+      ].sort()
+    : blocked.models;
+  // A second blocking window can outlive the first one's reset. Missing
+  // pricing also needs an operator action, so no reset is a recovery promise.
+  return `This API key's ${label} usage includes models with no configured price (${formatUnpricedModelList(models)}), so its usage quota cannot be enforced. Ask an administrator to add pricing for these models.`;
 }
 
 /**
@@ -687,24 +687,31 @@ function buildUsageLimitExceededMessage(
   now = Date.now(),
   options: { showUsd?: boolean } = {}
 ): string {
-  const unpricedMessage = buildUnpricedUsageBlockedMessage(status, now);
+  const unpricedMessage = buildUnpricedUsageBlockedMessage(status);
   if (unpricedMessage) return unpricedMessage;
   const showUsd = options.showUsd !== false;
+  const bothBlocked = status.dailyExceeded && status.weeklyExceeded;
   if (shouldReportDailyWindow(status) && status.dailyLimitUsd !== null) {
     const percent = formatUsagePercent(getUsagePercent(status.dailySpentUsd, status.dailyLimitUsd));
+    const nextStep = bothBlocked
+      ? "The weekly window also blocks this key; its daily reset alone will not restore access."
+      : `Resets in ${formatResetIn(status.dailyResetAtIso, now)}. Choose another allowed model after reset.`;
     if (!showUsd) {
-      return `This API key reached its daily usage quota (${percent}). Resets in ${formatResetIn(status.dailyResetAtIso, now)}. Choose another allowed model after reset.`;
+      return `This API key reached its daily usage quota (${percent}). ${nextStep}`;
     }
-    return `This API key reached its daily USD usage quota (${formatUsd(status.dailySpentUsd)} of ${formatUsd(status.dailyLimitUsd)}, ${percent}). Resets in ${formatResetIn(status.dailyResetAtIso, now)}. Choose another allowed model after reset.`;
+    return `This API key reached its daily USD usage quota (${formatUsd(status.dailySpentUsd)} of ${formatUsd(status.dailyLimitUsd)}, ${percent}). ${nextStep}`;
   }
   if (status.weeklyExceeded && status.weeklyLimitUsd !== null) {
     const percent = formatUsagePercent(
       getUsagePercent(status.weeklySpentUsd, status.weeklyLimitUsd)
     );
+    const nextStep = bothBlocked
+      ? "The daily window also blocks this key; its weekly reset alone will not restore access."
+      : `Resets in ${formatResetIn(status.weeklyResetAtIso, now)}. Choose another allowed model after reset.`;
     if (!showUsd) {
-      return `This API key reached its weekly usage quota (${percent}). Resets in ${formatResetIn(status.weeklyResetAtIso, now)}. Choose another allowed model after reset.`;
+      return `This API key reached its weekly usage quota (${percent}). ${nextStep}`;
     }
-    return `This API key reached its weekly USD usage quota (${formatUsd(status.weeklySpentUsd)} of ${formatUsd(status.weeklyLimitUsd)}, ${percent}). Resets in ${formatResetIn(status.weeklyResetAtIso, now)}. Choose another allowed model after reset.`;
+    return `This API key reached its weekly USD usage quota (${formatUsd(status.weeklySpentUsd)} of ${formatUsd(status.weeklyLimitUsd)}, ${percent}). ${nextStep}`;
   }
   return showUsd
     ? "This API key reached its USD usage quota. Choose another allowed model or wait for quota reset."
@@ -726,18 +733,20 @@ export function buildApiKeyUsageLimitRejection(
   now = Date.now(),
   options: { showUsd?: boolean } = {}
 ): Response {
-  const unpricedMessage = buildUnpricedUsageBlockedMessage(status, now);
+  const unpricedMessage = buildUnpricedUsageBlockedMessage(status);
   const message = sanitizeErrorMessage(
     unpricedMessage ?? buildUsageLimitExceededMessage(status, now, options)
   );
-  // Match the window named in the message: a daily block caused only by
-  // missing pricing must not lend its reset to a priced weekly overage.
+  // A reset is only actionable if that single priced window caused the
+  // rejection. Another blocked window (or missing pricing) may outlive it.
   const trippedResetAtIso =
-    status.dailyExceeded && shouldReportDailyWindow(status)
-      ? status.dailyResetAtIso
-      : status.weeklyExceeded
-        ? status.weeklyResetAtIso
-        : null;
+    unpricedMessage || (status.dailyExceeded && status.weeklyExceeded)
+      ? null
+      : status.dailyExceeded && shouldReportDailyWindow(status)
+        ? status.dailyResetAtIso
+        : status.weeklyExceeded
+          ? status.weeklyResetAtIso
+          : null;
   if (isAnthropicMessagesRequest(request)) {
     // Claude Code treats a non-400 /v1/messages error as an auth failure and triggers
     // a re-login prompt — this branch's status MUST stay 400 (see the "does not trigger

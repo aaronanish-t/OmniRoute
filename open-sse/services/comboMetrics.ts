@@ -63,6 +63,7 @@ interface ComboMetricsView extends ComboMetricsEntry {
   avgLatencyMs: number;
   successRate: number;
   fallbackRate: number;
+  persistedSkipBypassed: number;
   byModel: Record<string, ModelMetricsView>;
   byTarget: Record<string, ComboTargetMetricsView>;
   shadow: ComboShadowMetricsView;
@@ -190,6 +191,26 @@ function toMetricView<T extends ModelMetrics>(
 // In-memory store
 const metrics = new Map<string, ComboMetricsEntry>();
 const shadowMetrics = new Map<string, ComboShadowMetricsEntry>();
+
+/**
+ * Process-wide count of persisted-cooldown bypasses: targets re-served via
+ * an allow-listed rate-limited connection (transient 429 flag set, no future
+ * persisted cooldown). The flag itself is request-scoped (fresh Set per
+ * attempt-loop iteration / round-robin call, garbage-collected with the
+ * request); only this aggregate outlives the request, like the maps above.
+ * Process-local, incremented synchronously in the dispatch tick (no lock
+ * needed). Reset by resetAllComboMetrics() only; resetComboMetrics(name)
+ * leaves it untouched.
+ */
+let persistedSkipBypassed = 0;
+
+export function recordPersistedSkipBypass(): void {
+  persistedSkipBypassed++;
+}
+
+export function getPersistedSkipBypassed(): number {
+  return persistedSkipBypassed;
+}
 const MAX_METRICS_ENTRIES = 500;
 const METRICS_TTL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -413,6 +434,7 @@ export function getComboMetrics(comboName: string): ComboMetricsView | null {
   return {
     ...combo,
     productionTraffic: !!productionCombo && productionCombo.totalRequests > 0,
+    persistedSkipBypassed,
     avgLatencyMs:
       combo.totalRequests > 0 ? Math.round(combo.totalLatencyMs / combo.totalRequests) : 0,
     successRate:
@@ -477,4 +499,5 @@ export function resetAllComboMetrics(): void {
   clearInterval(_metricsCleanupTimer);
   metrics.clear();
   shadowMetrics.clear();
+  persistedSkipBypassed = 0;
 }

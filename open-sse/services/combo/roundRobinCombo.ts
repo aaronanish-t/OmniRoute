@@ -18,7 +18,7 @@ import {
 import { buildRecoveryHint } from "./pinRecovery.ts";
 import { formatExhaustedConnectionKey } from "./comboDiagFormat.ts";
 import { collectQuotaWindowExclusions, formatQuotaSkipMessage } from "./quotaSkipDiagnostics.ts";
-import { recordComboRequest } from "../comboMetrics.ts";
+import { recordComboRequest, recordPersistedSkipBypass } from "../comboMetrics.ts";
 import {
   expandComboSystemPromptIfPresent,
   resolveTargetFingerprint,
@@ -506,7 +506,7 @@ export async function handleRoundRobinCombo({
           );
           if (offset > 0) fallbackCount++;
           continue;
-        }
+        } else recordPersistedSkipBypass();
       }
       const targetForAttempt = allowRateLimitedConnection
         ? { ...target, allowRateLimitedConnection: true, fallbackAttempts: offset }

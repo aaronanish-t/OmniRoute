@@ -11082,6 +11082,7 @@
     "poolSetAsideReason": "Accantonato: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy non raggiungibile",
     "poolSetAsideKindIpQuota429": "limite di frequenza per IP (429)",
+    "poolSetAsideKindSlow": "risposte lente",
     "poolSetAsideUntil": "Di nuovo in rotazione {endsAt}",
     "poolSetAsideRepeat": "Accantonato {count, plural, one {# volta} other {# volte}}",
     "poolUnknownAddress": "Indirizzo sconosciuto",

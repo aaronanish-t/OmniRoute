@@ -23,7 +23,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // the next credential for a bounded empty-turn retry. The retry dispatches through
     // executeProviderRequest(), whose assertManagedLeaseFence(attemptConnectionId) rejects a
     // connection other than the leased one — so it is fenced centrally (class A).
-    "open-sse/handlers/chatCore.ts": 1,
+    // #14914 moved that loop (and its credential rollback) into
+    // chatCore/emptyTurnRetryLoop.ts; chatCore.ts now passes `getProviderCredentials` in
+    // as a dependency (a reference, not a call), so the site is inventoried at its new
+    // home — still dispatched through executeProviderRequest(), still class A.
+    "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts": 1,
     "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 2,
     "open-sse/services/imageCombo.ts": 1,
     "open-sse/services/speechCombo.ts": 1,
@@ -227,7 +231,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
   credential: Object.fromEntries(
     Object.keys(EXPECTED.credential).map((file) => [
       file,
-      file === "open-sse/handlers/chatCore.ts" ||
+      file === "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts" ||
       file === "src/app/api/v1/session-leases/route.ts" ||
       file === "src/sse/handlers/chat.ts" ||
       file === "src/sse/services/auth.ts"

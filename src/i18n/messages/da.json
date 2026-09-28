@@ -11082,6 +11082,7 @@
     "poolSetAsideReason": "Sat til side: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy kan ikke nås",
     "poolSetAsideKindIpQuota429": "IP-hastighedsbegrænsning (429)",
+    "poolSetAsideKindSlow": "langsomme svar",
     "poolSetAsideUntil": "Tilbage i rotation {endsAt}",
     "poolSetAsideRepeat": "Sat til side {count, plural, one {# gang} other {# gange}}",
     "poolUnknownAddress": "Ukendt adresse",

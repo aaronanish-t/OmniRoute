@@ -11082,6 +11082,7 @@
     "poolSetAsideReason": "กันไว้: {kind}",
     "poolSetAsideKindProxyUnreachable": "ไม่สามารถเข้าถึงพร็อกซีได้",
     "poolSetAsideKindIpQuota429": "จำกัดอัตราตาม IP (429)",
+    "poolSetAsideKindSlow": "การตอบสนองช้า",
     "poolSetAsideUntil": "กลับเข้าหมุนเวียน {endsAt}",
     "poolSetAsideRepeat": "กันไว้ {count, plural, one {# ครั้ง} other {# ครั้ง}}",
     "poolUnknownAddress": "ที่อยู่ไม่ทราบ",

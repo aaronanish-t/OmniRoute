@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Tanlangan {count} tasini yoqish",
     "testPassed": "✓ OK",
     "sweepVerdict": "So'nggi tekshiruv: {cause} ({code}) {age}",
+    "blockedHistory": "Toʻxtatilgan tarix: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ishga tushgandan beri tekshiruv yo'q",
     "sweepLabel": {
       "unproven": "nishon rad etdi",

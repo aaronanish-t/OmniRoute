@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Habilitar {count} selecionado(s)",
     "testPassed": "✓ OK",
     "sweepVerdict": "Última varredura: {cause} ({code}) {age}",
+    "blockedHistory": "Histórico bloqueado: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nenhuma varredura desde a inicialização",
     "sweepLabel": {
       "unproven": "destino recusado",

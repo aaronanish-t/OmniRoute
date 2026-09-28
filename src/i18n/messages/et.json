@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Aktiveeri {count} valitut",
     "testPassed": "✓ OK",
     "sweepVerdict": "Viimane kontroll: {cause} ({code}) {age}",
+    "blockedHistory": "Blokeeritud ajalugu: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Käivitamisest saadik kontrolli pole",
     "sweepLabel": {
       "unproven": "sihtmärk keeldus",

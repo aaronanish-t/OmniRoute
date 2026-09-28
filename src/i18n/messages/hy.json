@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Միացնել ընտրված {count} պրոքսիները",
     "testPassed": "✓ OK",
     "sweepVerdict": "Վերջին սկանավորում՝ {cause} ({code}) {age}",
+    "blockedHistory": "Անցյալ արգելված: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Մեկնարկից ի վեր սկանավորում չկա",
     "sweepLabel": {
       "unproven": "թիրախը մերժեց",

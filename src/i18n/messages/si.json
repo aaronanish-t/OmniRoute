@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "තෝරාගත් {count}ක් සබල කරන්න",
     "testPassed": "✓ හරි",
     "sweepVerdict": "අවසාන ස්කෑන්: {cause} ({code}) {age}",
+    "blockedHistory": "අවහිරිත ඉතිහාසය: {count}× {cause} ({code}) {age}",
     "sweepNoData": "ආරම්භයේ සිට තවම ස්කෑන් නැත",
     "sweepLabel": {
       "unproven": "ඉලක්කය ප්‍රතික්ෂේප කළා",

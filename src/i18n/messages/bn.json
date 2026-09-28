@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "নির্বাচিত {count}টি সক্ষম করুন",
     "testPassed": "✓ ঠিক আছে",
     "sweepVerdict": "শেষ স্ক্যান: {cause} ({code}) {age}",
+    "blockedHistory": "ব্লক করা ইতিহাস: {count}× {cause} ({code}) {age}",
     "sweepNoData": "চালুর পর থেকে এখনও স্ক্যান হয়নি",
     "sweepLabel": {
       "unproven": "লক্ষ্য প্রত্যাখ্যান করেছে",

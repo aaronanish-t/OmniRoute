@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "चयनित {count} सक्षम गर्नुहोस्",
     "testPassed": "✓ ठीक छ",
     "sweepVerdict": "अन्तिम स्क्यान: {cause} ({code}) {age}",
+    "blockedHistory": "अवरोधित इतिहास: {count}× {cause} ({code}) {age}",
     "sweepNoData": "सुरु भएदेखि अहिलेसम्म स्क्यान छैन",
     "sweepLabel": {
       "unproven": "लक्ष्यले अस्वीकार गर्‍यो",

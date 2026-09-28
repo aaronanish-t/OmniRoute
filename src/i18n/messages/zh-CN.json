@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "启用已选的 {count} 个",
     "testPassed": "✓ 成功",
     "sweepVerdict": "上次扫描：{cause} ({code}) {age}",
+    "blockedHistory": "被阻止的历史：{count}× {cause} ({code}) {age}",
     "sweepNoData": "启动以来暂无扫描",
     "sweepLabel": {
       "unproven": "目标已拒绝",

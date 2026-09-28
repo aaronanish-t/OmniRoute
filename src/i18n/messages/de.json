@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "{count} ausgewählte aktivieren",
     "testPassed": "✓ OK",
     "sweepVerdict": "Letzter Durchlauf: {cause} ({code}) {age}",
+    "blockedHistory": "Blockierte Historie: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Noch kein Durchlauf seit Start",
     "sweepLabel": {
       "unproven": "Ziel abgelehnt",

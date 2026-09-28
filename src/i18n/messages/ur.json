@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "منتخب کردہ {count} کو فعال کریں",
     "testPassed": "✓ ٹھیک ہے",
     "sweepVerdict": "آخری اسکین: {cause} ({code}) {age}",
+    "blockedHistory": "روکا ہوا تاریخ: {count}× {cause} ({code}) {age}",
     "sweepNoData": "اسٹارٹ اپ کے بعد ابھی تک کوئی اسکین نہیں",
     "sweepLabel": {
       "unproven": "ہدف نے مسترد کیا",

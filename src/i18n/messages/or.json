@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "ଚୟନିତ {count}ଟି ସକ୍ଷମ କରନ୍ତୁ",
     "testPassed": "✓ ଠିକ୍ ଅଛି",
     "sweepVerdict": "ଶେଷ ସ୍କାନ୍: {cause} ({code}) {age}",
+    "blockedHistory": "ବ୍ଲକ୍ କରାଯାଇଥିବା ଇତିହାସ: {count}× {cause} ({code}) {age}",
     "sweepNoData": "ଆରମ୍ଭରୁ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସ୍କାନ୍ ନାହିଁ",
     "sweepLabel": {
       "unproven": "ଲକ୍ଷ୍ୟ ପ୍ରତ୍ୟାଖ୍ୟାନ କଲା",

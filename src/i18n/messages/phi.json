@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "I-enable ang {count} na napili",
     "testPassed": "✓ OK",
     "sweepVerdict": "Huling scan: {cause} ({code}) {age}",
+    "blockedHistory": "Naka-block na kasaysayan: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Wala pang scan mula startup",
     "sweepLabel": {
       "unproven": "tinanggihan ng target",

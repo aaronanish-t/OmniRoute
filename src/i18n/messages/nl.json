@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "{count} geselecteerde inschakelen",
     "testPassed": "✓ OK",
     "sweepVerdict": "Laatste scan: {cause} ({code}) {age}",
+    "blockedHistory": "Geblokkeerde geschiedenis: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nog geen scan sinds opstart",
     "sweepLabel": {
       "unproven": "doel geweigerd",

@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Aktivera {count} markerade",
     "testPassed": "✓ OK",
     "sweepVerdict": "Senaste skanning: {cause} ({code}) {age}",
+    "blockedHistory": "Blockerad historik: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ingen skanning sedan start",
     "sweepLabel": {
       "unproven": "målet avvisade",

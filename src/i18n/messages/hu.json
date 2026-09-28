@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "{count} kijelölt engedélyezése",
     "testPassed": "✓ OK",
     "sweepVerdict": "Utolsó ellenőrzés: {cause} ({code}) {age}",
+    "blockedHistory": "Blokkolt előzmények: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Indítás óta még nincs ellenőrzés",
     "sweepLabel": {
       "unproven": "cél elutasítva",

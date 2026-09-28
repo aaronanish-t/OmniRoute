@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Omogući {count} odabranih",
     "testPassed": "✓ U redu",
     "sweepVerdict": "Zadnje skeniranje: {cause} ({code}) {age}",
+    "blockedHistory": "Blokirana istorija: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nema skeniranja od pokretanja",
     "sweepLabel": {
       "unproven": "meta odbila",

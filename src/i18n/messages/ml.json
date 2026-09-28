@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "തിരഞ്ഞെടുത്ത {count} എണ്ണം പ്രവർത്തനക്ഷമമാക്കുക",
     "testPassed": "✓ ശരി",
     "sweepVerdict": "അവസാന സ്കാൻ: {cause} ({code}) {age}",
+    "blockedHistory": "അവസാനിച്ച ചരിത്രം: {count}× {cause} ({code}) {age}",
     "sweepNoData": "ആരംഭത്തിന് ശേഷം ഇതുവരെ സ്കാൻ ഇല്ല",
     "sweepLabel": {
       "unproven": "ലക്ഷ്യം നിരസിച്ചു",

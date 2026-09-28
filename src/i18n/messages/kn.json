@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "ಆಯ್ಕೆಮಾಡಿದ {count} ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ",
     "testPassed": "✓ ಸರಿ",
     "sweepVerdict": "ಕೊನೆಯ ಸ್ಕ್ಯಾನ್: {cause} ({code}) {age}",
+    "blockedHistory": "ಬ್ಲಾಕ್ ಮಾಡಿದ ಇತಿಹಾಸ: {count}× {cause} ({code}) {age}",
     "sweepNoData": "ಪ್ರಾರಂಭದಿಂದ ಇನ್ನೂ ಸ್ಕ್ಯಾನ್ ಇಲ್ಲ",
     "sweepLabel": {
       "unproven": "ಗುರಿ ನಿರಾಕರಿಸಿದೆ",

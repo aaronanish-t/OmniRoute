@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Omogoči izbrane ({count})",
     "testPassed": "✓ V redu",
     "sweepVerdict": "Zadnje pregledovanje: {cause} ({code}) {age}",
+    "blockedHistory": "Zgodovina blokad: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Od zagona še ni pregledovanja",
     "sweepLabel": {
       "unproven": "cilj zavrnjen",

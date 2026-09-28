@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Seçilen {count} ögeyi etkinleştir",
     "testPassed": "✓ Tamam",
     "sweepVerdict": "Son tarama: {cause} ({code}) {age}",
+    "blockedHistory": "Engellenen geçmiş: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Başlangıçtan beri tarama yok",
     "sweepLabel": {
       "unproven": "hedef reddetti",

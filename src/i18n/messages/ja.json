@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "選択した {count} 件を有効化",
     "testPassed": "✓ OK",
     "sweepVerdict": "最終スキャン: {cause} ({code}) {age}",
+    "blockedHistory": "ブロックされた履歴: {count}× {cause} ({code}) {age}",
     "sweepNoData": "起動以降スキャンなし",
     "sweepLabel": {
       "unproven": "ターゲットが拒否",

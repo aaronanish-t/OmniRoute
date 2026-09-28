@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Kunna zaɓaɓɓu {count}",
     "testPassed": "✓ Lafiya",
     "sweepVerdict": "Bincike na ƙarshe: {cause} ({code}) {age}",
+    "blockedHistory": "Tarihin da aka toshe: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Babu bincike tukuna tun farawa",
     "sweepLabel": {
       "unproven": "manufa ta ƙi",

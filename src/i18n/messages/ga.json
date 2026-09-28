@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Cumasaigh {count} roghnaithe",
     "testPassed": "✓ Ceart go leor",
     "sweepVerdict": "Scan deireanach: {cause} ({code}) {age}",
+    "blockedHistory": "Stair blocáilte: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Gan scan fós ó thúsail",
     "sweepLabel": {
       "unproven": "dhiúltaigh an sprioc",

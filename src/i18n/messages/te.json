@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "ఎంపిక చేసిన {count} వాటిని ప్రారంభించండి",
     "testPassed": "✓ సరే",
     "sweepVerdict": "చివరి స్కాన్: {cause} ({code}) {age}",
+    "blockedHistory": "అడ్డుకున్న చరిత్ర: {count}× {cause} ({code}) {age}",
     "sweepNoData": "ప్రారంభం నుండి ఇంకా స్కాన్ లేదు",
     "sweepLabel": {
       "unproven": "లక్ష్యం తిరస్కరించింది",

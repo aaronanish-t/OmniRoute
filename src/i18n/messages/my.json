@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "ရွေးချယ်ထားသည့် {count} ခုကို ဖွင့်ရန်",
     "testPassed": "✓ အဆင်ပြေသည်",
     "sweepVerdict": "နောက်ဆုံးစကင်: {cause} ({code}) {age}",
+    "blockedHistory": "ပိတ်ထားသောသမိုင်း: {count}× {cause} ({code}) {age}",
     "sweepNoData": "စတင်ပြီးကတည်းက စကင်မရှိသေးပါ",
     "sweepLabel": {
       "unproven": "ပစ်မှတ်က ငြင်းပယ်သည်",

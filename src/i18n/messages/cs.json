@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Povolit {count} vybraných",
     "testPassed": "✓ OK",
     "sweepVerdict": "Poslední kontrola: {cause} ({code}) {age}",
+    "blockedHistory": "Zablokovaná historie: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Od spuštění zatím žádná kontrola",
     "sweepLabel": {
       "unproven": "cíl odmítnut",

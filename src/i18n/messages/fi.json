@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Ota käyttöön {count} valittua",
     "testPassed": "✓ OK",
     "sweepVerdict": "Viimeisin tarkistus: {cause} ({code}) {age}",
+    "blockedHistory": "Estetty historia: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ei tarkistuksia käynnistyksen jälkeen",
     "sweepLabel": {
       "unproven": "kohde kieltäytyi",

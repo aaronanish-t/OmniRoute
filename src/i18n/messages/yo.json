@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Mú àwọn {count} tí a yàn ṣiṣẹ́",
     "testPassed": "✓ Ó DÁRA",
     "sweepVerdict": "Ọlọjẹ ikẹhin: {cause} ({code}) {age}",
+    "blockedHistory": "Itan ti a dènà: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ko si ọlọjẹ sibẹsibe lati ibẹrẹ",
     "sweepLabel": {
       "unproven": "àfojúsùn kọ",

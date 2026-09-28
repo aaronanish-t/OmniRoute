@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Włącz wybrane ({count})",
     "testPassed": "✓ OK",
     "sweepVerdict": "Ostatnie skanowanie: {cause} ({code}) {age}",
+    "blockedHistory": "Zablokowana historia: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Brak skanowania od uruchomienia",
     "sweepLabel": {
       "unproven": "cel odrzucony",

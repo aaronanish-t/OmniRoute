@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "הפעל {count} שנבחרו",
     "testPassed": "✓ תקין",
     "sweepVerdict": "סריקה אחרונה: {cause} ({code}) {age}",
+    "blockedHistory": "היסטוריה חסומה: {count}× {cause} ({code}) {age}",
     "sweepNoData": "אין סריקה עדיין מאז ההפעלה",
     "sweepLabel": {
       "unproven": "היעד סירב",

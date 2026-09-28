@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Įjungti pasirinktus ({count})",
     "testPassed": "✓ Gerai",
     "sweepVerdict": "Paskutinis nuskaitymas: {cause} ({code}) {age}",
+    "blockedHistory": "Užblokuota istorija: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nuo paleidimo nuskaitymo nebuvo",
     "sweepLabel": {
       "unproven": "taikinys atsisakė",

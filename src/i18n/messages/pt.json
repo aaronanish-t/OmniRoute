@@ -11036,6 +11036,7 @@
     "batchActivateSelected": "Ativar {count} selecionados",
     "testPassed": "✓ OK",
     "sweepVerdict": "Última varredura: {cause} ({code}) {age}",
+    "blockedHistory": "Histórico bloqueado: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Sem varredura desde o início",
     "sweepLabel": {
       "unproven": "alvo recusado",

@@ -49,12 +49,24 @@ export function setupStallGuard(
 ): StallGuardSetup {
   const capMs = readBound();
   const windowMs = resolveResponsesStallWindowMs(stream, requestFormat, capMs);
-  const capped = windowMs > 0 && readConfigured() > capMs;
+  const capped = capMs > 0 && windowMs > 0 && readConfigured() > capMs;
   if (capped) log?.warn?.("OPENCODE", `${cid}stalled stream first-byte wait capped`);
   return { windowMs, capped };
 }
 
-/** First-byte window (ms) for this request, or 0 when the guard does not apply. */
+/**
+ * First-byte window (ms) for this request, or 0 when the guard does not apply.
+ *
+ * The configured window is capped by the stream readiness bound (`capMs`).
+ * Equal to the bound is enough — no need to stay strictly below it: the guard
+ * consumes the first byte BEFORE the executor returns, and the readiness check
+ * in chatCore only starts on the response the executor hands back (which then
+ * replays that byte at once), so the two waits never race. A guard firing at
+ * exactly the bound costs the same wall time the readiness check would have,
+ * but buys the rotation. A non-positive bound means readiness is disabled
+ * (`STREAM_READINESS_TIMEOUT_MS=0`): there is no ceiling, and the configured
+ * window is used as is, since the guard is then the only first-byte bound left.
+ */
 export function resolveResponsesStallWindowMs(
   stream: boolean | undefined,
   requestFormat: string | null,
@@ -65,7 +77,7 @@ export function resolveResponsesStallWindowMs(
   const configured = getResponsesFirstByteTimeoutMs();
   if (configured === 0) return 0;
   const cap = capMs ?? DEFAULT_STREAM_READINESS_TIMEOUT_MS;
-  if (!(cap > 0)) return 0;
+  if (!(cap > 0)) return configured;
   return configured > cap ? cap : configured;
 }
 

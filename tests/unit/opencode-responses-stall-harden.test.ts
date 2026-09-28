@@ -95,11 +95,16 @@ describe("resolveResponsesStallWindowMs with a readiness bound", () => {
     assert.equal(resolveResponsesStallWindowMs(true, "openai-responses", 80_000), 0);
   });
 
-  it("returns 0 when the bound is missing or not positive", () => {
+  it("treats a non-positive bound (readiness disabled) as no ceiling", () => {
+    // STREAM_READINESS_TIMEOUT_MS=0 means the readiness check is off, so the
+    // stall guard is the ONLY first-byte bound left: it must keep working with
+    // the configured window instead of being switched off.
     process.env[FLAG] = "true";
     process.env[TIMEOUT_ENV] = "15000";
-    assert.equal(resolveResponsesStallWindowMs(true, "openai-responses", 0), 0);
-    assert.equal(resolveResponsesStallWindowMs(true, "openai-responses", -1), 0);
+    assert.equal(resolveResponsesStallWindowMs(true, "openai-responses", 0), 15_000);
+    assert.equal(resolveResponsesStallWindowMs(true, "openai-responses", -1), 15_000);
+    process.env[TIMEOUT_ENV] = "200000";
+    assert.equal(resolveResponsesStallWindowMs(true, "openai-responses", 0), 200_000);
   });
 
   it("falls back to the stream readiness default when the bound is absent", () => {
@@ -181,6 +186,23 @@ describe("setupStallGuard wiring", () => {
       () => 15_000
     );
     assert.equal(setup.windowMs, 15_000);
+    assert.equal(setup.capped, false);
+    assert.deepEqual(seen, []);
+  });
+
+  it("keeps the configured window and reports no capping when readiness is disabled", () => {
+    process.env[FLAG] = "true";
+    process.env[TIMEOUT_ENV] = "200000";
+    const seen: string[] = [];
+    const setup = setupStallGuard(
+      true,
+      "openai-responses",
+      { warn: (_tag, msg) => seen.push(msg) },
+      "",
+      () => 0,
+      () => 200_000
+    );
+    assert.equal(setup.windowMs, 200_000);
     assert.equal(setup.capped, false);
     assert.deepEqual(seen, []);
   });

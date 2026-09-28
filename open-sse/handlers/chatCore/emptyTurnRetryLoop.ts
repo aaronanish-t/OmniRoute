@@ -35,11 +35,14 @@ export interface EmptyTurnRetryDeps {
   model: string;
   targetFormat: string;
   clientResponseFormat: string;
-  aborted: boolean;
+  /** Re-read on every iteration: the client can disconnect between retries. */
+  isAborted: () => boolean;
   timeoutMs: number;
   maxTimeoutMs: number;
   maxRetries?: number;
   translatedBody: unknown;
+  /** The body already captured for the original request; returned unchanged when no retry is adopted. */
+  finalBody: unknown;
   providerUrl: string;
   providerHeaders: Record<string, string>;
   correlationId: string | null;
@@ -63,9 +66,10 @@ export async function runEmptyTurnRetryLoop(
 ): Promise<EmptyTurnRetryResult> {
   const maxRetries = deps.maxRetries ?? STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX;
   const note = deps.noteOutcome ?? noteBufferedVerdictOutcome;
-  const selectCredentials = deps.getProviderCredentials ?? defaultGetProviderCredentials;
+  // Named `getProviderCredentials` so the hard-session-lease inventory still sees this call site.
+  const getProviderCredentials = deps.getProviderCredentials ?? defaultGetProviderCredentials;
   let providerResponse = deps.providerResponse;
-  let finalBody: unknown = deps.translatedBody;
+  let finalBody: unknown = deps.finalBody;
   let adopted = false;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -77,7 +81,7 @@ export async function runEmptyTurnRetryLoop(
       ),
       deps.targetFormat,
       deps.clientResponseFormat,
-      deps.aborted
+      deps.isAborted()
     );
     if (verdict.kind === "pass") {
       notePass(deps, note, verdict);
@@ -87,7 +91,13 @@ export async function runEmptyTurnRetryLoop(
       noteBudgetExhausted(deps, note, verdict);
       break;
     }
-    const adoptedRetry = await attemptRetry(deps, selectCredentials, note, verdict);
+    const adoptedRetry = await attemptRetry(
+      deps,
+      providerResponse,
+      getProviderCredentials,
+      note,
+      verdict
+    );
     if (!adoptedRetry) break;
     providerResponse = adoptedRetry.response;
     finalBody = adoptedRetry.body;
@@ -123,7 +133,8 @@ interface AdoptedRetry {
 
 async function attemptRetry(
   deps: EmptyTurnRetryDeps,
-  selectCredentials: typeof defaultGetProviderCredentials,
+  currentResponse: Response,
+  getProviderCredentials: typeof defaultGetProviderCredentials,
   note: typeof noteBufferedVerdictOutcome,
   verdict: Verdict
 ): Promise<AdoptedRetry | null> {
@@ -131,9 +142,13 @@ async function attemptRetry(
     "FLUSH_EMPTY_RETRY",
     `${"reason" in verdict ? verdict.reason : "empty turn"}, bounded retry through the normal credential path`
   );
-  note(verdict, { level: "warn", line: "reason" in verdict ? verdict.reason : "empty turn" }, false);
+  note(
+    verdict,
+    { level: "warn", line: "reason" in verdict ? verdict.reason : "empty turn" },
+    false
+  );
 
-  const nextCreds = (await selectCredentials(
+  const nextCreds = (await getProviderCredentials(
     deps.provider,
     null,
     null,
@@ -146,7 +161,7 @@ async function attemptRetry(
   const retryConnectionId = String(nextCreds.connectionId);
   deps.log?.info?.("FLUSH_EMPTY_RETRY", `retrying on ${retryConnectionId}`);
 
-  const prepared = await runRetryRequest(deps);
+  const prepared = await runRetryRequest(deps, currentResponse);
   if (!prepared) {
     restoreCredentials(deps.credentials, snapshot);
     return null;
@@ -164,8 +179,13 @@ function restoreCredentials(
   Object.assign(credentials, snapshot);
 }
 
-async function runRetryRequest(deps: EmptyTurnRetryDeps): Promise<AdoptedRetry | null> {
-  await deps.providerResponse.body?.cancel().catch(() => {});
+async function runRetryRequest(
+  deps: EmptyTurnRetryDeps,
+  currentResponse: Response
+): Promise<AdoptedRetry | null> {
+  // Cancel the response this iteration judged (the original on the first retry, the
+  // previously adopted retry afterwards), not always the original one.
+  await currentResponse.body?.cancel().catch(() => {});
   let retryResult: unknown = null;
   try {
     retryResult = await deps.executeProviderRequest(deps.currentModel, false);

@@ -45,14 +45,7 @@ import { buildNonStreamingResponseHeaders } from "./chatCore/nonStreamingRespons
 import { maybeWrapForcedNonStreamingResponsesJson } from "./chatCore/responsesJsonToSse.ts";
 import { enforceOutputTokenBudget } from "./chatCore/outputTokenBudget.ts";
 import { maybeConvertJsonBodyToSse } from "./chatCore/jsonBodyToSse.ts";
-import {
-  formatBufferedVerdictLog,
-  judgeBufferedTurn,
-  readBoundedResponseOutcome,
-  FLUSH_EMPTY_RETRY_MAX_BYTES,
-} from "../utils/emptyTurnRetry.ts";
 import { withResilienceActionsContext } from "./chatCore/resilienceAttemptContext.ts";
-import { noteBufferedVerdictOutcome } from "./chatCore/emptyTurnResilienceNotes.ts";
 import { runEmptyTurnRetryLoop } from "./chatCore/emptyTurnRetryLoop.ts";
 import { notePreviousResponseResumed } from "./chatCore/resumedResilienceNotes.ts";
 import { assembleStreamingResponseHeaders } from "./chatCore/streamingResponseHeaders.ts";
@@ -5909,11 +5902,12 @@ async function handleChatCoreInner({
         model,
         targetFormat,
         clientResponseFormat,
-        aborted: clientRawRequest?.signal?.aborted === true,
+        isAborted: () => clientRawRequest?.signal?.aborted === true,
         timeoutMs: streamReadinessPolicy.timeoutMs,
         maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
         maxRetries: STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX,
         translatedBody,
+        finalBody,
         providerUrl,
         providerHeaders,
         correlationId,
@@ -5925,7 +5919,7 @@ async function handleChatCoreInner({
         captureBody: (body) => providerRequestCapture.body(body),
       });
       providerResponse = retried.providerResponse;
-      finalBody = retried.finalBody;
+      if (retried.adopted) finalBody = retried.finalBody;
     }
   }
 

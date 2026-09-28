@@ -47,6 +47,7 @@ const OUTPUT_MIME_BY_FORMAT: Readonly<Record<string, string>> = {
   jpeg: "image/jpeg",
   webp: "image/webp",
 };
+const MAX_CODEX_IMAGES_PER_REQUEST = 10;
 
 /** GPT Image models are image-only: they are served by the Images routes, never a tool call. */
 export function isCodexImagesApiModel(model: unknown): boolean {
@@ -138,6 +139,16 @@ export async function handleCodexImagesApi({
   signal: AbortSignal | null;
   logPath: string;
 }) {
+  if (requestedCount > MAX_CODEX_IMAGES_PER_REQUEST) {
+    return saveImageErrorResult({
+      provider,
+      model,
+      status: 400,
+      startTime,
+      error: `n must be between 1 and ${MAX_CODEX_IMAGES_PER_REQUEST} for Codex image generation`,
+      path: logPath,
+    });
+  }
   const isEdit = referenceImages.length > 0;
   const url = codexImagesUrl(baseUrl, isEdit ? "edits" : "generations");
   const prompt = String(body.prompt);
@@ -203,7 +214,19 @@ export async function handleCodexImagesApi({
         retryable: false,
       };
     }
-    const raw = await response.text();
+    let raw: string;
+    try {
+      raw = await response.text();
+    } catch (err) {
+      const message = sanitizeErrorMessage(err);
+      if (log) log.error("IMAGE", `${provider} response read error: ${message}`);
+      return {
+        ok: false,
+        status: 502,
+        error: `Image provider response error: ${message}`,
+        retryable: false,
+      };
+    }
     if (!response.ok) {
       const safeError = sanitizeImageProviderError(raw);
       if (log) {

@@ -65,10 +65,7 @@ import { handleMaxaiImageGeneration } from "./imageGeneration/providers/maxaiIma
 import { handleAdobeFireflyImageGeneration } from "./imageGeneration/providers/adobeFirefly.ts";
 import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibabaImage.ts";
 import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihorde.ts";
-import {
-  handleCodexImagesApi,
-  isCodexImagesApiModel,
-} from "./imageGeneration/providers/codexImages.ts";
+import * as codexImages from "./imageGeneration/providers/codexImages.ts";
 import {
   applyPollinationsAnonymousFallback,
   reportPollinationsAnonOutcome,
@@ -76,6 +73,7 @@ import {
 
 // Re-export so /v1/images/edits can dispatch Firefly reference-image edits.
 export { handleAdobeFireflyImageGeneration };
+export { isCodexChatGptModelAccessError };
 
 interface KieImageOptions {
   model: string;
@@ -290,11 +288,7 @@ export function sanitizeImageProviderError(errorText: string): unknown {
 // (not a generic "invalid request"). Classify it so the caller can mark the failure
 // `retryable: true`, which routes it through the same sibling-account fallback that
 // already handles 401s (executeImageWithCredentialFallback, src/sse/services/imageCredentialRetry.ts).
-export function isCodexChatGptModelAccessError(
-  status: number,
-  errorText: string,
-  model: string
-): boolean {
+function isCodexChatGptModelAccessError(status: number, errorText: string, model: string): boolean {
   if (status !== 400) return false;
   const parsed = parseJsonOrNull(errorText);
   let detail: string | null = null;
@@ -2573,15 +2567,10 @@ async function handleCodexImageGeneration({
     !Array.isArray(credentials.providerSpecificData)
       ? (credentials.providerSpecificData as Record<string, unknown>).workspaceId
       : undefined;
-
-  // GPT Image models go to the dedicated Codex Images routes, which honor `model`.
-  if (isCodexImagesApiModel(model)) {
-    const baseUrl = providerConfig.baseUrl;
-    const args = { model, provider, baseUrl, body, token, workspaceId, requestedCount };
-    return handleCodexImagesApi({ ...args, referenceImages, startTime, log, signal, logPath });
+  if (codexImages.isCodexImagesApiModel(model)) {
+    // prettier-ignore
+    return codexImages.handleCodexImagesApi({ model, provider, baseUrl: providerConfig.baseUrl, body, token, workspaceId, requestedCount, referenceImages, startTime, log, signal, logPath });
   }
-
-  // Hosted-tool path: forward size/quality; the tool's image model is pinned server-side.
   const toolConfig: Record<string, unknown> = { type: "image_generation", output_format: "png" };
   if (referenceImages.length > 0) toolConfig.action = "edit";
   if (typeof body.size === "string" && body.size.trim()) {

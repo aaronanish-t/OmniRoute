@@ -153,6 +153,19 @@ test("Codex Images errors keep the free-plan guard, retryable access errors, and
   let fetchCalls = 0;
   globalThis.fetch = async () => {
     fetchCalls += 1;
+    throw new Error("request must not reach upstream");
+  };
+  const tooMany = await handleImageGeneration({
+    body: { model: "codex/gpt-image-2", prompt: "kitten", n: 11 },
+    credentials: { accessToken: "codex-token" },
+    log: null,
+  });
+  assert.equal(tooMany.status, 400);
+  assert.match(String(tooMany.error), /between 1 and 10/);
+  assert.equal(fetchCalls, 0);
+
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
     throw new Error("free-plan request must not reach upstream");
   };
   const freePlan = await handleImageGeneration({
@@ -202,6 +215,21 @@ test("Codex Images errors keep the free-plan guard, retryable access errors, and
   });
   assert.equal(empty.status, 502);
   assert.match(String(empty.error), /no b64_json/);
+
+  globalThis.fetch = async () =>
+    ({
+      ok: true,
+      text: async () => {
+        throw new Error("socket reset while reading response");
+      },
+    }) as unknown as Response;
+  const unreadable = (await handleImageGeneration({
+    body: { model: "codex/gpt-image-2", prompt: "kitten" },
+    credentials: { accessToken: "codex-token" },
+    log: null,
+  })) as { success: false; status: number; error: unknown };
+  assert.equal(unreadable.status, 502);
+  assert.match(String(unreadable.error), /response error/i);
 });
 
 test("v1 image generation route serves codex/gpt-image-2.5-flare from the Images route", async () => {

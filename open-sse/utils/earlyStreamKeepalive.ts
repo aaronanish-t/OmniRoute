@@ -313,8 +313,15 @@ export function __getDeadlineTokenRegistrySizeForTests(): number {
  * The wrapped request MUST be the one the route hands downstream (admission,
  * body parse, `handleChat`): the handler snapshots `request.signal` after
  * admission, so wrapping after that point would not propagate. Rebuilt via
- * `new Request(request, { signal, headers })`, which preserves method, url and
- * body byte-for-byte.
+ * `new Request(request.url, { method, headers, body, duplex, signal })` — NOT
+ * `new Request(request, init)`. Next.js 16 route handlers hand in `request` as
+ * a Proxy; on Node >=26.10 undici's Request constructor reads a private
+ * `#state` field off its `input` argument, and private fields do not tunnel
+ * through Proxy traps, so passing the Proxy as `input` throws
+ * `TypeError: Cannot read private member #state from an object whose class
+ * did not declare it` (Node 26.9 used a symbol-keyed state and was unaffected).
+ * Building from `url` + explicit `method`/`headers`/`body` sidesteps the input
+ * object entirely and preserves the same method/url/body byte-for-byte.
  *
  * Controller recovery downstream (`getDeadlineController`) is two-layered:
  * the combined signal object (fast path — same object when nothing rebuilds),
@@ -338,7 +345,17 @@ export function withDeadlineSignal(request: Request): {
   // admission rebuilds, which both copy headers but mint new signal objects.
   const token = `dl-${Date.now().toString(36)}-${(deadlineTokenSeq += 1)}`;
   headers.set(DEADLINE_TOKEN_HEADER, token);
-  const wrappedReq = new Request(request, { signal: combined, headers });
+  // Rebuild from url + explicit init fields rather than `new Request(request, init)`:
+  // Next.js hands in `request` as a Proxy, and on Node >=26.10 undici's Request
+  // constructor reads a private #state field off `input` that does not tunnel
+  // through Proxy traps (see doc comment above).
+  const hasBody = request.method !== "GET" && request.method !== "HEAD" && request.body !== null;
+  const wrappedReq = new Request(request.url, {
+    method: request.method,
+    headers,
+    signal: combined,
+    ...(hasBody ? { body: request.body, duplex: "half" } : {}),
+  } as RequestInit & { duplex?: "half" });
   deadlineControllers.set(combined, deadlineController);
   deadlineControllersByToken.set(token, new WeakRef(deadlineController));
   deadlineTokenByController.set(deadlineController, token);

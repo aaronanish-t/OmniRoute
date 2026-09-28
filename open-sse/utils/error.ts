@@ -1052,7 +1052,8 @@ export function unavailableResponse(
 
 export function providerCircuitOpenResponse(
   provider: string,
-  retryAfter?: string | number | Date | null
+  retryAfter?: string | number | Date | null,
+  failureKind?: string | null
 ) {
   const retryAfterSec = normalizeRetryAfterSeconds(retryAfter);
   const safeProvider = projectPublicContextLabel(provider) ?? "unknown";
@@ -1064,6 +1065,10 @@ export function providerCircuitOpenResponse(
         code: "provider_circuit_open",
         provider: safeProvider,
         retry_after: retryAfterSec,
+        // #14960: surface the classified failure kind so clients/operators can
+        // tell a quota_exhausted breaker (long upstream reset) from a generic
+        // rate_limit one without reading server logs.
+        ...(failureKind ? { failure_kind: failureKind } : {}),
       },
     }),
     {

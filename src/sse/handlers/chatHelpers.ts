@@ -373,7 +373,7 @@ export async function checkPipelineGates(
     const retryAfterMs = breaker.getRetryAfterMs();
     const retryAfterSec = Math.max(Math.ceil(retryAfterMs / 1000), 1);
     log.warn("CIRCUIT", `Circuit breaker OPEN for ${provider}, rejecting request`);
-    return providerCircuitOpenResponse(provider, retryAfterSec);
+    return providerCircuitOpenResponse(provider, retryAfterSec, breaker.getStatus().lastFailureKind);
   }
 
   return null;
@@ -598,7 +598,11 @@ export async function executeChatWithBreaker({
         return {
           result: {
             success: false,
-            response: providerCircuitOpenResponse(provider, Math.ceil(retryAfterMs / 1000)),
+            response: providerCircuitOpenResponse(
+              provider,
+              Math.ceil(retryAfterMs / 1000),
+              breaker.getStatus().lastFailureKind
+            ),
             status: HTTP_STATUS.SERVICE_UNAVAILABLE,
           },
           tlsFingerprintUsed: false,
@@ -642,7 +646,11 @@ export async function executeChatWithBreaker({
       return {
         result: {
           success: false,
-          response: providerCircuitOpenResponse(provider, Math.ceil(cbErr.retryAfterMs / 1000)),
+          response: providerCircuitOpenResponse(
+            provider,
+            Math.ceil(cbErr.retryAfterMs / 1000),
+            breaker.getStatus().lastFailureKind
+          ),
           status: HTTP_STATUS.SERVICE_UNAVAILABLE,
         },
         tlsFingerprintUsed: false,

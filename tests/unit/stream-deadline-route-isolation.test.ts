@@ -16,7 +16,10 @@ test("slow-stream deadline stays inside the streaming branch", () => {
     const deadlineCreate = source.indexOf("createStreamDeadlineSignal(");
 
     assert.ok(streamBranch >= 0, `${relativePath}: missing streaming branch`);
-    assert.ok(deadlineCreate > streamBranch, `${relativePath}: deadline must be created after stream detection`);
+    assert.ok(
+      deadlineCreate > streamBranch,
+      `${relativePath}: deadline must be created after stream detection`
+    );
     assert.equal(
       source.includes("withDeadlineSignal("),
       false,

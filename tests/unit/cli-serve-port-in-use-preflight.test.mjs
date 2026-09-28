@@ -209,3 +209,51 @@ test("reportPortInUse names the port, the owning pid, and how to resolve it", as
   assert.match(out, /omniroute stop/, "must tell the user how to free the port");
   assert.match(out, /--port/, "must offer running on a different port");
 });
+
+// Regression: #14538 left `busyPids` null when discovery returned null and the
+// bind probe found the port free, so every `omniroute serve` on macOS crashed
+// with "Cannot read properties of null (reading 'length')" — `lsof -ti :PORT`
+// exits 1 when nothing listens, which findListeningPids() reports as null.
+test("resolveBusyPortPids returns [] for a free port when discovery cannot answer", async () => {
+  const { resolveBusyPortPids } = await import("../../bin/cli/utils/pid.mjs");
+  const pids = await resolveBusyPortPids(20128, {
+    findListeningPids: async () => null,
+    probePortFree: async () => true,
+  });
+  assert.deepEqual(pids, [], "free port must resolve to an empty array, never null");
+});
+
+test("resolveBusyPortPids returns [null] for a held port when discovery cannot answer", async () => {
+  const { resolveBusyPortPids } = await import("../../bin/cli/utils/pid.mjs");
+  const pids = await resolveBusyPortPids(20128, {
+    findListeningPids: async () => null,
+    probePortFree: async () => false,
+  });
+  assert.deepEqual(pids, [null]);
+});
+
+test("resolveBusyPortPids keeps discovered owner pids without probing", async () => {
+  const { resolveBusyPortPids } = await import("../../bin/cli/utils/pid.mjs");
+  let probed = false;
+  const pids = await resolveBusyPortPids(20128, {
+    findListeningPids: async () => [4242],
+    probePortFree: async () => {
+      probed = true;
+      return true;
+    },
+  });
+  assert.deepEqual(pids, [4242]);
+  assert.equal(probed, false);
+});
+
+test("resolveBusyPortPids on a real free port with the real lsof returns []", async () => {
+  const { resolveBusyPortPids } = await import("../../bin/cli/utils/pid.mjs");
+  const server = net.createServer();
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
+  const { port } = server.address();
+  await new Promise((r) => server.close(r));
+  assert.deepEqual(await resolveBusyPortPids(port), []);
+});

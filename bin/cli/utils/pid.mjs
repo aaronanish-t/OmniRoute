@@ -118,6 +118,24 @@ export async function probePortFree(port, deps = {}) {
   });
 }
 
+// Serve preflight: which processes hold `port`? Always returns an array —
+// [] when the port is free, the owning pids when discovery can name them, or
+// [null] when a bind probe proves the port is held but no owner could be named.
+// findListeningPids() returns null whenever discovery cannot answer (tool
+// missing, or `lsof` exiting 1 because nothing is listening), so the bind probe
+// is the authority in that case. A free port must never surface as null: the
+// caller reads `.length`, and a null here crashed every `serve` on macOS with
+// "Cannot read properties of null (reading 'length')".
+export async function resolveBusyPortPids(port, deps = {}) {
+  const find = deps.findListeningPids || findListeningPids;
+  const probe = deps.probePortFree || probePortFree;
+  const pids = await find(port);
+  if (Array.isArray(pids) && pids.length > 0) return pids;
+  // Discovery saw nothing (can race a starting instance) or could not look:
+  // the bind probe decides.
+  return (await probe(port)) ? [] : [null];
+}
+
 function parseNetstatListeningPids(stdout, port) {
   const portCol = `:${port}`;
   const pids = [];

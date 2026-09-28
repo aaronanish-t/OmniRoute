@@ -1,0 +1,1 @@
+- **fix(cli):** stop `omniroute serve` from crashing with "Cannot read properties of null (reading 'length')" on every start where the port is free and pid discovery cannot answer (macOS `lsof` exits 1 when nothing listens; hosts without `lsof`). The preflight now always resolves to an array via `resolveBusyPortPids()`, keeping the #14518 bind-probe guard for busy ports.

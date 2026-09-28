@@ -669,6 +669,7 @@ process.env[`${PROVIDER_ID}_USER_AGENT`]
 | `CODEX_USER_AGENT`               | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` | When OpenAI updates the Codex CLI                                                                |
 | `CODEX_CLIENT_VERSION`           | `0.155.0`                                     | Override Codex client version independently of full UA string                                    |
 | `CLAUDE_CODE_CLIENT_VERSION`     | `2.1.258`                                     | Override advertised Claude Code version independently of `CLAUDE_USER_AGENT`. Anthropic gates some models on this value (#12417). |
+| `CLAUDE_CODE_CLIENT_BUILD_REVISION` | `1e2`                                    | Override the 3-character suffix OmniRoute appends to `cc_version=` in the Claude billing block. Bump alongside `CLAUDE_CODE_CLIENT_VERSION` — pinning only the version advertises a `version.revision` pair no real binary emits. |
 | `GITHUB_COPILOT_CLI_VERSION`     | `1.0.81-6`                                    | Override advertised Copilot CLI version independently of `GITHUB_USER_AGENT`                     |
 | `GITHUB_USER_AGENT`              | `GitHubCopilotChat/0.54.0`                    | When GitHub Copilot Chat updates                                                                 |
 | `ANTIGRAVITY_USER_AGENT`         | `antigravity/2.0.1 darwin/arm64`              | When Antigravity IDE updates                                                                     |

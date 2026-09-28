@@ -8,7 +8,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createServer } from "node:net";
+import { connect, createServer, type Socket } from "node:net";
 import { execFileSync, spawn } from "node:child_process";
 import { mkdtempSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -183,32 +183,43 @@ test("resolvePortPid ignores connected clients and returns only the listener pid
     return;
   }
 
-  const server = createServer();
-  // Use port 0 to bind an ephemeral free port, avoiding hardcoded collision
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-  const port = (server.address() as { port: number }).port;
-
-  const child = spawn(process.execPath, [
-    "-e",
-    `const s = require("node:net").connect(${port}, "127.0.0.1"); s.on("connect", () => { setTimeout(() => {}, 10000); });`,
-  ]);
+  // The listener runs in a CHILD process and the client connects from THIS
+  // process. The child's pid is higher, so a bare `lsof -ti :PORT` (which lists
+  // pids in ascending order and includes connected clients) would print this
+  // process's pid first and resolve to the client — exactly the #14722 bug.
+  const child = spawn(
+    process.execPath,
+    [
+      "-e",
+      'const s = require("node:net").createServer(() => {}); s.listen(0, "127.0.0.1", () => { process.stdout.write(s.address().port + "\\n"); }); setInterval(() => {}, 1000);',
+    ],
+    { stdio: ["ignore", "pipe", "inherit"] }
+  );
+  const exited = new Promise<void>((resolve) => child.once("exit", () => resolve()));
+  let client: Socket | undefined;
 
   try {
-    await new Promise<void>((resolve) => {
-      server.once("connection", () => resolve());
+    const port = await new Promise<number>((resolve, reject) => {
+      let buf = "";
+      child.stdout.on("data", (chunk: Buffer) => {
+        buf += chunk.toString("utf8");
+        if (buf.includes("\n")) resolve(Number.parseInt(buf, 10));
+      });
+      child.once("error", reject);
+      child.once("exit", (code) => reject(new Error(`listener exited early (${code})`)));
+    });
+
+    client = await new Promise<Socket>((resolve, reject) => {
+      const socket = connect(port, "127.0.0.1", () => resolve(socket));
+      socket.once("error", reject);
     });
 
     const resolved = await resolvePortPid(port);
-    assert.equal(resolved, process.pid, "must return the server pid");
-    assert.notEqual(resolved, child.pid, "must not return the client pid");
+    assert.equal(resolved, child.pid, "must return the listener (child) pid");
+    assert.notEqual(resolved, process.pid, "must not return the connected client pid");
   } finally {
-    try {
-      child.kill("SIGKILL");
-    } catch {}
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    client?.destroy();
+    child.kill("SIGKILL");
+    await exited;
   }
 });
-
-
-
-

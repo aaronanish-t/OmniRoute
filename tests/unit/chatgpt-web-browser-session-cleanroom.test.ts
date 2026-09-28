@@ -7,6 +7,7 @@ import {
   runChatGptWebBrowserTurn,
   type ChatGptWebBrowserSession,
   type ChatGptWebBrowserSessionHandlers,
+  composerAcceptedPrompt,
 } from "../../open-sse/utils/chatgptWebBrowserSession.ts";
 
 const HANDOFF_SSE =
@@ -462,5 +463,19 @@ describe("ChatGPT Web clean-room browser-owned session", () => {
     await session.start({});
 
     assert.equal(navigatedTo, "https://chatgpt.com/?temporary-chat=true");
+  });
+
+  test("accepts a prompt whose tail crosses a paragraph boundary", () => {
+    // Captured live: the whole prompt was in the composer (2110 chars) yet the insert was
+    // reported as rejected, because ProseMirror renders blocks without a separator.
+    const prompt =
+      "System:\nYou are a title generator.\n\nUser:\nGenerate a title for this conversation:\n\nUser:\nHI";
+    const composerText =
+      "System:You are a title generator.User:Generate a title for this conversation:User:HI";
+    assert.equal(composerAcceptedPrompt(prompt, composerText), true);
+    // A genuinely empty composer is still rejected.
+    assert.equal(composerAcceptedPrompt(prompt, ""), false);
+    // And a different prompt is not accepted.
+    assert.equal(composerAcceptedPrompt(prompt, "something else entirely"), false);
   });
 });

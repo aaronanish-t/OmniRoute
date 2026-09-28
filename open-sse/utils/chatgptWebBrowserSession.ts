@@ -66,6 +66,19 @@ export interface ChatGptWebBrowserTurnRequest {
   tools?: unknown[];
 }
 
+/**
+ * Did the composer accept the prompt? Compares whitespace-FREE text: ProseMirror's `textContent`
+ * concatenates blocks with no separator ("a\nb" -> "ab"), so a space-normalised tail spanning a
+ * paragraph boundary never matched. That false negative rejected prompts whose last 40 characters
+ * cross a line break — every OpenCode title request ends with "…conversation:" then "HI" — as
+ * "composer did not accept the prompt" even though the whole prompt was present in the element
+ * (observed live: `promptLen: 2110` with the insert reported as rejected).
+ */
+export function composerAcceptedPrompt(prompt: string, composerText: string): boolean {
+  const expectedTail = prompt.replace(/\s+/g, "").slice(-40);
+  return composerText.replace(/\s+/g, "").includes(expectedTail);
+}
+
 export interface ChatGptWebBrowserTurnResult {
   conversationId: string;
   turnExchangeId: string;
@@ -650,6 +663,26 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
    * outside the app cannot be signed — ChatGPT answers 403 ("Unusual activity …") and redirects
    * to the app shell. Typing into the composer lets the page sign its own request instead.
    */
+  /** Diagnostics for a composer that will not accept text (logged, never returned to clients). */
+  private async describeComposerState(): Promise<Record<string, unknown>> {
+    return this.page
+      .evaluate(() => {
+        const nodes = Array.from(document.querySelectorAll<HTMLElement>("[contenteditable]"));
+        return {
+          url: location.href.replace("https://chatgpt.com", ""),
+          activeId: (document.activeElement as HTMLElement | null)?.id ?? null,
+          promptLen: (document.querySelector("#prompt-textarea")?.textContent ?? "").length,
+          editables: nodes.map((node) => ({
+            id: node.id,
+            cls: String(node.className).slice(0, 28),
+            len: (node.textContent ?? "").length,
+            visible: node.offsetParent !== null,
+          })),
+        };
+      })
+      .catch((error) => ({ evaluateFailed: String(error).slice(0, 120) }));
+  }
+
   async submitPromptViaComposer(request: ChatGptWebBrowserSubmission): Promise<void> {
     requireFirstPartyUrl(this.page.url());
     const prompt = requirePrompt(request.prompt);
@@ -670,22 +703,27 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
         target?.focus();
         document.execCommand("insertText", false, text);
       }, prompt);
-      const expectedTail = prompt.trim().replace(/\s+/g, " ").slice(-40);
+      const expectedTail = prompt;
       const deadline = Date.now() + COMPOSER_TYPED_TIMEOUT_MS;
       while (Date.now() < deadline) {
         await this.page.waitForTimeout(COMPOSER_SETTLE_MS);
-        const present = await this.readComposerText();
-        if (present.includes(expectedTail)) return true;
+        if (composerAcceptedPrompt(expectedTail, await this.readComposerText())) return true;
       }
       return false;
     };
 
     if (!(await insertOnce())) {
+      console.warn(
+        `[chatgpt-web] composer rejected the first insert: ${JSON.stringify(await this.describeComposerState())}`
+      );
       await this.page
         .goto(this.pageUrl, { waitUntil: "domcontentloaded", timeout: 30_000 })
         .catch(() => {});
       await this.page.waitForTimeout(COMPOSER_SETTLE_MS);
       if (!(await insertOnce())) {
+        console.warn(
+          `[chatgpt-web] composer rejected the reload retry: ${JSON.stringify(await this.describeComposerState())}`
+        );
         throw new Error("ChatGPT Web composer did not accept the prompt");
       }
     }

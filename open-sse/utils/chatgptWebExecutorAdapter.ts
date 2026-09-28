@@ -819,6 +819,35 @@ export function buildChatGptWebOpenAiResponse(
   );
 }
 
+/**
+ * One ChatGPT Web UI session per pooled browser context. An OpenAI-compatible client (OpenCode)
+ * fires its title request alongside the main turn, so two requests opened their own page in the
+ * SAME shared context; ChatGPT's SPA navigation then clobbered the sibling's composer. Observed
+ * live: whichever request lost the race failed with `ChatGPT Web composer did not accept the
+ * prompt` after both insert retries, because the reload-retry raced the sibling too. Turns are
+ * therefore serialized per context — and the context may only be dropped by the request holding
+ * it, so a retry cannot yank the browser out from under a concurrent turn.
+ */
+const contextTurnQueues = new Map<string, Promise<void>>();
+
+async function withContextTurnLock<T>(key: string, task: () => Promise<T>): Promise<T> {
+  const previous = contextTurnQueues.get(key) ?? Promise.resolve();
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const queued = previous.then(() => gate);
+  contextTurnQueues.set(key, queued);
+  // A failed predecessor must not poison the queue for everyone behind it.
+  await previous.catch(() => {});
+  try {
+    return await task();
+  } finally {
+    release();
+    if (contextTurnQueues.get(key) === queued) contextTurnQueues.delete(key);
+  }
+}
+
 export async function executeChatGptWebCleanRoom(
   input: Pick<ExecuteInput, "model" | "body" | "stream" | "credentials" | "signal">,
   deps: ChatGptWebExecutorAdapterDeps = {}
@@ -848,43 +877,47 @@ export async function executeChatGptWebCleanRoom(
   // page can otherwise stay wedged in it for the whole request.
   // Two chances: one for a transient handshake failure, and (for tool turns) one corrective
   // retry when the model answered in prose instead of invoking a tool.
-  const maxAttempts = 3;
-  let lastError: unknown;
-  let correctedPrompt: string | null = null;
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const session = await createSession(sessionInput);
-    try {
-      const result = await runTurn(session, {
-        prompt: correctedPrompt ?? prepared.prompt,
-        attachments,
-        tools: prepared.tools,
-        timeoutMs: prepared.timeoutMs,
-        signal: input.signal,
-      });
-      if (
-        correctedPrompt === null &&
-        attempt < maxAttempts &&
-        !input.signal?.aborted &&
-        shouldRetryWithToolReminder(result, prepared.tools, originalMessages)
-      ) {
-        // Re-issue once, telling the model that describing work is not doing it.
-        correctedPrompt = clampText(prepared.prompt + TOOL_REMINDER_PROMPT, MAX_PROMPT_CHARS);
-        continue;
+  const poolKey = `chatgpt-web-cleanroom:${chatGptWebPoolDigest(sessionInput)}`;
+
+  // One turn at a time per pooled context (see withContextTurnLock).
+  return withContextTurnLock(poolKey, async () => {
+    const maxAttempts = 3;
+    let lastError: unknown;
+    let correctedPrompt: string | null = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      const session = await createSession(sessionInput);
+      try {
+        const result = await runTurn(session, {
+          prompt: correctedPrompt ?? prepared.prompt,
+          attachments,
+          tools: prepared.tools,
+          timeoutMs: prepared.timeoutMs,
+          signal: input.signal,
+        });
+        if (
+          correctedPrompt === null &&
+          attempt < maxAttempts &&
+          !input.signal?.aborted &&
+          shouldRetryWithToolReminder(result, prepared.tools, originalMessages)
+        ) {
+          // Re-issue once, telling the model that describing work is not doing it.
+          correctedPrompt = clampText(prepared.prompt + TOOL_REMINDER_PROMPT, MAX_PROMPT_CHARS);
+          continue;
+        }
+        return buildChatGptWebOpenAiResponse(input.model, result, input.stream, {
+          id: deps.id?.(),
+          created: deps.now ? Math.floor(deps.now() / 1000) : undefined,
+          tools: prepared.tools,
+        });
+      } catch (error) {
+        lastError = error;
+        const retryable = isRetryableChatGptWebHandshake(error);
+        if (attempt >= maxAttempts || !retryable || input.signal?.aborted) throw error;
+        // Drop the pooled context so the retry gets a brand-new page and handshake. Safe while
+        // this request holds the turn lock: no sibling turn is using the context.
+        await releaseBrowserContext(poolKey).catch(() => {});
       }
-      return buildChatGptWebOpenAiResponse(input.model, result, input.stream, {
-        id: deps.id?.(),
-        created: deps.now ? Math.floor(deps.now() / 1000) : undefined,
-        tools: prepared.tools,
-      });
-    } catch (error) {
-      lastError = error;
-      const retryable = isRetryableChatGptWebHandshake(error);
-      if (attempt >= maxAttempts || !retryable || input.signal?.aborted) throw error;
-      // Drop the pooled context so the retry gets a brand-new page and handshake.
-      await releaseBrowserContext(
-        `chatgpt-web-cleanroom:${chatGptWebPoolDigest(sessionInput)}`
-      ).catch(() => {});
     }
-  }
-  throw lastError;
+    throw lastError;
+  });
 }

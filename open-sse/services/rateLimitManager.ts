@@ -43,7 +43,7 @@ import {
   LEGACY_RATE_LIMIT_QUEUE_TIMEOUT_CODE,
 } from "./rateLimitManager/errors";
 import { LimiterWedgeWatchdog, WATCHDOG_INTERVAL_MS } from "./rateLimitManager/wedgeWatchdog";
-import { cancelQueuedJob } from "./rateLimitManager/queuedJobCancel";
+import { createCancellableJob } from "./rateLimitManager/queuedJobCancel";
 import { toNumber } from "@/shared/utils/numeric";
 import {
   getExecutorTimeoutMs,
@@ -144,7 +144,6 @@ const limiterWatchdog = new LimiterWedgeWatchdog({
   warn: warnRateLimit,
 });
 let watchdogInterval: ReturnType<typeof setInterval> | null = null;
-let scheduledJobSeq = 0;
 
 type LimiterFactory = (options: Bottleneck.ConstructorOptions) => Bottleneck;
 const defaultLimiterFactory: LimiterFactory = (options) => new Bottleneck(options);
@@ -751,16 +750,11 @@ export async function withRateLimit(
       `[RATE-LIMIT] executionMaxWaitMs ${perConnExec}ms clamped to upstream ${upstreamMs}ms for ${provider}/${model ?? ""}`
     );
   }
-  // A unique id lets a caller that gives up remove its still-QUEUED job, so an
-  // abandoned request never consumes a reservoir token or minTime slot later.
-  const jobId = `rl-${++scheduledJobSeq}`;
-  const scheduleOpts: Bottleneck.JobOptions =
-    executionExpirationMs && executionExpirationMs > 0
-      ? { id: jobId, expiration: executionExpirationMs }
-      : { id: jobId };
-  const abandonQueuedJob = () => {
-    void trackAsyncOperation(cancelQueuedJob(limiter, jobId));
-  };
+  const { scheduleOpts, abandon: abandonQueuedJob } = createCancellableJob(
+    limiter,
+    executionExpirationMs,
+    trackAsyncOperation
+  );
 
   // Issue #6593: opt-in admission cap — fast-reject before Bottleneck's
   // schedule() (and before any downstream compression/prompt work runs) when
@@ -814,14 +808,9 @@ export async function withRateLimit(
   const boundFn = AsyncResource.bind(wrappedFn);
   const scheduled = limiter.schedule(scheduleOpts, boundFn as unknown as () => Promise<unknown>);
   scheduled.catch(() => {});
-  // If timeoutPromise or the abort signal wins while the job is still QUEUED,
-  // abandonQueuedJob() removes it from the Bottleneck queue (Bottleneck has no
-  // public cancel). Leaving it there was not harmless: on dispatch it still
-  // registered against the limiter, spending a reservoir token and a minTime
-  // slot before wrappedFn rejected, so with an rpm override live requests
-  // queued behind dead ones and the queue never recovered. A job that already
-  // left QUEUED (RUNNING in its minTime wait) cannot be removed; wrappedFn's
-  // queueTimedOut guard still keeps it from calling fn.
+  // If timeoutPromise or the abort wins while the job is still QUEUED,
+  // abandonQueuedJob() removes it (see queuedJobCancel.ts); a job already past
+  // QUEUED is kept from calling fn by wrappedFn's queueTimedOut guard.
 
   try {
     if (signal) {

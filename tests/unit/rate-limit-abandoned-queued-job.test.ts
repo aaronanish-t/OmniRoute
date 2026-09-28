@@ -13,8 +13,14 @@ const rateLimitManager = await import("../../open-sse/services/rateLimitManager.
 const { cancelQueuedJob, ABANDONED_JOB_DROP_MESSAGE } =
   await import("../../open-sse/services/rateLimitManager/queuedJobCancel.ts");
 const Bottleneck = (await import("bottleneck")).default;
+const { createRequire } = await import("node:module");
 
-const REFRESH_MS = 300;
+// The rpm window is shortened so one refresh fits in a unit test. The queue
+// budget is generous (a loaded CI box can take hundreds of ms just to dispatch
+// the first job) and the refresh comes well after it, so the abandoned callers
+// always time out before the next window opens.
+const QUEUE_WAIT_MS = 1_000;
+const REFRESH_MS = 2_500;
 
 function wait(ms: number) {
   const { promise, resolve } = Promise.withResolvers<void>();
@@ -24,7 +30,7 @@ function wait(ms: number) {
 
 // Bottleneck hops through setTimeout(0) at every step, so poll instead of
 // guessing a fixed delay (timer resolution varies across platforms).
-async function waitFor(condition: () => boolean, message: string, timeoutMs = 2_000) {
+async function waitFor(condition: () => boolean, message: string, timeoutMs = 5_000) {
   const deadline = Date.now() + timeoutMs;
   while (!condition()) {
     if (Date.now() >= deadline) throw new Error(message);
@@ -65,7 +71,7 @@ test.after(async () => {
 
 test("queue-timed-out callers do not spend the next rpm window of a live request", async () => {
   const connectionId = "abandoned-rpm-conn";
-  await useOverrideLimiter(connectionId, { rpm: 1, maxWaitMs: 100 });
+  await useOverrideLimiter(connectionId, { rpm: 1, maxWaitMs: QUEUE_WAIT_MS });
 
   let abandonedRuns = 0;
   const burst = Array.from({ length: 5 }, (_, i) =>
@@ -168,5 +174,59 @@ test("cancelQueuedJob removes only the named QUEUED job and keeps FIFO order", a
   await running;
   assert.deepEqual(await Promise.all(jobs), ["ran", ABANDONED_JOB_DROP_MESSAGE, "ran"]);
   assert.deepEqual(order, ["running", "a", "c"]);
+  await limiter.disconnect();
+});
+
+// cancelQueuedJob reaches Bottleneck internals (no public cancel API). A
+// Bottleneck upgrade that reshapes them would silently degrade the fix back to
+// "abandoned jobs stay queued" (cancelQueuedJob falls back to `false`), so pin
+// the exact version and shape it was verified against and fail loudly here.
+type GuardNode = {
+  value: { options?: { id?: string }; doDrop?: unknown };
+  prev: unknown;
+  next: unknown;
+};
+type GuardList = { _first: GuardNode | null; _last: unknown; length: number; decr?: unknown };
+type GuardInternals = {
+  _submitLock?: { schedule?: unknown };
+  _registerLock?: { schedule?: unknown };
+  _queues?: { _lists?: GuardList[] };
+};
+
+test("Bottleneck internals used by cancelQueuedJob are still the verified shape", async () => {
+  const require = createRequire(import.meta.url);
+  const { version } = require("bottleneck/package.json") as { version: string };
+  assert.equal(
+    version,
+    "2.19.5",
+    "bottleneck changed version: re-verify open-sse/services/rateLimitManager/queuedJobCancel.ts " +
+      "(_submitLock, _registerLock, _queues._lists DLList, job.options.id, job.doDrop) then update this pin"
+  );
+
+  const limiter = new Bottleneck({ maxConcurrent: 1 });
+  const internals = limiter as unknown as GuardInternals;
+  assert.equal(typeof internals._submitLock?.schedule, "function", "_submitLock.schedule");
+  assert.equal(typeof internals._registerLock?.schedule, "function", "_registerLock.schedule");
+  assert.ok(Array.isArray(internals._queues?._lists), "_queues._lists must be an array");
+  assert.equal(typeof limiter.jobStatus, "function", "jobStatus");
+
+  const { promise: gate, resolve: openGate } = Promise.withResolvers<void>();
+  const running = limiter.schedule({ id: "guard-running" }, () => gate);
+  const queued = limiter.schedule({ id: "guard-queued" }, async () => "ran").catch(() => "dropped");
+  await waitFor(() => limiter.jobStatus("guard-queued") === "QUEUED", "guard job never queued");
+
+  const list = internals._queues?._lists?.find((l) => l?._first);
+  assert.ok(list, "a queued job must sit in one of _queues._lists");
+  for (const key of ["_first", "_last", "length"]) assert.ok(key in list, `DLList.${key}`);
+  assert.equal(typeof list.decr, "function", "DLList.decr");
+  const node = list._first as GuardNode;
+  for (const key of ["value", "prev", "next"]) assert.ok(key in node, `DLList node.${key}`);
+  assert.equal(node.value.options?.id, "guard-queued", "job.options.id");
+  assert.equal(typeof node.value.doDrop, "function", "job.doDrop");
+
+  assert.equal(await cancelQueuedJob(limiter, "guard-queued"), true);
+  openGate();
+  await running;
+  assert.equal(await queued, "dropped");
   await limiter.disconnect();
 });

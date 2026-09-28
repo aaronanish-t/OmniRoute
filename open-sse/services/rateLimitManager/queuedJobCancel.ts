@@ -109,3 +109,26 @@ export function cancelQueuedJob(limiter: Bottleneck, jobId: string): Promise<boo
     )
     .catch(() => false);
 }
+
+let scheduledJobSeq = 0;
+
+/**
+ * Schedule options carrying a unique job id, plus `abandon()` that removes
+ * that job from `limiter`'s queue while it is still QUEUED. A caller that gives
+ * up (queue-wait budget or abort) calls `abandon()` so its dead job never
+ * spends a reservoir token or `minTime` slot later. `track` registers the async
+ * removal with the manager's in-flight operation tracker.
+ */
+export function createCancellableJob(
+  limiter: Bottleneck,
+  expirationMs: number | undefined,
+  track: (promise: Promise<boolean>) => unknown
+): { scheduleOpts: Bottleneck.JobOptions; abandon: () => void } {
+  const id = `rl-${++scheduledJobSeq}`;
+  return {
+    scheduleOpts: expirationMs && expirationMs > 0 ? { id, expiration: expirationMs } : { id },
+    abandon: () => {
+      track(cancelQueuedJob(limiter, id));
+    },
+  };
+}

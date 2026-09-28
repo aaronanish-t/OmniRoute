@@ -326,7 +326,7 @@ export function withChatAdmission(
       const { runtime, admitted } = admittedState;
       return runtime.attachResponseLifecycle(response, admitted.lease, {
         admittedAtMs: admitted.admittedAtMs,
-        signal: request?.signal ?? undefined,
+        signal: effectiveSignal,
       });
     } catch (err) {
       const admittedState = admissionContext.getAdmittedState();

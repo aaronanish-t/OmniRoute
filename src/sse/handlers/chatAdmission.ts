@@ -258,7 +258,7 @@ export function createChatAdmissionContext(
       const result = await runtime.acquire({
         tenantKey: resolveAdmissionTenantKey(apiKeyId),
         body,
-        signal: request?.signal ?? undefined,
+        signal: effectiveSignal,
         streaming,
       });
 
@@ -284,7 +284,8 @@ type HandleChatImplementation = (
   clientRawRequest: any,
   preParsedBody: any,
   correlationId: string | undefined,
-  admissionContext: ChatAdmissionContext
+  admissionContext: ChatAdmissionContext,
+  lifecycleSignal?: AbortSignal | null
 ) => Promise<Response>;
 
 export type WithChatAdmissionOptions = {
@@ -303,18 +304,21 @@ export function withChatAdmission(
     request: any,
     clientRawRequest: any = null,
     preParsedBody: any = null,
-    correlationId?: string
+    correlationId?: string,
+    lifecycleSignal?: AbortSignal | null
   ): Promise<Response> {
     const admissionContext = createChatAdmissionContext(
       options.getRuntime ?? getAdaptiveAdmissionRuntime
     );
+    const effectiveSignal = lifecycleSignal ?? request?.signal ?? undefined;
     try {
       const response = await implementation(
         request,
         clientRawRequest,
         preParsedBody,
         correlationId,
-        admissionContext
+        admissionContext,
+        effectiveSignal
       );
       const admittedState = admissionContext.getAdmittedState();
       if (!admittedState) return response;
@@ -330,7 +334,7 @@ export function withChatAdmission(
         const { runtime, admitted } = admittedState;
         runtime.releaseHandlerFailure(
           admitted.lease,
-          classifyHandlerFailure(err, request?.signal),
+          classifyHandlerFailure(err, effectiveSignal),
           { admittedAtMs: admitted.admittedAtMs }
         );
       }

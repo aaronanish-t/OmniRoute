@@ -4,6 +4,10 @@ import {
   settlePendingFirstChunk,
 } from "../../lib/proxyLogger";
 import { updateAttemptTiming } from "../../lib/db/proxyLogs";
+import {
+  isFirstChunkTimingEnabled,
+  sanitizeTimingMs,
+} from "@omniroute/open-sse/utils/upstreamStatusCapture.ts";
 
 /** One request actually sent: the outlet snapshot plus what came back. */
 export type AttemptJournalEntry = {
@@ -25,14 +29,6 @@ export type AttemptJournalEntry = {
   /** True once the envelope replaced the raw body (single-wrap guard). */
   bodyTracked?: boolean;
 };
-
-/**
- * Non-negative integer durations only: unknown, clock-skewed, or malformed
- * values stay null so partially migrated databases never corrupt a row.
- */
-export function sanitizeAttemptTiming(value: unknown): number | null {
-  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : null;
-}
 
 export type ProxyJournalInput = {
   result: { success: boolean; status?: number | null; error?: string | null };
@@ -136,6 +132,9 @@ function settleAttemptTiming(
   attempt: AttemptJournalEntry | null | undefined,
   firstChunkMs: number | null
 ): void {
+  // Opt-in (PROXY_LOG_FIRST_CHUNK_TIMING): with it off no body is enveloped,
+  // so nothing can ever settle a link - register nothing, patch nothing.
+  if (!isFirstChunkTimingEnabled()) return;
   linkPendingFirstChunk(entry.id, entry as never, firstChunkMs !== null, true);
   if (firstChunkMs !== null) {
     settlePendingFirstChunk(entry.id, firstChunkMs, (id, patch) => updateAttemptTiming(id, patch));
@@ -157,8 +156,8 @@ export function attemptTimingPair(attempt: AttemptJournalEntry | null | undefine
   firstChunkMs: number | null;
 } {
   return {
-    headersMs: sanitizeAttemptTiming(attempt?.headersMs),
-    firstChunkMs: sanitizeAttemptTiming(attempt?.firstChunkMs),
+    headersMs: sanitizeTimingMs(attempt?.headersMs),
+    firstChunkMs: sanitizeTimingMs(attempt?.firstChunkMs),
   };
 }
 

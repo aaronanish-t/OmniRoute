@@ -336,9 +336,6 @@ export function flushProxyLogsSync() {
   // 2. Persist to SQLite using a single transaction for high-performance non-blocking write
   try {
     const db = getDbInstance();
-    // Self-heal before the fixed-column INSERT: a partially migrated database
-    // would otherwise throw "no such column" instead of storing NULL.
-    ensureProxyLogsColumns(db);
     const insertStmt = db.prepare(
       `INSERT INTO proxy_logs (id, timestamp, status, proxy_type, proxy_host, proxy_port, proxy_name,
         level, level_id, provider, target_url, public_ip, egress_ip, latency_ms, error,

@@ -62,6 +62,17 @@ export function sanitizeTimingMs(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : null;
 }
 
+/**
+ * Opt-in switch for the first-byte body envelope and its deferred row patch.
+ * Off by default: with it off the upstream Response passes through untouched
+ * (same object, no extra stream stage) and only the free headers timing is
+ * recorded. Read on every send so operators can flip it without a restart.
+ */
+export function isFirstChunkTimingEnabled(): boolean {
+  const raw = process.env.PROXY_LOG_FIRST_CHUNK_TIMING;
+  return raw === "true" || raw === "1";
+}
+
 function stampHeadersMs(record: AttemptRecord): void {
   record.headersMs = sanitizeTimingMs(Date.now() - (record.startedAt ?? Date.now()));
 }
@@ -115,11 +126,27 @@ function trackFirstChunk(record: AttemptRecord, response: Response): Response {
       await upstream.cancel(reason).catch(() => {});
     },
   });
-  return new Response(wrapped, {
+  const enveloped = new Response(wrapped, {
     status: response.status,
     statusText: response.statusText,
     headers: response.headers,
   });
+  preserveResponseIdentity(enveloped, response);
+  return enveloped;
+}
+
+/**
+ * A reconstructed Response loses url/redirected/type (the constructor always
+ * yields "", false, "default"). Callers read `response.url` for redirect
+ * handling and logging, so carry the originals over the same way tlsClient.ts
+ * does for its adapted responses.
+ */
+function preserveResponseIdentity(target: Response, source: Response): void {
+  for (const key of ["url", "redirected", "type"] as const) {
+    const value = source[key];
+    if (value === undefined) continue;
+    Object.defineProperty(target, key, { value, configurable: true });
+  }
 }
 
 /**
@@ -206,6 +233,8 @@ function settleAttemptResponse(
     writeFlight(sink, undefined);
   }
   if (isDispatching()) sink.upstreamStatus = response.status;
-  if (isDispatching() && active) return trackFirstChunk(record, response);
+  if (isDispatching() && active && isFirstChunkTimingEnabled()) {
+    return trackFirstChunk(record, response);
+  }
   return response;
 }

@@ -10,6 +10,9 @@ import path from "node:path";
 // registry links late arrivals to their row and returns to its initial size.
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-attempt-timing-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+// The first-byte envelope is opt-in; the envelope tests below run with it on,
+// the flag-off tests flip it off locally and restore it.
+process.env.PROXY_LOG_FIRST_CHUNK_TIMING = "true";
 
 const core = await import("../../src/lib/db/core.ts");
 const proxyLogsDb = await import("../../src/lib/db/proxyLogs.ts");
@@ -48,12 +51,12 @@ test("new timing columns default to null and accept a deferred update", () => {
 test("the journal timing pair sanitizes each send record", async () => {
   // logProxyEvent is not owned here: assert at the journal boundary only,
   // via the timing pair helper the journal hands to the logger.
-  const { attemptTimingPair, sanitizeAttemptTiming } =
-    await import("../../src/sse/handlers/proxyJournal.ts");
-  assert.equal(sanitizeAttemptTiming(-5), null);
-  assert.equal(sanitizeAttemptTiming(1.5), null);
-  assert.equal(sanitizeAttemptTiming("40"), null);
-  assert.equal(sanitizeAttemptTiming(40), 40);
+  const { attemptTimingPair } = await import("../../src/sse/handlers/proxyJournal.ts");
+  const { sanitizeTimingMs } = await import("../../open-sse/utils/upstreamStatusCapture.ts");
+  assert.equal(sanitizeTimingMs(-5), null);
+  assert.equal(sanitizeTimingMs(1.5), null);
+  assert.equal(sanitizeTimingMs("40"), null);
+  assert.equal(sanitizeTimingMs(40), 40);
   assert.deepEqual(attemptTimingPair({ proxy: null, headersMs: 40, firstChunkMs: 90 }), {
     headersMs: 40,
     firstChunkMs: 90,
@@ -268,4 +271,96 @@ test("a null body leaves the first-chunk timing null", async () => {
   assert.equal(typeof sink.attempts?.[0]?.headersMs, "number");
   assert.equal(sink.attempts?.[0]?.firstChunkMs ?? null, null);
   assert.equal(sink.attempts?.[0]?.bodyTracked ?? false, false);
+});
+
+async function withFirstChunkTiming<T>(value: string | undefined, run: () => Promise<T>) {
+  const previous = process.env.PROXY_LOG_FIRST_CHUNK_TIMING;
+  if (value === undefined) delete process.env.PROXY_LOG_FIRST_CHUNK_TIMING;
+  else process.env.PROXY_LOG_FIRST_CHUNK_TIMING = value;
+  try {
+    return await run();
+  } finally {
+    if (previous === undefined) delete process.env.PROXY_LOG_FIRST_CHUNK_TIMING;
+    else process.env.PROXY_LOG_FIRST_CHUNK_TIMING = previous;
+  }
+}
+
+test("the envelope keeps url, redirected and type of the upstream response", async () => {
+  const { withUpstreamStatusCapture } =
+    await import("../../open-sse/utils/upstreamStatusCapture.ts");
+  const upstream = new Response(new TextEncoder().encode("ok"), { status: 200 });
+  Object.defineProperty(upstream, "url", { value: "https://upstream.example/v1/chat" });
+  Object.defineProperty(upstream, "redirected", { value: true });
+  Object.defineProperty(upstream, "type", { value: "cors" });
+  const sink: { proxy: unknown; attempts?: Array<Record<string, unknown>> } = { proxy: null };
+  const wrapped = withUpstreamStatusCapture(
+    async () => upstream,
+    () => sink,
+    () => true
+  );
+  const response = await wrapped();
+  // The body was enveloped (a new Response), yet its identity survived.
+  assert.notEqual(response, upstream);
+  assert.equal(sink.attempts?.[0]?.bodyTracked, true);
+  assert.equal(response.url, "https://upstream.example/v1/chat");
+  assert.equal(response.redirected, true);
+  assert.equal(response.type, "cors");
+  assert.equal(await response.text(), "ok");
+});
+
+test("with first-chunk timing off the upstream response passes through untouched", async () => {
+  const { withUpstreamStatusCapture } =
+    await import("../../open-sse/utils/upstreamStatusCapture.ts");
+  for (const flag of [undefined, "false", "0"]) {
+    await withFirstChunkTiming(flag, async () => {
+      const upstream = new Response(new TextEncoder().encode("raw"), { status: 200 });
+      const sink: { proxy: unknown; attempts?: Array<Record<string, unknown>> } = { proxy: null };
+      const wrapped = withUpstreamStatusCapture(
+        async () => upstream,
+        () => sink,
+        () => true
+      );
+      const response = await wrapped();
+      assert.equal(response, upstream, `flag=${String(flag)} must not wrap the body`);
+      const record = sink.attempts?.[0];
+      assert.ok(record);
+      assert.equal(typeof record.headersMs, "number");
+      assert.equal(record.bodyTracked ?? false, false);
+      assert.equal(await response.text(), "raw");
+      assert.equal(record.firstChunkMs ?? null, null);
+    });
+  }
+});
+
+test("with first-chunk timing off the journal registers no deferred patch", async () => {
+  const { logProxyJournal } = await import("../../src/sse/handlers/proxyJournal.ts");
+  const journal = (id: string) => ({
+    result: { success: true, status: 200 },
+    proxyInfo: {
+      proxy: null,
+      level: "direct",
+      attempts: [
+        { proxy: null, upstreamStatus: 200, headersMs: 12, firstChunkMs: null, bodyTracked: true },
+      ],
+    },
+    proxyLatency: 5,
+    provider: "openai",
+    model: "gpt-5",
+    credentials: { connectionId: null },
+    comboName: null,
+    clientRawRequest: null,
+    tlsFingerprintUsed: false,
+    rotationAccount: null,
+    correlationId: id,
+  });
+  const startSize = proxyLogger.pendingFirstChunkSizeForTests();
+  try {
+    await withFirstChunkTiming("false", () => logProxyJournal(journal("timing-off")));
+    assert.equal(proxyLogger.pendingFirstChunkSizeForTests(), startSize);
+    // Control: with the flag on the same late-byte journal links its row.
+    await withFirstChunkTiming("true", () => logProxyJournal(journal("timing-on")));
+    assert.equal(proxyLogger.pendingFirstChunkSizeForTests(), startSize + 1);
+  } finally {
+    proxyLogger.clearProxyLogs();
+  }
 });

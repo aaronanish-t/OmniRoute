@@ -14198,6 +14198,8 @@
     "upstreamStatus": "N'elu ọnọdụ",
     "noResponse": "Enweghị nzaghachi",
     "egressIp": "Egress IP",
+    "headersAfter": "Isi mgbe",
+    "firstChunkAfter": "Akụkụ mbụ mgbe",
     "servedBy": "Nyeere site na",
     "correlationId": "Njikọ ID"
   },

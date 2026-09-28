@@ -14198,6 +14198,8 @@
     "upstreamStatus": "État amont",
     "noResponse": "Aucune réponse",
     "egressIp": "IP de sortie",
+    "headersAfter": "En-têtes après",
+    "firstChunkAfter": "Premier bloc après",
     "servedBy": "Servi par",
     "correlationId": "ID de corrélation"
   },

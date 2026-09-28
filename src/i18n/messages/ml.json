@@ -14198,6 +14198,8 @@
     "upstreamStatus": "അപ്പ്സ്ട്രീം നില",
     "noResponse": "പ്രതികരണം ഇല്ല",
     "egressIp": "ഇഗ്രസ് ഐപി",
+    "headersAfter": "ശീർഷകങ്ങൾ ശേഷം",
+    "firstChunkAfter": "ആദ്യ ഭാഗം ശേഷം",
     "servedBy": "സർവുഡ് ബൈ",
     "correlationId": "സംബന്ധീകരണ ഐഡി"
   },

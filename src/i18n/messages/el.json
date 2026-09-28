@@ -14198,6 +14198,8 @@
     "upstreamStatus": "Κατάσταση ανάντη",
     "noResponse": "Καμία απάντηση",
     "egressIp": "Διεύθυνση IP εξόδου",
+    "headersAfter": "Κεφαλίδες μετά",
+    "firstChunkAfter": "Πρώτο τμήμα μετά",
     "servedBy": "Παρέχεται από",
     "correlationId": "Αναγνωριστικό συσχέτισης"
   },

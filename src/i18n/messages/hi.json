@@ -14198,6 +14198,8 @@
     "upstreamStatus": "उपधारा स्थिति",
     "noResponse": "कोई प्रतिक्रिया नहीं",
     "egressIp": "निकासी आईपी",
+    "headersAfter": "हेडर बाद में",
+    "firstChunkAfter": "पहला टुकड़ा बाद में",
     "servedBy": "द्वारा सेवा की गई",
     "correlationId": "संबंध आईडी"
   },

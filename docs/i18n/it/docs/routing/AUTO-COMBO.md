@@ -256,71 +256,79 @@ valori risolti alimentano gli input esistenti `config.modePack` / `config.budget
 `config.budgetFallback` del motore. Il valore `config.budgetFallback` memorizzato di una combo ("strict" |
 "cheapest") imposta la policy persistente; l'header la sovrascrive per una singola richiesta.
 
-## Tutte le Strategie di Routing
+## Tutte le strategie di routing
 
-Il motore combo di OmniRoute supporta **19 strategie di routing** (dichiarate in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Il motore Auto Combo stesso è esposto sotto la strategia `auto`; le altre sono disponibili per i combo persistenti.
+Il motore di combinazione di OmniRoute supporta **19 strategie di routing** (dichiarate in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Il motore Auto Combo è esposto tramite la strategia `auto`; le altre sono disponibili per le combinazioni persistenti.
 
-| Strategy            | Description                                                                                                                                                                                                                            |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Elenco ordinato per primo target con priorità esplicita                                                                                                                                                                                |
-| `weighted`          | Casuale pesato in base al peso per target                                                                                                                                                                                              |
-| `round-robin`       | Cicla tra i target in ordine (a batch; vedi sotto)                                                                                                                                                                                     |
-| `context-relay`     | Passa il contesto tra i target (conversazioni lunghe)                                                                                                                                                                                  |
-| `fill-first`        | Riempi la quota di ogni target prima di passare al successivo                                                                                                                                                                          |
-| `p2c`               | Bilanciamento del carico casuale Power-of-2-choices                                                                                                                                                                                    |
-| `random`            | Selezione casuale uniforme                                                                                                                                                                                                             |
-| `least-used`        | Scegli il target con il carico corrente più basso                                                                                                                                                                                      |
-| `cost-optimized`    | Minimizza i $ per richiesta dato il prezzo di catalogo                                                                                                                                                                                 |
-| `reset-aware` ⭐    | Prioritizza in base al tempo di reset della quota — finestre di reset brevi classificate più in alto                                                                                                                                   |
-| `reset-window`      | Preferisci i target la cui finestra di quota si resetta prima                                                                                                                                                                          |
-| `headroom`          | Scegli il target con il maggior margine di quota rimanente                                                                                                                                                                             |
-| `strict-random`     | Casuale senza deduplicazione di ripetizioni                                                                                                                                                                                            |
-| `auto`              | Usa il punteggio Auto Combo (16 fattori) — **raccomandato**                                                                                                                                                                            |
-| `lkgp`              | Last-Known-Good Path (si aggancia all'ultimo provider di successo, poi ricade sulle regole)                                                                                                                                            |
-| `context-optimized` | Scegli il target con la migliore corrispondenza per la dimensione del contesto corrente                                                                                                                                                |
-| `cache-optimized`   | Riordina i target per affinità di prompt-cache — la connessione più propensa a contenere già il prefisso memorizzato nella cache di questa richiesta viene tentata per prima (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Distribuisci a un pannello di modelli in parallelo, quindi sintetizza una risposta tramite un giudice (vedi sotto)                                                                                                                     |
-| `pipeline`          | Esegui i target in sequenza, passando l'output di ogni passo come input al passo successivo; viene restituita solo la risposta finale (#6396)                                                                                          |
+| Strategia           | Descrizione                                                                                                                                                                                                                                                        |
+| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Elenco ordinato con priorità esplicita, in cui viene provato per primo il primo target                                                                                                                                                                             |
+| `weighted`          | Selezione casuale ponderata in base al peso di ciascun target                                                                                                                                                                                                      |
+| `round-robin`       | Scorre ciclicamente i target in ordine (in batch; vedere sotto)                                                                                                                                                                                                    |
+| `context-relay`     | Trasferisce il contesto tra i target (conversazioni lunghe)                                                                                                                                                                                                        |
+| `fill-first`        | Esaurisce la quota di ciascun target prima di passare al successivo                                                                                                                                                                                                |
+| `p2c`               | Bilanciamento casuale del carico basato sulla scelta tra 2 opzioni                                                                                                                                                                                                 |
+| `random`            | Selezione casuale uniforme                                                                                                                                                                                                                                         |
+| `least-used`        | Seleziona il target con il carico corrente più basso                                                                                                                                                                                                               |
+| `cost-optimized`    | Riduce al minimo il costo per richiesta in base ai prezzi del catalogo                                                                                                                                                                                             |
+| `reset-aware` ⭐    | Assegna la priorità in base al momento di reimpostazione della quota: le finestre di reimpostazione brevi hanno priorità maggiore                                                                                                                                  |
+| `reset-window`      | Preferisce i target la cui finestra di quota verrà reimpostata prima                                                                                                                                                                                               |
+| `headroom`          | Seleziona il target con il maggior margine di quota residua                                                                                                                                                                                                        |
+| `strict-random`     | Selezione casuale senza deduplicazione delle ripetizioni                                                                                                                                                                                                           |
+| `auto`              | Utilizza il punteggio di Auto Combo (16 fattori): **consigliato**                                                                                                                                                                                                  |
+| `lkgp`              | Last-Known-Good Path (mantiene l'ultimo provider che ha avuto esito positivo, quindi, se necessario, ricorre alle regole)                                                                                                                                          |
+| `context-optimized` | Seleziona il target più adatto alle dimensioni del contesto corrente                                                                                                                                                                                               |
+| `cache-optimized`   | Riordina i target in base all'affinità con la cache dei prompt: la connessione che con maggiore probabilità contiene già il prefisso memorizzato nella cache di questa richiesta viene provata per prima (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Invia la richiesta in parallelo a un gruppo di modelli, quindi sintetizza un'unica risposta tramite un giudice (vedere sotto)                                                                                                                                      |
+| `pipeline`          | Esegue i target in sequenza, passando l'output di ogni passaggio come input al successivo; viene restituita solo la risposta finale (#6396)                                                                                                                        |
 
-⭐ = Novità in v3.8.0 · 🧬 = Novità in v3.8.36
+⭐ = Novità nella v3.8.0 · 🧬 = Novità nella v3.8.36
 
 ### Semantica di `weighted`
 
-`weighted` è un'**estrazione casuale proporzionale per richiesta** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), non un equalizzatore:
+`weighted` esegue un'**estrazione casuale proporzionale per ogni richiesta**
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), non un bilanciamento uniforme:
 
-- Ogni richiesta estrae **un** passo con probabilità `weight / totalWeight`; i passi rimanenti sono ordinati per peso decrescente come catena di fallback per quella richiesta.
-- Un passo il cui peso è `0` (o mancante) **non viene mai estratto** finché qualsiasi altro passo ha un peso > 0 — può servire solo come fallback dopo che il passo estratto fallisce. Solo quando **tutti** i pesi sono 0 la selezione diventa uniforme.
-- I passi i cui target sono tutti non disponibili — interruttore del provider `OPEN`, cooldown della connessione, blocco del modello — vengono rimossi dall'estrazione prima che avvenga (`open-sse/services/combo/targetResolution.ts`), quindi un singolo passo sano può temporaneamente vincere ogni richiesta.
-- `stickyWeightedLimit` (configurazione combo, default `1` = disattivato) blocca il passo estratto per quel numero di successi consecutivi prima di una nuova estrazione.
+- Ogni richiesta estrae **un** passaggio con probabilità `weight / totalWeight`; i passaggi rimanenti
+  vengono ordinati per peso decrescente come catena di fallback per quella richiesta.
+- Un passaggio il cui peso è `0` (o non è specificato) **non viene mai estratto** finché qualsiasi altro passaggio
+  ha un peso > 0: può essere utilizzato solo come fallback dopo il fallimento del passaggio estratto. La selezione
+  diventa uniforme solo quando **tutti** i pesi sono pari a 0.
+- I passaggi i cui target non sono tutti disponibili — circuit breaker del provider `OPEN`, periodo di cooldown
+  della connessione, blocco del modello — vengono rimossi dall'estrazione prima che questa avvenga
+  (`open-sse/services/combo/targetResolution.ts`), quindi un singolo passaggio integro può temporaneamente
+  essere selezionato per ogni richiesta.
+- `stickyWeightedLimit` (configurazione della combinazione, valore predefinito `1` = disattivato) mantiene il passaggio estratto per quel numero
+  di esiti positivi consecutivi prima di eseguire una nuova estrazione.
 
-Per una rotazione stretta usa `round-robin`; pesi uguali su `weighted` danno un bilanciamento statistico — non stretto.
+Per una rotazione rigorosa, utilizzare `round-robin`; pesi uguali con `weighted` producono un bilanciamento statistico,
+non rigoroso.
 
-### Batch sticky e espansione account di `round-robin`
+### Modalità pipeline agentica
 
-Round-robin è a batch, non una richiesta per passo:
+Una combinazione `pipeline` in due passaggi può abilitare l'instradamento pianificatore/esecutore tramite `config.agenticOrchestration.enabled`. Il primo target gestisce la pianificazione e le risposte finali; il secondo target emette chiamate agli strumenti nel formato nativo del client. OmniRoute rileva le continuazioni con i risultati degli strumenti dal protocollo della richiesta, chiede al pianificatore se sia necessario un altro ciclo di strumenti e rende dinamicamente l'esecutore o il pianificatore il passaggio finale rivolto al client.
 
-- `stickyRoundRobinLimit` (configurazione combo, poi `comboStickyRoundRobinLimit`, poi
-  `settings.stickyRoundRobinLimit`, predefinito **3**) mantiene lo stesso target per quel numero di
-  successi consecutivi prima di ruotare. Impostare l'override della combo su `1` per la
-  rotazione a una richiesta. L'editor della combo mostra il valore effettivo e da quale
-  livello proviene.
-- `connectionAwareExpansion` (configurazione combo, poi impostazioni, predefinito **false**)
-  espande ogni step a livello di provider in target per account prima della rotazione.
-  Le strategie del Gruppo B (priority, weighted, round-robin, random, p2c, least-used,
-  cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized,
-  context-relay, fusion, pipeline) mantengono una vista a livello di provider finché
-  questa opzione non è attiva. L'editor della combo espone eredita / on / off; eredita
-  utilizza il valore predefinito globale (off).
-- Routing di località della cache dei prompt (`promptCacheAffinityEnabled`, predefinito **true**)
-  riordina le connessioni bloccate in modo che le chiavi della cache corrispondenti
-  rimangano su un unico account. Ha la precedenza sulla rotazione round-robin e ponderata
-  tra gli step per account bloccati. Disattivalo in Impostazioni → Predefiniti combo se
-  hai bisogno di una rotazione rigorosa. Non esiste un override per combo.
+```json
+{
+  "strategy": "pipeline",
+  "models": [{ "model": "provider/planner" }, { "model": "provider/executor" }],
+  "config": {
+    "agenticOrchestration": { "enabled": true, "maxToolRounds": 8 }
+  }
+}
+```
 
-Per la rotazione multi-account su un unico modello, preferisci **un singolo step con
-account dinamico** (`connectionId` vuoto, pool completo) con limite sticky `1`, non tre
-`connectionId` bloccati. Gli step bloccati più l'affinità collassano sullo stesso
-account anche mentre il contatore RR avanza.
+L'esecutore può emettere più chiamate indipendenti in un'unica risposta. Le chiamate dipendenti vengono gestite nei successivi turni del client relativi ai risultati degli strumenti, con il pianificatore che esamina ogni risultato. Il valore predefinito di `maxToolRounds` è `8` e sono accettati valori da `1` a `32`; una volta raggiunto il limite, il pianificatore deve produrre la migliore risposta finale disponibile. Le decisioni interne del pianificatore vengono memorizzate nel buffer, mentre la risposta selezionata rivolta al client mantiene la preferenza di streaming originale.
+
+### Batch persistente `round-robin` ed espansione degli account
+
+Il round-robin opera in batch, non con una richiesta per passaggio:
+
+- `stickyRoundRobinLimit` (configurazione della combinazione, quindi `comboStickyRoundRobinLimit`, quindi `settings.stickyRoundRobinLimit`, valore predefinito **3**) mantiene lo stesso target per quel numero di successi consecutivi prima di passare al successivo. Imposta la sostituzione specifica della combinazione su `1` per ruotare a ogni richiesta. L'editor delle combinazioni mostra il valore effettivo e il livello da cui proviene.
+- `connectionAwareExpansion` (configurazione della combinazione, quindi impostazioni, valore predefinito **false**) espande ogni passaggio a livello di provider in target distinti per account prima della rotazione. Le strategie del gruppo B (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline) mantengono una vista a livello di provider finché questa opzione non viene attivata. L'editor delle combinazioni offre le opzioni eredita / attivo / disattivo; eredita utilizza il valore predefinito globale (disattivato).
+- L'instradamento basato sulla località della cache dei prompt (`promptCacheAffinityEnabled`, valore predefinito **true**) riordina le connessioni bloccate in modo che le chiavi della cache corrispondenti rimangano su un unico account. Ha la precedenza sulla rotazione round-robin e ponderata tra i passaggi bloccati per account. Disattivalo in Impostazioni → Valori predefiniti delle combinazioni se hai bisogno di una rotazione rigorosa. Non esiste una sostituzione specifica per combinazione.
+
+Per la rotazione tra più account su un unico modello, preferisci **un solo passaggio con account dinamico** (`connectionId` vuoto, intero pool) con limite di persistenza `1`, anziché tre `connectionId` bloccati. I passaggi bloccati, insieme all'affinità, convergono sullo stesso account anche mentre il contatore RR avanza.
 
 ## Strategia Fusion
 

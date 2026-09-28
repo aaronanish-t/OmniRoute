@@ -261,66 +261,100 @@ lahendatud väärtused edastatakse mootori olemasolevatele sisenditele `config.m
 
 ## Kõik marsruutimisstrateegiad
 
-OmniRoute'i kombineeritud mootor toetab **19 marsruutimisstrateegiat** (deklareeritud failis `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Auto Combo mootor ise on eksponeeritud `auto` strateegia all; teised on saadaval püsivate kombode jaoks.
+OmniRoute'i kombomootor toetab **19 marsruutimisstrateegiat** (deklareeritud failis `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Auto Combo mootor ise on saadaval strateegia `auto` kaudu; teised strateegiad on saadaval salvestatud kombode jaoks.
 
-| Strateegia          | Kirjeldus                                                                                                                                                                                                                       |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `priority`          | Esimene sihtmärgi järjestatud loend selge prioriteediga                                                                                                                                                                         |
-| `weighted`          | Kaalutud juhuslik valik sihtmärgi kaalu järgi                                                                                                                                                                                   |
-| `round-robin`       | Tsükkel sihtmärkide vahel järjekorras (partiina; vt allpool)                                                                                                                                                                    |
-| `context-relay`     | Konteksti edastamine sihtmärkide vahel (pikad vestlused)                                                                                                                                                                        |
-| `fill-first`        | Täidab iga sihtmärgi kvoodi enne järgmise juurde liikumist                                                                                                                                                                      |
-| `p2c`               | 2 valiku võimsuse juhuslik koormuse tasakaalustamine                                                                                                                                                                            |
-| `random`            | Ühtlane juhuslik valik                                                                                                                                                                                                          |
-| `least-used`        | Valib sihtmärgi madalaima praeguse koormusega                                                                                                                                                                                   |
-| `cost-optimized`    | Minimeerib $ päringu kohta, arvestades kataloogi hinda                                                                                                                                                                          |
-| `reset-aware` ⭐    | Prioriseerib kvoodi lähtestamise aja järgi — lühikesed lähtestamisaknad on kõrgema asetusega                                                                                                                                    |
-| `reset-window`      | Eelistab sihtmärke, mille kvoodiaken lähtestub kõige varem                                                                                                                                                                      |
-| `headroom`          | Valib sihtmärgi, millel on kõige rohkem järelejäänud kvoodivaru                                                                                                                                                                 |
-| `strict-random`     | Juhuslik ilma korduste deduplitseerimiseta                                                                                                                                                                                      |
-| `auto`              | Kasutab Auto Combo hindamist (16-faktoriline) — **soovitatav**                                                                                                                                                                  |
-| `lkgp`              | Viimane teadaolev hea tee (kinnitub viimasele edukale pakkujale, seejärel langeb tagasi reeglitele)                                                                                                                             |
-| `context-optimized` | Valib sihtmärgi, mis sobib kõige paremini praeguse konteksti suurusega                                                                                                                                                          |
-| `cache-optimized`   | Järjestab sihtmärgid ümber viip-vahemälu afiinsuse järgi — ühendust, mis tõenäoliselt juba hoiab selle päringu vahemällu salvestatud eesliidet, proovitakse esimesena (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Levitab paralleelselt mudelite paneelile, seejärel sünteesib kohtuniku kaudu ühe vastuse (vt allpool)                                                                                                                           |
-| `pipeline`          | Käivitab sihtmärgid järjestikku, suunates iga sammu väljundi järgmise sammu sisendisse; tagastatakse ainult lõplik vastus (#6396)                                                                                               |
+| Strateegia          | Kirjeldus                                                                                                                                                                                                                          |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Esimest sihtmärki eelistav järjestatud loend selgesõnalise prioriteediga                                                                                                                                                           |
+| `weighted`          | Kaalutud juhuvalik iga sihtmärgi kaalu alusel                                                                                                                                                                                      |
+| `round-robin`       | Sihtmärkide järjestikune tsükliline läbimine (pakettidena; vt allpool)                                                                                                                                                             |
+| `context-relay`     | Konteksti edastamine sihtmärkide vahel (pikad vestlused)                                                                                                                                                                           |
+| `fill-first`        | Iga sihtmärgi kvoodi täitmine enne järgmisele liikumist                                                                                                                                                                            |
+| `p2c`               | Juhuslik koormuse tasakaalustamine kahe valiku meetodil                                                                                                                                                                            |
+| `random`            | Ühtlane juhuvalik                                                                                                                                                                                                                  |
+| `least-used`        | Väikseima praeguse koormusega sihtmärgi valimine                                                                                                                                                                                   |
+| `cost-optimized`    | Päringu hinna minimeerimine kataloogihindade põhjal                                                                                                                                                                                |
+| `reset-aware` ⭐    | Prioriseerimine kvoodi lähtestamisaja järgi — lühema lähtestusaknaga sihtmärgid paigutatakse ettepoole                                                                                                                             |
+| `reset-window`      | Eelistatakse sihtmärke, mille kvoodiaken lähtestatakse kõige varem                                                                                                                                                                 |
+| `headroom`          | Kõige suurema allesjäänud kvoodivaruga sihtmärgi valimine                                                                                                                                                                          |
+| `strict-random`     | Juhuvalik ilma korduste eemaldamiseta                                                                                                                                                                                              |
+| `auto`              | Auto Combo hindamise kasutamine (16 tegurit) — **soovitatav**                                                                                                                                                                      |
+| `lkgp`              | Viimane teadaolevalt toimiv tee (kinnistab viimase eduka teenusepakkuja ning kasutab seejärel varuvariandina reegleid)                                                                                                             |
+| `context-optimized` | Praeguse konteksti suurusega kõige paremini sobiva sihtmärgi valimine                                                                                                                                                              |
+| `cache-optimized`   | Sihtmärkide ümberjärjestamine viiba vahemälu sobivuse järgi — esimesena proovitakse ühendust, millel on kõige tõenäolisemalt selle päringu vahemällu salvestatud prefiks (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Päringu paralleelne saatmine mudelite paneelile, mille järel sünteesib hindaja ühe vastuse (vt allpool)                                                                                                                            |
+| `pipeline`          | Sihtmärkide järjestikune käitamine, edastades iga etapi väljundi järgmise etapi sisendiks; tagastatakse ainult lõplik vastus (#6396)                                                                                               |
 
 ⭐ = Uus versioonis v3.8.0 · 🧬 = Uus versioonis v3.8.36
 
-### `weighted` semantika
+### Strateegia `weighted` semantika
 
-`weighted` on **proportsionaalne juhuslik valik päringu kohta** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), mitte tasakaalustaja:
+`weighted` teeb **iga päringu kohta proportsionaalse juhuvaliku**
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), mitte ei võrdsusta jaotust:
 
-- Iga päring valib **ühe** sammu tõenäosusega `weight / totalWeight`; ülejäänud sammud järjestatakse kahaneva kaalu järgi selle päringu varuahelana.
-- Samm, mille kaal on `0` (või puudub), **ei valita kunagi**, kui mõnel teisel sammul on kaal > 0 — see saab toimida ainult varuna pärast valitud sammu ebaõnnestumist. Ainult siis, kui **kõik** kaalud on 0, muutub valik ühtlaseks.
-- Sammud, mille sihtmärgid on kõik kättesaamatud — pakkuja kaitselüliti `OPEN`, ühenduse jahtumine, mudeli lukustus — eemaldatakse valikust enne selle toimumist (`open-sse/services/combo/targetResolution.ts`), nii et üks terve samm võib ajutiselt võita iga päringu.
-- `stickyWeightedLimit` (kombo konfiguratsioon, vaikimisi `1` = välja lülitatud) kinnitab valitud sammu nii mitmeks järjestikuseks õnnestumiseks enne uuesti valimist.
+- Iga päringu puhul valitakse **üks** etapp tõenäosusega `weight / totalWeight`; ülejäänud etapid
+  järjestatakse selle päringu varuahelas kaalu järgi kahanevalt.
+- Etappi, mille kaal on `0` (või määramata), **ei valita kunagi**, kui mõne teise etapi
+  kaal on > 0 — seda saab kasutada ainult varuvariandina pärast valitud etapi nurjumist. Valik muutub
+  ühtlaseks ainult siis, kui **kõik** kaalud on 0.
+- Etapid, mille kõik sihtmärgid pole saadaval — teenusepakkuja kaitselüliti on `OPEN`, ühendus
+  on ooteajal või mudel on lukustatud — eemaldatakse valikust enne selle tegemist
+  (`open-sse/services/combo/targetResolution.ts`), mistõttu võib üks terve etapp ajutiselt
+  võita iga päringu.
+- `stickyWeightedLimit` (kombo konfiguratsioon, vaikeväärtus `1` = väljas) kinnistab valitud etapi nii mitmeks
+  järjestikuseks edukaks korraks, enne kui tehakse uus valik.
 
-Range pöörlemise jaoks kasutage `round-robin`; võrdsed kaalud `weighted` puhul annavad statistilise — mitte range — tasakaalu.
+Range rotatsiooni jaoks kasutage strateegiat `round-robin`; võrdsed kaalud strateegias `weighted` annavad statistilise, mitte
+range tasakaalu.
 
-### `round-robin` kleepuv partii ja konto laiendamine
+### Agendipõhine konveierirežiim
 
-Ringikujuline jaotus toimub partiidena, mitte üks päring sammu kohta:
+Kaheastmeline `pipeline`-kombinatsioon saab kasutada planeerija/täitja marsruutimist valikuga
+`config.agenticOrchestration.enabled`. Esimene sihtmärk vastutab planeerimise ja lõplike vastuste eest;
+teine sihtmärk väljastab kliendile omaseid tööriistakutseid. OmniRoute tuvastab päringuprotokollist
+tööriistatulemuste jätkud, küsib planeerijalt, kas on vaja veel üht tööriistavooru,
+ning määrab dünaamiliselt kas täitja või planeerija viimaseks kliendile suunatud
+etapiks.
 
-- `stickyRoundRobinLimit` (kombo konfiguratsioon, seejärel `comboStickyRoundRobinLimit`, seejärel
-  `settings.stickyRoundRobinLimit`, vaikimisi **3**) hoiab sama sihtmärki nii mitme
-  järjestikuse õnnestumise korral enne pööramist. Seadistage kombo alistamine väärtusele `1`
-  ühe päringu pööramiseks. Kombo redaktor näitab tegelikku väärtust ja seda, millisest kihist see pärineb.
-- `connectionAwareExpansion` (kombo konfiguratsioon, seejärel seaded, vaikimisi **false**)
-  laiendab iga pakkuja taseme sammu kontopõhisteks sihtmärkideks enne pööramist. B-grupi
-  strateegiad (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
+```json
+{
+  "strategy": "pipeline",
+  "models": [{ "model": "provider/planner" }, { "model": "provider/executor" }],
+  "config": {
+    "agenticOrchestration": { "enabled": true, "maxToolRounds": 8 }
+  }
+}
+```
+
+Täitja võib ühes vastuses väljastada mitu sõltumatut kutset. Sõltuvaid kutseid
+käsitletakse kliendi järgnevates tööriistatulemuste voorudes, kus planeerija vaatab üle iga tulemuse.
+`maxToolRounds` vaikeväärtus on `8` ja lubatud vahemik on `1`–`32`; piirini jõudmisel peab planeerija
+koostama parima saadaoleva lõpliku vastuse. Planeerija sisemised otsused puhverdatakse, samal ajal kui
+valitud kliendile suunatud vastus säilitab algse voogedastuseelistuse.
+
+### `round-robin`-strateegia püsiv pakett ja kontode laiendamine
+
+Round-robin töötab pakettidena, mitte põhimõttel üks päring etapi kohta:
+
+- `stickyRoundRobinLimit` (esmalt kombinatsiooni konfiguratsioon, seejärel `comboStickyRoundRobinLimit`, siis
+  `settings.stickyRoundRobinLimit`, vaikeväärtus **3**) kasutab sama sihtmärki nii mitme
+  järjestikuse õnnestumise jooksul enne järgmisele liikumist. Ühe päringu kaupa roteerimiseks määrake
+  kombinatsiooni väärtuseks `1`. Kombinatsiooniredaktor näitab kehtivat väärtust ja kihti, kust see pärineb.
+- `connectionAwareExpansion` (esmalt kombinatsiooni konfiguratsioon, seejärel sätted, vaikeväärtus **false**) laiendab
+  iga teenusepakkuja taseme etapi enne roteerimist kontopõhisteks sihtmärkideks. B-rühma strateegiad
+  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
   fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) säilitavad pakkuja taseme vaate, kuni see on sisse lülitatud. Kombo redaktor
-  pakub valikuid pärimine / sees / väljas; pärimine kasutab globaalset vaikeseadet (väljas).
-- Prompt-vahemälu lokaalsuse marsruutimine (`promptCacheAffinityEnabled`, vaikimisi **true**)
-  järjestab kinnitatud ühendused ümber nii, et vastavad vahemälu võtmed jäävad ühele kontole.
-  See on eelistatud ringikujulise ja kaalutud pööramise ees kinnitatud kontopõhiste sammude
-  puhul. Lülitage see välja jaotises Settings → Combo defaults, kui vajate ranget pööramist.
-  Kombineeritud alistamist ei ole.
+  pipeline) säilitavad teenusepakkuja taseme vaate seni, kuni see valik sisse lülitatakse. Kombinatsiooniredaktor võimaldab
+  valida pärimise / sees / väljas; pärimine kasutab globaalset vaikeväärtust (väljas).
+- Viibapuhvri lokaalsusepõhine marsruutimine (`promptCacheAffinityEnabled`, vaikeväärtus **true**) järjestab
+  kinnitatud ühendused ümber, et ühtivate puhvervõtmetega päringud jääksid samale kontole. Sellel on prioriteet
+  round-robin- ja kaalutud roteerimise ees kinnitatud kontopõhiste etappide vahel. Kui vajate ranget roteerimist,
+  lülitage see välja jaotises Settings → Combo defaults. Kombinatsioonipõhist ülekirjutust ei ole.
 
-Mitme konto pööramiseks ühel mudelil eelistage **ühte dünaamilise konto sammu** (tühi
-`connectionId`, kogu kogum) kleepuva piiranguga `1`, mitte kolme kinnitatud `connectionId`.
-Kinnitatud sammud pluss afiinsus koondavad samale kontole isegi siis, kui RR-loendur edasi liigub.
+Ühe mudeli mitme konto vahel roteerimiseks eelistage **üht dünaamilise konto etappi** (tühi
+`connectionId`, kogu kogum), mille püsivuspiir on `1`, mitte kolme kinnitatud `connectionId`-d.
+Kinnitatud etapid koos afiinsusega koonduvad samale kontole isegi siis, kui RR-loendur
+edeneb.
 
 ## Fusiooni strateegia
 

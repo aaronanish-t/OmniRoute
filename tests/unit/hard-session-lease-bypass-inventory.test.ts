@@ -103,6 +103,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // streak seeder reads the row's lastErrorType/lastErrorAt so a crash loop
     // cannot reset the backoff count on every boot — a state read, not dispatch.
     "open-sse/handlers/chatCore/requestRejectedFailure.ts": 1,
+    // #14958: after a successful search the proxy re-reads the connection row it
+    // just used so clearAccountError() can wipe a stale lastError/testStatus — a
+    // post-dispatch state read, not connection selection, so it stays class C.
+    "open-sse/handlers/search/searchProxy.ts": 1,
     // v3.8.50 back-merge additions (f95b03d7): combo routing infra and the
     // volcengine-plan binding/auto-sync services query connections the same
     // way as their classified siblings.

@@ -32,6 +32,11 @@ test.after(async () => {
   } catch {}
 });
 
+// A stuck upstream socket must fail the test, not park the runner for hours.
+const TEST_TIMEOUT_MS = 30_000;
+const timedTest = (name: string, fn: () => Promise<void>) =>
+  test(name, { timeout: TEST_TIMEOUT_MS }, fn);
+
 async function withServer<T>(
   status: number,
   body: string,
@@ -50,6 +55,10 @@ async function withServer<T>(
   try {
     return await fn(port);
   } finally {
+    // #14958: a pooled keep-alive socket held by the fetch dispatcher would keep
+    // server.close() (and the whole test process) waiting forever — drop every
+    // connection first so close() resolves and the file exits on its own.
+    server.closeAllConnections();
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 }
@@ -76,7 +85,7 @@ async function runFetch(port: number, connectionId: string) {
   } as never);
 }
 
-test("a successful search clears a stale failed-test error on the connection", async () => {
+timedTest("a successful search clears a stale failed-test error on the connection", async () => {
   const conn = await providersDb.createProviderConnection({
     provider: "tavily-search",
     authType: "apikey",
@@ -104,34 +113,37 @@ test("a successful search clears a stale failed-test error on the connection", a
   assert.equal(after.errorCode ?? null, null, "real success must clear errorCode");
 });
 
-test("a successful search after an elapsed 429 cooldown clears the cooldown error", async () => {
-  const conn = await providersDb.createProviderConnection({
-    provider: "tavily-search",
-    authType: "apikey",
-    name: "tavily-elapsed-cooldown",
-    apiKey: "tvly-test-key-cooldown",
-    isActive: true,
-    testStatus: "active",
-  });
-  const connId = String(conn.id);
-  await auth.markAccountUnavailable(connId, 429, "Too Many Requests", "tavily-search", null);
-  // Simulate the cooldown having elapsed (lazy recovery lets the request through).
-  await providersDb.updateProviderConnection(connId, {
-    rateLimitedUntil: new Date(Date.now() - 1000).toISOString(),
-  });
+timedTest(
+  "a successful search after an elapsed 429 cooldown clears the cooldown error",
+  async () => {
+    const conn = await providersDb.createProviderConnection({
+      provider: "tavily-search",
+      authType: "apikey",
+      name: "tavily-elapsed-cooldown",
+      apiKey: "tvly-test-key-cooldown",
+      isActive: true,
+      testStatus: "active",
+    });
+    const connId = String(conn.id);
+    await auth.markAccountUnavailable(connId, 429, "Too Many Requests", "tavily-search", null);
+    // Simulate the cooldown having elapsed (lazy recovery lets the request through).
+    await providersDb.updateProviderConnection(connId, {
+      rateLimitedUntil: new Date(Date.now() - 1000).toISOString(),
+    });
 
-  const result = await withServer(200, JSON.stringify({ results: [] }), (port) =>
-    runFetch(port, connId)
-  );
-  assert.equal(result.success, true);
+    const result = await withServer(200, JSON.stringify({ results: [] }), (port) =>
+      runFetch(port, connId)
+    );
+    assert.equal(result.success, true);
 
-  const after = (await providersDb.getProviderConnectionById(connId)) as Record<string, unknown>;
-  assert.equal(after.testStatus, "active");
-  assert.equal(after.lastError ?? null, null);
-  assert.equal(after.rateLimitedUntil ?? null, null);
-});
+    const after = (await providersDb.getProviderConnectionById(connId)) as Record<string, unknown>;
+    assert.equal(after.testStatus, "active");
+    assert.equal(after.lastError ?? null, null);
+    assert.equal(after.rateLimitedUntil ?? null, null);
+  }
+);
 
-test("a failed search does not clear the connection error", async () => {
+timedTest("a failed search does not clear the connection error", async () => {
   const conn = await providersDb.createProviderConnection({
     provider: "tavily-search",
     authType: "apikey",

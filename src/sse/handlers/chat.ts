@@ -784,16 +784,10 @@ async function handleChatImplementation(
       true;
   }
 
-  const admissionRejection = await admissionContext.acquire(
-    apiKeyInfo?.id,
-    { signal: effectiveSignal },
-    body
-  );
+  const admissionRejection = await admissionContext.acquire(apiKeyInfo?.id, { signal: effectiveSignal }, body);
   if (admissionRejection) return admissionRejection;
   clientRawRequest = chatAdmission.resolveClientRawAfterAdmission(clientRawRequest, () =>
-    deferredClientRawBody.withClientBody((clientBody) =>
-      buildClientRawRequest(request, clientBody, effectiveSignal)
-    )
+    deferredClientRawBody.withClientBody((clientBody) => buildClientRawRequest(request, clientBody, effectiveSignal))
   );
   // Sibling of clientRawRequest.body, not a replacement: .body stays the raw
   // pre-reconstruction client bytes (see captureDeferredClientRawBody), while
@@ -1250,9 +1244,7 @@ async function handleChatImplementation(
       signal: effectiveSignal,
       correlationId: reqId,
       // #9654 Wave 2: per-target lane-aware admission probe for combo fan-out.
-      perTargetAdmission: admissionContext.createPerTargetAdmissionHook(apiKeyInfo?.id, {
-        signal: effectiveSignal,
-      }),
+      perTargetAdmission: admissionContext.createPerTargetAdmissionHook(apiKeyInfo?.id, { signal: effectiveSignal }),
     });
 
     for (const credentials of comboPreselectedCredentials.values()) {

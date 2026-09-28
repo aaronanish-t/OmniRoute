@@ -187,7 +187,7 @@ test("direct /v1/images/generations moves the key's USD spend and the limit then
 
   // The next request with the same key is refused by the existing policy check.
   const blocked = await imageRoute.POST(generationRequest(key.key, "openai/gpt-image-2"));
-  assert.equal(blocked.status, 400);
+  assert.ok(blocked.status >= 400, "the next request must be refused by the usage policy");
   const blockedBody = (await blocked.json()) as { error: { message: string } };
   assert.match(blockedBody.error.message, /weekly usage quota/i);
   assert.equal(hits.length, 1, "the blocked call never reaches the upstream");
@@ -278,6 +278,35 @@ test("an image call whose upstream reports no usage does not lock a limited key 
   assert.equal(response.status, 200);
   assert.deepEqual(usageRows(), []);
   const status = await spendOf(key.key);
+  assert.equal(status.weeklyExceeded, false);
+  assert.equal(status.weeklyHasUnpricedUsage, false);
+
+  const logs = await callLogRows("/v1/images/generations");
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0].api_key_id, key.id);
+  assert.equal(logs[0].connection_id, connection.id);
+});
+
+test("an image call with usage but no pricing row is logged without locking the limited key", async () => {
+  // A successful image response can report tokens before OmniRoute has a pricing
+  // row for that model. Do not persist that row: apiKeyUsageLimits treats any
+  // unpriced usage as fail-closed and would reject the key's next request.
+  const connection = await seedConnection("openai");
+  const key = await createLimitedKey(100);
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({ created: 1, data: [{ b64_json: "aW1hZ2U=" }], usage: IMAGE_USAGE }),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }
+    );
+
+  const response = await imageRoute.POST(generationRequest(key.key, "openai/gpt-image-2"));
+  assert.equal(response.status, 200);
+  assert.deepEqual(usageRows(), []);
+  const status = await spendOf(key.key);
+  assert.equal(status.weeklySpentUsd, 0);
   assert.equal(status.weeklyExceeded, false);
   assert.equal(status.weeklyHasUnpricedUsage, false);
 

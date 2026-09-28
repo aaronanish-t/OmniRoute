@@ -17,14 +17,16 @@
  *    extractors, pricing and per-key USD limits apply unchanged.
  *
  * Successful calls whose upstream reports no usage are deliberately NOT
- * written: a zero-token row for a model without a pricing row would trip the
- * fail-closed budget guard (#12341) and lock a usage-limited key for the whole
- * window, and most image models ship without a token price. How to charge
- * those calls (per-image price, a cost column, or zero-cost rows) is left to a
- * follow-up decision.
+ * written. Calls that report usage but have no pricing row are also skipped: a
+ * zero-token row or a token row for an unpriced model would trip the fail-closed
+ * budget guard (#12341) and lock a usage-limited key for the whole window, and
+ * most image models ship without a token price. How to charge those calls
+ * (per-image price, a cost column, or zero-cost rows) is left to a follow-up
+ * decision.
  */
 
 import { runWithCallLogApiKeyContext } from "./callLogApiKeyContext";
+import { calculateCostDetailed } from "./costCalculator";
 import { saveRequestUsage } from "./usageHistory";
 
 export interface ImageRequestAccounting {
@@ -71,10 +73,24 @@ export async function runImageRequestWithAccounting<T>(
   const usage = upstreamUsageOf(result);
   if ((result as { success?: unknown } | null)?.success === true && usage) {
     const latencyMs = Date.now() - accounting.startTime;
+    const localModel = toProviderLocalModel(accounting.provider, accounting.model);
+    // Check pricing before writing the row. `apiKeyUsageLimits` deliberately fails
+    // closed on any unpriced usage; writing a token row for a default image model
+    // with no pricing entry would therefore lock the key after one successful image.
+    // Keep the raw provider usage here so exact provider-reported costs (for example
+    // xAI's cost_in_usd_ticks) remain visible to the calculator.
+    const { priced } = await calculateCostDetailed(
+      accounting.provider,
+      localModel,
+      usage as Record<string, number | undefined>,
+      { provider: accounting.provider, model: localModel }
+    );
+    if (!priced) return result;
+
     // saveRequestUsage never throws (it logs and swallows DB errors).
     await saveRequestUsage({
       provider: accounting.provider,
-      model: toProviderLocalModel(accounting.provider, accounting.model),
+      model: localModel,
       tokens: usage,
       status: "200",
       success: true,

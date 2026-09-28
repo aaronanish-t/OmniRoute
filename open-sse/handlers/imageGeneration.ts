@@ -2948,7 +2948,6 @@ async function fetchImageEndpoint(url, headers, body, provider, log) {
         created: data.created || Math.floor(Date.now() / 1000),
         data: items,
       },
-      // Upstream token usage for usage_history (kept out of the client payload).
       usage: isJsonObject(data?.usage) ? data.usage : undefined,
     };
   } catch (err: unknown) {

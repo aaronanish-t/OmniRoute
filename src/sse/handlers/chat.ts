@@ -82,6 +82,7 @@ import {
 import { dispatchChatWithAffinityEviction } from "./chatDispatch";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
+import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
 import { comboTargetPassesKeyModelPolicy } from "./chat/comboTargetKeyPolicy.ts";
 import { getCombos } from "@/lib/db/combos";
 import { resolveModelLockoutSettings } from "@/lib/resilience/modelLockoutSettings";
@@ -104,7 +105,6 @@ import {
   isEarlyEofSiblingFailoverOn,
   withSessionHeader,
   withSelectedConnectionHeader,
-  withEmergencyFallbackHeader,
   withCorrelationId,
   withModalityBridgeHeader,
   withConversationId,
@@ -2380,17 +2380,8 @@ async function handleSingleModelChat(
               Boolean(comboName) // isCombo if comboName exists
             );
 
-            if (fallbackResponse.ok) {
-              log.warn(
-                "EMERGENCY_FALLBACK",
-                `Served by emergency fallback: ${currentModelStr} -> ${fallbackModelStr}`
-              );
-              return withEmergencyFallbackHeader(
-                fallbackResponse,
-                currentModelStr,
-                fallbackModelStr
-              );
-            }
+            if (fallbackResponse.ok)
+              return markEmergencyFallback(fallbackResponse, currentModelStr, fallbackModelStr);
 
             log.warn(
               "EMERGENCY_FALLBACK",

@@ -25,7 +25,8 @@ const {
 
 const { clearProviderFailure } = await import("../../open-sse/services/accountFallback.ts");
 const { OMNIROUTE_RESPONSE_HEADERS } = await import("../../src/shared/constants/headers.ts");
-const { withEmergencyFallbackHeader } = await import("../../src/sse/handlers/chatHelpers.ts");
+const { withEmergencyFallbackHeader } =
+  await import("../../src/sse/handlers/emergencyFallbackHeader.ts");
 
 const EMERGENCY_HEADER = "X-OmniRoute-Emergency-Fallback";
 

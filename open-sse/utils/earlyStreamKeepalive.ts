@@ -312,9 +312,9 @@ export function __getDeadlineTokenRegistrySizeForTests(): number {
  *
  * The wrapped request MUST be the one the route hands downstream (admission,
  * body parse, `handleChat`): the handler snapshots `request.signal` after
- * admission, so wrapping after that point would not propagate. Rebuilt via
- * `new Request(request, { signal, headers })`, which preserves method, url and
- * body byte-for-byte.
+ * admission, so wrapping after that point would not propagate. Rebuilt from
+ * primitives (`url`/`method`/`headers`/`body`) rather than from the request
+ * object itself — see the brand note at the `new Request` call below.
  *
  * Controller recovery downstream (`getDeadlineController`) is two-layered:
  * the combined signal object (fast path — same object when nothing rebuilds),
@@ -338,7 +338,19 @@ export function withDeadlineSignal(request: Request): {
   // admission rebuilds, which both copy headers but mint new signal objects.
   const token = `dl-${Date.now().toString(36)}-${(deadlineTokenSeq += 1)}`;
   headers.set(DEADLINE_TOKEN_HEADER, token);
-  const wrappedReq = new Request(request, { signal: combined, headers });
+  // NEVER pass `request` itself as the constructor input. Next.js App Router route
+  // handlers receive a Proxy-wrapped Request: `request instanceof Request` is true,
+  // but the native constructor's private-brand read on the input (`input.#state`) is
+  // not reachable through a Proxy and throws "Cannot read private member #state from
+  // an object whose class did not declare it" — killing every wrapped request.
+  // Rebuilding from primitives preserves url, method, headers and body byte-for-byte;
+  // the body stream is handed over unread (this runs before admission and parsing).
+  const wrappedReq = new Request(request.url, {
+    method: request.method,
+    headers,
+    signal: combined,
+    ...(request.body ? { body: request.body, duplex: "half" as const } : {}),
+  });
   deadlineControllers.set(combined, deadlineController);
   deadlineControllersByToken.set(token, new WeakRef(deadlineController));
   deadlineTokenByController.set(deadlineController, token);

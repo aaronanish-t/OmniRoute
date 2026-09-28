@@ -692,3 +692,53 @@ test("deadline token registry returns to its original size after N requests", as
     "a released token must not resolve through the header fallback"
   );
 });
+
+// #14808 regression: Next.js App Router route handlers receive a Proxy-wrapped
+// Request — reads are forwarded to the target (so `.url`/`.signal`/`.headers`
+// work), but the object identity is the Proxy, so the native constructor's
+// private-brand read on the input (`input.#state`) still fails. The old shape,
+// `new Request(request, { signal, headers })`, therefore threw "Cannot read
+// private member #state from an object whose class did not declare it" and every
+// wrapped inference request died with a 500. The wrapper must rebuild from
+// primitives instead.
+function proxyWrappedRequest(request: Request): Request {
+  return new Proxy(request, {
+    get(target, prop) {
+      const value = Reflect.get(target, prop, target);
+      return typeof value === "function" ? value.bind(target) : value;
+    },
+  });
+}
+
+test("withDeadlineSignal wraps a Proxy-request without private-brand failure", async () => {
+  const inner = new Request("http://localhost/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "m", messages: [{ role: "user", content: "hi" }] }),
+  });
+
+  const { wrappedReq, deadlineController } = withDeadlineSignal(proxyWrappedRequest(inner));
+
+  assert.equal(wrappedReq.method, "POST", "method must survive the rebuild");
+  assert.equal(
+    wrappedReq.url,
+    "http://localhost/v1/chat/completions",
+    "url must survive the rebuild"
+  );
+  assert.equal(
+    wrappedReq.headers.get("content-type"),
+    "application/json",
+    "headers must survive the rebuild"
+  );
+  assert.equal(deadlineController.signal.aborted, false);
+  assert.equal(
+    getDeadlineController(wrappedReq),
+    deadlineController,
+    "the rebuilt request must still resolve to its deadline controller"
+  );
+  assert.deepEqual(
+    await wrappedReq.json(),
+    { model: "m", messages: [{ role: "user", content: "hi" }] },
+    "the unread body stream must be handed over byte-for-byte"
+  );
+});

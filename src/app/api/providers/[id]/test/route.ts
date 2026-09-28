@@ -1052,12 +1052,9 @@ export async function testSingleConnection(
   // connection that can never be health-checked would otherwise stay hidden
   // from /v1/models forever under the "only advertise tested connections"
   // default (isActive starts false on creation — see POST /api/providers),
-  // silently regressing every provider without a test surface.
-  // Activation is only for connections that were never switched on: one an
-  // operator turned off on purpose stays off (see lib/providers/operatorDisable).
-  const operatorDisabled = isOperatorDisabled(connection);
+  // silently regressing every provider without a test surface. Operator-disabled stays off.
   if (result.skipped === true) {
-    if (connection.isActive !== true && !operatorDisabled) {
+    if (connection.isActive !== true && !isOperatorDisabled(connection)) {
       try {
         await updateProviderConnection(connectionId, { isActive: true });
       } catch (activateError) {
@@ -1117,9 +1114,8 @@ export async function testSingleConnection(
     // failing test intentionally leaves isActive untouched (a transient
     // failure on an already-active, already-working connection must not take
     // it out of rotation — that's what the cooldown/rateLimitedUntil below is
-    // for), so this never deactivates anything.
-    // It also never overrides an operator who switched the connection off.
-    ...(result.valid && !operatorDisabled ? { isActive: true } : {}),
+    // for), so this never deactivates anything, nor re-enables an operator-disabled one.
+    ...(result.valid && !isOperatorDisabled(connection) ? { isActive: true } : {}),
     lastError: clearErrorState ? null : result.valid ? connection.lastError : result.error,
     lastErrorAt: clearErrorState ? null : result.valid ? connection.lastErrorAt : now,
     lastTested: now,

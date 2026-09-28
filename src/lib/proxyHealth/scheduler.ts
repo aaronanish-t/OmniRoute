@@ -58,7 +58,11 @@ import {
   type ProxyRefusalKind,
 } from "@omniroute/open-sse/utils/proxyRefusalMemory";
 import { deleteSweepVerdict, recordSweepVerdict, toSweepVerdict } from "./sweepVerdict.ts";
-import { deleteBlockedHistory, recordBlockedObservation } from "./blockedHistory.ts";
+import {
+  deleteBlockedHistory,
+  pruneBlockedHistory,
+  recordBlockedObservation,
+} from "./blockedHistory.ts";
 import {
   isProxyHealthBlockedResetsStreakEnabled,
   isProxySkipRecentlyFailedEnabled,
@@ -319,6 +323,9 @@ async function decideOneResult(
   recordSweepVerdict(id, verdict);
   if (verdict.verdict === "blocked") {
     recordBlockedObservation(id, verdict.cause, verdict.status, verdict.at);
+  } else if (verdict.verdict === "ok") {
+    // A healthy sweep ends the refusal streak (see blockedHistory.ts lifecycle).
+    deleteBlockedHistory(id);
   }
 
   if (decision.clearFailures) ctx.failureMap.delete(id);
@@ -548,6 +555,8 @@ async function sweep(): Promise<void> {
   }
 
   const { items: proxies } = await listProxies({ includeSecrets: true });
+  // Before the empty-registry return, so deleting the last proxy prunes too.
+  pruneBlockedHistory(proxies.map((proxy) => proxy.id));
   if (proxies.length === 0) return;
 
   const failureMap = getFailureMap();

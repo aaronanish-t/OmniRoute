@@ -11,7 +11,15 @@ const HISTORY_FILE = "blocked-history.json";
  * Written ONLY by the periodic sweep in `scheduler.ts` right after the
  * display-verdict write; read by display consumers. The history aggregates
  * cause plus counts across sweeps and restarts (best-effort JSON file), so
- * the UI can show a refusal streak without re-probing. It is NEVER imported
+ * the UI can show a refusal streak without re-probing.
+ *
+ * Lifecycle: an entry is the CURRENT refusal streak of one proxy. It ends —
+ * and the entry is dropped — when a sweep sees the proxy healthy (`ok`), so
+ * `count`/`firstSeen` never carry over a recovery; `fail`/`hang`/
+ * `inconclusive` sweeps prove nothing about the target and keep the streak.
+ * Entries of proxies that no longer exist (deleted by the operator, a
+ * subscription sync, or the sweep's auto-remove) are pruned at the start of
+ * every sweep against the live registry. It is NEVER imported
  * by the pure decision layer (`decision.ts`): recording an observation
  * neither counts a failure, nor writes a status, nor removes a proxy.
  */
@@ -169,6 +177,26 @@ export function getBlockedHistory(id: string): BlockedHistoryEntry | undefined {
 export function deleteBlockedHistory(id: string): void {
   loadHistory();
   if (getHistoryMap().delete(id)) scheduleSave();
+}
+
+/**
+ * Drop the history of every proxy not in `liveIds` (the full registry read by
+ * the sweep). Covers every delete path — operator, batch, subscription sync —
+ * without each having to know about this store. Returns the pruned count.
+ */
+export function pruneBlockedHistory(liveIds: Iterable<string>): number {
+  loadHistory();
+  const live = new Set(liveIds);
+  const entries = getHistoryMap();
+  let pruned = 0;
+  for (const id of [...entries.keys()]) {
+    if (!live.has(id)) {
+      entries.delete(id);
+      pruned++;
+    }
+  }
+  if (pruned > 0) scheduleSave();
+  return pruned;
 }
 
 /** Tests only: isolate suites sharing the process memory. */

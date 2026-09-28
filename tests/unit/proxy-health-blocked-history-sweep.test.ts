@@ -18,8 +18,10 @@ delete process.env.PROXY_AUTO_REMOVE;
 delete process.env.PROXY_AUTO_DISABLE;
 delete process.env.PROXY_HEALTH_BLOCKED_RESETS_STREAK;
 
+// Mutable so a test can make the target "recover" (answer 200) between sweeps.
+let targetStatus = 403;
 const target = http.createServer((_req, res) => {
-  res.writeHead(403);
+  res.writeHead(targetStatus);
   res.end();
 });
 await new Promise<void>((resolve) => target.listen(0, "127.0.0.1", () => resolve()));
@@ -85,6 +87,18 @@ async function freePort(): Promise<number> {
   return port;
 }
 
+async function createRelayedProxy(): Promise<{ id: string; relay: http.Server }> {
+  const port = await freePort();
+  const created = await proxiesDb.createProxy({
+    name: `relayed ${port}`,
+    type: "http",
+    host: "127.0.0.1",
+    port,
+  });
+  const relay = await startRelay(port);
+  return { id: created!.id, relay };
+}
+
 async function threeRefusedSweeps(): Promise<{
   proxyId: string;
   status: string | undefined;
@@ -131,3 +145,79 @@ for (const flag of ["off", "on"] as const) {
     }
   });
 }
+
+test("operator delete: a proxy removed outside the sweep leaves no orphan history after the next sweep", async () => {
+  clearBlockedHistoryForTesting();
+  verdicts.clearSweepVerdicts();
+  targetStatus = 403;
+  const gone = await createRelayedProxy();
+  const kept = await createRelayedProxy();
+  try {
+    await scheduler.forceProxyHealthSweep();
+    assert.equal(getBlockedHistory(gone.id)?.count, 1);
+    assert.equal(getBlockedHistory(kept.id)?.count, 1);
+    // The operator deletes the proxy through the registry (not the sweep's
+    // auto-remove path), so nothing pairs the delete with the history.
+    assert.equal(await proxiesDb.deleteProxyById(gone.id, { force: true }), true);
+    await scheduler.forceProxyHealthSweep();
+    assert.equal(getBlockedHistory(gone.id), undefined, "orphan entry pruned");
+    assert.equal(getBlockedHistory(kept.id)?.count, 2, "live proxy keeps its history");
+    // Pruned from the persisted file too, not only from memory.
+    clearBlockedHistoryForTesting({ keepFile: true });
+    assert.equal(getBlockedHistory(gone.id), undefined);
+    assert.equal(getBlockedHistory(kept.id)?.count, 2);
+  } finally {
+    await stopRelay(gone.relay);
+    await stopRelay(kept.relay);
+    await proxiesDb.deleteProxyById(kept.id, { force: true });
+    clearBlockedHistoryForTesting();
+    verdicts.clearSweepVerdicts();
+  }
+});
+
+test("operator delete of the last proxy: the empty registry still prunes the history", async () => {
+  clearBlockedHistoryForTesting();
+  verdicts.clearSweepVerdicts();
+  targetStatus = 403;
+  const only = await createRelayedProxy();
+  try {
+    await scheduler.forceProxyHealthSweep();
+    assert.equal(getBlockedHistory(only.id)?.count, 1);
+    await proxiesDb.deleteProxyById(only.id, { force: true });
+    await scheduler.forceProxyHealthSweep();
+    assert.equal(getBlockedHistory(only.id), undefined);
+  } finally {
+    await stopRelay(only.relay);
+    clearBlockedHistoryForTesting();
+    verdicts.clearSweepVerdicts();
+  }
+});
+
+test("recovery: a healthy sweep ends the refusal streak and clears the history", async () => {
+  clearBlockedHistoryForTesting();
+  verdicts.clearSweepVerdicts();
+  targetStatus = 403;
+  const proxy = await createRelayedProxy();
+  try {
+    await scheduler.forceProxyHealthSweep();
+    await scheduler.forceProxyHealthSweep();
+    assert.equal(getBlockedHistory(proxy.id)?.count, 2);
+    targetStatus = 200;
+    await scheduler.forceProxyHealthSweep();
+    assert.equal(verdicts.getSweepVerdict(proxy.id)?.verdict, "ok");
+    assert.equal(getBlockedHistory(proxy.id), undefined, "streak cleared after recovery");
+    // A new refusal starts a fresh streak (count 1, new firstSeen).
+    targetStatus = 403;
+    const before = Date.now();
+    await scheduler.forceProxyHealthSweep();
+    const fresh = getBlockedHistory(proxy.id);
+    assert.equal(fresh?.count, 1);
+    assert.ok((fresh?.firstSeen ?? 0) >= before);
+  } finally {
+    targetStatus = 403;
+    await stopRelay(proxy.relay);
+    await proxiesDb.deleteProxyById(proxy.id, { force: true });
+    clearBlockedHistoryForTesting();
+    verdicts.clearSweepVerdicts();
+  }
+});

@@ -14198,6 +14198,8 @@
     "upstreamStatus": "Статус верхнего потока",
     "noResponse": "Нет ответа",
     "egressIp": "Egress IP",
+    "headersAfter": "Заголовки после",
+    "firstChunkAfter": "Первый фрагмент после",
     "servedBy": "Обслуживается",
     "correlationId": "ID корреляции"
   },

@@ -14198,6 +14198,8 @@
     "upstreamStatus": "Uppströmsstatus",
     "noResponse": "Ingen respons",
     "egressIp": "Utgående IP",
+    "headersAfter": "Rubriker efter",
+    "firstChunkAfter": "Första del efter",
     "servedBy": "Serverad av",
     "correlationId": "Korrelerings-ID"
   },

@@ -14198,6 +14198,8 @@
     "upstreamStatus": "అప్‌స్ట్రీమ్ స్థితి",
     "noResponse": "స్పందన లేదు",
     "egressIp": "ఇగ్రెస్ IP",
+    "headersAfter": "శీర్షికలు తర్వాత",
+    "firstChunkAfter": "మొదటి భాగం తర్వాత",
     "servedBy": "సేవ అందించినది",
     "correlationId": "సంబంధ ID"
   },

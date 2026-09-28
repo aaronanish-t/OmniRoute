@@ -14198,6 +14198,8 @@
     "upstreamStatus": "மேல்நிலை நிலை",
     "noResponse": "எந்த பதிலும் இல்லை",
     "egressIp": "வெளியேற்ற IP",
+    "headersAfter": "தலைப்புகள் பின்னர்",
+    "firstChunkAfter": "முதல் துண்டு பின்னர்",
     "servedBy": "சேவையளிக்கப்படுகிறது",
     "correlationId": "இணைப்பு ஐடி"
   },

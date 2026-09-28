@@ -14198,6 +14198,8 @@
     "upstreamStatus": "Stat tas-sors",
     "noResponse": "Ebda risposta",
     "egressIp": "IP Egress",
+    "headersAfter": "Intestaturi wara",
+    "firstChunkAfter": "L-ewwel biċċa wara",
     "servedBy": "Servut minn",
     "correlationId": "ID tal-Korrelazzjoni"
   },

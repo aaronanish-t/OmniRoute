@@ -14198,6 +14198,8 @@
     "upstreamStatus": "Status źródła",
     "noResponse": "Brak odpowiedzi",
     "egressIp": "Adres IP wyjściowy",
+    "headersAfter": "Nagłówki po",
+    "firstChunkAfter": "Pierwszy fragment po",
     "servedBy": "Obsługiwane przez",
     "correlationId": "ID korelacji"
   },

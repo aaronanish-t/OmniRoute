@@ -14198,6 +14198,8 @@
     "upstreamStatus": "ស្ថានភាពអ៊ុបស្ត្រីម",
     "noResponse": "មិនមានការឆ្លើយតប",
     "egressIp": "អ៊ីភីចេញ",
+    "headersAfter": "ក្បាលបន្ទាប់",
+    "firstChunkAfter": "បំណែកដំបូងបន្ទាប់",
     "servedBy": "បានផ្តល់ដោយ",
     "correlationId": "អត្តសញ្ញាណការតភ្ជាប់"
   },

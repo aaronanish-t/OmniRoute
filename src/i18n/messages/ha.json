@@ -14198,6 +14198,8 @@
     "upstreamStatus": "Matsayin tushen",
     "noResponse": "Babu amsa",
     "egressIp": "IP na fita",
+    "headersAfter": "Kanun bayan",
+    "firstChunkAfter": "Sashe na farko bayan",
     "servedBy": "An bayar da",
     "correlationId": "ID na haɗin kai"
   },

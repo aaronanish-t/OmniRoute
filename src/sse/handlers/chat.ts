@@ -784,17 +784,19 @@ async function handleChatImplementation(
       true;
   }
 
-  const admissionRejection = await admissionContext.acquire(apiKeyInfo?.id, { signal: effectiveSignal }, body);
+  const admissionRejection = await admissionContext.acquire(
+    apiKeyInfo?.id,
+    { signal: effectiveSignal },
+    body
+  );
   if (admissionRejection) return admissionRejection;
   clientRawRequest = chatAdmission.resolveClientRawAfterAdmission(clientRawRequest, () =>
-    deferredClientRawBody.withClientBody((clientBody) => buildClientRawRequest(request, clientBody, effectiveSignal))
+    deferredClientRawBody.withClientBody((clientBody) =>
+      buildClientRawRequest(request, clientBody, effectiveSignal)
+    )
   );
-  // Sibling of clientRawRequest.body, not a replacement: .body stays the raw
-  // pre-reconstruction client bytes (see captureDeferredClientRawBody), while
-  // this is the `input` actually dispatched with -- after the
-  // previous_response_id reconstruction above ran, when it applies. A future
-  // continuation lookup against THIS response must resolve from this field,
-  // not the raw one. See the logClientRawRequest doc comment in requestLogger.ts.
+  // Preserve raw client bytes for observability; effectiveInput below records any
+  // reconstructed Responses input without replacing the original snapshot.
   if (clientRawRequest && Array.isArray((body as { input?: unknown }).input)) {
     (clientRawRequest as { effectiveInput?: unknown }).effectiveInput = (
       body as { input: unknown[] }
@@ -1210,15 +1212,8 @@ async function handleChatImplementation(
             reasoningRequestTags: requestRoutingTags.tags,
             managedLease,
             videoBridgeLog,
-            // #7360 follow-up: without this, a target dispatch abandoned by
-            // targetTimeoutRunner.ts's per-target timeout (comboTargetTimeoutMs)
-            // never learns it was abandoned — it only watches the ORIGINAL
-            // client's request.signal (see clientRawRequest below), which stays
-            // open for as long as the overall combo keeps retrying elsewhere.
-            // The abandoned dispatch then hangs forever inside withRateLimit/
-            // acquireAccountSemaphore, leaking a permanent "pending" dashboard
-            // entry (trackPendingRequest(false) never runs) — live incident,
-            // log id 1784418258231-14961a.
+            // #7360: propagate the per-target timeout into dispatch; otherwise an
+            // abandoned target can hang while the parent request remains open.
             modelAbortSignal: target?.modelAbortSignal ?? null,
             fallbackAttempts: target?.fallbackAttempts,
           },
@@ -1244,7 +1239,9 @@ async function handleChatImplementation(
       signal: effectiveSignal,
       correlationId: reqId,
       // #9654 Wave 2: per-target lane-aware admission probe for combo fan-out.
-      perTargetAdmission: admissionContext.createPerTargetAdmissionHook(apiKeyInfo?.id, { signal: effectiveSignal }),
+      perTargetAdmission: admissionContext.createPerTargetAdmissionHook(apiKeyInfo?.id, {
+        signal: effectiveSignal,
+      }),
     });
 
     for (const credentials of comboPreselectedCredentials.values()) {
@@ -1657,9 +1654,7 @@ async function handleSingleModelChat(
       runtimeOptions.emergencyFallbackTried === true
   );
   const requestSignal = clientRawRequest?.signal ?? request?.signal ?? null;
-  // Cumulative cap across all waits for this request (#7360 follow-up) — mirrors
-  // combo.ts's comboCooldownBudgetLeftMs. Declared outside requestAttemptLoop so
-  // it persists (and only decreases) across `continue requestAttemptLoop` retries.
+  // Cumulative wait cap (#7360), kept outside requestAttemptLoop so retries share it.
   let requestRetryBudgetLeftMs = retrySettings.budgetMs;
 
   if (Array.isArray(effectiveAllowedConnections) && effectiveAllowedConnections.length === 0) {

@@ -1,6 +1,9 @@
 // #14360: a request refused by the quota-parking path returns a synthesized 429
-// but writes nothing to call_logs. Upstream 429s are logged; this router-side
-// skip is not, so the refusal only exists in the client's terminal.
+// but wrote nothing to call_logs / usage_history. Upstream 429s are logged; this
+// router-side skip was not, so the refusal only existed in the client's terminal.
+// recordQuotaParkedSkip (called from chat.ts right after handleNoCredentials)
+// records it with the same api-key attribution the pipeline-gate path uses, and
+// skips combo targets — the combo-exhausted path already writes one row.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -11,50 +14,114 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-quota-ski
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
+const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const callLogs = await import("../../src/lib/usage/callLogs.ts");
-const { handleNoCredentials } = await import("../../src/sse/handlers/chatHelpers.ts");
+const { recordQuotaParkedSkip, quotaParkedSkipStatus } =
+  await import("../../src/sse/handlers/quotaParkedSkipUsage.ts");
+
+const PARKED = {
+  allRateLimited: true,
+  lastError: "All qwen-cloud-token-plan accounts have exhausted their quota",
+  lastErrorCode: 429,
+  retryAfterHuman: "4d",
+};
+
+type LogRow = {
+  provider?: string;
+  status?: number;
+  error?: string | null;
+  apiKeyId?: string | null;
+};
+
+async function waitForLogs(provider: string, expectAtLeast: number): Promise<LogRow[]> {
+  let rows: LogRow[] = [];
+  for (let i = 0; i < 50; i++) {
+    const logs = await callLogs.getCallLogs({});
+    const list = ((logs as { logs?: LogRow[] }).logs ?? logs) as LogRow[];
+    rows = (list ?? []).filter((l) => l.provider === provider);
+    if (rows.length >= expectAtLeast) break;
+    await new Promise((r) => setTimeout(r, 10));
+  }
+  return rows;
+}
 
 test.beforeEach(() => {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
+  usageHistory.clearPendingRequests();
 });
 
 test.after(() => {
+  usageHistory.clearPendingRequests();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("#14360 a quota-parked provider skip writes a call_logs row", async () => {
-  const response = handleNoCredentials(
-    {
-      allRateLimited: true,
-      lastError: "All qwen-cloud-token-plan accounts have exhausted their quota",
-      lastErrorCode: 429,
-      retryAfterHuman: "4d",
-    },
-    null,
-    "qwen-cloud-token-plan",
-    "deepseek-v4-flash",
-    null,
-    null
-  );
+test("#14360 a quota-parked skip writes call_logs + usage_history attributed to the api key", async () => {
+  await recordQuotaParkedSkip({
+    credentials: PARKED,
+    lastError: null,
+    lastStatus: null,
+    provider: "qwen-cloud-token-plan",
+    model: "deepseek-v4-flash",
+    isCombo: false,
+    endpoint: "/v1/chat/completions",
+    apiKeyId: "key-14360",
+    apiKeyName: "reporter-key",
+    correlationId: "corr-14360",
+    sessionTag: "conv-14360",
+    startTime: Date.now() - 4,
+  });
 
-  assert.equal(response.status, 429);
-
-  let rows: Array<{ provider?: string; status?: number; error?: string | null }> = [];
-  for (let i = 0; i < 50 && rows.length === 0; i++) {
-    const logs = await callLogs.getCallLogs({});
-    const list = (logs.logs ?? logs) as Array<{
-      provider?: string;
-      status?: number;
-      error?: string | null;
-    }>;
-    rows = (list ?? []).filter((l) => l.provider === "qwen-cloud-token-plan");
-    if (rows.length === 0) await new Promise((r) => setTimeout(r, 10));
-  }
-
+  const rows = await waitForLogs("qwen-cloud-token-plan", 1);
   assert.equal(rows.length, 1, "the synthesized 429 must reach call_logs");
   assert.equal(rows[0].status, 429);
   assert.match(String(rows[0].error ?? ""), /exhausted their quota/);
+  assert.equal(rows[0].apiKeyId, "key-14360");
+
+  const history = (await usageHistory.getUsageDb()).data.history as Array<{
+    apiKeyId?: string | null;
+    success?: boolean;
+  }>;
+  const keyRows = history.filter((r) => r.apiKeyId === "key-14360");
+  assert.equal(keyRows.length, 1, "usage_history must count the refusal against the key");
+  assert.equal(keyRows[0].success, false);
+});
+
+test("#14360 a parked combo target is not recorded (combo-exhausted path owns the row)", async () => {
+  await recordQuotaParkedSkip({
+    credentials: PARKED,
+    lastError: null,
+    lastStatus: null,
+    provider: "qwen-cloud-token-plan",
+    model: "deepseek-v4-flash",
+    isCombo: true,
+    apiKeyId: "key-combo",
+  });
+  // A sentinel non-combo write proves the log pipeline flushed before we assert absence.
+  await recordQuotaParkedSkip({
+    credentials: PARKED,
+    lastError: null,
+    lastStatus: null,
+    provider: "sentinel-provider",
+    model: "m",
+    isCombo: false,
+  });
+  await waitForLogs("sentinel-provider", 1);
+
+  assert.equal((await waitForLogs("qwen-cloud-token-plan", 0)).length, 0);
+  const history = (await usageHistory.getUsageDb()).data.history as Array<{
+    apiKeyId?: string | null;
+  }>;
+  assert.equal(history.filter((r) => r.apiKeyId === "key-combo").length, 0);
+});
+
+test("#14360 status mirrors handleNoCredentials and skips the model-cooldown branch", () => {
+  assert.equal(quotaParkedSkipStatus(null, null), null);
+  assert.equal(quotaParkedSkipStatus({ allRateLimited: false }, 429), null);
+  assert.equal(quotaParkedSkipStatus(PARKED, null), 429);
+  assert.equal(quotaParkedSkipStatus({ allRateLimited: true }, null), 503);
+  assert.equal(quotaParkedSkipStatus({ allRateLimited: true }, 502), 502);
+  assert.equal(quotaParkedSkipStatus({ ...PARKED, cooldownScope: "model" }, null), null);
 });

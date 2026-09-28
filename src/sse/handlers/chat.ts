@@ -83,6 +83,7 @@ import { dispatchChatWithAffinityEviction } from "./chatDispatch";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
 import { comboTargetPassesKeyModelPolicy } from "./chat/comboTargetKeyPolicy.ts";
+import { recordQuotaParkedSkip } from "./quotaParkedSkipUsage";
 import { getCombos } from "@/lib/db/combos";
 import { resolveModelLockoutSettings } from "@/lib/resilience/modelLockoutSettings";
 import {
@@ -1849,6 +1850,22 @@ async function handleSingleModelChat(
           shadowedNode,
           runtimeOptions?.correlationId ?? null
         );
+        // #14360: log the synthesized quota-parking refusal (never for combo targets).
+        await recordQuotaParkedSkip({
+          credentials,
+          lastError,
+          lastStatus,
+          provider,
+          model,
+          isCombo,
+          requestedModel: body?.model || modelStr,
+          endpoint: clientRawRequest?.endpoint,
+          apiKeyId: apiKeyInfo?.id ?? null,
+          apiKeyName: apiKeyInfo?.name ?? null,
+          correlationId: runtimeOptions?.correlationId ?? null,
+          sessionTag: runtimeOptions?.conversationId ?? null,
+          startTime: telemetry?.startTime,
+        });
         const lastFailedConnectionId =
           excludedConnectionIds.size > 0
             ? Array.from(excludedConnectionIds)[excludedConnectionIds.size - 1]

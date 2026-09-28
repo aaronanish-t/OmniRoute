@@ -14199,6 +14199,8 @@
     "upstreamStatus": "Uzvodni status",
     "noResponse": "Nema odgovora",
     "egressIp": "Egress IP",
+    "headersAfter": "Zaglavlja nakon",
+    "firstChunkAfter": "Prvi dio nakon",
     "servedBy": "Poslužuje",
     "correlationId": "ID korelacije"
   },

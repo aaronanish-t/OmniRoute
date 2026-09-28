@@ -14199,6 +14199,8 @@
     "upstreamStatus": "アップストリームステータス",
     "noResponse": "応答なし",
     "egressIp": "イーグレスIP",
+    "headersAfter": "ヘッダーの後",
+    "firstChunkAfter": "最初のチャンクの後",
     "servedBy": "提供元",
     "correlationId": "相関ID"
   },

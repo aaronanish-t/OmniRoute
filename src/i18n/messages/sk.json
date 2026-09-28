@@ -14199,6 +14199,8 @@
     "upstreamStatus": "Stav nadriadeného",
     "noResponse": "Žiadna odpoveď",
     "egressIp": "Egress IP",
+    "headersAfter": "Hlavičky po",
+    "firstChunkAfter": "Prvý úsek po",
     "servedBy": "Poskytované",
     "correlationId": "ID korelácie"
   },

@@ -14199,6 +14199,8 @@
     "upstreamStatus": "Felfelé állapot",
     "noResponse": "Nincs válasz",
     "egressIp": "Kimeneti IP",
+    "headersAfter": "Fejlécek után",
+    "firstChunkAfter": "Első darab után",
     "servedBy": "Szolgáltatva általa",
     "correlationId": "Korelációs azonosító"
   },

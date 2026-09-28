@@ -14199,6 +14199,8 @@
     "upstreamStatus": "Katayuan ng Upstream",
     "noResponse": "Walang tugon",
     "egressIp": "Egress IP",
+    "headersAfter": "Mga header pagkatapos",
+    "firstChunkAfter": "Unang chunk pagkatapos",
     "servedBy": "Ipinagkaloob ng",
     "correlationId": "ID ng Pagsasama"
   },

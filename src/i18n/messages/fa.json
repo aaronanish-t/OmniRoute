@@ -14199,6 +14199,8 @@
     "upstreamStatus": "وضعیت بالا دستی",
     "noResponse": "هیچ پاسخی",
     "egressIp": "IP خروجی",
+    "headersAfter": "سرفصل‌ها پس از",
+    "firstChunkAfter": "اولین بخش پس از",
     "servedBy": "توسط ارائه شده",
     "correlationId": "شناسه همبستگی"
   },

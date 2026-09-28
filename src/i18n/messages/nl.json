@@ -14199,6 +14199,8 @@
     "upstreamStatus": "Stroomopwaartse status",
     "noResponse": "Geen reactie",
     "egressIp": "Uittrede IP",
+    "headersAfter": "Headers na",
+    "firstChunkAfter": "Eerste chunk na",
     "servedBy": "Gediend door",
     "correlationId": "Correlatie-ID"
   },

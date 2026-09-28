@@ -14199,6 +14199,8 @@
     "upstreamStatus": "Trạng thái nguồn",
     "noResponse": "Không có phản hồi",
     "egressIp": "IP ra",
+    "headersAfter": "Tiêu đề sau",
+    "firstChunkAfter": "Đoạn đầu tiên sau",
     "servedBy": "Được phục vụ bởi",
     "correlationId": "ID tương quan"
   },

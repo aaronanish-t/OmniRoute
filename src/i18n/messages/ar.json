@@ -14199,6 +14199,8 @@
     "upstreamStatus": "حالة التيار العلوي",
     "noResponse": "لا توجد استجابة",
     "egressIp": "عنوان IP الصادر",
+    "headersAfter": "الرؤوس بعد",
+    "firstChunkAfter": "الكتلة الأولى بعد",
     "servedBy": "مقدم بواسطة",
     "correlationId": "معرف التوافق"
   },

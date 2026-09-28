@@ -14199,6 +14199,8 @@
     "upstreamStatus": "ਉਪਰਲੀ ਧਾਰਾ ਦੀ ਸਥਿਤੀ",
     "noResponse": "ਕੋਈ ਜਵਾਬ ਨਹੀਂ",
     "egressIp": "ਇਗਰੈਸ IP",
+    "headersAfter": "ਹੈਡਰਜ਼ ਬਾਅਦ",
+    "firstChunkAfter": "ਪਹਿਲਾ ਚੰਕ ਬਾਅਦ",
     "servedBy": "ਦੁਆਰਾ ਸੇਵਾ ਕੀਤੀ ਗਈ",
     "correlationId": "ਸੰਬੰਧਿਤਤਾ ID"
   },

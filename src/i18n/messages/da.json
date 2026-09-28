@@ -14199,6 +14199,8 @@
     "upstreamStatus": "Opstrøm status",
     "noResponse": "Ingen respons",
     "egressIp": "Udgående IP",
+    "headersAfter": "Headers efter",
+    "firstChunkAfter": "Første chunk efter",
     "servedBy": "Betjent af",
     "correlationId": "Korrelation ID"
   },

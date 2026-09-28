@@ -14199,6 +14199,8 @@
     "upstreamStatus": "סטטוס מעלה",
     "noResponse": "אין תגובה",
     "egressIp": "כתובת IP יוצאת",
+    "headersAfter": "כותרות אחרי",
+    "firstChunkAfter": "החלק הראשון אחרי",
     "servedBy": "מוגש על ידי",
     "correlationId": "מזהה קורלציה"
   },

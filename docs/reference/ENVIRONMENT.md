@@ -377,9 +377,12 @@ Route upstream LLM provider calls through an HTTP or SOCKS5 proxy for egress con
 | ---------------------------------------- | --------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ENABLE_SOCKS5_PROXY`                    | `true`    | `open-sse/executors`                         | Enable SOCKS5 proxy agent for upstream calls. Opt-out with `false`.                                                                                                                                                                                                                                                                                 |
 | `NEXT_PUBLIC_ENABLE_SOCKS5_PROXY`        | `true`    | Client-side                                  | Client-side awareness of SOCKS5 availability.                                                                                                                                                                                                                                                                                                       |
-| `PROXY_SKIP_RECENTLY_FAILED`             | `false`   | `src/shared/utils/featureFlags.ts`           | Opt-in feature flag (see [FEATURE_FLAGS.md](./FEATURE_FLAGS.md); a dashboard DB override wins). Proxy pools and per-account rotation stop re-serving a member that just failed (refused TCP probe, or a 429 through it) for a period that doubles on each repeat, up to a cap. `true` (or `1`, `yes`) enables it.                                   |
+| `PROXY_SKIP_RECENTLY_FAILED`             | `true`    | `src/shared/utils/featureFlags.ts`           | On-by-default feature flag (see [FEATURE_FLAGS.md](./FEATURE_FLAGS.md); a dashboard DB override wins). Proxy pools and per-account rotation stop re-serving a member that just failed (refused TCP probe, or a 429 through it) for a period that doubles on each repeat, up to a cap. `false` restores plain selection.                                          |
+| `SELECTOR_CONTROL_ALLOWLIST`             | _(unset)_ | `src/lib/proxySubscription/selectorGuard.ts` | Allow-list for local-core selector-control targets beyond loopback (comma/space separated hosts or IPs, `*` opens LAN/private but never metadata/link-local). Loopback over http/https is allowed by default. A dashboard DB value wins over this variable when set and non-empty.                                                                                                                                                                          |
 | `PROXY_QUOTA_429_BASE_MS`                | `120000`  | `open-sse/utils/proxyRefusalMemory.ts`       | Base period (ms) of the 429 set-aside, doubled on each repeat. Read once at startup. Bounded to `1000..3600000`; out-of-range or unreadable falls back to the default with a warning. |
 | `PROXY_QUOTA_429_MAX_MS`                 | `3600000` | `open-sse/utils/proxyRefusalMemory.ts`       | Cap (ms) of the 429 set-aside. Read once at startup. Bounded to `1000..3600000`; out-of-range or unreadable falls back to the default with a warning. When the cap is below the base, it falls back to the default. Lowering the cap also shortens streak forgetting: entries purge `2 x max` after expiry.                                                                                                                                                                          |
+| `PROXY_POOL_SHARED_EGRESS_ORDER`         | `false`   | `src/shared/utils/featureFlags.ts`           | Opt-in feature flag (see [FEATURE_FLAGS.md](./FEATURE_FLAGS.md); a dashboard DB override wins). For providers whose quota is bucketed by egress address, rank a pool member sharing a recently refused member's observed egress address just below healthy members. Order only, never excluded. Needs `PROXY_SKIP_RECENTLY_FAILED`, which produces the refusal signal it reads. |
+| `PROXY_WEBHOOK_REBOUND_MS`               | `300000`  | `src/lib/proxyEvents/proxyTransitionBridge.ts` | Rebound window (ms) capping repeat `proxy.set_aside` webhook alerts per pool member so a burst of refusals sends one event. Read on each emit. Bounded to `1000..3600000`; out-of-range or unreadable falls back to the default silently. |
 | `HTTP_PROXY`                             | _(unset)_ | Node.js standard                             | HTTP proxy for upstream calls.                                                                                                                                                                                                                                                                                                                      |
 | `HTTPS_PROXY`                            | _(unset)_ | Node.js standard                             | HTTPS proxy for upstream calls.                                                                                                                                                                                                                                                                                                                     |
 | `ALL_PROXY`                              | _(unset)_ | Node.js standard                             | Universal proxy (supports `socks5://`).                                                                                                                                                                                                                                                                                                             |
@@ -808,10 +811,12 @@ REQUEST_TIMEOUT_MS (global override)
 | `OPENCODE_RESPONSES_HEADERS_WAIT_MAX_ROTATIONS` | `2`            | OpenCode executor only: how many times per request the headers-wait bound above may move to the next account. The last remaining account always keeps the full headers window. |
 | `OPENCODE_PARK_AND_RESUME`                    | `false`              | OpenCode executor only: park the request with a heartbeat after repeated transient 429s (or a fresh pool-strain marker), then replay one capped leg of up to 3 sequential accounts instead of fanning out the whole fleet (#13924). Off by default: every 429 rotates to the next account exactly as before. |
 | `STREAM_READINESS_STALL_RETRY` | `false` | Streaming chat only: when the first upstream body stalls before producing a usable event, issue one bounded second attempt through the same routing path with the same readiness budget and no account penalty. Off by default: a stalled first body fails the request without a retry. |
+| `OPENCODE_POOL_RESELECT`                    | `false`              | OpenCode executor only: after a 429 from an egress-bucketed provider on a proxy-less account under an ambient pool context, ask the connection pool for another member for the next attempt instead of retrying the same egress address. Orders, never excludes: an exhausted pool keeps the current behavior. Off by default: every 429 rotates to the next account exactly as before. |
 | `OPENCODE_POOL_STRAIN_MARKER_PATH`              | _(unset)_            | OpenCode executor only: override path of the pool-strain marker read before parking (`{since, reason, ttl_s}`, default `/tmp/opencode-pool-strain.json`, #13924). A fresh marker parks without recounting; absent or stale falls back to the burst counter. |
 | `API_BRIDGE_PROXY_TIMEOUT_MS`             | `30000`              | Proxy hop timeout for `/v1` bridge requests.                                                                                                                    |
 | `FIRECRAWL_BASE_URL`                      | `https://api.firecrawl.dev` | Point the Firecrawl web-fetch executor at a self-hosted instance (API key optional off-cloud).                                                          |
 | `FIRECRAWL_TIMEOUT_MS`                    | `30000`              | Per-request timeout for the Firecrawl web-fetch executor.                                                                                                       |
+| `TAVILY_BASE_URL`                         | _(unset)_            | Base URL for the Tavily `/usage` quota fetcher (Provider Limits); ignored when it points at `api.tavily.com`. Unset falls back to the connection's base URL. |
 | `API_BRIDGE_SERVER_REQUEST_TIMEOUT_MS`    | `300000`             | Overall server request timeout for the bridge.                                                                                                                  |
 | `API_BRIDGE_SERVER_HEADERS_TIMEOUT_MS`    | `60000`              | Time to send response headers via the bridge.                                                                                                                   |
 | `API_BRIDGE_SERVER_KEEPALIVE_TIMEOUT_MS`  | `5000`               | Bridge keep-alive idle timeout.                                                                                                                                 |
@@ -937,8 +942,62 @@ The logging system writes to both stdout and rotated log files. All configuratio
 | `SEMANTIC_CACHE_TTL_MS`    | `1800000` (30 min) | Semantic cache entry TTL.                                                                                                                                                                                                                                                         |
 | `OMNIROUTE_CORPUS_CACHE_SIZE` | `5`             | Local-corpus roots that keep a live in-memory index at once (`src/lib/localCorpus/configured.ts`). LRU: at the limit the least-recently-used root's index is evicted and rebuilt on its next query. Clamped to a minimum of `1`; a non-numeric value falls back to the default.     |
 | `STREAM_HISTORY_MAX`       | `50`               | Max recent stream events in the Dashboard live view buffer.                                                                                                                                                                                                                       |
-| `CONTEXT_LENGTH_DEFAULT`   | `128000`           | Global fallback max context length for models without explicit config.                                                                                                                                                                                                            |
+| `CONTEXT_LENGTH_DEFAULT`   | _(unset)_          | Global context-length override (tokens) for every provider that has no `CONTEXT_LENGTH_<PROVIDER>` variable. When set, it **replaces** the catalog, dashboard override and registry values for those providers; when unset, OmniRoute uses its built-in chain, whose last resort is `128000`. See [Per-provider context length](#per-provider-context-length-context_length_provider). |
 | `USAGE_TOKEN_BUFFER`       | `100`              | Extra token headroom reserved when tracking usage quotas.                                                                                                                                                                                                                         |
+
+### Per-provider context length (`CONTEXT_LENGTH_<PROVIDER>`)
+
+`open-sse/services/contextManager.ts` (`getEnvOverride()` / `resolveTokenLimit()`) also reads a
+**per-provider** form whose name is built from the provider ID at runtime, so it cannot be
+listed row by row in the table above or in `.env.example`.
+
+**Name.** `CONTEXT_LENGTH_<PROVIDER>`, where `<PROVIDER>` is the provider ID upper-cased, with
+every character outside `A-Z` / `0-9` replaced by `_`. The provider ID is the canonical one after
+alias resolution (the `provider` part of a `provider/model` string once a short alias has been
+resolved). Custom OpenAI- or Anthropic-compatible nodes use their generated node ID, so the
+UUID is part of the variable name. The value is a positive integer number of tokens; anything
+else (empty, `0`, negative, non-numeric) is ignored and resolution moves on to the next step.
+
+| Provider ID                                                 | Variable name                                                              |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------- |
+| agentrouter                                                 | CONTEXT_LENGTH_AGENTROUTER                                                 |
+| openrouter                                                  | CONTEXT_LENGTH_OPENROUTER                                                  |
+| openai-compatible-chat-0f8e2c1a-5b7d-4e3f-9a6c-2d1b8e4f7a90 | CONTEXT_LENGTH_OPENAI_COMPATIBLE_CHAT_0F8E2C1A_5B7D_4E3F_9A6C_2D1B8E4F7A90 |
+
+**Precedence.** For a `provider/model` pair, the first step that yields a value wins:
+
+1. `CONTEXT_LENGTH_<PROVIDER>` for that provider.
+2. `CONTEXT_LENGTH_DEFAULT` (global environment override).
+3. The per-model window: a persisted context override (set in the dashboard, or auto-pinned by
+   the discovery reconciler, see `CONTEXT_WINDOW_RECONCILE_INTERVAL`), otherwise the synced
+   catalog / models.dev value.
+4. The provider's registry `defaultContextLength`.
+5. Model-name heuristics (`claude` 200000, `gemini` 1000000, `gpt` / `o1` / `o3` / `o4` /
+   `codex` 400000).
+6. Built-in per-provider defaults, then `128000`.
+
+Both environment steps apply to the **whole provider**: every model of that provider gets the
+same limit, and they win over per-model dashboard overrides. When only one model of a provider
+needs a different window, use a per-model override in the dashboard instead.
+
+**Scope.** This chain drives the request-time context-window check (the
+`context_length_exceeded` / "Input exceeds context window" rejection in
+`open-sse/handlers/chatCore.ts`), prompt compression budgets and combo context limits. The
+`context_length` advertised by `GET /v1/models` can still come from catalog or registry
+metadata and is not guaranteed to reflect the environment override.
+
+**Example.** A provider whose model accepts a 1,050,000-token window while the catalog reports
+128,000:
+
+```dotenv
+CONTEXT_LENGTH_AGENTROUTER=1050000
+```
+
+Restart the server after changing it: the value is read from the server process environment.
+On the **desktop app** the server runs as a child process and does not see a system variable
+set after the app was launched; put the line in the `.env` file the app loads (lookup order in
+[Electron Guide: Environment file lookup](../guides/ELECTRON_GUIDE.md#environment-file-lookup)),
+then fully quit and relaunch the app.
 
 ### Compression
 

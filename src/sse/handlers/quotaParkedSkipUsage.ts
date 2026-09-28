@@ -4,9 +4,10 @@
  * reaching an upstream — so the normal failure path never writes a call_logs
  * row and the refusal only exists in the client's terminal.
  *
- * This leaf records that synthesized response through
- * `recordRejectedRequestUsage` with the same attribution the pipeline-gate path
- * in `chat.ts` passes (api key, endpoint, conversation, start time), so the
+ * This leaf records that synthesized response (and the pipeline-gate rejection)
+ * through
+ * `recordRejectedRequestUsage` with one shared attribution (api key, endpoint,
+ * conversation, start time — `chatRejectionAttribution`), so the
  * `usage_history` row (success:false) is counted against the right key.
  *
  * Combo targets are NOT recorded here: a combo calls handleSingleModel once per
@@ -15,22 +16,85 @@
  */
 import * as log from "../utils/logger";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
-import { recordRejectedRequestUsage } from "./rejectedRequestUsage";
+import type { RejectedRequestUsageInput } from "./rejectedRequestUsage";
 
-export interface QuotaParkedSkipInput {
+/** The request-scoped values of handleSingleModelChat that attribute a rejection. */
+export interface ChatRejectionScope {
+  body?: { model?: string } | null;
+  modelStr?: string | null;
+  clientRawRequest?: { endpoint?: string | null } | null;
+  apiKeyInfo?: { id?: string | null; name?: string | null } | null;
+  runtimeOptions?: {
+    comboStepId?: string | null;
+    comboExecutionKey?: string | null;
+    correlationId?: string | null;
+    conversationId?: string | null;
+  } | null;
+  telemetry?: { startTime?: number } | null;
+  comboName?: string | null;
+  isCombo?: boolean;
+}
+
+export interface QuotaParkedSkip {
   credentials: unknown;
   lastError: string | null;
   lastStatus: number | null;
   provider: string;
   model: string;
-  isCombo: boolean;
-  requestedModel?: string | null;
-  endpoint?: string | null;
-  apiKeyId?: string | null;
-  apiKeyName?: string | null;
-  correlationId?: string | null;
-  sessionTag?: string | null;
-  startTime?: number;
+}
+
+/** Attribution fields shared by every pre-dispatch rejection recorded from chat.ts. */
+export function chatRejectionAttribution(scope: ChatRejectionScope) {
+  const opts = scope.runtimeOptions ?? null;
+  const isCombo = scope.isCombo === true;
+  return {
+    requestedModel: scope.body?.model || scope.modelStr || undefined,
+    endpoint: scope.clientRawRequest?.endpoint,
+    comboName: isCombo ? (scope.comboName ?? null) : null,
+    comboStepId: isCombo ? (opts?.comboStepId ?? null) : null,
+    comboExecutionKey: isCombo ? (opts?.comboExecutionKey ?? null) : null,
+    apiKeyId: scope.apiKeyInfo?.id ?? null,
+    apiKeyName: scope.apiKeyInfo?.name ?? null,
+    correlationId: opts?.correlationId ?? null,
+    sessionTag: opts?.conversationId ?? null,
+    startTime: scope.telemetry?.startTime,
+  };
+}
+
+async function recordSafely(input: RejectedRequestUsageInput, what: string): Promise<void> {
+  try {
+    // Lazy, as chat.ts always loaded it: keeps usageDb off chat.ts's static import graph.
+    const { recordRejectedRequestUsage } = await import("./rejectedRequestUsage");
+    await recordRejectedRequestUsage(input);
+  } catch (err) {
+    log.debug("CHAT", `[${input.provider}/${input.model}] ${what} log failed`, {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
+/**
+ * Pipeline-gate rejection (provider circuit breaker OPEN / model cooldown):
+ * visible in /dashboard/logs AND counted per api key in usage_history
+ * (success:false) — otherwise a key whose traffic is entirely gate-rejected
+ * shows "zero requests" (support-mesh 2026-07-08).
+ */
+export async function recordGateRejection(
+  status: number,
+  provider: string,
+  model: string,
+  scope: ChatRejectionScope
+): Promise<void> {
+  await recordSafely(
+    {
+      status,
+      model,
+      provider,
+      error: `[${status}] Pipeline gate rejected`,
+      ...chatRejectionAttribution(scope),
+    },
+    "gate rejection"
+  );
 }
 
 type ParkedCredentials = {
@@ -55,30 +119,24 @@ export function quotaParkedSkipStatus(credentials: unknown, lastStatus: number |
   return status;
 }
 
-export async function recordQuotaParkedSkip(input: QuotaParkedSkipInput): Promise<void> {
-  if (input.isCombo) return;
-  const status = quotaParkedSkipStatus(input.credentials, input.lastStatus);
+export async function recordQuotaParkedSkip(
+  skip: QuotaParkedSkip,
+  scope: ChatRejectionScope
+): Promise<void> {
+  if (scope.isCombo) return;
+  const status = quotaParkedSkipStatus(skip.credentials, skip.lastStatus);
   if (status === null) return;
-  const creds = input.credentials as ParkedCredentials;
+  const creds = skip.credentials as ParkedCredentials;
   const errorMsg =
-    input.lastError || (typeof creds.lastError === "string" && creds.lastError) || "Unavailable";
-  try {
-    await recordRejectedRequestUsage({
+    skip.lastError || (typeof creds.lastError === "string" && creds.lastError) || "Unavailable";
+  await recordSafely(
+    {
       status,
-      model: input.model,
-      requestedModel: input.requestedModel || input.model,
-      provider: input.provider,
-      endpoint: input.endpoint,
-      error: `[${input.provider}/${input.model}] ${errorMsg}`,
-      apiKeyId: input.apiKeyId ?? null,
-      apiKeyName: input.apiKeyName ?? null,
-      correlationId: input.correlationId ?? null,
-      sessionTag: input.sessionTag ?? null,
-      startTime: input.startTime,
-    });
-  } catch (err) {
-    log.debug("CHAT", `[${input.provider}/${input.model}] quota-parked skip log failed`, {
-      error: err instanceof Error ? err.message : String(err),
-    });
-  }
+      model: skip.model,
+      provider: skip.provider,
+      error: `[${skip.provider}/${skip.model}] ${errorMsg}`,
+      ...chatRejectionAttribution(scope),
+    },
+    "quota-parked skip"
+  );
 }

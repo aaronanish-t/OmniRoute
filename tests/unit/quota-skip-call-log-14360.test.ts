@@ -16,7 +16,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const callLogs = await import("../../src/lib/usage/callLogs.ts");
-const { recordQuotaParkedSkip, quotaParkedSkipStatus } =
+const { recordQuotaParkedSkip, recordGateRejection, quotaParkedSkipStatus } =
   await import("../../src/sse/handlers/quotaParkedSkipUsage.ts");
 
 const PARKED = {
@@ -25,6 +25,14 @@ const PARKED = {
   lastErrorCode: 429,
   retryAfterHuman: "4d",
 };
+
+const parked = (provider: string) => ({
+  credentials: PARKED,
+  lastError: null,
+  lastStatus: null,
+  provider,
+  model: "deepseek-v4-flash",
+});
 
 type LogRow = {
   provider?: string;
@@ -59,19 +67,13 @@ test.after(() => {
 });
 
 test("#14360 a quota-parked skip writes call_logs + usage_history attributed to the api key", async () => {
-  await recordQuotaParkedSkip({
-    credentials: PARKED,
-    lastError: null,
-    lastStatus: null,
-    provider: "qwen-cloud-token-plan",
-    model: "deepseek-v4-flash",
+  await recordQuotaParkedSkip(parked("qwen-cloud-token-plan"), {
+    body: { model: "deepseek-v4-flash" },
+    clientRawRequest: { endpoint: "/v1/chat/completions" },
+    apiKeyInfo: { id: "key-14360", name: "reporter-key" },
+    runtimeOptions: { correlationId: "corr-14360", conversationId: "conv-14360" },
+    telemetry: { startTime: Date.now() - 4 },
     isCombo: false,
-    endpoint: "/v1/chat/completions",
-    apiKeyId: "key-14360",
-    apiKeyName: "reporter-key",
-    correlationId: "corr-14360",
-    sessionTag: "conv-14360",
-    startTime: Date.now() - 4,
   });
 
   const rows = await waitForLogs("qwen-cloud-token-plan", 1);
@@ -90,24 +92,13 @@ test("#14360 a quota-parked skip writes call_logs + usage_history attributed to 
 });
 
 test("#14360 a parked combo target is not recorded (combo-exhausted path owns the row)", async () => {
-  await recordQuotaParkedSkip({
-    credentials: PARKED,
-    lastError: null,
-    lastStatus: null,
-    provider: "qwen-cloud-token-plan",
-    model: "deepseek-v4-flash",
+  await recordQuotaParkedSkip(parked("qwen-cloud-token-plan"), {
+    apiKeyInfo: { id: "key-combo" },
+    comboName: "prod",
     isCombo: true,
-    apiKeyId: "key-combo",
   });
   // A sentinel non-combo write proves the log pipeline flushed before we assert absence.
-  await recordQuotaParkedSkip({
-    credentials: PARKED,
-    lastError: null,
-    lastStatus: null,
-    provider: "sentinel-provider",
-    model: "m",
-    isCombo: false,
-  });
+  await recordQuotaParkedSkip(parked("sentinel-provider"), { isCombo: false });
   await waitForLogs("sentinel-provider", 1);
 
   assert.equal((await waitForLogs("qwen-cloud-token-plan", 0)).length, 0);
@@ -124,4 +115,20 @@ test("#14360 status mirrors handleNoCredentials and skips the model-cooldown bra
   assert.equal(quotaParkedSkipStatus({ allRateLimited: true }, null), 503);
   assert.equal(quotaParkedSkipStatus({ allRateLimited: true }, 502), 502);
   assert.equal(quotaParkedSkipStatus({ ...PARKED, cooldownScope: "model" }, null), null);
+});
+
+test("the gate path shares the attribution and keeps combo fields for combo targets", async () => {
+  await recordGateRejection(503, "gate-provider", "claude-sonnet-5", {
+    body: { model: "claude-sonnet-5" },
+    apiKeyInfo: { id: "key-gate", name: "gate-key" },
+    runtimeOptions: { comboStepId: "s1", comboExecutionKey: "k1" },
+    comboName: "prod",
+    isCombo: true,
+  });
+  const rows = await waitForLogs("gate-provider", 1);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].status, 503);
+  assert.equal(rows[0].apiKeyId, "key-gate");
+  assert.equal(rows[0].comboName, "prod");
+  assert.match(String(rows[0].error ?? ""), /Pipeline gate rejected/);
 });

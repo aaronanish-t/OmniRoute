@@ -11082,6 +11082,7 @@
     "poolSetAsideReason": "Odložené: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy je nedostupná",
     "poolSetAsideKindIpQuota429": "obmedzenie rýchlosti podľa IP (429)",
+    "poolSetAsideKindSlow": "pomalé odpovede",
     "poolSetAsideUntil": "Späť v rotácii {endsAt}",
     "poolSetAsideRepeat": "Odložené {count, plural, one {#krát} other {#krát}}",
     "poolUnknownAddress": "Neznáma adresa",

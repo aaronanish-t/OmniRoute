@@ -11082,6 +11082,7 @@
     "poolSetAsideReason": "Curtha ar leataobh: {kind}",
     "poolSetAsideKindProxyUnreachable": "níl teacht ar an seachfhreastalaí",
     "poolSetAsideKindIpQuota429": "teorainn ráta IP (429)",
+    "poolSetAsideKindSlow": "freagraí mall",
     "poolSetAsideUntil": "Ar ais sa rothlú {endsAt}",
     "poolSetAsideRepeat": "Curtha ar leataobh {count, plural, one {# uair} other {# uair}}",
     "poolUnknownAddress": "Seoladh anaithnid",

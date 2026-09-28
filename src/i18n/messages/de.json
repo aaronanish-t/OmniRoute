@@ -11082,6 +11082,7 @@
     "poolSetAsideReason": "Zurückgestellt: {kind}",
     "poolSetAsideKindProxyUnreachable": "Proxy nicht erreichbar",
     "poolSetAsideKindIpQuota429": "IP-Ratenlimit (429)",
+    "poolSetAsideKindSlow": "langsame Antworten",
     "poolSetAsideUntil": "Zurück in Rotation {endsAt}",
     "poolSetAsideRepeat": "Zurückgestellt {count, plural, one {# Mal} other {# Mal}}",
     "poolUnknownAddress": "Unbekannte Adresse",

@@ -11082,6 +11082,7 @@
     "poolSetAsideReason": "Pus deoparte: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy inaccesibil",
     "poolSetAsideKindIpQuota429": "limită de rată pe IP (429)",
+    "poolSetAsideKindSlow": "răspunsuri lente",
     "poolSetAsideUntil": "Înapoi în rotație {endsAt}",
     "poolSetAsideRepeat": "Pus deoparte {count, plural, one {# dată} other {# ori}}",
     "poolUnknownAddress": "Adresă necunoscută",

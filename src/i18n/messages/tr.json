@@ -11082,6 +11082,7 @@
     "poolSetAsideReason": "Kenara ayrıldı: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy'ye ulaşılamıyor",
     "poolSetAsideKindIpQuota429": "IP hız sınırı (429)",
+    "poolSetAsideKindSlow": "yavaş yanıtlar",
     "poolSetAsideUntil": "Rotasyona geri döndü {endsAt}",
     "poolSetAsideRepeat": "Kenara ayrıldı {count, plural, one {# kez} other {# kez}}",
     "poolUnknownAddress": "Bilinmeyen adres",

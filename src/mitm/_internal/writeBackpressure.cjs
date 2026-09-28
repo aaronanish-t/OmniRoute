@@ -12,7 +12,7 @@
  * resolving. All three listeners are removed whichever event fires first, so a
  * long stream to a slow client never accumulates listeners.
  *
- * @param {import("stream").Writable} res
+ * @param {NodeJS.WritableStream} res
  * @param {string | Buffer} chunk
  * @returns {Promise<void>}
  */

@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "無料スタック（$0）",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "すべての無料プロバイダー間でラウンドロビンします：Antigravity (Gemini)、Kiro (Claude)、Qoder (3モデル)、NVIDIA、Groq。コストはゼロで、コーディングが止まることはありません。",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP モード",

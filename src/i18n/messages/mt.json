@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Sett Bla Ħlas ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Rotazzjoni bejn il-fornituri bla ħlas kollha: Antigravity (Gemini), Kiro (Claude), Qoder (3 mudelli), NVIDIA, Groq. Bla ebda spiża, u qatt ma jieqaf jikteb il-kodiċi.",
     "auto": "Awtomatiku Intelliġenti",
     "autoDesc": "Grupp intelliġenti ta’ rotot li jirkupra waħdu, b’punteġġ ibbażat fuq diversi fatturi",
     "lkgp": "Modalità LKGP",

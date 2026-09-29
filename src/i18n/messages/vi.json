@@ -3672,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Bộ miễn phí ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Định tuyến xoay vòng qua tất cả nhà cung cấp miễn phí: Antigravity (Gemini), Kiro (Claude), Qoder (3 mô hình), NVIDIA, Groq. Không tốn chi phí, không bao giờ ngừng lập trình.",
     "auto": "Tự động thông minh",
     "autoDesc": "Nhóm định tuyến thông minh tự phục hồi với tính điểm đa yếu tố",
     "lkgp": "Chế độ LKGP",

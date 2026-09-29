@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "უფასო სტეკი ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "წრიული მონაცვლეობა ყველა უფასო პროვაიდერს შორის: Antigravity (Gemini), Kiro (Claude), Qoder (3 მოდელი), NVIDIA, Groq. ნულოვანი ღირებულება, კოდირებას არასდროს წყვეტს.",
     "auto": "ინტელექტუალური ავტომატური რეჟიმი",
     "autoDesc": "თვითაღდგენადი ჭკვიანი მარშრუტიზაციის პული მრავალფაქტორიანი შეფასებით",
     "lkgp": "LKGP რეჟიმი",

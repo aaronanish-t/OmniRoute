@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Бесплатан стек ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Кружна расподела (round-robin) на све бесплатне провајдере: Antigravity (Gemini), Kiro (Claude), Qoder (3 модела), NVIDIA, Groq. Без трошкова и без прекида кодирања.",
     "auto": "Интелигентно аутоматско рутирање",
     "autoDesc": "Самоопорављајући паметни пул за рутирање са оцењивањем на основу више фактора",
     "lkgp": "LKGP режим",

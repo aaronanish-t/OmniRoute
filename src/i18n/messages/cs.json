@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Volný zásobník (0 $)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Round-robin mezi všemi bezplatnými poskytovateli: Antigravity (Gemini), Kiro (Claude), Qoder (3 modely), NVIDIA, Groq. Bez nákladů, nikdy nepřestaňte kódovat.",
     "auto": "Auto Kombo",
     "autoDesc": "Samoopravný inteligentní směrovací pool (Optimalizovaný výkon)",
     "lkgp": "Režim LKGP",

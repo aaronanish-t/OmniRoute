@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "निःशुल्क स्ट्याक ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "सबै निःशुल्क प्रदायकहरूमा राउन्ड-रोबिन: Antigravity (Gemini), Kiro (Claude), Qoder (3 मोडेल), NVIDIA, Groq। शून्य लागत, कोडिङ कहिल्यै रोकिँदैन।",
     "auto": "बुद्धिमान स्वचालित मोड",
     "autoDesc": "बहु-कारक स्कोरिङसहितको स्व-मर्मतकारी स्मार्ट रुटिङ पूल",
     "lkgp": "LKGP मोड",

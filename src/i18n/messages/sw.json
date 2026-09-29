@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Mkusanyiko wa Bure ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Zungusha kwa mpangilio kupitia watoa huduma wote wa bure: Antigravity (Gemini), Kiro (Claude), Qoder (modeli 3), NVIDIA, Groq. Gharama sifuri, haiachi kamwe kuandika msimbo.",
     "auto": "Otomatiki Janja",
     "autoDesc": "Kundi mahiri la uelekezaji linalojirekebisha lenye utoaji wa alama kwa vipengele vingi",
     "lkgp": "Hali ya LKGP",

@@ -98,11 +98,13 @@ test("the Free Stack description does not advertise a retired provider", () => {
   assert.ok(desc, "templateFreeStackDesc missing from en.json");
 
   // Match the retired provider's display word, not its id — the string is prose.
-  const lowered = desc!.toLowerCase();
+  // Parenthesized text names a model family served through a live provider
+  // ("Antigravity (Gemini)"), not a provider, so it is left out of the match.
+  const providerProse = desc!.replace(/\([^)]*\)/g, " ").toLowerCase();
   for (const id of retiredIds) {
     const word = id.split("-")[0]!;
     assert.ok(
-      !lowered.includes(word),
+      !new RegExp(`\\b${word}\\b`).test(providerProse),
       `Free Stack description still advertises retired provider "${id}" (matched "${word}")`
     );
   }

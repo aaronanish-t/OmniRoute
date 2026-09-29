@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Darmowy stos ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Round-robin po wszystkich darmowych dostawcach: Antigravity (Gemini), Kiro (Claude), Qoder (3 modele), NVIDIA, Groq. Zerowy koszt, nigdy nie przestaje kodować.",
     "auto": "Inteligentne Auto",
     "autoDesc": "Samonaprawiająca się inteligentna pula routingu z ocenianiem wieloczynnikowym",
     "lkgp": "Tryb LKGP",

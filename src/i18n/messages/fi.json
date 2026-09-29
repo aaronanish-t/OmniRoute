@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Ilmainen pino ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Vuorottelu kaikkien ilmaisten palveluntarjoajien välillä: Antigravity (Gemini), Kiro (Claude), Qoder (3 mallia), NVIDIA, Groq. Täysin ilmainen, koodaus ei keskeydy koskaan.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP-tila",

@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "ነፃ ስብስብ ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "በሁሉም ነፃ አቅራቢዎች መካከል በዙር ያዘዋውራል፦ Antigravity (Gemini)፣ Kiro (Claude)፣ Qoder (3 ሞዴሎች)፣ NVIDIA፣ Groq። ምንም ወጪ የለም፣ ፈጽሞ ኮድ መጻፉን አያቆምም።",
     "auto": "ብልህ ራስ-ሰር",
     "autoDesc": "በብዙ-ሁኔታ ውጤት አሰጣጥ ራሱን የሚጠግን ብልህ የማዘዋወር ስብስብ",
     "lkgp": "የLKGP ሁነታ",

@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "ఉచిత స్టాక్ ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "అన్ని ఉచిత ప్రొవైడర్లలో రౌండ్-రాబిన్: Antigravity (Gemini), Kiro (Claude), Qoder (3 మోడళ్లు), NVIDIA, Groq. సున్నా ఖర్చు, కోడింగ్ ఎప్పటికీ ఆగదు.",
     "auto": "తెలివైన ఆటో",
     "autoDesc": "బహుళ-కారక స్కోరింగ్తో స్వీయ-పునరుద్ధరణ స్మార్ట్ రూటింగ్ పూల్",
     "lkgp": "LKGP మోడ్",

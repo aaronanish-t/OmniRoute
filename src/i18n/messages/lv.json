@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Bezmaksas pakotne ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Cikliska maršrutēšana starp visiem bezmaksas pakalpojumu sniedzējiem: Antigravity (Gemini), Kiro (Claude), Qoder (3 modeļi), NVIDIA, Groq. Nekādu izmaksu, kodēšana bez pārtraukuma.",
     "auto": "Viedais automātiskais režīms",
     "autoDesc": "Pašatjaunojošs viedās maršrutēšanas kopums ar daudzfaktoru vērtēšanu",
     "lkgp": "LKGP režīms",

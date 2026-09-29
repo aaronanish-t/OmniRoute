@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "免费栈（$0）",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "在所有免费提供者之间进行轮询：Antigravity（Gemini）、Kiro（Claude）、Qoder（3 个模型）、NVIDIA、Groq。零成本，编码不中断。",
     "auto": "自动组合",
     "autoDesc": "自愈型智能路由池（性能优化）",
     "lkgp": "LKGP 模式",

@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Bepul toʻplam ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Barcha bepul provayderlar boʻylab navbatma-navbat yoʻnaltirish: Antigravity (Gemini), Kiro (Claude), Qoder (3 ta model), NVIDIA, Groq. Xarajat yoʻq, kod yozish hech qachon toʻxtamaydi.",
     "auto": "Aqlli avtomatik rejim",
     "autoDesc": "Koʻp omilli baholashga ega, oʻzini tiklaydigan aqlli yoʻnaltirish guruhi",
     "lkgp": "LKGP rejimi",

@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Δωρεάν Πακέτο ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Εναλλαγή round-robin σε όλους τους δωρεάν παρόχους: Antigravity (Gemini), Kiro (Claude), Qoder (3 μοντέλα), NVIDIA, Groq. Μηδενικό κόστος, χωρίς διακοπές στη συγγραφή κώδικα.",
     "auto": "Έξυπνη αυτόματη λειτουργία",
     "autoDesc": "Ομάδα έξυπνης δρομολόγησης με δυνατότητα αυτόματης αποκατάστασης και βαθμολόγηση πολλαπλών παραγόντων",
     "lkgp": "Λειτουργία LKGP",

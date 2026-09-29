@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Ingyenes csomag ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Ciklikus elosztás az összes ingyenes szolgáltató között: Antigravity (Gemini), Kiro (Claude), Qoder (3 modell), NVIDIA, Groq. Nulla költség, megszakítás nélküli kódolás.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP mód",

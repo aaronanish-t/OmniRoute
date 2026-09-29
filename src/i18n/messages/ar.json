@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "مكدس مجاني ($0)",
-    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
+    "templateFreeStackDesc": "توزيع دوري عبر جميع المزودين المجانيين: Antigravity (Gemini) وKiro (Claude) وQoder (3 نماذج) وNVIDIA وGroq. بلا تكلفة ولا توقف عن البرمجة.",
     "auto": "مجموعة تلقائية",
     "autoDesc": "مجموعة توجيه ذكية ذاتية الإصلاح (محسّنة للأداء)",
     "lkgp": "وضع LKGP",

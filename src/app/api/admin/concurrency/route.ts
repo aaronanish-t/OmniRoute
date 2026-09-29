@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { getAllRateLimitStatus } from "@omniroute/open-sse/services/rateLimitManager.ts";
+import { getStats as getComboSemaphoreStats } from "@omniroute/open-sse/services/rateLimitSemaphore.ts";
 import {
   getStats as getSemaphoreStats,
   resetAll as resetAllSemaphores,
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     timestamp: new Date().toISOString(),
     rateLimits: getAllRateLimitStatus(),
+    comboQueues: getComboSemaphoreStats("combo:"),
     semaphores: getSemaphoreStats(),
   });
 }

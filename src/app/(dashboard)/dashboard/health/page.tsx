@@ -23,6 +23,7 @@ import { useLocale, useTranslations } from "next-intl";
 import TelemetryCard from "./TelemetryCard";
 import ProviderHealthAutopilotCard from "./ProviderHealthAutopilotCard";
 import ProviderHealthMatrixCard from "./ProviderHealthMatrixCard";
+import ConcurrencyQueuesCard from "./ConcurrencyQueuesCard";
 
 function formatUptime(seconds) {
   const d = Math.floor(seconds / 86400);
@@ -64,6 +65,8 @@ export default function HealthPage() {
   const tp = useTranslations("providers");
   const nodeMap = useProviderNodeMap();
   const [data, setData] = useState(null);
+  const [concurrency, setConcurrency] = useState(null);
+  const [concurrencyError, setConcurrencyError] = useState(null);
   const [dbHealth, setDbHealth] = useState(null);
   const [dbHealthError, setDbHealthError] = useState(null);
   const [error, setError] = useState(null);
@@ -87,6 +90,18 @@ export default function HealthPage() {
       setLastRefresh(new Date());
     } catch (err) {
       setError(err.message);
+    }
+  }, []);
+
+  const fetchConcurrency = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/concurrency");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      setConcurrency(json);
+      setConcurrencyError(null);
+    } catch (err) {
+      setConcurrencyError(err.message);
     }
   }, []);
 
@@ -119,11 +134,13 @@ export default function HealthPage() {
   useEffect(() => {
     const initialFetch = setTimeout(() => {
       void fetchHealth();
+      void fetchConcurrency();
       void fetchExtras();
       void fetchDbHealth();
     }, 0);
     const interval = setInterval(() => {
       void fetchHealth();
+      void fetchConcurrency();
       void fetchExtras();
       void fetchDbHealth();
     }, 15000);
@@ -131,7 +148,7 @@ export default function HealthPage() {
       clearTimeout(initialFetch);
       clearInterval(interval);
     };
-  }, [fetchHealth, fetchExtras, fetchDbHealth]);
+  }, [fetchHealth, fetchConcurrency, fetchExtras, fetchDbHealth]);
 
   const handleResetHealth = async () => {
     if (!confirm(t("resetConfirm"))) return;
@@ -257,6 +274,7 @@ export default function HealthPage() {
         <button
           onClick={() => {
             fetchHealth();
+            fetchConcurrency();
             fetchExtras();
             fetchDbHealth();
           }}
@@ -933,6 +951,8 @@ export default function HealthPage() {
           })()
         )}
       </Card>
+
+      <ConcurrencyQueuesCard data={concurrency} error={concurrencyError} />
 
       {/* Rate Limit Status */}
       {rateLimitStatus &&

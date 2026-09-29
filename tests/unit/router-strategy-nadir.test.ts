@@ -163,6 +163,7 @@ test("nadir — unknown model, empty response, non-2xx, thrown error and bad JSO
   const cases: Array<[string, NadirTransport, RegExp]> = [
     ["unknown model", async () => json({ selected_model: "gpt-9" }), /is not in the pool/],
     ["no selected_model", async () => json({ bucket: "simple" }), /no selected_model/],
+    ["null response", async () => json(null), /call failed: malformed response/],
     ["HTTP 503", async () => json({ error: "down" }, 503), /call failed: HTTP 503/],
     [
       "thrown",

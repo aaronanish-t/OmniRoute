@@ -191,26 +191,9 @@ export class NadirStrategyImpl implements RouterStrategy {
       return this.fallbackDecision(candidates, context, "cooling down after a failed call");
     }
 
-    const apiKey =
-      readString(context.nadir?.apiKey) ?? readString(process.env.OMNIROUTE_NADIR_API_KEY);
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (apiKey) headers["X-API-Key"] = apiKey;
-    const menu = [...new Set(candidates.map((c) => c.model))].slice(0, MAX_MENU_ITEMS);
-
     let data: BucketResponse;
     try {
-      const response = await this.transport(`${baseUrl}/v1/bucket`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          prompt: prompt.slice(0, NADIR_MAX_PROMPT_CHARS),
-          menu,
-          source: "omniroute",
-        }),
-        timeoutMs: clampTimeout(context.nadir?.timeoutMs),
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      data = (await response.json()) as BucketResponse;
+      data = await this.requestDecision(baseUrl, prompt, candidates, context);
     } catch (err) {
       this.cooldownUntil.set(baseUrl, this.now() + NADIR_FAILURE_COOLDOWN_MS);
       const message = err instanceof Error ? err.message : String(err);
@@ -220,6 +203,43 @@ export class NadirStrategyImpl implements RouterStrategy {
       return this.fallbackDecision(candidates, context, `call failed: ${message}`);
     }
 
+    return this.decisionFromResponse(data, candidates, context);
+  }
+
+  private async requestDecision(
+    baseUrl: string,
+    prompt: string,
+    candidates: ProviderCandidate[],
+    context: RoutingContext
+  ): Promise<BucketResponse> {
+    const apiKey =
+      readString(context.nadir?.apiKey) ?? readString(process.env.OMNIROUTE_NADIR_API_KEY);
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (apiKey) headers["X-API-Key"] = apiKey;
+    const menu = [...new Set(candidates.map((c) => c.model))].slice(0, MAX_MENU_ITEMS);
+    const response = await this.transport(`${baseUrl}/v1/bucket`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        prompt: prompt.slice(0, NADIR_MAX_PROMPT_CHARS),
+        menu,
+        source: "omniroute",
+      }),
+      timeoutMs: clampTimeout(context.nadir?.timeoutMs),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data: unknown = await response.json();
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      throw new Error("malformed response");
+    }
+    return data as BucketResponse;
+  }
+
+  private decisionFromResponse(
+    data: BucketResponse,
+    candidates: ProviderCandidate[],
+    context: RoutingContext
+  ): RoutingDecision {
     const selected = readString(data.selected_model);
     const matching = selected ? candidates.filter((c) => c.model === selected) : [];
     if (!selected || matching.length === 0) {

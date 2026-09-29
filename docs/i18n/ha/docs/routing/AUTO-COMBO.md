@@ -1,21 +1,12 @@
-# AUTO-COMBO (Hausa)
+# OmniRoute Auto-Combo Engine (Hausa)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇪🇹 [am](../../../am/docs/routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇪 [ga](../../../ga/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇰🇷 [ko](../../../ko/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇳🇴 [no](../../../no/docs/routing/AUTO-COMBO.md) · 🇮🇳 [or](../../../or/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
-
----
+🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇪🇹 [am](../../../am/docs/routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇧🇦 [bs](../../../bs/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇪 [ga](../../../ga/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇰🇷 [ko](../../../ko/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇳🇴 [no](../../../no/docs/routing/AUTO-COMBO.md) · 🇮🇳 [or](../../../or/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
 
 ---
 
-title: "Injin Auto-Combo na OmniRoute"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
+> **Ga Masu Amfani**: Kuna neman hanyar farawa cikin sauri? Duba [Jagorar Mai Amfani da Auto-Combo](../getting-started/AUTO-COMBO-GUIDE.md) don bayani da misalai masu sauƙi.
 
-# Injin Auto-Combo na OmniRoute
-
-> **Ga Masu Amfani**: Kuna neman hanyar farawa cikin sauri? Duba [Jagorar Mai Amfani da Auto-Combo](../getting-started/AUTO-COMBO-GUIDE.md) don sauƙaƙan bayanai da misalai.
-
-> Sarƙoƙin samfura masu sarrafa kansu tare da kimantawa mai daidaituwa + auto-routing marar saiti
+> Jerin samfura masu sarrafa kansu tare da kimantawa mai daidaituwa + tura buƙatu ta atomatik ba tare da saiti ba
 
 ## Auto-Routing Marar Saiti (gabanin `auto/`)
 
@@ -226,9 +217,9 @@ Injin Auto-Combo yana zaɓar mafi kyawun mai samarwa/samfuri a kai a kai ga kowa
 
 ## Kunshin Yanayi
 
-Akwai bayanan nauyi 6 da aka riga aka ayyana a cikin `open-sse/services/autoCombo/modePacks.ts`. Kowane kunshi yana maye gurbin tsoffin nauyoyi gaba ɗaya domin karkatar da zaɓi zuwa ga manufa guda. Jimillar kowane kunshi ta riga ta kai `1.0` (`0.9999` kamar yadda aka buga zuwa lambobi huɗu bayan ɗigo), don haka `normalizeScoringWeights()` ba shi da wani gyara mai ma’ana da zai yi lokacin da kunshi yake aiki — ƙimomin da ke ƙasa, bayan zagaye, su ne waɗanda mai ƙididdigar maki yake amfani da su.
+Akwai bayanan martabar nauyi 6 da aka riga aka ayyana a cikin `open-sse/services/autoCombo/modePacks.ts`. Kowane kunshi yana maye gurbin tsoffin nauyoyi gaba ɗaya domin karkatar da zaɓi zuwa ga manufa guda. Jimillar kowane kunshi ta riga ta kai `1.0` (`0.9999` kamar yadda aka nuna da lambobi huɗu bayan digo), saboda haka `normalizeScoringWeights()` ba shi da wani gyara mai ma'ana da zai yi lokacin da kunshi yake aiki — ƙimomin da ke ƙasa su ne, bayan zagaye, waɗanda mai ƙididdigar maki yake amfani da su.
 
-| Ma’auni               | ship-fast  | cost-saver | quality-first | offline-friendly | reliability-first | chaos-mode |
+| Ma'auni               | ship-fast  | cost-saver | quality-first | offline-friendly | reliability-first | chaos-mode |
 | :-------------------- | :--------- | :--------- | :------------ | :--------------- | :---------------- | :--------- |
 | `quota`               | 0.1133     | 0.1133     | 0.0752        | **0.3324**       | 0.1133            | 0.0376     |
 | `health`              | 0.2667     | 0.1810     | 0.1714        | 0.2667           | **0.3524**        | **0.4000** |
@@ -248,31 +239,29 @@ Akwai bayanan nauyi 6 da aka riga aka ayyana a cikin `open-sse/services/autoComb
 
 Bayanan kula:
 
-- **Kunshinan suna ɗauke da `quality` da `reliability`** (`quality 0.02`, `quality-first 0.03`; `reliability 0.03`, `reliability-first 0.04`) kuma suna maye gurbin taswirar nauyi gaba ɗaya (`weights = pack`, ba haɗawa ba). `DEFAULT_WEIGHTS` yana ɗauke da `quality 0.03 / reliability 0`; zaɓar `balanced`/`default` yana riƙe waɗannan tsoffin ƙimomin, yayin da zaɓar kunshi ke amfani da ƙimomin kunshin da ke sama. A kan tarin da bai da bayanai tukuna (ba a sami wani abin lura ba tukuna, don haka `quality 0.5` da `reliability 1`), waɗannan ma’aunai biyu suna ƙara `+0.04` a ƙarƙashin kunshi na gama-gari (`0.03 + 0.01`), `+0.045` a ƙarƙashin `quality-first`, da `+0.05` a ƙarƙashin `reliability-first`.
-- `tierAffinity`, `specificityMatch`, da `resetWindowAffinity` an saita su a sarari zuwa `0` a cikin kowane kunshi.
-- Abin da kowane kunshi ya fi mayar da hankali a taƙaice:
-  - **ship-fast** → latencyInv 0.3048 + health 0.2667 (haɗe-haɗe masu ƙarancin jinkiri kuma lafiyayyu)
-  - **cost-saver** → costInv 0.3324 (alamomin da suka fi arha ne ke cin nasara)
-  - **quality-first** → taskFit 0.3524 + stability 0.1429 + quality 0.03, mafi girma a cikin dukkan kunshinan (mafi kyawun samfurin ga aikin, mai daidaito)
-  - **offline-friendly** → quota 0.3324 + health 0.2667 (mafi girman sararin iyaka ba tare da la’akari da sauri/farashi ba)
-  - **reliability-first** → health 0.3524 + stability 0.1905 + reliability 0.04, mafi girma a cikin dukkan kunshinan (mafi ƙarancin abubuwan ba-zata)
-  - **chaos-mode** → health 0.4000 + taskFit 0.1905 (bayanin gwajin shigar da matsala)
+- **Kunshin suna ɗauke da `quality` da `reliability`** (`quality 0.02`, `quality-first 0.03`; `reliability 0.03`, `reliability-first 0.04`) kuma suna maye gurbin taswirar nauyi gaba ɗaya (`weights = pack`, ba haɗewa ba). `DEFAULT_WEIGHTS` yana ɗauke da `quality 0.03 / reliability 0`; zaɓin `balanced`/`default` yana riƙe waɗannan tsoffin ƙimomi, yayin da zaɓin kunshi yake amfani da ƙimomin kunshin da ke sama. A wurin haɗi mai sanyi (ba a sami abubuwan lura ba tukuna, don haka `quality 0.5` da `reliability 1`) waɗannan ma'aunai biyu suna ƙara `+0.04` a ƙarƙashin kunshi na gama-gari (`0.03 + 0.01`), `+0.045` a ƙarƙashin `quality-first`, da `+0.05` a ƙarƙashin `reliability-first`.
+- `tierAffinity`, `specificityMatch` da `resetWindowAffinity` an saita su a sarari zuwa `0` a cikin kowane kunshi.
+- Abin da kowane kunshi ya fi mayar da hankali a kai a taƙaice:
+  - **ship-fast** → latencyInv 0.3048 + health 0.2667 (haɗe-haɗe masu ƙarancin jinkiri kuma masu ƙoshin lafiya)
+  - **cost-saver** → costInv 0.3324 (tokens mafi arha ne suke yin nasara)
+  - **quality-first** → taskFit 0.3524 + stability 0.1429 + quality 0.03, mafi girma a cikin dukkan kunshin (samfurin da ya fi dacewa da aikin, mai daidaito)
+  - **offline-friendly** → quota 0.3324 + health 0.2667 (mafi girman sararin aiki ba tare da la'akari da sauri/farashi ba)
+  - **reliability-first** → health 0.3524 + stability 0.1905 + reliability 0.04, mafi girma a cikin dukkan kunshin (mafi ƙarancin abubuwan bazata)
+  - **chaos-mode** → health 0.4000 + taskFit 0.1905 (bayanan martabar gwajin shigar da matsala)
 
 ### Sarrafawar Kowane Buƙata (headers) — #6023 / #6024 / #6025 / #3470
 
-Ana iya jagorantar haɗin `auto` **ga kowace buƙata** ta hanyar headers guda uku, ba tare da sauya
-daidaitaccen tsarin haɗin da aka adana ba. Waɗannan suna aiki ne kawai ga dabarar `auto`, kuma ga buƙatar
-da ta ɗauke su kawai; ana amfani da `modePack`/`budgetCap`/`budgetFallback` da aka adana na haɗin
-lokacin da header ɗin ba ya nan.
+Ana iya jagorantar haɗin `auto` **ga kowace buƙata** ta hanyar headers guda uku, ba tare da canza saitunan haɗin da aka adana ba. Waɗannan suna aiki ne kawai ga dabarar `auto` kuma kawai ga buƙatar da ke ɗauke da su; ana amfani da `modePack`/`budgetCap`/`budgetFallback` da aka adana na haɗin idan babu header.
 
-| Kanun                         | Abubuwan da yake karɓa                                                                                                                                                                                            | Tasiri                                                                                                                                                                                                                                                                         |
-| :---------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-Mode`            | laƙabin saitin da aka riga aka tsara (`fast`, `balanced`, `quality`, `cheap`, `reliable`, `offline`) ko ɗanyen sunan fakiti (`ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first`) | Yana maye gurbin ma'aunin ƙididdiga na wannan buƙata. `balanced`/`default` suna tilasta amfani da ma'aunan tsoho (babu fakiti). Ana yin watsi da ƙimomin da ba a sani ba (ana kiyaye saitunan).                                                                                |
-| `X-OmniRoute-Budget`          | lamba mai kyau (mafi yawan USD ga kowace buƙata)                                                                                                                                                                  | Ƙayyadadden iyakar kuɗi: ana tace ƴan takarar da ƙiyasin kuɗinsu ya zarce ta kafin zaɓi. Abin da zai faru idan **duk** ƴan takara sun zarce ta yana ƙarƙashin ikon `X-OmniRoute-Budget-Fallback` da ke ƙasa.                                                                   |
-| `X-OmniRoute-Budget-Fallback` | `cheapest` (tsoho, laƙabai: `cheapest-viable`, `soft`) ko `strict` (laƙabai: `block`, `hard`)                                                                                                                     | `cheapest`: yana koma wa ɗan takara mafi arha gaba ɗaya duk da cewa har yanzu ya zarce iyakar (tsohuwar ɗabi'a). `strict`: yana ƙin yin zaɓi — buƙatar tana gaza nan take da `HTTP 402` maimakon yin kashe kuɗi fiye da kima a ɓoye. Ana yin watsi da ƙimomin da ba a sani ba. |
+| Header                        | Abubuwan da yake karɓa                                                                                                                                                                                           | Tasiri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-Mode`            | laƙabin saitin da aka riga aka tanada (`fast`, `balanced`, `quality`, `cheap`, `reliable`, `offline`) ko ɗanyen sunan pack (`ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first`) | Yana maye gurbin ma'aunin maki na wannan buƙata. `balanced`/`default` suna tilasta amfani da ma'aunan tsoho (babu pack). Ana yin watsi da ƙimomin da ba a sani ba (ana kiyaye saitunan).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Budget`          | lamba mai kyau (matsakaicin USD ga kowace buƙata)                                                                                                                                                                | Ƙaƙƙarfan iyakar kuɗi: ana tace 'yan takarar da kiyasin kuɗinsu ya zarce ta kafin zaɓe. Abin da zai faru idan **duk** 'yan takara sun zarce ta yana ƙarƙashin ikon `X-OmniRoute-Budget-Fallback` da ke ƙasa.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Budget-Fallback` | `cheapest` (tsoho, laƙabai: `cheapest-viable`, `soft`) ko `strict` (laƙabai: `block`, `hard`)                                                                                                                    | `cheapest`: yana koma wa ɗan takara mafi arha gaba ɗaya duk da cewa har yanzu ya zarce iyakar (tsohuwar ɗabi'a). `strict`: yana ƙin yin zaɓi — buƙatar tana gaza nan take tare da `HTTP 402` maimakon kashe kuɗi fiye da kima ba tare da sanarwa ba. Ana yin watsi da ƙimomin da ba a sani ba.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Effort`          | `auto` (an tanadi sauran ƙimomi)                                                                                                                                                                                 | Kasafin tunani mai daidaitawa: idan buƙatar ba ta ɗauke da **wani** filin yin tunani na kowace siga ba (`reasoning_effort`, `reasoning`, `thinking`), gateway yana warware `auto` zuwa `low`/`medium`/`high` daga tabbatattun alamomin tsarin buƙata (tsawon saƙon mai amfani na ƙarshe, girman mahalli har zuwa saƙon mai amfani na ƙarshe, sakamakon kayan aiki na baya, zurfin madaukin kayan aiki). Alamomin sun keɓanta ga zagayen yanzu — ana yin watsi da duk abin da ke bayan saƙon mai amfani na ƙarshe — don haka kowace buƙata a cikin madaukin kayan aiki tana warwarewa zuwa mataki ɗaya (daidaitaccen mataki marar yanayin zaman ga kowane zagaye, babu yanayin zaman, babu ƙara mataki a tsakiyar madauki wanda zai lalata prefixes na prompt-cache na upstream). Filin yin tunani da client ya bayyana a sarari koyaushe shi ne yake da rinjaye. Wannan ya keɓanta ga buƙatun da upstream dispatch ɗinsu ya warware zuwa tsarin OpenAI Chat Completions (`targetFormat === FORMATS.OPENAI`) — `reasoning_effort` fili ne mai tsarin OpenAI, don haka header ɗin ba ya yin komai a kan buƙatar da aka nufa ga Claude ko Gemini (duba `open-sse/handlers/chatCore/adaptiveEffortWiring.ts`). |
 
 ```bash
-# Tilasta bayanin martaba mafi sauri, iyakance wannan buƙata zuwa $0.05, sannan a toshe ta kai tsaye maimakon kashe kuɗi fiye da kima
+# Tilasta amfani da mafi saurin profile, iyakance wannan buƙatar zuwa $0.05, sannan a toshe ta gaba ɗaya maimakon wuce kasafin kuɗi
 curl -sS http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-OmniRoute-Mode: fast" \
@@ -281,58 +270,107 @@ curl -sS http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"hi"}]}'
 ```
 
-Warwarewar tsantsar aiki ce (`open-sse/services/autoCombo/requestControls.ts`); ƙimomin da
-aka warware suna shiga cikin shigarwar `config.modePack` / `config.budgetCap` /
-`config.budgetFallback` da injin yake da su. `config.budgetFallback` ("strict" |
-"cheapest") da aka adana na wani combo yana saita manufofin dindindin; kanun yana maye gurbinsa don buƙata guda ɗaya.
+Warwarewar pure function ce (`open-sse/services/autoCombo/requestControls.ts`); ƙimomin da
+aka warware suna shiga abubuwan shigarwa na engine ɗin da suke akwai, wato `config.modePack` / `config.budgetCap` /
+`config.budgetFallback`. `config.budgetFallback` da aka adana na combo ("strict" |
+"cheapest") yana saita manufofin dindindin; header ɗin yana maye gurbinsa don buƙata guda ɗaya.
 
 ## Duk Dabarun Sarrafa Hanya
 
-Injin haɗin OmniRoute yana goyon bayan **dabarun sarrafa hanya guda 19** (an ayyana su a cikin `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Ana samar da injin Auto Combo kansa ƙarƙashin dabarar `auto`; sauran kuma suna samuwa ga haɗe-haɗen da aka adana.
+Injin haɗaɗɗun OmniRoute yana goyon bayan **dabarun sarrafa hanya 19** (waɗanda aka ayyana a `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Ana samar da injin Auto Combo kansa a ƙarƙashin dabarar `auto`; sauran kuma suna samuwa ga haɗaɗɗun da aka adana.
 
-| Dabara              | Bayani                                                                                                                                                                                                      |
-| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Jerin manufa na farko da aka tsara tare da fifiko bayyananne                                                                                                                                                |
-| `weighted`          | Zaɓin bazuwar mai nauyi bisa nauyin kowace manufa                                                                                                                                                           |
-| `round-robin`       | Bi ta cikin manufofi ɗaya bayan ɗaya bisa jeri                                                                                                                                                              |
-| `context-relay`     | Miƙa mahallin tattaunawa tsakanin manufofi (dogayen tattaunawa)                                                                                                                                             |
-| `fill-first`        | Cika ƙason kowace manufa kafin a matsa zuwa ta gaba                                                                                                                                                         |
-| `p2c`               | Daidaita nauyi ta zaɓin bazuwar daga zaɓuɓɓuka 2                                                                                                                                                            |
-| `random`            | Zaɓin bazuwar bai-ɗaya                                                                                                                                                                                      |
-| `least-used`        | Zaɓi manufa mai mafi ƙarancin nauyin aiki na yanzu                                                                                                                                                          |
-| `cost-optimized`    | Rage $ na kowace buƙata bisa farashin kundin bayanai                                                                                                                                                        |
-| `reset-aware` ⭐    | Ba da fifiko bisa lokacin sake saita ƙaso — tagogin sake saiti masu gajarta suna samun matsayi mafi girma                                                                                                   |
-| `reset-window`      | Fi son manufofin da tagar ƙasonsu za ta sake saitawa mafi kusa                                                                                                                                              |
-| `headroom`          | Zaɓi manufa mai mafi yawan sararin ƙaso da ya rage                                                                                                                                                          |
-| `strict-random`     | Zaɓin bazuwar ba tare da cire maimaitawa ba                                                                                                                                                                 |
-| `auto`              | Yi amfani da kimantawar Auto Combo (abubuwa 16) — **ana ba da shawara**                                                                                                                                     |
-| `lkgp`              | Hanyar Ƙarshe da Aka San Tana Aiki (yana manne wa mai samarwa na ƙarshe da ya yi nasara, sannan ya koma ga ƙa’idoji idan ya gaza)                                                                           |
-| `context-optimized` | Zaɓi manufa mafi dacewa da girman mahallin yanzu                                                                                                                                                            |
-| `cache-optimized`   | Sake tsara manufofi bisa dacewar ma’ajiyar prompt — za a fara gwada haɗin da aka fi tsammanin yana riƙe da prefix ɗin wannan buƙata a ma’ajiyarsa (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Aika buƙata zuwa rukunin samfura a lokaci guda, sannan mai hukunci ya haɗa amsa guda (duba ƙasa)                                                                                                            |
-| `pipeline`          | Gudanar da manufofi bi da bi, tare da sanya fitarwar kowane mataki cikin shigarwar mataki na gaba; amsar ƙarshe kaɗai ake mayarwa (#6396)                                                                   |
+| Dabara              | Bayani                                                                                                                                                                                                           |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Jerin manufa ta farko da aka tsara tare da fifiko bayyananne                                                                                                                                                     |
+| `weighted`          | Zaɓin bazuwar mai nauyi bisa nauyin kowace manufa                                                                                                                                                                |
+| `round-robin`       | Bi ta cikin manufofi a jere (a rukuni-rukuni; duba ƙasa)                                                                                                                                                         |
+| `context-relay`     | Miƙa mahalli tsakanin manufofi (dogayen tattaunawa)                                                                                                                                                              |
+| `fill-first`        | Cika ƙason kowace manufa kafin matsawa zuwa ta gaba                                                                                                                                                              |
+| `p2c`               | Daidaita nauyi ta zaɓin bazuwar Power-of-2-choices                                                                                                                                                               |
+| `random`            | Zaɓin bazuwar da ke da damar zaɓuwa iri ɗaya                                                                                                                                                                     |
+| `least-used`        | Zaɓi manufa mai mafi ƙarancin nauyin aiki na yanzu                                                                                                                                                               |
+| `cost-optimized`    | Rage $ na kowace buƙata bisa farashin kundin bayanai                                                                                                                                                             |
+| `reset-aware` ⭐    | Ba da fifiko bisa lokacin sake saita ƙaso — ana ba wa gajerun tagogin sake saiti matsayi mafi girma                                                                                                              |
+| `reset-window`      | Fi son manufofin da tagar ƙasarsu za ta sake saitawa da wuri                                                                                                                                                     |
+| `headroom`          | Zaɓi manufa mai mafi yawan sararin ƙaso da ya rage                                                                                                                                                               |
+| `strict-random`     | Zaɓin bazuwar ba tare da cire maimaitawa ba                                                                                                                                                                      |
+| `auto`              | Yi amfani da ƙididdigar Auto Combo (dalilai 16) — **ana ba da shawara**                                                                                                                                          |
+| `lkgp`              | Last-Known-Good Path (yana manne wa mai samarwa na ƙarshe da ya yi nasara, sannan ya koma ga ƙa'idoji idan hakan bai yiwu ba)                                                                                    |
+| `context-optimized` | Zaɓi manufa mafi dacewa da girman mahalli na yanzu                                                                                                                                                               |
+| `cache-optimized`   | Sake tsara manufofi bisa kusancin ma'ajiyar prompt — haɗin da ya fi yiwuwa ya riga ya riƙe prefix ɗin wannan buƙata a ma'ajiyarsa shi ake fara gwadawa (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Aika buƙata zuwa rukunin model a lokaci guda, sannan a haɗa amsa guda ta hanyar mai tantancewa (duba ƙasa)                                                                                                       |
+| `pipeline`          | Gudanar da manufofi ɗaya bayan ɗaya, ana shigar da fitowar kowane mataki cikin shigarwar mataki na gaba; amsar ƙarshe kawai ake mayarwa (#6396)                                                                  |
 
 ⭐ = Sabo a v3.8.0 · 🧬 = Sabo a v3.8.36
 
-### Ma’anar `weighted`
+### Ma'anar `weighted`
 
-`weighted` **zaɓin bazuwar da ya dace da gwargwado ne ga kowace buƙata**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ba mai daidaita rabon amfani ba ne:
+`weighted` **zaɓin bazuwar ne gwargwadon nauyi ga kowace buƙata**
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ba mai daidaitawa ba ne:
 
 - Kowace buƙata tana zaɓar mataki **guda ɗaya** da yiwuwar `weight / totalWeight`; sauran matakan
-  ana tsara su bisa saukowar nauyi a matsayin jerin madadin wannan buƙatar.
-- Matakin da nauyinsa yake `0` (ko babu) **ba a taɓa zaɓarsa ba** muddin wani mataki yana da
-  nauyi > 0 — zai iya zama madadin ne kawai bayan matakin da aka zaɓa ya gaza. Sai idan nauyuka
-  **duka** suka zama 0 ne zaɓin zai zama bai-ɗaya.
-- Ana cire matakan da duk manufofinsu ba sa samuwa — provider circuit breaker `OPEN`, lokacin
-  jiran haɗi, kulle samfur — daga zaɓin kafin a gudanar da shi
-  (`open-sse/services/combo/targetResolution.ts`), don haka mataki lafiyayye guda ɗaya zai iya
-  cin nasarar kowace buƙata na ɗan lokaci.
-- `stickyWeightedLimit` (tsarin combo, tsohon ƙima `1` = a kashe) yana manne wa matakin da aka zaɓa har tsawon
-  nasarori masu jere daidai wannan adadin kafin a sake yin zaɓi.
+  ana tsara su bisa nauyi daga mafi girma zuwa mafi ƙanƙanta a matsayin jerin madadin wannan buƙatar.
+- Matakin da nauyinsa yake `0` (ko babu shi) **ba a taɓa zaɓarsa ba** muddin wani mataki yana da
+  nauyi > 0 — zai iya zama madadin kawai bayan matakin da aka zaɓa ya gaza. Sai idan nauyin **duk**
+  matakan ya zama 0 ne zaɓin zai zama mai damar zaɓuwa iri ɗaya.
+- Matakan da dukkan manufofinsu ba sa samuwa — circuit breaker na mai samarwa yana `OPEN`, haɗi
+  yana lokacin jira, ko an kulle model — ana cire su daga zaɓin kafin a yi shi
+  (`open-sse/services/combo/targetResolution.ts`), don haka mataki guda mai lafiya zai iya
+  lashe kowace buƙata na ɗan lokaci.
+- `stickyWeightedLimit` (tsarin combo, tsohon ƙima `1` = a kashe) yana manne wa matakin da aka zaɓa na
+  nasarori masu jere na wannan adadin kafin a sake yin zaɓi.
 
-Don juyawa mai tsauri, yi amfani da `round-robin`; nauyuka daidai a `weighted` suna samar da daidaito na ƙididdiga — ba
-mai tsauri ba.
+Don juyawa mai tsauri, yi amfani da `round-robin`; daidaitattun nauyi a kan `weighted` suna samar da
+daidaito na ƙididdiga — ba mai tsauri ba.
+
+### Yanayin pipeline mai aikin agentic
+
+Haɗin `pipeline` mai matakai biyu zai iya zaɓar amfani da karkatarwar mai tsarawa/mai aiwatarwa ta hanyar
+`config.agenticOrchestration.enabled`. Manufa ta farko ce ke da alhakin tsarawa da amsoshin ƙarshe;
+manufa ta biyu kuma tana fitar da kiran kayan aiki na asalin abokin ciniki. OmniRoute yana gano ci gaba
+na sakamakon kayan aiki daga ƙa'idar buƙata, yana tambayar mai tsarawa ko ana buƙatar wani zagayen kayan aiki,
+sannan yana sanya ko dai mai aiwatarwa ko mai tsarawa ya zama matakin ƙarshe da abokin ciniki zai gani
+ta hanyar sauyawa mai ƙarfi.
+
+```json
+{
+  "strategy": "pipeline",
+  "models": [{ "model": "provider/planner" }, { "model": "provider/executor" }],
+  "config": {
+    "agenticOrchestration": { "enabled": true, "maxToolRounds": 8 }
+  }
+}
+```
+
+Mai aiwatarwa na iya fitar da kira masu zaman kansu da yawa a cikin amsa ɗaya. Ana
+sarrafa kiran da suka dogara da juna a zagayen sakamakon kayan aiki na abokin ciniki na gaba, yayin da mai tsarawa
+ke duba kowane sakamako. Tsohon ƙimar `maxToolRounds` ita ce `8`, kuma yana karɓar `1`–`32`; da zarar an kai iyakar,
+dole ne mai tsarawa ya samar da mafi kyawun amsar ƙarshe da ake da ita. Ana tara shawarwarin mai tsarawa na ciki,
+yayin da amsar da aka zaɓa don abokin ciniki take kiyaye zaɓin asali na watsawa kai tsaye.
+
+### Rukunin manne na `round-robin` da faɗaɗa asusu
+
+Ana gudanar da round-robin ne a rukuni-rukuni, ba buƙata ɗaya ga kowane mataki ba:
+
+- `stickyRoundRobinLimit` (saitin combo, sannan `comboStickyRoundRobinLimit`, sannan
+  `settings.stickyRoundRobinLimit`, tsohon ƙima **3**) yana riƙe manufa ɗaya na wannan adadin
+  nasarori masu jere kafin ya juya. Saita ƙimar combo zuwa `1` don juyawa bayan kowace buƙata.
+  Editan combo yana nuna ƙimar da ake amfani da ita da kuma matakin da ta fito daga gare shi.
+- `connectionAwareExpansion` (saitin combo, sannan settings, tsohon ƙima **false**) yana faɗaɗa
+  kowane mataki na matakin mai samarwa zuwa manufofin kowane asusu kafin juyawa. Dabarun Group-B
+  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
+  fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
+  pipeline) suna riƙe hangen matakin mai samarwa har sai an kunna wannan. Editan combo yana ba da
+  inherit / on / off; inherit yana amfani da tsohon saitin gama-gari (off).
+- Karkatarwar da ke kiyaye kusancin ma'ajiyar prompt (`promptCacheAffinityEnabled`, tsohon ƙima **true**) tana sake jera
+  haɗin da aka kafe domin maɓallan cache masu dacewa su ci gaba da kasancewa a asusu ɗaya. Tana da fifiko a kan
+  juyawar round-robin da weighted a tsakanin matakan kowane asusu da aka kafe. Kashe ta a ƙarƙashin
+  Settings → Combo defaults idan kana buƙatar juyawa mai tsauri. Babu saitin musamman na kowane combo.
+
+Don juyawa tsakanin asusu da yawa a kan model ɗaya, fi son **mataki ɗaya na dynamic-account** (`connectionId`
+mara komai, dukkan pool) tare da sticky limit `1`, maimakon `connectionId` guda uku da aka kafe.
+Matakan da aka kafe tare da affinity suna haɗuwa zuwa asusu ɗaya ko da kuwa ma'aunin RR
+yana ci gaba.
 
 ## Dabarar Fusion
 

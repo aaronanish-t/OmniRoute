@@ -14,6 +14,7 @@ import {
   isForbiddenCustomHeaderName,
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
+import { PROXY_REGISTRY_STATUS_VALUES } from "@/shared/constants/proxyRegistryStatus";
 
 export const proxyConfigSchema = z
   .object({
@@ -85,21 +86,30 @@ export const testProxySchema = z.object({
   }),
 });
 
+export const SCOPE_ID_REQUIRED_NON_GLOBAL_SCOPE = "scopeId is required for non-global scope";
+export const SCOPE_ID_REQUIRED_SCOPED = "scopeId is required for provider/account/combo/key scope";
+
+// Shared refinement: a non-global scope requires a non-blank scopeId.
+// The message stays per call-site (frozen 400 contract), never unified.
+export function requireScopeIdForNonGlobal(message: string) {
+  return (value: { scope: string; scopeId?: string | null }, ctx: z.RefinementCtx) => {
+    if (value.scope !== "global" && !value.scopeId?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message,
+        path: ["scopeId"],
+      });
+    }
+  };
+}
+
 export const inlineProxyAssignmentSchema = z
   .object({
     scope: z.enum(["global", "provider", "account", "combo", "key"]),
     scopeId: z.string().trim().nullable().optional(),
   })
   .strict()
-  .superRefine((value, ctx) => {
-    if (value.scope !== "global" && !value.scopeId?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "scopeId is required for non-global scope",
-        path: ["scopeId"],
-      });
-    }
-  });
+  .superRefine(requireScopeIdForNonGlobal(SCOPE_ID_REQUIRED_NON_GLOBAL_SCOPE));
 
 export const proxyRegistryFieldsSchema = z
   .object({
@@ -116,7 +126,9 @@ export const proxyRegistryFieldsSchema = z
     password: z.string().optional(),
     region: z.string().trim().max(64).nullable().optional(),
     notes: z.string().trim().max(1000).nullable().optional(),
-    status: z.enum(["active", "inactive", "dead"]).optional().default("active"),
+    // No default: zod 4 applies it under .partial() too, which rewrote the stored status
+    // on every update or import that omitted it. New rows still start active in the DB.
+    status: z.enum(PROXY_REGISTRY_STATUS_VALUES).optional(),
     source: z
       .enum([
         "manual",
@@ -172,15 +184,7 @@ export const proxyAssignmentSchema = z
     proxyId: z.string().trim().nullable().optional(),
   })
   .strict()
-  .superRefine((value, ctx) => {
-    if (value.scope !== "global" && !value.scopeId?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "scopeId is required for provider/account/combo/key scope",
-        path: ["scopeId"],
-      });
-    }
-  });
+  .superRefine(requireScopeIdForNonGlobal(SCOPE_ID_REQUIRED_SCOPED));
 
 export const bulkProxyAssignmentSchema = z
   .object({
@@ -221,15 +225,16 @@ export const proxyPoolMemberSchema = z
     proxyId: z.string().trim().min(1, "proxyId is required"),
   })
   .strict()
-  .superRefine((value, ctx) => {
-    if (value.scope !== "global" && !value.scopeId?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "scopeId is required for provider/account/combo/key scope",
-        path: ["scopeId"],
-      });
-    }
-  });
+  .superRefine(requireScopeIdForNonGlobal(SCOPE_ID_REQUIRED_SCOPED));
+
+// GET /api/settings/proxies/pool/egress-observation query (#13581). Same scope vocabulary and
+// scopeId rule as the pool routes: an unknown scope is rejected, never read as "global".
+export const proxyPoolEgressObservationQuerySchema = z
+  .object({
+    scope: z.enum(["global", "provider", "account", "combo", "key"]),
+    scopeId: z.string().trim().max(256).nullable().optional(),
+  })
+  .superRefine(requireScopeIdForNonGlobal(SCOPE_ID_REQUIRED_SCOPED));
 
 // Set a scope pool's rotation strategy. Optional sticky window (minutes) only
 // applies to the `sticky` strategy; ignored otherwise.
@@ -241,12 +246,4 @@ export const proxyRotationStrategySchema = z
     stickyWindowMinutes: z.number().int().min(1).max(1440).optional(),
   })
   .strict()
-  .superRefine((value, ctx) => {
-    if (value.scope !== "global" && !value.scopeId?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "scopeId is required for provider/account/combo/key scope",
-        path: ["scopeId"],
-      });
-    }
-  });
+  .superRefine(requireScopeIdForNonGlobal(SCOPE_ID_REQUIRED_SCOPED));

@@ -6,9 +6,9 @@ import type { AntigravityClientProfile } from "@/shared/constants/antigravityCli
 // VS Code Copilot Chat extension. The CLI's `copilot-developer-cli` integration
 // id is the catalog-unlock lever: it exposes the full entitled model set
 // (gemini-3.x, gpt-5.4-nano, the full opus reasoning range) where `vscode-chat`
-// returns a narrower list. Version strings track the live-captured CLI 1.0.81-6.
+// returns a narrower list. Version strings track the live-captured CLI 1.0.88.
 export const GITHUB_COPILOT_API_VERSION = "2026-08-01";
-export const GITHUB_COPILOT_CLI_VERSION = "1.0.81-6";
+export const GITHUB_COPILOT_CLI_VERSION = "1.0.88";
 const GITHUB_COPILOT_VERSION_OVERRIDE_ENV = "GITHUB_COPILOT_CLI_VERSION";
 const SAFE_COPILOT_VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$/;
 
@@ -41,11 +41,25 @@ export const GITHUB_COPILOT_REFRESH_USER_AGENT = "GithubCopilot/1.0";
 export function getGitHubCopilotChatUserAgent(): string {
   return `GitHubCopilotChat/${getGitHubCopilotCliVersion()}`;
 }
-export const GITHUB_COPILOT_INTEGRATION_ID = "copilot-developer-cli";
+export const GITHUB_COPILOT_CLI_INTEGRATION_ID = "copilot-developer-cli";
+export const GITHUB_COPILOT_CHAT_INTEGRATION_ID = "copilot-chat";
+export const GITHUB_COPILOT_INTEGRATION_ID = GITHUB_COPILOT_CLI_INTEGRATION_ID;
 export const GITHUB_COPILOT_OPENAI_INTENT = "conversation-agent";
 export const GITHUB_COPILOT_INTERACTION_TYPE = "conversation-user";
 export const GITHUB_COPILOT_HARNESS_ID = "copilot-sdk";
 export const GITHUB_COPILOT_DEFAULT_INITIATOR = "user";
+
+export function normalizeCopilotIntegrationId(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed || /[\r\n]/.test(trimmed)) return null;
+  return trimmed;
+}
+
+export function resolveCopilotIntegrationIdOverride(): string | null {
+  const raw = typeof process === "undefined" ? undefined : process.env?.COPILOT_INTEGRATION_ID;
+  return normalizeCopilotIntegrationId(raw);
+}
 
 // Stable per-install device fingerprint (the CLI's X-Client-Machine-Id). The
 // real @github/copilot CLI sends ONE stable UUID on every inference + /models
@@ -86,9 +100,9 @@ export const CURSOR_REGISTRY_VERSION = "3.9";
 export function getGitHubCopilotChatHeaders(
   accept = "application/json",
   initiator = GITHUB_COPILOT_DEFAULT_INITIATOR,
-  options: { vision?: boolean; intent?: string } = {}
+  options: { vision?: boolean; intent?: string; integrationId?: string } = {}
 ): Record<string, string> {
-  // Matches the live @github/copilot CLI 1.0.81-6 inference request 1:1 (MITM-
+  // Matches the live @github/copilot CLI 1.0.88 inference request 1:1 (MITM-
   // captured). NOTE the CLI does NOT send `editor-plugin-version` nor
   // `x-vscode-user-agent-library-version` on the inference path — those belong
   // to the VS Code Copilot Chat extension, not the CLI. Sending an incomplete
@@ -97,10 +111,14 @@ export function getGitHubCopilotChatHeaders(
   // is the catalog-unlock lever; the stable X-Client-Machine-Id is the CLI's
   // per-install device fingerprint.
   const version = getGitHubCopilotCliVersion();
+  const integrationId =
+    normalizeCopilotIntegrationId(options.integrationId) ||
+    resolveCopilotIntegrationIdOverride() ||
+    GITHUB_COPILOT_CLI_INTEGRATION_ID;
   const headers: Record<string, string> = {
-    "copilot-integration-id": GITHUB_COPILOT_INTEGRATION_ID,
+    "copilot-integration-id": integrationId,
     "editor-version": `copilot/${version}`,
-    "user-agent": `copilot/${version}`,
+    "user-agent": `copilot/${version} (${getRuntimePlatform()}) term/unknown`,
     "openai-intent": options.intent || GITHUB_COPILOT_OPENAI_INTENT,
     "x-interaction-type": GITHUB_COPILOT_INTERACTION_TYPE,
     "copilot-harness-id": GITHUB_COPILOT_HARNESS_ID,

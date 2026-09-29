@@ -2,12 +2,16 @@
  * Extract usage from non-streaming response body
  * Handles different provider response formats
  */
+import { carryEstimatedUsageMarker } from "../utils/usageTracking.ts";
+
 export function extractUsageFromResponse(responseBody, provider) {
   if (!responseBody || typeof responseBody !== "object") return null;
   const providerId = typeof provider === "string" ? provider.toLowerCase() : "";
   const isClaudeProvider =
     providerId === "claude" ||
     providerId === "anthropic" ||
+    providerId === "vertex" ||
+    providerId === "vertex-partner" ||
     providerId.startsWith("anthropic-compatible");
 
   // OpenAI format (has prompt_tokens / completion_tokens)
@@ -23,7 +27,7 @@ export function extractUsageFromResponse(responseBody, provider) {
       responseBody.usage.prompt_tokens_details?.cache_write_tokens ??
       responseBody.usage.input_tokens_details?.cache_write_tokens ??
       responseBody.usage.cache_write_tokens;
-    return {
+    const openAiUsage = {
       prompt_tokens: responseBody.usage.prompt_tokens || 0,
       completion_tokens: responseBody.usage.completion_tokens || 0,
       // DeepSeek native API uses flat prompt_cache_hit_tokens (NOT
@@ -60,6 +64,7 @@ export function extractUsageFromResponse(responseBody, provider) {
         ? { cost_in_usd_ticks: responseBody.usage.cost_in_usd_ticks }
         : {}),
     };
+    return carryEstimatedUsageMarker(responseBody.usage, openAiUsage);
   }
 
   // Claude format
@@ -103,7 +108,11 @@ export function extractUsageFromResponse(responseBody, provider) {
         responsesUsage.input_tokens_details?.cached_tokens ??
         responsesUsage.prompt_tokens_details?.cached_tokens ??
         responsesUsage.cache_read_input_tokens,
-      cache_creation_input_tokens: responsesUsage.cache_creation_input_tokens,
+      cache_creation_input_tokens:
+        responsesUsage.cache_creation_input_tokens ??
+        responsesUsage.input_tokens_details?.cache_creation_tokens ??
+        responsesUsage.prompt_tokens_details?.cache_creation_tokens ??
+        responsesUsage.cache_write_tokens,
       reasoning_tokens:
         responsesUsage.output_tokens_details?.reasoning_tokens ??
         responsesUsage.completion_tokens_details?.reasoning_tokens ??

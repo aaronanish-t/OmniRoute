@@ -32,13 +32,9 @@ import {
   resolveOpencodeCliDefaults,
 } from "../utils/opencodeHeaders.ts";
 import { projectOpencodeSessionBody } from "../utils/opencodeSessionIdentity.ts";
-import {
-  listForRequest,
-  releaseRequestList,
-  requiredProxyUnavailableFingerprints,
-  type ScopedAccount,
-  type ScopedAccountHealth,
-} from "./opencodeAccountScope.ts";
+import { listForRequest, releaseRequestList } from "./opencodeAccountScope.ts";
+import type { ScopedAccount, ScopedAccountHealth } from "./opencodeAccountScope.ts";
+import { guardRequiredAccountProxies } from "./opencodeRequiredProxy.ts";
 import {
   type AccountProxyConfig,
   type RotationAccountSnapshot,
@@ -83,7 +79,6 @@ import {
   retryFreeTierRefusalWithObservedTools,
 } from "./opencodeFreeTierRetry.ts";
 import { withRequestShapeRetry } from "./opencodeRequestShape.ts";
-import { buildErrorBody } from "../utils/error.ts";
 
 // Re-exported: the free-model catalog moved to the contract module (it decides whether the
 // contract applies), and existing importers keep resolving it from the executor.
@@ -535,7 +530,6 @@ export class OpencodeExecutor extends BaseExecutor {
         );
       }
 
-      const blockedAccounts = requiredProxyUnavailableFingerprints(input.credentials);
       const accounts = listForRequest(input.body, this.accountHealth, input.credentials);
       if (accounts.length === 1 && accounts[0]?.fingerprint === "") this.nextAccountIdx = 0;
       else if (this.nextAccountIdx >= accounts.length) this.nextAccountIdx = 0;
@@ -544,27 +538,8 @@ export class OpencodeExecutor extends BaseExecutor {
       // empty when absent (never n/a/none/fabricated). The existing motif
       // stays byte-identical after the prefix.
       const cid = input.correlationId ? `correlationId=${input.correlationId} ` : "";
-      for (const fingerprint of blockedAccounts) {
-        log?.warn?.(
-          "OPENCODE",
-          `${cid}skipping account ${maskAccountId(fingerprint)}: required proxy unavailable`
-        );
-      }
-      if (accounts.length === 0 && blockedAccounts.length > 0) {
-        return {
-          response: new Response(
-            JSON.stringify(
-              buildErrorBody(503, "Required account proxy is unavailable", undefined, {
-                code: "proxy_unavailable",
-              })
-            ),
-            { status: 503, headers: { "Content-Type": "application/json" } }
-          ),
-          url: "",
-          headers: {} as Record<string, string>,
-          transformedBody: null,
-        };
-      }
+      const proxyGuard = guardRequiredAccountProxies(input.credentials, accounts, log, cid);
+      if (proxyGuard) return proxyGuard;
       // Rotation attribution diagnostics (single flag read per request — the DB
       // override lookup is synchronous SQLite, never in the attempt loop).
       const attributionOn = isRotationAttributionEnabled();

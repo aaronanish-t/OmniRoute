@@ -1,8 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
-import { OpencodeExecutor } from "../../open-sse/executors/opencode.ts";
-import { syncFromHealth } from "../../open-sse/executors/opencodeAccountScope.ts";
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-opencode-proxy-15007-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const [{ OpencodeExecutor }, { syncFromHealth }, core] = await Promise.all([
+  import("../../open-sse/executors/opencode.ts"),
+  import("../../open-sse/executors/opencodeAccountScope.ts"),
+  import("../../src/lib/db/core.ts"),
+]);
+
+test.after(() => {
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 const log = { debug() {}, info() {}, warn() {}, error() {} };
 const BLOCKED = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";

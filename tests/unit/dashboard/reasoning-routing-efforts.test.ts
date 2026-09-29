@@ -36,3 +36,15 @@ test("ultra remains limited to the model variants already supported by the capab
     "max",
   ]);
 });
+
+test("openai/ prefixed ids read the same Codex alias sets as the executor (#14720)", () => {
+  assert.deepEqual(getReasoningRoutingTargetEffortOptions("openai/gpt-6-sol-high", "medium"), [
+    "none",
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max",
+    "ultra",
+  ]);
+});

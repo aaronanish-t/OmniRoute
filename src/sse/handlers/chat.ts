@@ -82,7 +82,9 @@ import {
 import { dispatchChatWithAffinityEviction } from "./chatDispatch";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
+import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
 import { comboTargetPassesKeyModelPolicy } from "./chat/comboTargetKeyPolicy.ts";
+import { recordGateRejection, recordQuotaParkedSkip } from "./quotaParkedSkipUsage";
 import { getCombos } from "@/lib/db/combos";
 import { resolveModelLockoutSettings } from "@/lib/resilience/modelLockoutSettings";
 import {
@@ -1594,29 +1596,18 @@ async function handleSingleModelChat(
     providerProfile,
     ...(bypassReason ? { bypassReason } : {}),
   });
+  const rejectionScope = {
+    body,
+    modelStr,
+    clientRawRequest,
+    apiKeyInfo,
+    runtimeOptions,
+    telemetry,
+    comboName,
+    isCombo,
+  };
   if (gate) {
-    // Log the rejected request so it appears in /dashboard/logs AND is counted in the
-    // per-api-key usage analytics (usage_history, success:false) — otherwise a key whose
-    // traffic is entirely gate/breaker-rejected shows "zero requests" (support-mesh 2026-07-08).
-    try {
-      const { recordRejectedRequestUsage } = await import("./rejectedRequestUsage");
-      await recordRejectedRequestUsage({
-        status: gate.status,
-        model,
-        requestedModel: body?.model || modelStr,
-        provider,
-        endpoint: clientRawRequest?.endpoint,
-        error: `[${gate.status}] Pipeline gate rejected`,
-        comboName: isCombo ? comboName : null,
-        comboStepId: isCombo ? (runtimeOptions?.comboStepId ?? null) : null,
-        comboExecutionKey: isCombo ? (runtimeOptions?.comboExecutionKey ?? null) : null,
-        apiKeyId: apiKeyInfo?.id ?? null,
-        apiKeyName: apiKeyInfo?.name ?? null,
-        correlationId: runtimeOptions?.correlationId ?? null,
-        sessionTag: runtimeOptions?.conversationId ?? null,
-        startTime: telemetry?.startTime,
-      });
-    } catch {}
+    await recordGateRejection(gate.status, provider, model, rejectionScope);
     return gate;
   }
 
@@ -1849,6 +1840,9 @@ async function handleSingleModelChat(
           shadowedNode,
           runtimeOptions?.correlationId ?? null
         );
+        // #14360: log the synthesized quota-parking refusal (never for combo targets).
+        const skip = { credentials, lastError, lastStatus, provider, model };
+        await recordQuotaParkedSkip(skip, rejectionScope);
         const lastFailedConnectionId =
           excludedConnectionIds.size > 0
             ? Array.from(excludedConnectionIds)[excludedConnectionIds.size - 1]
@@ -2379,9 +2373,8 @@ async function handleSingleModelChat(
               Boolean(comboName) // isCombo if comboName exists
             );
 
-            if (fallbackResponse.ok) {
-              return fallbackResponse;
-            }
+            if (fallbackResponse.ok)
+              return markEmergencyFallback(fallbackResponse, currentModelStr, fallbackModelStr);
 
             log.warn(
               "EMERGENCY_FALLBACK",

@@ -24,6 +24,7 @@ import { canAffordRequest } from "../../../src/lib/quota/quotaScheduler.ts";
 import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
+import { recordPersistedSkipBypass } from "../comboMetrics.ts";
 import {
   getExhaustedTargetSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
@@ -232,6 +233,10 @@ export async function evaluateExecuteTargetGates(opts: {
       );
       bumpFallback();
       return { kind: "skip", result: null };
+    } else if (allowRateLimitedConnection) {
+      // The transient flag re-served a target with no future persisted
+      // cooldown: count the bypass for operators.
+      recordPersistedSkipBypass(deps.combo.name);
     }
   }
 

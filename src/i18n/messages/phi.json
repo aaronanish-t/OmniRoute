@@ -1203,6 +1203,8 @@
     "batchGroup": "Pangkat",
     "homeSubtitle": "Pangkalahatang-ideya ng dashboard",
     "providersSubtitle": "Pamahalaan ang mga AI provider",
+    "modelCatalog": "Katalogo ng modelo",
+    "modelCatalogSubtitle": "Mag-browse ng mga modelo mula sa iba't ibang provider",
     "quotaTrackerSubtitle": "Subaybayan ang mga limitasyon sa paggamit",
     "providerQuotaSubtitle": "Subaybayan ang mga limitasyon sa paggamit ng provider",
     "runtimeSubtitle": "Real-time na katatagan at mga session",
@@ -11521,6 +11523,7 @@
       "output": "I-output",
       "totalOut": "Kabuuang Labas: {value}",
       "reasoning": "Rason: {value}",
+      "reasoningObserved": "{value} · naobserbahan ang {chars} karakter",
       "requestedModel": "Hiniling na Modelo",
       "requestProtocol": "Protokol ng Request",
       "cacheSource": "Cache Pinagmulan",
@@ -12867,7 +12870,8 @@
     "inheritedProxy": "Nagmamana ng koneksyon: {host}",
     "inheritedPool": "Nagmamana ng pool ng koneksyon ({count})",
     "poolEmptyBlocked": "Walang laman ang pool — nabibigo ang mga request (hindi direkta)",
-    "directEgress": "Direkta (walang proxy)"
+    "directEgress": "Direkta (walang proxy)",
+    "ownProxy": "Sariling proxy"
   },
   "gamification": {
     "leaderboardScopes": {

@@ -1203,6 +1203,8 @@
     "batchGroup": "الدُفعات",
     "homeSubtitle": "نظرة عامة على لوحة القيادة",
     "providersSubtitle": "إدارة موفري الذكاء الاصطناعي",
+    "modelCatalog": "كتالوج النماذج",
+    "modelCatalogSubtitle": "تصفح النماذج عبر المزودين",
     "quotaTrackerSubtitle": "تتبع حدود الاستخدام",
     "providerQuotaSubtitle": "تتبع حدود استخدام الموفر",
     "runtimeSubtitle": "المرونة والجلسات في الوقت الحقيقي",
@@ -11521,6 +11523,7 @@
       "output": "مخرج",
       "totalOut": "الإجمالي الخارج: {value}",
       "reasoning": "التفكير: {value}",
+      "reasoningObserved": "{value} · تم رصد {chars} حرفًا",
       "requestedModel": "النموذج المطلوب",
       "requestProtocol": "بروتوكول المتطلبات",
       "cacheSource": "مصدر التخزين المؤقت",
@@ -12867,7 +12870,8 @@
     "inheritedProxy": "يرث الاتصال: {host}",
     "inheritedPool": "يرث تجمع الاتصالات ({count})",
     "poolEmptyBlocked": "التجمع فارغ — تفشل الطلبات (ليس مباشرًا)",
-    "directEgress": "مباشر (بدون وكيل)"
+    "directEgress": "مباشر (بدون وكيل)",
+    "ownProxy": "وكيل خاص"
   },
   "gamification": {
     "leaderboardScopes": {

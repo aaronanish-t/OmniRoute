@@ -11523,6 +11523,7 @@
       "output": "Đầu ra",
       "totalOut": "Tổng đầu ra: {value}",
       "reasoning": "Suy luận: {value}",
+      "reasoningObserved": "{value} · quan sát được {chars} ký tự",
       "requestedModel": "Mô hình được yêu cầu",
       "requestProtocol": "Giao thức yêu cầu",
       "cacheSource": "Nguồn cache",
@@ -12869,7 +12870,8 @@
     "inheritedProxy": "Kế thừa kết nối: {host}",
     "inheritedPool": "Kế thừa nhóm proxy của kết nối ({count})",
     "poolEmptyBlocked": "Nhóm proxy trống — yêu cầu thất bại (không phải trực tiếp)",
-    "directEgress": "Kết nối trực tiếp (không dùng proxy)"
+    "directEgress": "Kết nối trực tiếp (không dùng proxy)",
+    "ownProxy": "Proxy riêng"
   },
   "gamification": {
     "leaderboardScopes": {

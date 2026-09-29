@@ -1203,6 +1203,8 @@
     "batchGroup": "ಬ್ಯಾಚ್",
     "homeSubtitle": "ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅವಲೋಕನ",
     "providersSubtitle": "AI ಪ್ರೊವೈಡರ್ಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+    "modelCatalog": "ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್",
+    "modelCatalogSubtitle": "ಪೂರೈಕೆದಾರರಾದ್ಯಂತ ಮಾದರಿಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
     "quotaTrackerSubtitle": "ಬಳಕೆ ಮಿತಿಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ",
     "providerQuotaSubtitle": "ಪ್ರೊವೈಡರ್ ಬಳಕೆಯ ಮಿತಿಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ",
     "runtimeSubtitle": "ನೈಜ-ಸಮಯದ ಸ್ಥಿತಿಸ್ಥಾಪಕತೆ ಮತ್ತು ಸೆಷನ್ಗಳು",
@@ -11521,6 +11523,7 @@
       "output": "ಔಟ್ಪುಟ್",
       "totalOut": "ಒಟ್ಟು ಔಟ್ಪುಟ್: {value}",
       "reasoning": "ತಾರ್ಕಿಕ ವಿಶ್ಲೇಷಣೆ: {value}",
+      "reasoningObserved": "{value} · {chars} ಅಕ್ಷರಗಳು ಕಂಡುಬಂದಿವೆ",
       "requestedModel": "ವಿನಂತಿಸಿದ ಮಾದರಿ",
       "requestProtocol": "ವಿನಂತಿ ಪ್ರೋಟೋಕಾಲ್",
       "cacheSource": "ಕ್ಯಾಶ್ ಮೂಲ",
@@ -12867,7 +12870,8 @@
     "inheritedProxy": "ಸಂಪರ್ಕವನ್ನು ಆನುವಂಶಿಕವಾಗಿ: {host}",
     "inheritedPool": "ಸಂಪರ್ಕ ಪೂಲ್ ಅನ್ನು ಆನುವಂಶಿಕವಾಗಿ ({count})",
     "poolEmptyBlocked": "ಪೂಲ್ ಖಾಲಿ — ವಿನಂತಿಗಳು ವಿಫಲವಾಗುತ್ತವೆ (ನೇರವಲ್ಲ)",
-    "directEgress": "ನೇರ (ಪ್ರಾಕ್ಸಿ ಇಲ್ಲದೆ)"
+    "directEgress": "ನೇರ (ಪ್ರಾಕ್ಸಿ ಇಲ್ಲದೆ)",
+    "ownProxy": "ಸ್ವಂತ ಪ್ರಾಕ್ಸಿ"
   },
   "gamification": {
     "leaderboardScopes": {

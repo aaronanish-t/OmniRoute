@@ -1203,6 +1203,8 @@
     "batchGroup": "Procesare în lot",
     "homeSubtitle": "Prezentare generală a tabloului de bord",
     "providersSubtitle": "Gestionarea furnizorilor AI",
+    "modelCatalog": "Catalog de modele",
+    "modelCatalogSubtitle": "Răsfoiește modelele tuturor furnizorilor",
     "quotaTrackerSubtitle": "Urmărirea limitelor de utilizare",
     "providerQuotaSubtitle": "Urmărirea limitelor de utilizare ale furnizorului",
     "runtimeSubtitle": "Reziliență și sesiuni în timp real",
@@ -11521,6 +11523,7 @@
       "output": "Ieșire",
       "totalOut": "Total Ieșire: {value}",
       "reasoning": "Raționament: {value}",
+      "reasoningObserved": "{value} · {chars} caractere observate",
       "requestedModel": "Model Solicitat",
       "requestProtocol": "Protocol Req",
       "cacheSource": "Sursă Cache",
@@ -12867,7 +12870,8 @@
     "inheritedProxy": "Moștenește conexiunea: {host}",
     "inheritedPool": "Moștenește pool-ul de conexiuni ({count})",
     "poolEmptyBlocked": "Pool gol — cererile eșuează (nu direct)",
-    "directEgress": "Direct (fără proxy)"
+    "directEgress": "Direct (fără proxy)",
+    "ownProxy": "Proxy propriu"
   },
   "gamification": {
     "leaderboardScopes": {

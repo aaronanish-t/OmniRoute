@@ -4,10 +4,12 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { fetch as undiciFetch, Agent } from "undici";
 import {
   buildVercelRelayHeaders,
+  clearDispatcherCache,
   createProxyDispatcher,
   getDefaultDispatcher,
   getProxyRetryDispatcher,
   getRetryDispatcher,
+  isLocalEgressHostname,
   isRelayType,
   normalizeProxyUrl,
   proxyConfigToUrl,
@@ -15,7 +17,10 @@ import {
 } from "./proxyDispatcher.ts";
 import tlsClient, { type TlsFetchOptions, guardTlsFirstByte } from "./tlsClient.ts";
 import { withUpstreamStatusCapture } from "./upstreamStatusCapture.ts";
+import { stampOwnListenerSelfHop } from "./selfHop.ts";
 import { describeFallbackFailure, redactProxyDetailsInMessage } from "./proxyFetchRedaction.ts";
+import { recordFinalTransportOutcome, recordProxiedSuccess } from "./proxyTransportOutcome.ts";
+import { sanitizeTransportError } from "./proxyTransportError.ts";
 import { isProxyReachable } from "@/lib/proxyHealth";
 import {
   isControlPlaneProxyDirectFallbackEnabled,
@@ -24,7 +29,7 @@ import {
 import {
   directFetchWithBoundedResponseStart,
   isDirectResponseStartTimeout,
-  resolveDirectHeadersTimeoutMs,
+  directHeadersTimeoutResolver,
 } from "./directResponseStartTimeout.ts";
 
 // #9100: relay egress (Vercel / Deno / Cloudflare edge functions) used to go
@@ -113,6 +118,7 @@ const TLS_PROVIDER_PROFILE: Record<string, { browser: string; os: string }> = {
 
 type TlsProfileResult = { browserProfile?: string; os?: string };
 function tlsProfileForProvider(provider: string | null | undefined): TlsProfileResult {
+
   if (!provider) return {};
   const p = TLS_PROVIDER_PROFILE[provider.trim().toLowerCase()];
   return p ? { browserProfile: p.browser, os: p.os } : {};
@@ -194,6 +200,17 @@ export type AppliedProxySink = {
   upstreamStatus?: number;
   /** Masked serving-account id (N112) — set by the rotation executor at dispatch. */
   rotationAccount?: string | null;
+  /** Added wait before dispatch, ms — null means none was imposed. */
+  addedWaitMs?: number | null;
+  /** Added-wait cause: throttle, park, or throttle+park. */
+  addedWaitCause?: string | null;
+  /**
+   * Pool-member resolver published by the chat layer when the resolved egress
+   * came from a connection pool that may offer another member on a per-address
+   * refusal. Absent otherwise. Resolves to a proxy config, or null when the
+   * pool has nothing else to offer — the executor keeps its behavior then.
+   */
+  reselectPoolMember?: () => Promise<unknown>;
 };
 const APPLIED_PROXY_CONTEXT_KEY = Symbol.for("omniroute.proxyFetch.applied-context");
 type AppliedProxyStore = typeof globalThis & {
@@ -216,6 +233,16 @@ export function runWithAppliedProxyCapture<T>(sink: AppliedProxySink, fn: () => 
 }
 
 /**
+ * Read the current applied-proxy capture sink, if the request runs inside one
+ * (see runWithAppliedProxyCapture). Read-only: never creates a sink. Lets an
+ * executor read a resolver the chat layer published on the sink before
+ * dispatch without importing the database layer.
+ */
+export function currentAppliedProxySink(): AppliedProxySink | undefined {
+  return getAppliedProxyContext().getStore();
+}
+
+/**
  * Record the masked id of the rotation account serving this request on the
  * current capture sink (no-op outside a capture — the sink stays null and the
  * call-site forwards null). Only an already-masked id may be passed in.
@@ -226,6 +253,47 @@ export function noteRotationAccount(masked: string): void {
     if (sink) sink.rotationAccount = masked;
   } catch {
     /* attribution is best-effort; never break the request path */
+  }
+}
+
+/** Added-wait causes. Plain data — numbers plus this enum, nothing to mask. */
+export type AddedWaitCause = "throttle" | "park" | "throttle+park";
+
+/**
+ * Cumulative wait before dispatch (pacing, park) on the capture sink.
+ * Snapshot: callers publish cumulative totals, so last-write-wins loses
+ * nothing. Best-effort like noteRotationAccount: no-op outside a capture.
+ */
+export function noteAddedWait(totalMs: number, causes: Set<AddedWaitCause>): void {
+  try {
+    const sink = getAppliedProxyContext().getStore();
+    if (!sink) return;
+    if (!Number.isFinite(totalMs) || totalMs <= 0 || causes.size === 0) {
+      sink.addedWaitMs = null;
+      sink.addedWaitCause = null;
+      return;
+    }
+    sink.addedWaitMs = Math.round(totalMs);
+    sink.addedWaitCause = causes.size > 1 ? "throttle+park" : ([...causes][0] ?? null);
+  } catch {
+    /* added-wait is best-effort; never break the request path */
+  }
+}
+
+/**
+ * Late read of the added wait on the capture sink. Fail-soft: null
+ * outside a capture or when nothing was published — callers persist NULL.
+ */
+export function readAddedWait(): { ms: number | null; cause: string | null } | null {
+  try {
+    const sink = getAppliedProxyContext().getStore();
+    if (!sink) return null;
+    const ms = typeof sink.addedWaitMs === "number" ? sink.addedWaitMs : null;
+    if (ms === null) return null;
+    const cause = typeof sink.addedWaitCause === "string" ? sink.addedWaitCause : null;
+    return { ms, cause };
+  } catch {
+    return null;
   }
 }
 
@@ -367,30 +435,6 @@ function isWreqProxySupported(proxyUrl: string): boolean {
   }
 }
 
-function sanitizeTransportError(
-  error: unknown,
-  message: string,
-  fallbackCode: string
-): Error & { code: string; errorCode?: string; statusCode?: number } {
-  const source = error && typeof error === "object" ? (error as Record<string, unknown>) : {};
-  const sanitized = new Error(message) as Error & {
-    code: string;
-    errorCode?: string;
-    statusCode?: number;
-  };
-  sanitized.code =
-    typeof source.code === "string" && /^[A-Z0-9_:-]{1,64}$/.test(source.code)
-      ? source.code
-      : fallbackCode;
-  if (typeof source.errorCode === "string" && /^[a-zA-Z0-9_:-]{1,64}$/.test(source.errorCode)) {
-    sanitized.errorCode = source.errorCode;
-  }
-  if (typeof source.statusCode === "number" && Number.isFinite(source.statusCode)) {
-    sanitized.statusCode = source.statusCode;
-  }
-  return sanitized;
-}
-
 /** Injectable dependencies for testability (Approach B DI). */
 export type ProxyFetchDeps = {
   undiciFetch?: FetchWithDispatcher;
@@ -488,6 +532,21 @@ function noProxyMatch(targetUrl) {
     }
     return hostname === patternHost || hostname.endsWith(`.${patternHost}`);
   });
+}
+
+/**
+ * True loopback only — NOT the broader private-network set `isLocalAddress`
+ * covers. A LAN peer (192.168.x, a local Ollama box) is still reached over a
+ * real network and keeps the outbound bound-and-replay policy; a loopback
+ * target is this very process.
+ */
+function isLoopbackHost(hostname: string): boolean {
+  const host = hostname
+    .replace(/^\[/, "")
+    .replace(/\]$/, "")
+    .replace(/^::ffff:/i, "")
+    .toLowerCase();
+  return host === "localhost" || host === "::1" || host === "127.0.0.1" || host.startsWith("127.");
 }
 
 function isLocalAddress(hostname: string): boolean {
@@ -771,6 +830,9 @@ async function patchedFetchUnrecorded(
   options: FetchWithDispatcherOptions = {},
   deps: ProxyFetchDeps = {}
 ) {
+  // #13593: a hop back to this listener carries the process self-hop token
+  // so admission does not shed it with public traffic.
+  stampOwnListenerSelfHop(input, options);
   // Explicit direct contexts must win even when a caller supplied a stale
   // dispatcher. Native fetch preserves direct streaming semantics.
   if (proxyContext.getStore() === DIRECT_PROXY_CONTEXT) {
@@ -859,9 +921,29 @@ async function patchedFetchUnrecorded(
       deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
     const _nativeFallback =
       (deps.nativeFetch as FetchWithDispatcher | undefined) ?? originalFetchWithDispatcher;
+
+    // A loopback self-request (model sync, auto-discovery, internal routes) must
+    // NOT inherit the outbound-egress policy below. That policy bounds
+    // response-start and then REPLAYS the request on a fresh no-keep-alive
+    // dispatcher, which is designed for a dead keep-alive socket to a remote
+    // host (#10214). Against our own listener there is no such socket to
+    // detect: the replay just doubles how long a slow internal request occupies
+    // one of our OWN inbound slots (30s bound + 30s replay). When a provider
+    // stalls, those self-requests pile up against the chat admission limit and
+    // starve live traffic until Cloudflare cuts the client at its 120s proxy
+    // read timeout (HTTP 524). Send loopback straight through the native fetch.
+    let isLoopbackTarget = false;
+    try {
+      isLoopbackTarget = isLoopbackHost(new URL(targetUrl).hostname);
+    } catch {
+      // ignore — a non-parseable target keeps the default egress policy
+    }
+    if (isLoopbackTarget) {
+      return _nativeFallback(input, options);
+    }
+
     let lastDispatcherError: unknown = null;
-    const directBodyForTimeout = typeof options.body === "string" ? options.body : null;
-    const directHeadersTimeoutMs = resolveDirectHeadersTimeoutMs(undefined, directBodyForTimeout);
+    const timeoutFor = directHeadersTimeoutResolver(options, targetUrl);
     let targetHostForLogs = "";
     try {
       targetHostForLogs = new URL(targetUrl).host;
@@ -870,20 +952,27 @@ async function patchedFetchUnrecorded(
     }
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
+        let hostnameForDispatcher: string | undefined;
+        try {
+          hostnameForDispatcher = new URL(targetUrl).hostname;
+        } catch {}
         return await directFetchWithBoundedResponseStart(
           input,
           {
             ...options,
-            dispatcher: attempt === 0 ? getDefaultDispatcher() : getRetryDispatcher(),
+            dispatcher:
+              attempt === 0
+                ? getDefaultDispatcher(hostnameForDispatcher)
+                : getRetryDispatcher(hostnameForDispatcher),
           },
           _undiciDirect,
-          resolveDirectHeadersTimeoutMs(undefined, directBodyForTimeout, attempt, !!options.signal)
+          timeoutFor(attempt)
         );
       } catch (dispatcherError) {
         if (isDirectResponseStartTimeout(dispatcherError)) {
           if (attempt === 0 && maxAttempts > 1) {
             console.warn(
-              `[ProxyFetch] Direct response-start timeout (${directHeadersTimeoutMs}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetHostForLogs}`
+              `[ProxyFetch] Direct response-start timeout (${timeoutFor(0)}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetHostForLogs}`
             );
             lastDispatcherError = dispatcherError;
             continue;
@@ -964,6 +1053,18 @@ async function patchedFetchUnrecorded(
           console.warn(
             `[ProxyFetch] Undici dispatcher failed, falling back to native fetch (after retry): ${describeFetchCause(dispatcherError)}`
           );
+          // On PROXY_UNREACHABLE for local-egress hostnames (host.docker.internal,
+          // *.internal, *.local), drop the cached dispatcher pool: Docker
+          // Desktop's NAT silently drops idle keep-alive sockets inside the
+          // round-robin pool's keepAliveMaxTimeout window, and the pool never
+          // reaps them on PROXY_UNREACHABLE, so the next request must rebuild
+          // with fresh sockets (#4252-style stale-socket burst mitigation).
+          if (
+            isLocalEgressHostname(targetHostForLogs) &&
+            isProxyUnreachableError(dispatcherError)
+          ) {
+            clearDispatcherCache();
+          }
           try {
             return await _nativeFallback(input, options);
           } catch (nativeError) {
@@ -1154,11 +1255,13 @@ async function patchedFetchUnrecorded(
   let lastProxyError: unknown = null;
   for (let attempt = 0; attempt < maxProxyAttempts; attempt++) {
     try {
-      return await _undiciProxy(input, {
+      const response = await _undiciProxy(input, {
         ...options,
         dispatcher:
           attempt === 0 ? createProxyDispatcher(proxyUrl) : getProxyRetryDispatcher(proxyUrl),
       });
+      recordProxiedSuccess(proxyUrl, targetUrl); // completed response, any status
+      return response;
     } catch (error) {
       if (isCallerAbort(error, getEffectiveSignal(input, options))) throw error;
       const msg = error instanceof Error ? error.message : String(error);
@@ -1190,8 +1293,15 @@ async function patchedFetchUnrecorded(
         originalMsg ? `Proxy request failed: ${originalMsg}` : "Proxy request failed",
         "PROXY_REQUEST_FAILED"
       );
+      // Read the code off the thrown sanitized error (tag survives the
+      // sanitize as errorCode passthrough; untagged reads undefined).
+      if (sanitized.errorCode === "proxy_unreachable")
+        recordFinalTransportOutcome(proxyUrl, targetUrl);
+      if (sanitized.causeCode) {
+        sanitized.message += ` (cause ${sanitized.causeCode})`;
+      }
       console.error(
-        `[ProxyFetch] Proxy request failed (${source}, fail-closed; code=${sanitized.code})`
+        `[ProxyFetch] Proxy request failed (${source}, fail-closed; code=${sanitized.code}${sanitized.causeCode ? `; cause=${sanitized.causeCode}` : ""})`
       );
       throw sanitized;
     }

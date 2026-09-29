@@ -34,6 +34,12 @@ export const APP_STAGING_REMOVAL_PATHS: string[] = [
 export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
   ".env.example",
   "BUILD_SHA",
+  // Sentinel written by write-build-base-path.mjs into the standalone dist/. Consumed at
+  // container start time by ensure-docker-base-path.mjs to compare the baked-in
+  // OMNIROUTE_BASE_PATH against the runtime value. Without this entry prepublish Step
+  // 10.7 (findUnexpectedArtifactPaths) prunes it as an unexpected artifact → the Docker
+  // container crashes at startup with a missing sentinel.
+  "BUILD_OMNIROUTE_BASE_PATH",
   "docs/openapi.yaml",
   // #7065: imported by dist/server-ws.mjs; assembleStandalone copies it but without
   // this bare entry the prepublish prune deleted it → every `omniroute` boot of the
@@ -224,6 +230,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // required entries make its absence loud (#7065 class; derived + enforced by
   // tests/unit/pack-artifact-entrypoint-closures.test.ts).
   "bin/cli/data-dir.mjs",
+  // GHSA-2pg2-xm9r-8544: private-by-default DATA_DIR / .env modes, called on every boot.
+  "bin/cli/privateDataDir.mjs",
   "bin/cli/utils/ensureAndroidCacheDir.mjs",
   "bin/cli/utils/parseEnvValue.mjs",
   "bin/cli/utils/storageKeyProvision.mjs",

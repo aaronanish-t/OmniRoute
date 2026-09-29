@@ -1,5 +1,5 @@
 /**
- * Per-key self-service settings (migration 194) end to end on a temp SQLite DB:
+ * Per-key self-service settings (migration 197) end to end on a temp SQLite DB:
  * the DB module, the Zod schemas, the admin routes (GET/PUT
  * /api/keys/[id]/self-service, GET /api/keys, PATCH/DELETE /api/keys/[id]),
  * GET /v1/me/status auth via Bearer or x-api-key, and the policy merge into

@@ -23,7 +23,7 @@ test("responses transport: internal reasoning sentinel is emitted as a reasoning
     ],
   };
   const out = openaiToOpenAIResponsesRequest("deepseek-v4-flash-max", body, true, {
-    _explicitReasoningReplay: true,
+    _provider: "opencode-go",
   }) as { input: Array<{ type: string; content?: Array<{ type: string; text?: string }> }> };
 
   const reasoningItems = out.input.filter(
@@ -55,4 +55,32 @@ test("responses transport: assistant turns with real reasoning keep their text",
   const reasoningItems = out.input.filter((item) => item.type === "reasoning");
   assert.equal(reasoningItems.length, 1);
   assert.equal(reasoningItems[0].content?.[0]?.text, "Because 2+2=4.");
+});
+
+test("responses transport: sentinel is NOT promoted for non-presence-enforcing upstreams", () => {
+  const body = {
+    model: "deepseek-v4-flash-max",
+    messages: [
+      { role: "user", content: "question" },
+      {
+        role: "assistant",
+        tool_calls: [{ id: "call_1", type: "function", function: { name: "f", arguments: "{}" } }],
+        reasoning_content: NON_ANTHROPIC_THINKING_PLACEHOLDER,
+      },
+      { role: "tool", tool_call_id: "call_1", content: "result" },
+    ],
+  };
+  for (const provider of ["deepseek", undefined]) {
+    const out = openaiToOpenAIResponsesRequest(
+      "deepseek-v4-flash-max",
+      body,
+      true,
+      provider ? { _provider: provider } : null
+    ) as { input: Array<{ type: string }> };
+    assert.equal(
+      out.input.some((item) => item.type === "reasoning"),
+      false,
+      `sentinel must not become a reasoning item for provider=${String(provider)}`
+    );
+  }
 });

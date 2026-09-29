@@ -102,6 +102,32 @@ test("runAuthzPipeline redirects root to dashboard before management auth", asyn
   assert.equal(response.headers.get("location"), "http://localhost/dashboard");
 });
 
+test("runAuthzPipeline forwards zed-hosted native-app callback from root to /callback preserving the query string (#13140)", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/?user_id=abc123&access_token=tok-xyz"),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 307);
+  assert.equal(
+    response.headers.get("location"),
+    "http://localhost/callback?user_id=abc123&access_token=tok-xyz"
+  );
+});
+
+test("runAuthzPipeline still redirects root to dashboard when only one native-app callback param is present (#13140)", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/?user_id=abc123"), {
+    enforce: true,
+  });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/dashboard");
+});
+
 test("runAuthzPipeline redirects unauthenticated dashboard pages to login", async () => {
   await forceAuthRequired();
 
@@ -371,18 +397,37 @@ test("runAuthzPipeline allows dashboard sessions to read model catalog aliases",
   assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
 });
 
-test("runAuthzPipeline allows dashboard sessions to reach DB health management API", async () => {
+test("runAuthzPipeline gates the DB health API on loopback, not on the session alone", async () => {
   await forceAuthRequired();
 
-  const response = await pipeline.runAuthzPipeline(
+  // #13717 moved /api/db/health to Tier 1 LOCAL_ONLY: runManagedDbHealthCheck()
+  // forks native diagnostics into a child process (Hard Rules #15 + #17), and the
+  // route is NOT in LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES. So a dashboard session
+  // is no longer sufficient by itself — an unstamped peer fails closed, whatever the
+  // URL says, because requestPeerAddress() never reads the spoofable Host header.
+  const unstamped = await pipeline.runAuthzPipeline(
     request("http://localhost/api/db/health", {
       headers: { cookie: await dashboardCookie() },
     }),
     { enforce: true }
   );
+  assert.equal(unstamped.status, 403);
 
-  assert.equal(response.status, 200);
-  assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+  // The local operator — real TCP peer 127.0.0.1, stamped by the custom server —
+  // still reaches it with their session.
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = "pipeline-test-peer-stamp-token";
+  const loopback = await pipeline.runAuthzPipeline(
+    request("http://localhost/api/db/health", {
+      headers: {
+        cookie: await dashboardCookie(),
+        "x-omniroute-peer-ip": "pipeline-test-peer-stamp-token|127.0.0.1",
+        "x-omniroute-via-proxy": "pipeline-test-peer-stamp-token|0",
+      },
+    }),
+    { enforce: true }
+  );
+  assert.equal(loopback.status, 200);
+  assert.equal(loopback.headers.get("x-omniroute-route-class"), "MANAGEMENT");
 });
 
 test("runAuthzPipeline accepts dashboard mutations from configured public origin", async () => {
@@ -635,4 +680,25 @@ test("runAuthzPipeline clears stale dashboard JWTs without error-stack noise", a
     console.error = originalError;
     console.warn = originalWarn;
   }
+});
+
+test("authenticated remote dashboard page is not a login redirect that clears the session", async () => {
+  await forceAuthRequired();
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = "pipeline-test-peer-stamp-token";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://gateway.example.test/dashboard/resilience/connections", {
+      headers: {
+        cookie: await dashboardCookie(),
+        "x-omniroute-peer-ip": "pipeline-test-peer-stamp-token|203.0.113.8",
+        "x-omniroute-via-proxy": "pipeline-test-peer-stamp-token|1",
+      },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 200);
+  const setCookie = response.headers.get("set-cookie") || "";
+  assert.doesNotMatch(setCookie, /Max-Age=0|Expires=Thu, 01 Jan 1970/i);
+  assert.equal(response.headers.get("location"), null);
 });

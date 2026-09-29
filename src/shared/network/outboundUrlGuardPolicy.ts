@@ -1,4 +1,5 @@
 import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
+import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveFeatureFlag } from "@/shared/utils/featureFlags";
 import {
   OutboundUrlGuardError,
@@ -62,10 +63,7 @@ export function arePrivateProviderUrlsAllowed() {
   if (legacyValue === undefined || legacyValue === "") {
     legacyValue = process.env[SSRF_GUARD_FLAG];
   }
-  if (
-    typeof legacyValue === "string" &&
-    ["false", "0", "no", "off"].includes(legacyValue.trim().toLowerCase())
-  ) {
+  if (!parseEnvBoolean(legacyValue, true)) {
     return true;
   }
 

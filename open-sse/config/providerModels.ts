@@ -222,6 +222,15 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   const bareModelId = prefix ? modelId.slice(prefix.length) : modelId;
   const found = PROVIDER_MODELS[alias]?.find((m) => m.id === bareModelId);
   if (found?.targetFormat) return found.targetFormat;
+  // Effort suffixes (gpt-6-astra-high, gpt-5.6-sol-xhigh) are not separate
+  // catalog rows on the public OpenAI provider. They must keep the base
+  // model's endpoint, or tools+reasoning land on /v1/chat/completions and
+  // OpenAI returns a 400 that the Responses API would have accepted.
+  const effortStripped = bareModelId.replace(/-(?:ultra|max|xhigh|high|medium|low|none)$/i, "");
+  if (effortStripped !== bareModelId) {
+    const base = PROVIDER_MODELS[alias]?.find((m) => m.id === effortStripped);
+    if (base?.targetFormat) return base.targetFormat;
+  }
   // #5842: OpenAI "*-pro" reasoning models (o1-pro, gpt-5.x-pro) are only served by
   // the native /v1/responses endpoint — /v1/chat/completions 404s ("only supported
   // in v1/responses"). Curated catalog entries are tagged explicitly; this heuristic
@@ -229,10 +238,26 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   // executor's /codex/i routing, 9router#102). Scoped to the openai alias so other
   // providers shipping *-pro ids keep their own endpoint semantics.
   if (alias === "openai" && /-pro$/i.test(bareModelId)) return "openai-responses";
+  // Grok Build only speaks Responses: GrokCliExecutor always POSTs to /v1/responses and
+  // live discovery drops non-`responses` backends. A passthrough id that post-dates the
+  // seed (e.g. grok-4.7 before a sync) otherwise falls back to the provider's "openai"
+  // format and ships a chat-completions body, which Grok Build rejects with 400.
+  if (alias === "gc") return "openai-responses";
   // Vertex uses three protocol families: Gemini generateContent, Anthropic Messages rawPredict,
   // and OpenAI-shaped Mistral/Open-MaaS requests. Resource names retain enough publisher data to
   // route future dynamically-synced models without adding another pinned prefix here.
   if (alias === "vertex" || alias === "vp") return getVertexModelTargetFormat(bareModelId);
+  // #14575: GitHub/GHE Copilot's own executors (github.ts, ghe-copilot.ts) route ANY
+  // claude-named model to Copilot's Anthropic-native /v1/messages endpoint via an
+  // unconditional /claude/i name match, regardless of curated-catalog coverage. When
+  // Copilot ships a new Claude id before the catalog is updated (e.g. claude-opus-5.5),
+  // the curated lookup above misses and previously fell through to the provider's base
+  // "openai" format, leaving the request body OpenAI-shaped while it is dispatched to the
+  // Anthropic-native endpoint — which rejects it (tool_choice/tools shape mismatch).
+  // Mirror the routing heuristic here so body translation stays consistent with where the
+  // executor actually sends the request (same pattern as the openai "-pro" heuristic above,
+  // #5842).
+  if ((alias === "gh" || alias === "ghe-copilot") && /claude/i.test(bareModelId)) return "claude";
   // Model-level targetFormat is provider-scoped: a catalog entry declares how THIS
   // provider's endpoint serves the model — do NOT import another provider's tag.
   // #9994 scoped this for providers WITH a catalog; #10072 extends it to catalogless

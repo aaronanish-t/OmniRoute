@@ -575,14 +575,8 @@ export class CircuitBreaker {
         if (this.openCycleCount <= this.backoffEscalationCount) {
           return override;
         }
-        const escalationFactor = Math.pow(
-          2,
-          this.openCycleCount - this.backoffEscalationCount
-        );
-        return Math.min(
-          override * escalationFactor,
-          override * this.maxBackoffMultiplier
-        );
+        const escalationFactor = Math.pow(2, this.openCycleCount - this.backoffEscalationCount);
+        return Math.min(override * escalationFactor, override * this.maxBackoffMultiplier);
       }
     }
     return baseTimeout;

@@ -1065,10 +1065,7 @@ export function providerCircuitOpenResponse(
         code: "provider_circuit_open",
         provider: safeProvider,
         retry_after: retryAfterSec,
-        // #14960: surface the classified failure kind so clients/operators can
-        // tell a quota_exhausted breaker (long upstream reset) from a generic
-        // rate_limit one without reading server logs.
-        ...(failureKind ? { failure_kind: failureKind } : {}),
+        ...(failureKind ? { failure_kind: failureKind } : {}), // #14960 quota vs rate_limit
       },
     }),
     {

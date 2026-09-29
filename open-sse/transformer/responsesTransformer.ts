@@ -9,6 +9,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { resolveRequestToolIdentity } from "../translator/response/openai-responses/requestToolIdentity.ts";
 import { plaintextCollaborationFields } from "../translator/response/openai-responses/collaborationPlaintextMarker.ts";
+import { finalizeResponsesTerminalStatus } from "../translator/helpers/responsesTerminalStatus.ts";
 
 // #10223: threshold for detecting corrupted request_id fields. Normal
 // request IDs are <100 chars. DeepSeek's SSE encoder bug produces 200+
@@ -253,6 +254,7 @@ export function createResponsesApiTransformStream(
     buffer: "",
     completedSent: false,
     usage: null,
+    finishReason: null as string | null,
     keepaliveTimer: null,
     // #6906: true once a finish_reason chunk closed all output items but deferred
     // response.completed — a trailing usage-only chunk (choices: [], usage: {...}) may
@@ -618,8 +620,9 @@ export function createResponsesApiTransformStream(
         response.usage = state.usage;
       }
 
-      emit(controller, "response.completed", {
-        type: "response.completed",
+      const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
+      emit(controller, eventType, {
+        type: eventType,
         response,
       });
     }
@@ -967,6 +970,8 @@ export function createResponsesApiTransformStream(
 
           // Handle finish_reason
           if (choice.finish_reason) {
+            // Read by sendCompleted() → finalizeResponsesTerminalStatus (length/filter → incomplete).
+            state.finishReason = choice.finish_reason;
             for (const i in state.msgItemAdded) closeMessage(controller, i);
             closeReasoning(controller);
             for (const i in state.funcCallIds) closeToolCall(controller, i);

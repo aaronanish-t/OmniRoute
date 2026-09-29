@@ -13,10 +13,10 @@ import { shouldShowKimiSponsorBanner } from "./kimiSponsorBannerGate";
 // subscriptions are closed to most new users, so that traffic could not
 // convert.
 // Dedicated tracked link issued by Moonshot 2026-08 for the 15% first-top-up
-// bonus campaign (offer valid through 2026-09-30 — revisit the 15% copy in the
+// bonus campaign (offer valid through 2026-12-31 — revisit the 15% copy in the
 // i18n `kimiSponsorBanner.description` strings after that date if not renewed).
 const KIMI_PLATFORM_AFF_URL =
-  "https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute";
+  "https://platform.kimi.ai?track_id=track-54109d849f474505a300fd86751ff226&aff=omniroute";
 
 // Versioned dismissal key — bump the suffix (e.g. `-v3`) if the banner's
 // offer/copy ever changes materially enough to warrant re-showing it to

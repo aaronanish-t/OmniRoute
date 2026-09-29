@@ -62,6 +62,17 @@ test("explicit combo providerId remains an authoritative credential-provider ove
   assert.equal(comboTargetCredentialProviderId(target), "opengate");
 });
 
+test("a provider-only combo target still overrides the credential provider (#11840)", () => {
+  // An alias-prefixed passthrough target (kilocode/cline) carries only `provider`;
+  // it must keep routing credentials to that provider. Only the "unknown"
+  // sentinel stamped on bare model ids is ignored.
+  assert.equal(comboTargetCredentialProviderId({ provider: "kilocode" }), "kilocode");
+  assert.equal(comboTargetCredentialProviderId({ providerId: null, provider: "cline" }), "cline");
+  assert.equal(comboTargetCredentialProviderId({ provider: "unknown" }), null);
+  assert.equal(comboTargetCredentialProviderId({}), null);
+  assert.equal(comboTargetCredentialProviderId(null), null);
+});
+
 test("mapped bare combo target keeps its model-resolved provider", async () => {
   BaseExecutor.RETRY_CONFIG.delayMs = 0;
   await resetStorage();
@@ -109,6 +120,65 @@ test("mapped bare combo target keeps its model-resolved provider", async () => {
     (body as { choices: Array<{ message: { content: string } }> }).choices[0].message.content,
     "OK"
   );
+});
+
+test("a bare combo target fails over to a sibling connection of its inferred provider (#14743)", async () => {
+  // Before the fix the target's "unknown" sentinel became the credential provider:
+  // the first attempt ran on the combo's preselected connection, but the failover
+  // lookup after a 429 asked for connections of provider "unknown", found none and
+  // failed the request instead of moving to the second openai key.
+  BaseExecutor.RETRY_CONFIG.delayMs = 0;
+  await resetStorage();
+  const model = `${TARGET_MODEL}-failover`;
+  const first = await providersDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "combo-provider-override-14743-a",
+    apiKey: "sk-combo-14743-a",
+    isActive: true,
+    testStatus: "active",
+    priority: 1,
+  });
+  await providersDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "combo-provider-override-14743-b",
+    apiKey: "sk-combo-14743-b",
+    isActive: true,
+    testStatus: "active",
+    priority: 2,
+  });
+  await persistDiscoveredModels("openai", first.id, [{ id: model, name: "Failover model" }]);
+  const combo = await combosDb.createCombo({
+    name: `combo-provider-failover-14743-${Date.now()}`,
+    strategy: "priority",
+    models: [{ kind: "model", model }],
+  });
+
+  const keysSeen: string[] = [];
+  globalThis.fetch = async (_input, init) => {
+    const auth = String((init?.headers as Record<string, string>)?.Authorization ?? "");
+    keysSeen.push(auth.replace(/^Bearer /, ""));
+    if (auth.endsWith("-a")) {
+      return new Response(
+        JSON.stringify({ error: { message: "rate limited", type: "rate_limit" } }),
+        {
+          status: 429,
+          headers: { "content-type": "application/json" },
+        }
+      );
+    }
+    return buildOpenAIResponse("OK", model);
+  };
+  const response = await handleChat(
+    buildRequest({
+      body: { model: combo.name, stream: false, messages: [{ role: "user", content: "Hi" }] },
+    })
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200, JSON.stringify(body));
+  assert.deepEqual(keysSeen, ["sk-combo-14743-a", "sk-combo-14743-b"]);
 });
 
 test.after(async () => {

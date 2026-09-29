@@ -318,7 +318,11 @@ function capabilityFor(
     if (capabilities.reasoningEffortsOverride && Array.isArray(declaredEfforts)) {
       return "unsupported" as const;
     }
-    if (codexModelFamilySupportsExtendedEffort(model, targetEffort)) return "supported" as const;
+    // Strip the provider namespace (`openai/`, `github/`, `opencode-zen/`,
+    // `codex/`…) so every provider serving the family resolves the same way.
+    if (codexModelFamilySupportsExtendedEffort(modelIdForRegistry, targetEffort)) {
+      return "supported" as const;
+    }
     if (capabilities.supportsThinking === null) return "unknown" as const;
     return "unsupported" as const;
   }

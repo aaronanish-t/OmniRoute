@@ -68,6 +68,7 @@ export function useConcurrencySnapshot() {
           setData(null);
           setError("unauthorized");
           clearTimeout(staleTimer);
+          finish();
           return;
         }
         if (!response.ok) throw new Error("Snapshot unavailable");

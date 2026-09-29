@@ -28,13 +28,22 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const authError = await requireManagementAuth(request);
-  if (authError) return authError;
+  if (authError) {
+    authError.headers.set("Cache-Control", "private, no-store");
+    return authError;
+  }
 
   const url = new URL(request.url);
   const action = url.searchParams.get("action");
   if (action === "reset-semaphores") {
     resetAllSemaphores();
-    return NextResponse.json({ ok: true, action });
+    return NextResponse.json(
+      { ok: true, action },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   }
-  return NextResponse.json({ error: "unknown action" }, { status: 400 });
+  return NextResponse.json(
+    { error: "unknown action" },
+    { status: 400, headers: { "Cache-Control": "private, no-store" } }
+  );
 }

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
-import { codexModelFamilySupportsExtendedEffort } from "@/shared/reasoning/codexExtendedEffort";
 import Button from "./Button";
 import Card from "./Card";
 import Input from "./Input";
@@ -12,6 +11,12 @@ import Toggle from "./Toggle";
 import { ConfirmModal } from "./Modal";
 import RoutingChoice from "./routing/RoutingChoice";
 import { readCatalogModels } from "./ModelSelectField";
+import {
+  EXTENDED_REASONING_EFFORTS,
+  getReasoningRoutingTargetEffortOptions,
+  STANDARD_REASONING_EFFORTS,
+  supportsExtendedCodexEffort,
+} from "@/shared/reasoning/reasoningRoutingEfforts";
 
 type RuleScope = "global" | "apiKey" | "combo" | "model" | "connection";
 type TargetKind = "keep" | "model" | "combo";
@@ -64,9 +69,6 @@ type FormState = {
   priority: string;
   enabled: boolean;
 };
-
-const STANDARD_EFFORTS = ["none", "low", "medium", "high", "xhigh"];
-const EXTENDED_EFFORTS = ["max", "ultra"];
 
 function emptyRule(apiKeyId?: string): FormState {
   return {
@@ -203,28 +205,20 @@ export default function ReasoningRoutingRules({
 
   const targetModelForCapability =
     form.targetKind === "model" ? form.targetModel : form.modelPattern;
-  const effortOptions = useMemo(() => {
-    const values = [...STANDARD_EFFORTS];
-    for (const effort of EXTENDED_EFFORTS) {
-      if (
-        codexModelFamilySupportsExtendedEffort(
-          targetModelForCapability,
-          effort as "max" | "ultra"
-        ) ||
-        form.targetEffort === effort
-      ) {
-        values.push(effort);
-      }
-    }
-    return values.map((value) => ({ value, label: value }));
-  }, [form.targetEffort, targetModelForCapability]);
+  const effortOptions = useMemo(
+    () =>
+      getReasoningRoutingTargetEffortOptions(targetModelForCapability, form.targetEffort).map(
+        (value) => ({ value, label: value })
+      ),
+    [form.targetEffort, targetModelForCapability]
+  );
 
   const capabilityWarning = useMemo(() => {
     if (form.effortMode === "inherit") return "";
-    if (!EXTENDED_EFFORTS.includes(form.targetEffort)) return "";
+    if (!(EXTENDED_REASONING_EFFORTS as readonly string[]).includes(form.targetEffort)) return "";
     if (form.targetKind === "combo") return t("extendedComboWarning");
     if (!targetModelForCapability.trim()) return t("extendedUnknownWarning");
-    return codexModelFamilySupportsExtendedEffort(
+    return supportsExtendedCodexEffort(
       targetModelForCapability,
       form.targetEffort as "max" | "ultra"
     )
@@ -762,7 +756,10 @@ export default function ReasoningRoutingRules({
                       options={[
                         { value: "any", label: t("any") },
                         { value: "missing", label: t("missing") },
-                        ...[...STANDARD_EFFORTS, ...EXTENDED_EFFORTS].map((value) => ({
+                        ...[
+                          ...STANDARD_REASONING_EFFORTS,
+                          ...EXTENDED_REASONING_EFFORTS,
+                        ].map((value) => ({
                           value,
                           label: value,
                         })),

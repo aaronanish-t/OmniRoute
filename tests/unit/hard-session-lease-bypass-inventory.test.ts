@@ -29,7 +29,6 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // home — still dispatched through executeProviderRequest(), still class A.
     "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts": 1,
     "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 2,
-    "open-sse/handlers/chatCore.ts": 1,
     "open-sse/services/imageCombo.ts": 1,
     "open-sse/services/speechCombo.ts": 1,
     "open-sse/services/videoCombo.ts": 2,

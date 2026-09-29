@@ -180,6 +180,16 @@ describe("concurrency queue snapshots", () => {
     expect(screen.getAllByText("No gates tracked in this snapshot.")).toHaveLength(2);
   });
 
+  it("marks repeatedly returned old server snapshots stale rather than refreshing their age", async () => {
+    fetchMock.mockResolvedValue(response({ ...empty, timestamp: "2026-09-29T07:59:00.000Z" }));
+    mount();
+    await tick();
+    expect(screen.getByText("Stale snapshot")).toBeTruthy();
+    await tick(3000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(screen.getByText("Stale snapshot")).toBeTruthy();
+  });
+
   it("aborts on unmount and ignores a response that finishes after unmount", async () => {
     const late = deferred<Response>();
     fetchMock.mockReturnValue(late.promise);

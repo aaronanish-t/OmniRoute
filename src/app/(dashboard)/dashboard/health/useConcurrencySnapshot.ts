@@ -68,7 +68,6 @@ export function useConcurrencySnapshot() {
           setData(null);
           setError("unauthorized");
           clearTimeout(staleTimer);
-          finish();
           return;
         }
         if (!response.ok) throw new Error("Snapshot unavailable");
@@ -76,9 +75,12 @@ export function useConcurrencySnapshot() {
         if (!isCurrent()) return;
         setData(snapshot);
         setError(null);
-        setAged(false);
+        const snapshotAge = Math.max(0, Date.now() - Date.parse(snapshot.timestamp));
+        setAged(snapshotAge >= STALE_MS);
         clearTimeout(staleTimer);
-        staleTimer = setTimeout(() => setAged(true), STALE_MS);
+        if (snapshotAge < STALE_MS) {
+          staleTimer = setTimeout(() => setAged(true), STALE_MS - snapshotAge);
+        }
       } catch {
         // Network, JSON and schema failures share an explicit localized error;
         // retain the last good snapshot rather than rendering a false empty one.

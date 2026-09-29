@@ -106,6 +106,8 @@ type CallLogSummaryRow = {
   tokens_cache_creation: number | null;
   tokens_reasoning: number | null;
   tokens_compressed: number | null;
+  reasoning_source?: string | null;
+  reasoning_chars?: number | null;
   cache_source: string | null;
   request_type: string | null;
   source_format: string | null;
@@ -490,6 +492,10 @@ function mapSummaryRow(row: CallLogSummaryRow) {
       compressed: row.tokens_compressed != null ? toNumber(row.tokens_compressed) : null,
     },
     cacheSource: row.cache_source || "upstream",
+    // #6187/#13965: observed reasoning (source + CHARACTER count, never tokens) so the
+    // detail view can tell "reasoned but not metered" apart from "did not reason".
+    reasoningSource: row.reasoning_source ?? null,
+    reasoningChars: row.reasoning_chars != null ? toNumber(row.reasoning_chars) : null,
     hasContent: row.has_content ?? null,
     usageProvenance: row.usage_provenance ?? null,
     requestType: row.request_type,

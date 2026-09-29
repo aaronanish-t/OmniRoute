@@ -18,7 +18,7 @@ import {
 import { buildRecoveryHint } from "./pinRecovery.ts";
 import { formatExhaustedConnectionKey } from "./comboDiagFormat.ts";
 import { collectQuotaWindowExclusions, formatQuotaSkipMessage } from "./quotaSkipDiagnostics.ts";
-import { recordComboRequest } from "../comboMetrics.ts";
+import { recordComboRequest, recordPersistedSkipBypass } from "../comboMetrics.ts";
 import {
   expandComboSystemPromptIfPresent,
   resolveTargetFingerprint,
@@ -508,6 +508,7 @@ export async function handleRoundRobinCombo({
           if (offset > 0) fallbackCount++;
           continue;
         }
+        recordPersistedSkipBypass(combo.name);
       }
       const targetForAttempt = allowRateLimitedConnection
         ? { ...target, allowRateLimitedConnection: true, fallbackAttempts: offset }
@@ -980,31 +981,18 @@ export async function handleRoundRobinCombo({
             await resolveComboDailyReset(provider)
           );
           const { cooldownMs } = fallbackResult;
-          const selectedConnectionId =
-            result.headers?.get("X-OmniRoute-Selected-Connection-Id") ||
-            result.headers?.get("x-omniroute-selected-connection-id") ||
-            undefined;
-          const targetWithConnection = selectedConnectionId
-            ? { ...target, connectionId: selectedConnectionId }
-            : target;
-
+          const rawModel = parseModel(modelStr).model || modelStr;
           const isAllAccountsRateLimited = isAllAccountsRateLimitedResponse(
             result.status,
             result.headers?.get("content-type") ?? null,
             errorText
           );
 
-          // #1731: If the entire provider quota is exhausted, mark it so subsequent
-          // same-provider targets are skipped immediately. API-key 429s still use
-          // the short resilience cooldown, but explicit quota text should stop the
-          // combo from trying another target for the same provider in this request.
-          // #1731 / #1731v2: classify the upstream error and update the exhaustion sets
-          // (shared with handleComboChat). Returns whether the provider is fully exhausted.
-          const providerExhausted = applyComboTargetExhaustion(targetWithConnection, {
+          const targetFailure = applyComboTargetExhaustion(target, {
             result,
             fallbackResult,
             errorText,
-            rawModel: parseModel(modelStr).model || modelStr,
+            rawModel,
             isTokenLimitBreach,
             allAccountsRateLimited: isAllAccountsRateLimited,
             requestScopedFailure: scopedFailure,
@@ -1014,6 +1002,12 @@ export async function handleRoundRobinCombo({
             exhaustedLogLevel: "debug",
             structuredError,
           });
+          const {
+            target: targetWithConnection,
+            providerExhausted,
+            isModelScopedClaudeQuota,
+            effectiveTargetCooldownMs: targetCooldownMs,
+          } = targetFailure;
           // #6692: mirrors handleComboChat's exhaustion-point release above.
           releaseStickyPinOnFailure(
             _rrSessionSticky.messageHash,
@@ -1041,10 +1035,13 @@ export async function handleRoundRobinCombo({
             !isTokenLimitBreach &&
             !scopedFailure &&
             TRANSIENT_FOR_SEMAPHORE.includes(result.status) &&
-            cooldownMs > 0
+            targetCooldownMs > 0
           ) {
-            semaphore.markRateLimited(semaphoreKey, cooldownMs);
-            log.warn("COMBO-RR", `${modelStr} error ${result.status}, cooldown ${cooldownMs}ms`);
+            semaphore.markRateLimited(semaphoreKey, targetCooldownMs);
+            log.warn(
+              "COMBO-RR",
+              `${modelStr} error ${result.status}, cooldown ${targetCooldownMs}ms`
+            );
           }
 
           if (isAllAccountsRateLimited) {
@@ -1073,6 +1070,7 @@ export async function handleRoundRobinCombo({
             retry < maxRetries &&
             isTransient &&
             !providerExhausted &&
+            !isModelScopedClaudeQuota &&
             (!config.failoverBeforeRetryExplicit || !hasNextRrTarget)
           ) {
             continue;
@@ -1119,9 +1117,10 @@ export async function handleRoundRobinCombo({
             provider &&
             provider !== "unknown" &&
             !scopedFailure &&
+            !isModelScopedClaudeQuota &&
             !(
               (result.status === 500 || result.status === 429) &&
-              hasPerModelQuota(provider, parseModel(modelStr).model || modelStr)
+              hasPerModelQuota(provider, rawModel)
             )
           ) {
             recordProviderCooldown(

@@ -112,7 +112,7 @@ export const NATIVE_ASSET_ENTRIES = [
 ];
 
 /** @type {{label:string, src:string[], dest:string[]}[]} */
-const EXTRA_MODULE_ENTRIES = [
+export const EXTRA_MODULE_ENTRIES = [
   {
     // tlsClient.ts intentionally resolves wreq-js through a runtime-dynamic
     // require so Turbopack cannot rewrite the package name to a hashed external.

@@ -1,16 +1,6 @@
 "use client";
 
-/**
- * Health Dashboard — Phase 8.3
- *
- * System health overview with cards for:
- * - System status (uptime, version, memory)
- * - Provider health (circuit breaker states)
- * - Rate limit status
- * - Active lockouts
- * - Signature cache stats
- * - Latency telemetry & prompt cache
- */
+/** System health diagnostics and independently refreshed local concurrency gates. */
 
 import { useState, useEffect, useCallback } from "react";
 

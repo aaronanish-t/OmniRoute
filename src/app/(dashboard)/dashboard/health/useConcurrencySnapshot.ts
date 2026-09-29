@@ -24,6 +24,12 @@ const POLL_MS = 3_000;
 const DEADLINE_MS = 5_000;
 const STALE_MS = 10_000;
 
+function scheduleSnapshotAge(snapshot: ConcurrencySnapshot, setAged: (aged: boolean) => void) {
+  const age = Math.max(0, Date.now() - Date.parse(snapshot.timestamp));
+  setAged(age >= STALE_MS);
+  return age < STALE_MS ? setTimeout(() => setAged(true), STALE_MS - age) : undefined;
+}
+
 /** Independent, read-only polling. At most one live request per mounted card. */
 export function useConcurrencySnapshot() {
   const [data, setData] = useState<ConcurrencySnapshot | null>(null);
@@ -37,6 +43,13 @@ export function useConcurrencySnapshot() {
     let current: AbortController | null = null;
     let deadline: ReturnType<typeof setTimeout> | undefined;
     let staleTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const acceptSnapshot = (snapshot: ConcurrencySnapshot) => {
+      setData(snapshot);
+      setError(null);
+      clearTimeout(staleTimer);
+      staleTimer = scheduleSnapshotAge(snapshot, setAged);
+    };
 
     const refresh = async () => {
       if (!mounted || current) return;
@@ -64,7 +77,7 @@ export function useConcurrencySnapshot() {
           signal: controller.signal,
         });
         if (!isCurrent()) return;
-        if (response.status === 401 || response.status === 403) {
+        if ([401, 403].includes(response.status)) {
           setData(null);
           setError("unauthorized");
           clearTimeout(staleTimer);
@@ -73,14 +86,7 @@ export function useConcurrencySnapshot() {
         if (!response.ok) throw new Error("Snapshot unavailable");
         const snapshot = snapshotSchema.parse(await response.json());
         if (!isCurrent()) return;
-        setData(snapshot);
-        setError(null);
-        const snapshotAge = Math.max(0, Date.now() - Date.parse(snapshot.timestamp));
-        setAged(snapshotAge >= STALE_MS);
-        clearTimeout(staleTimer);
-        if (snapshotAge < STALE_MS) {
-          staleTimer = setTimeout(() => setAged(true), STALE_MS - snapshotAge);
-        }
+        acceptSnapshot(snapshot);
       } catch {
         // Network, JSON and schema failures share an explicit localized error;
         // retain the last good snapshot rather than rendering a false empty one.
@@ -93,12 +99,8 @@ export function useConcurrencySnapshot() {
     refreshRef.current = () => {
       void refresh();
     };
-    const initial = setTimeout(() => {
-      void refresh();
-    }, 0);
-    const interval = setInterval(() => {
-      void refresh();
-    }, POLL_MS);
+    const initial = setTimeout(refresh, 0);
+    const interval = setInterval(refresh, POLL_MS);
     return () => {
       mounted = false;
       clearTimeout(initial);

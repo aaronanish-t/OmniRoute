@@ -72,15 +72,44 @@ function QueueSection({ title, rows }: { title: string; rows: GateRow[] }) {
   );
 }
 
+function SnapshotStatus({
+  data,
+  error,
+  stale,
+}: Pick<ReturnType<typeof useConcurrencySnapshot>, "data" | "error" | "stale">) {
+  const t = useTranslations("health");
+  const tc = useTranslations("common");
+  const ta = useTranslations("auth");
+  const locale = useLocale();
+  return (
+    <>
+      <div className="mt-3 flex flex-wrap gap-3 text-xs text-text-muted" role="status">
+        {!data && !error && <span>{tc("loading")}</span>}
+        {data && (
+          <time dateTime={data.timestamp}>
+            {t("updatedAt", { time: new Date(data.timestamp).toLocaleTimeString(locale) })}
+          </time>
+        )}
+        {stale && <span className="text-amber-500">{t("queuesStale")}</span>}
+      </div>
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-red-500">
+          {t("queuesError")}
+          {error === "unauthorized" && <> · {ta("signIn")}</>}
+        </p>
+      )}
+    </>
+  );
+}
+
 export default function ConcurrencyQueuesCard() {
   const { data, error, refreshing, stale, refresh } = useConcurrencySnapshot();
   const t = useTranslations("health");
   const tc = useTranslations("common");
   const ts = useTranslations("settings");
-  const ta = useTranslations("auth");
-  const locale = useLocale();
+  const snapshot = data ?? { timestamp: "", comboQueues: {}, semaphores: {} };
 
-  const comboRows: GateRow[] = Object.entries(data?.comboQueues ?? {}).map(([key, gate]) => {
+  const comboRows: GateRow[] = Object.entries(snapshot.comboQueues).map(([key, gate]) => {
     // Combo names exclude colons in the schema. Everything after the first
     // separator is the opaque execution key; never truncate or re-parse it.
     const remainder = key.slice("combo:".length);
@@ -98,10 +127,10 @@ export default function ConcurrencyQueuesCard() {
       ...gate,
       limit: gate.max,
       until: gate.rateLimitedUntil,
-      snapshotAt: Date.parse(data!.timestamp),
+      snapshotAt: Date.parse(snapshot.timestamp),
     };
   });
-  const admissionRows: GateRow[] = Object.entries(data?.semaphores ?? {}).map(([key, gate]) => {
+  const admissionRows: GateRow[] = Object.entries(snapshot.semaphores).map(([key, gate]) => {
     const separator = key.indexOf(":");
     const identity =
       key === "global"
@@ -120,7 +149,7 @@ export default function ConcurrencyQueuesCard() {
       ...gate,
       limit: gate.maxConcurrency,
       until: gate.blockedUntil,
-      snapshotAt: Date.parse(data!.timestamp),
+      snapshotAt: Date.parse(snapshot.timestamp),
     };
   });
 
@@ -140,21 +169,7 @@ export default function ConcurrencyQueuesCard() {
           {tc("refresh")}
         </button>
       </div>
-      <div className="mt-3 flex flex-wrap gap-3 text-xs text-text-muted" role="status">
-        {!data && !error && <span>{tc("loading")}</span>}
-        {data && (
-          <time dateTime={data.timestamp}>
-            {t("updatedAt", { time: new Date(data.timestamp).toLocaleTimeString(locale) })}
-          </time>
-        )}
-        {stale && <span className="text-amber-500">{t("queuesStale")}</span>}
-      </div>
-      {error && (
-        <p role="alert" className="mt-3 text-sm text-red-500">
-          {t("queuesError")}
-          {error === "unauthorized" && <> · {ta("signIn")}</>}
-        </p>
-      )}
+      <SnapshotStatus data={data} error={error} stale={stale} />
       {data && (
         <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
           <QueueSection title={t("queuesCombo")} rows={comboRows} />

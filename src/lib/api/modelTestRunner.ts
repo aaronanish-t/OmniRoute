@@ -369,6 +369,8 @@ export interface SingleModelTestResult {
   isQuota?: boolean;
   isTimeout?: boolean;
   retryAfter?: number;
+  /** The probe was deliberately not dispatched (#14780) — not a model failure. */
+  skipped?: boolean;
 }
 
 export type ModelTestResponseText = {
@@ -481,6 +483,7 @@ export async function runSingleModelTest(
       status: "error",
       latencyMs: 0,
       httpStatus: 422,
+      skipped: true,
       error:
         "Skipped: web-session providers are excluded from chat probes to avoid creating provider conversations",
     };

@@ -779,7 +779,7 @@ export default function Sidebar({
                     aria-controls={`${navigationId}-${section.id}`}
                     className="flex min-h-11 min-w-0 flex-1 items-center justify-between gap-2 rounded-lg px-3 text-start text-xs font-semibold tracking-wide text-text-main/80 hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
-                    {section.title}
+                    <span className="truncate">{section.title}</span>
                     <span
                       aria-hidden="true"
                       className={cn(

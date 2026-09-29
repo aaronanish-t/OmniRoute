@@ -1,4 +1,8 @@
-import { verifyDashboardSessionToken, getDashboardJwtSecret, DASHBOARD_SESSION_COOKIE } from "@/shared/utils/dashboardSessionToken";
+import {
+  verifyDashboardSessionToken,
+  getDashboardJwtSecret,
+  DASHBOARD_SESSION_COOKIE,
+} from "@/shared/utils/dashboardSessionToken";
 import { getSettings } from "@/lib/db/settings";
 import { validateApiKey } from "@/lib/db/apiKeys";
 

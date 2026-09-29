@@ -652,7 +652,6 @@ export const getKnownToolPaths = (toolId: string): string[] => {
     kilo: [["kilocode.cmd", "kilocode"]],
     continue: [["cn.cmd", "cn"]],
     opencode: [["opencode.cmd", "opencode"]],
-    omp: [["omp.cmd", "omp"]],
     qoder: [
       ["qodercli.cmd", "qodercli"],
       ["qodercli.exe", "qodercli"],

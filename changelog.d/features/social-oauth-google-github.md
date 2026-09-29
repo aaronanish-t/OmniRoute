@@ -1,0 +1,1 @@
+- **feat(auth):** Add native Google OAuth 2.0 and GitHub OAuth login for Dashboard with allowlist filtering and seamless password coexistence;

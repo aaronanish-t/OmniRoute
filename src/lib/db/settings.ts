@@ -180,8 +180,17 @@ export async function getSettings() {
     oidcClientId: "",
     oidcClientSecret: "",
     oidcScopes: ["openid", "profile", "email"],
-    oidcRedirectPath: "/api/auth/oidc/callback",
     oidcAllowedSubjects: [], // optional sub or email whitelist
+    googleAuthEnabled: false,
+    googleClientId: "",
+    googleClientSecret: "",
+    googleRedirectPath: "/api/auth/google/callback",
+    githubAuthEnabled: false,
+    githubClientId: "",
+    githubClientSecret: "",
+    githubRedirectPath: "/api/auth/github/callback",
+    authAllowedEmails: [], // optional list of allowed email addresses
+    disablePasswordLogin: false,
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],
@@ -295,6 +304,12 @@ export async function getSettings() {
   if (typeof settings.oidcClientSecret === "string") {
     settings.oidcClientSecret = decrypt(settings.oidcClientSecret) ?? "";
   }
+  if (typeof settings.googleClientSecret === "string") {
+    settings.googleClientSecret = decrypt(settings.googleClientSecret) ?? "";
+  }
+  if (typeof settings.githubClientSecret === "string") {
+    settings.githubClientSecret = decrypt(settings.githubClientSecret) ?? "";
+  }
   applySessionAffinityLegacyFallback(settings);
 
   // Auto-complete onboarding for pre-configured deployments (Docker/VM)
@@ -337,8 +352,14 @@ export async function updateSettings(
     if (options?.expectedRevision !== undefined && options.expectedRevision !== currentRevision) {
       throw new SettingsRevisionConflictError(currentRevision);
     }
+    const SECRET_SETTING_KEYS = new Set([
+      "oidcClientSecret",
+      "googleClientSecret",
+      "githubClientSecret",
+    ]);
     for (const [key, value] of Object.entries(updates)) {
-      const toStore = key === "oidcClientSecret" ? encrypt(value as string) : value;
+      const toStore =
+        SECRET_SETTING_KEYS.has(key) && typeof value === "string" ? encrypt(value) : value;
       insert.run(key, JSON.stringify(toStore));
     }
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));

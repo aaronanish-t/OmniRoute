@@ -80,6 +80,52 @@ export function applyCodexReasoningSelection(
   whitelistWireReasoning(body);
 }
 
+type CatalogSplit = { baseModel: string; effort: string | null | undefined };
+
+/** The model id and suffix effort: a discovered catalog id is used verbatim (no re-parse). */
+function splitRequestedModel(
+  metadata: RecordValue,
+  requestedModel: string,
+  hasCatalog: boolean
+): CatalogSplit {
+  return hasCatalog
+    ? { baseModel: requestedModel, effort: effort(metadata.resolvedThinkingEffort) }
+    : splitCodexReasoningSuffix(requestedModel);
+}
+
+/**
+ * Effort used when the request carries none. OpenRouter-style `enabled: false` asks for
+ * reasoning to be off: it wins over the connection default but loses to any per-request
+ * effort selection.
+ */
+function fallbackEffort(
+  reasoning: RecordValue,
+  metadata: RecordValue,
+  connectionDefault: string | undefined,
+  allowDefaults: boolean
+): string | undefined {
+  if (reasoning.enabled === false) return "none";
+  if (!allowDefaults) return undefined;
+  return connectionDefault || effort(metadata.defaultThinkingEffort) || "medium";
+}
+
+/**
+ * The caller's own effort choice. Chat→Responses translation normalizes canonical max to
+ * xhigh, so for catalog-backed Codex models in passthrough mode the original choice is
+ * restored; explicit thinking-budget policies still own the translated value in other modes.
+ */
+function requestedEffort(
+  metadata: RecordValue,
+  reasoning: RecordValue,
+  body: RecordValue,
+  restoreOriginal: boolean
+): string | undefined {
+  if (restoreOriginal && Object.hasOwn(metadata, "requestedThinkingEffort")) {
+    return effort(metadata.requestedThinkingEffort);
+  }
+  return effort(reasoning.effort) || effort(body.reasoning_effort);
+}
+
 function selectCodexReasoning(
   model: string,
   body: RecordValue,
@@ -92,29 +138,15 @@ function selectCodexReasoning(
   const requestedModel = typeof body.model === "string" ? body.model : model;
   const hasCatalog =
     metadata.model === requestedModel && Array.isArray(metadata.supportedThinkingEfforts);
-  const split = hasCatalog
-    ? { baseModel: requestedModel, effort: effort(metadata.resolvedThinkingEffort) }
-    : splitCodexReasoningSuffix(requestedModel);
+  const split = splitRequestedModel(metadata, requestedModel, hasCatalog);
   if (split.effort) body.model = split.baseModel;
   const reasoning = asRecord(body.reasoning);
-  // Chat→Responses translation normalizes canonical max to xhigh. Restore the
-  // original choice for catalog-backed Codex models in passthrough mode; explicit
-  // thinking-budget policies still own the translated value in other modes.
-  const requested =
-    hasCatalog && allowDefaults && Object.hasOwn(metadata, "requestedThinkingEffort")
-      ? effort(metadata.requestedThinkingEffort)
-      : effort(reasoning.effort) || effort(body.reasoning_effort);
-  // OpenRouter-style `enabled: false` asks for reasoning to be off. It wins over the
-  // connection default but still loses to any per-request effort selection.
+  const requested = requestedEffort(metadata, reasoning, body, hasCatalog && allowDefaults);
   const selected =
     effort(forcedEffort) ||
     split.effort ||
     requested ||
-    (reasoning.enabled === false
-      ? "none"
-      : allowDefaults
-        ? connectionDefault || effort(metadata.defaultThinkingEffort) || "medium"
-        : undefined);
+    fallbackEffort(reasoning, metadata, connectionDefault, allowDefaults);
   if (!selected) return;
   // New catalog values pass through verbatim, including upstream validation errors.
   // Only the old built-in Ultra aliases retain their historical Max wire mapping.

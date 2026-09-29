@@ -90,6 +90,16 @@ export function shouldExposeSyncedEffortVariants(
   return extractEffortTiers(model).length > 0;
 }
 
+/** Codex variants advertise their own label and drop tiers so clients never append a 2nd suffix. */
+function codexVariantOverrides(model: CatalogModelEntry, tier: string): Partial<CatalogModelEntry> {
+  if (model.owned_by !== "codex") return {};
+  return {
+    name: `${typeof model.name === "string" ? model.name : model.id} (${tier})`,
+    supportedThinkingEfforts: undefined,
+    capabilities: { ...model.capabilities, effort_tiers: undefined },
+  };
+}
+
 /**
  * Append reasoning-effort variants for every eligible synced model. Returns the original
  * array reference unchanged when nothing is eligible (no allocation in the common case).
@@ -115,13 +125,7 @@ export function appendSyncedEffortVariants<T extends CatalogModelEntry>(models: 
         ...model,
         id: variantId,
         root: `${baseRoot}-${tier}`,
-        ...(model.owned_by === "codex"
-          ? {
-              name: `${typeof model.name === "string" ? model.name : model.id} (${tier})`,
-              supportedThinkingEfforts: undefined,
-              capabilities: { ...model.capabilities, effort_tiers: undefined },
-            }
-          : {}),
+        ...codexVariantOverrides(model, tier),
       });
     }
   }

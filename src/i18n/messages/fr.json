@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Stack gratuite (0 $)",
-    "templateFreeStackDesc": "Répartition à tour de rôle entre tous les fournisseurs gratuits : Kiro (Claude), Qoder (5 modèles), Qwen (4 modèles). Coût nul, pour coder sans interruption.",
+    "templateFreeStackDesc": "Répartition à tour de rôle entre tous les fournisseurs gratuits : Antigravity (Gemini), Kiro (Claude), Qoder (3 modèles), NVIDIA, Groq. Coût nul, pour coder sans interruption.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "Mode LKGP",

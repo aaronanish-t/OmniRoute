@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "મફત સ્ટેક ($0)",
-    "templateFreeStackDesc": "તમામ મફત પ્રદાતાઓમાં રાઉન્ડ-રોબિન: Kiro (Claude), Qoder (5 મોડેલ), Qwen (4 મોડેલ). શૂન્ય ખર્ચ, કોડિંગ ક્યારેય અટકતું નથી.",
+    "templateFreeStackDesc": "તમામ મફત પ્રદાતાઓમાં રાઉન્ડ-રોબિન: Antigravity (Gemini), Kiro (Claude), Qoder (3 મોડેલ), NVIDIA, Groq. શૂન્ય ખર્ચ, કોડિંગ ક્યારેય અટકતું નથી.",
     "auto": "બુદ્ધિશાળી સ્વચાલિત",
     "autoDesc": "બહુવિધ પરિબળોના સ્કોરિંગ સાથેનો સ્વ-સુધારક સ્માર્ટ રૂટિંગ પૂલ",
     "lkgp": "LKGP મોડ",

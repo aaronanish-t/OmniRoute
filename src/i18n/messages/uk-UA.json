@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Безкоштовний стек ($0)",
-    "templateFreeStackDesc": "Циклічний розподіл між усіма безкоштовними провайдерами: Kiro (Claude), Qoder (5 моделей), Qwen (4 моделі). Нульова вартість, кодування без зупинок.",
+    "templateFreeStackDesc": "Циклічний розподіл між усіма безкоштовними провайдерами: Antigravity (Gemini), Kiro (Claude), Qoder (3 моделі), NVIDIA, Groq. Нульова вартість, кодування без зупинок.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "Режим LKGP",

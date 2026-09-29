@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Stack Grátis ($0)",
-    "templateFreeStackDesc": "Round-robin entre todos os fornecedores grátis: Kiro (Claude), Qoder (5 modelos), Qwen (4 modelos). Custo zero, nunca para.",
+    "templateFreeStackDesc": "Round-robin entre todos os fornecedores grátis: Antigravity (Gemini), Kiro (Claude), Qoder (3 modelos), NVIDIA, Groq. Custo zero, nunca para.",
     "auto": "Auto Combo",
     "autoDesc": "Pool de roteamento inteligente (Otimizado)",
     "lkgp": "Modo LKGP",

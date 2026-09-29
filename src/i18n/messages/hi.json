@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "निःशुल्क स्टैक ($0)",
-    "templateFreeStackDesc": "सभी निःशुल्क प्रदाताओं में राउंड-रॉबिन: Kiro (Claude), Qoder (5 मॉडल), Qwen (4 मॉडल)। कोई लागत नहीं, कोडिंग कभी नहीं रुकती।",
+    "templateFreeStackDesc": "सभी निःशुल्क प्रदाताओं में राउंड-रॉबिन: Antigravity (Gemini), Kiro (Claude), Qoder (3 मॉडल), NVIDIA, Groq। कोई लागत नहीं, कोडिंग कभी नहीं रुकती।",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP मोड",

@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "無料スタック（$0）",
-    "templateFreeStackDesc": "すべての無料プロバイダー間でラウンドロビンします：Kiro (Claude)、Qoder (5モデル)、Qwen (4モデル)。コストはゼロで、コーディングが止まることはありません。",
+    "templateFreeStackDesc": "すべての無料プロバイダー間でラウンドロビンします：Antigravity (Gemini)、Kiro (Claude)、Qoder (3モデル)、NVIDIA、Groq。コストはゼロで、コーディングが止まることはありません。",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP モード",

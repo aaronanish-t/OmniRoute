@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Besplatni Stack ($0)",
-    "templateFreeStackDesc": "Round-robin kroz sve besplatne provajdere: Kiro (Claude), Qoder (5 modela), Qwen (4 modela). Nula troškova, kodiranje nikada ne prestaje.",
+    "templateFreeStackDesc": "Round-robin kroz sve besplatne provajdere: Antigravity (Gemini), Kiro (Claude), Qoder (3 modela), NVIDIA, Groq. Nula troškova, kodiranje nikada ne prestaje.",
     "auto": "Inteligentni automatski odabir",
     "autoDesc": "Samoiscjeljujući smart routing pool sa višefaktorskim bodovanjem",
     "lkgp": "LKGP Mod",

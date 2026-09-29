@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Kostnadsfri stack (0 $)",
-    "templateFreeStackDesc": "Round-robin mellan alla kostnadsfria leverantörer: Kiro (Claude), Qoder (5 modeller), Qwen (4 modeller). Helt kostnadsfritt och kodningen avbryts aldrig.",
+    "templateFreeStackDesc": "Round-robin mellan alla kostnadsfria leverantörer: Antigravity (Gemini), Kiro (Claude), Qoder (3 modeller), NVIDIA, Groq. Helt kostnadsfritt och kodningen avbryts aldrig.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP-läge",

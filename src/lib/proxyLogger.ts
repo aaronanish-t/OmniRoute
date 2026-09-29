@@ -8,7 +8,7 @@
  */
 import { v4 as uuidv4 } from "uuid";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
-import { sanitizeTimingMs } from "@omniroute/open-sse/utils/upstreamStatusCapture.ts";
+import { sanitizeTimingMs } from "@omniroute/open-sse/utils/timingMs.ts";
 import { getDbInstance, isCloud, isBuildPhase } from "./db/core";
 import { ensureProxyLogsColumns } from "./db/schemaColumns";
 

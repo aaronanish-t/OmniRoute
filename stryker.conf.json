@@ -537,7 +537,12 @@
       "tests/unit/middleware-hook-realm-isolation.test.ts",
       "tests/unit/bootstrap-env-private-modes.test.ts",
       "tests/unit/electron-server-env-private-modes.test.ts",
-      "tests/unit/provider-test-local-runtime-probe.test.ts"
+      "tests/unit/provider-test-local-runtime-probe.test.ts",
+      "tests/unit/flagship-0day-discovery.test.ts",
+      "tests/unit/combo-responses-sse-failure-fallback.test.ts",
+      "tests/unit/metered-budget-must-not-disable-flat-rate.test.ts",
+      "tests/unit/expiry-first-account-rotation.test.ts",
+      "tests/unit/claude-passthrough-empty-response.test.ts"
     ],
     "nodeArgs": [
       "--import",

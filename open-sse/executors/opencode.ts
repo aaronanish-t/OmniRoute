@@ -5,7 +5,7 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
-import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
+import { getModelTargetFormat, stripOpencodeModelPrefix } from "../config/providerModels.ts";
 import {
   injectReasoningContentForThinkingModel,
   isThinkingMessageModel,
@@ -202,8 +202,7 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
  * Exported for testability.
  */
 export function resolveOpencodeTargetFormat(provider: string, model: string): string {
-  const alias = PROVIDER_ID_TO_ALIAS[provider] || provider;
-  return getModelTargetFormat(alias, model) || "openai";
+  return getModelTargetFormat(provider, model) || "openai";
 }
 
 export {
@@ -1419,6 +1418,7 @@ export class OpencodeExecutor extends BaseExecutor {
     }
     if (modifiedBody && typeof modifiedBody === "object" && !Array.isArray(modifiedBody)) {
       const mb = modifiedBody as Record<string, unknown>;
+      mb.model = stripOpencodeModelPrefix(mb.model); // see providerModels.ts
       // OpenCode accepts stream_options only on streaming Chat Completions (#13699).
       const format = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
       if (format !== "openai" || mb.stream !== true) {

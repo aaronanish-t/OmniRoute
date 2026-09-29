@@ -51,6 +51,7 @@ export interface BatchTestResultEntry {
   isQuota?: boolean;
   hidden?: boolean;
   isTimeout?: boolean;
+  skipped?: boolean;
 }
 
 function toBatchEntry(
@@ -67,6 +68,7 @@ function toBatchEntry(
   if (result.isTransient === true) entry.isTransient = true;
   if (result.isQuota === true) entry.isQuota = true;
   if (result.isTimeout === true) entry.isTimeout = true;
+  if (result.skipped === true) entry.skipped = true;
   return entry;
 }
 
@@ -202,7 +204,9 @@ export async function POST(request: Request) {
       !entry.rateLimited &&
       !entry.isTimeout &&
       !entry.isTransient &&
-      !entry.isQuota
+      !entry.isQuota &&
+      // #14780: a skipped probe (web-session provider) never ran — not a failure.
+      !entry.skipped
     ) {
       try {
         await setModelIsHidden(providerId, modelId, true);

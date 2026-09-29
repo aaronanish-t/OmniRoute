@@ -594,6 +594,10 @@ test("large generated API skills split endpoint details into indexed references"
     endpointReference.includes("## Table of contents"),
     "Large references need a table of contents"
   );
+  assert.ok(
+    endpointReference.includes("- [`POST /api/v1/chat/completions`](#post-apiv1chatcompletions)"),
+    "The table of contents must list the endpoint anchors, not just a heading"
+  );
 });
 
 test("buildSkillMarkdown CLI skill body contains expected sections", () => {

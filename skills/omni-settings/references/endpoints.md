@@ -4,6 +4,137 @@
 
 ## Table of contents
 
+- [`GET /api/settings/memory`](#get-apisettingsmemory)
+- [`PUT /api/settings/memory`](#put-apisettingsmemory)
+- [`GET /api/settings/qdrant`](#get-apisettingsqdrant)
+- [`PUT /api/settings/qdrant`](#put-apisettingsqdrant)
+- [`GET /api/settings/qdrant/health`](#get-apisettingsqdranthealth)
+- [`POST /api/settings/qdrant/search`](#post-apisettingsqdrantsearch)
+- [`POST /api/settings/qdrant/cleanup`](#post-apisettingsqdrantcleanup)
+- [`GET /api/settings/qdrant/embedding-models`](#get-apisettingsqdrantembedding-models)
+- [`GET /api/settings`](#get-apisettings)
+- [`PATCH /api/settings`](#patch-apisettings)
+- [`POST /api/settings/purge-request-history`](#post-apisettingspurge-request-history)
+- [`GET /api/settings/compression`](#get-apisettingscompression)
+- [`PUT /api/settings/compression`](#put-apisettingscompression)
+- [`GET /api/settings/compression/mcp-accessibility`](#get-apisettingscompressionmcp-accessibility)
+- [`PUT /api/settings/compression/mcp-accessibility`](#put-apisettingscompressionmcp-accessibility)
+- [`GET /api/settings/payload-rules`](#get-apisettingspayload-rules)
+- [`PUT /api/settings/payload-rules`](#put-apisettingspayload-rules)
+- [`GET /api/settings/combo-defaults`](#get-apisettingscombo-defaults)
+- [`GET /api/settings/proxy`](#get-apisettingsproxy)
+- [`PATCH /api/settings/proxy`](#patch-apisettingsproxy)
+- [`POST /api/settings/proxy/test`](#post-apisettingsproxytest)
+- [`POST /api/settings/require-login`](#post-apisettingsrequire-login)
+- [`GET /api/settings/ip-filter`](#get-apisettingsip-filter)
+- [`PUT /api/settings/ip-filter`](#put-apisettingsip-filter)
+- [`GET /api/settings/system-prompt`](#get-apisettingssystem-prompt)
+- [`PUT /api/settings/system-prompt`](#put-apisettingssystem-prompt)
+- [`GET /api/settings/thinking-budget`](#get-apisettingsthinking-budget)
+- [`PUT /api/settings/thinking-budget`](#put-apisettingsthinking-budget)
+- [`GET /api/tags`](#get-apitags)
+- [`GET /api/settings/quota-store`](#get-apisettingsquota-store)
+- [`PUT /api/settings/quota-store`](#put-apisettingsquota-store)
+- [`POST /api/settings/purge-usage-history`](#post-apisettingspurge-usage-history)
+- [`GET /api/settings/authz-inventory`](#get-apisettingsauthz-inventory)
+- [`GET /api/settings/auto-disable-accounts`](#get-apisettingsauto-disable-accounts)
+- [`PUT /api/settings/auto-disable-accounts`](#put-apisettingsauto-disable-accounts)
+- [`GET /api/settings/background-degradation`](#get-apisettingsbackground-degradation)
+- [`POST /api/settings/background-degradation`](#post-apisettingsbackground-degradation)
+- [`PUT /api/settings/background-degradation`](#put-apisettingsbackground-degradation)
+- [`GET /api/settings/cache-config`](#get-apisettingscache-config)
+- [`PUT /api/settings/cache-config`](#put-apisettingscache-config)
+- [`GET /api/settings/cache-metrics`](#get-apisettingscache-metrics)
+- [`DELETE /api/settings/cache-metrics`](#delete-apisettingscache-metrics)
+- [`GET /api/settings/cc-discovery-metrics`](#get-apisettingscc-discovery-metrics)
+- [`GET /api/settings/compression/rules`](#get-apisettingscompressionrules)
+- [`GET /api/settings/compression/run-telemetry`](#get-apisettingscompressionrun-telemetry)
+- [`GET /api/settings/database`](#get-apisettingsdatabase)
+- [`PUT /api/settings/database`](#put-apisettingsdatabase)
+- [`PATCH /api/settings/database`](#patch-apisettingsdatabase)
+- [`POST /api/settings/database/refresh-stats`](#post-apisettingsdatabaserefresh-stats)
+- [`GET /api/settings/database/vacuum`](#get-apisettingsdatabasevacuum)
+- [`POST /api/settings/database/vacuum`](#post-apisettingsdatabasevacuum)
+- [`GET /api/settings/export-json`](#get-apisettingsexport-json)
+- [`GET /api/settings/favicon`](#get-apisettingsfavicon)
+- [`GET /api/settings/feature-flags`](#get-apisettingsfeature-flags)
+- [`PUT /api/settings/feature-flags`](#put-apisettingsfeature-flags)
+- [`DELETE /api/settings/feature-flags`](#delete-apisettingsfeature-flags)
+- [`GET /api/settings/free-proxies`](#get-apisettingsfree-proxies)
+- [`DELETE /api/settings/free-proxies`](#delete-apisettingsfree-proxies)
+- [`POST /api/settings/free-proxies/{id}/add-to-pool`](#post-apisettingsfree-proxiesidadd-to-pool)
+- [`POST /api/settings/free-proxies/bulk-add-to-pool`](#post-apisettingsfree-proxiesbulk-add-to-pool)
+- [`GET /api/settings/free-proxies/stats`](#get-apisettingsfree-proxiesstats)
+- [`POST /api/settings/free-proxies/sync`](#post-apisettingsfree-proxiessync)
+- [`POST /api/settings/import-json`](#post-apisettingsimport-json)
+- [`DELETE /api/settings/lkgp-cache`](#delete-apisettingslkgp-cache)
+- [`GET /api/settings/local-corpus`](#get-apisettingslocal-corpus)
+- [`POST /api/settings/local-corpus`](#post-apisettingslocal-corpus)
+- [`DELETE /api/settings/local-corpus`](#delete-apisettingslocal-corpus)
+- [`GET /api/settings/mitm`](#get-apisettingsmitm)
+- [`POST /api/settings/mitm`](#post-apisettingsmitm)
+- [`PUT /api/settings/mitm`](#put-apisettingsmitm)
+- [`GET /api/settings/model-aliases`](#get-apisettingsmodel-aliases)
+- [`POST /api/settings/model-aliases`](#post-apisettingsmodel-aliases)
+- [`PUT /api/settings/model-aliases`](#put-apisettingsmodel-aliases)
+- [`DELETE /api/settings/model-aliases`](#delete-apisettingsmodel-aliases)
+- [`GET /api/settings/models-dev`](#get-apisettingsmodels-dev)
+- [`POST /api/settings/models-dev`](#post-apisettingsmodels-dev)
+- [`GET /api/settings/notion`](#get-apisettingsnotion)
+- [`POST /api/settings/notion`](#post-apisettingsnotion)
+- [`DELETE /api/settings/notion`](#delete-apisettingsnotion)
+- [`GET /api/settings/obsidian`](#get-apisettingsobsidian)
+- [`POST /api/settings/obsidian`](#post-apisettingsobsidian)
+- [`DELETE /api/settings/obsidian`](#delete-apisettingsobsidian)
+- [`GET /api/settings/obsidian/webdav`](#get-apisettingsobsidianwebdav)
+- [`POST /api/settings/obsidian/webdav`](#post-apisettingsobsidianwebdav)
+- [`DELETE /api/settings/obsidian/webdav`](#delete-apisettingsobsidianwebdav)
+- [`GET /api/settings/oneproxy`](#get-apisettingsoneproxy)
+- [`POST /api/settings/oneproxy`](#post-apisettingsoneproxy)
+- [`DELETE /api/settings/oneproxy`](#delete-apisettingsoneproxy)
+- [`POST /api/settings/oneproxy/rotate`](#post-apisettingsoneproxyrotate)
+- [`GET /api/settings/proxies`](#get-apisettingsproxies)
+- [`POST /api/settings/proxies`](#post-apisettingsproxies)
+- [`PATCH /api/settings/proxies`](#patch-apisettingsproxies)
+- [`DELETE /api/settings/proxies`](#delete-apisettingsproxies)
+- [`POST /api/settings/proxies/{id}/repair-relay`](#post-apisettingsproxiesidrepair-relay)
+- [`GET /api/settings/proxies/assignments`](#get-apisettingsproxiesassignments)
+- [`PUT /api/settings/proxies/assignments`](#put-apisettingsproxiesassignments)
+- [`POST /api/settings/proxies/auto-test`](#post-apisettingsproxiesauto-test)
+- [`POST /api/settings/proxies/batch-activate`](#post-apisettingsproxiesbatch-activate)
+- [`POST /api/settings/proxies/batch-delete`](#post-apisettingsproxiesbatch-delete)
+- [`PUT /api/settings/proxies/bulk-assign`](#put-apisettingsproxiesbulk-assign)
+- [`POST /api/settings/proxies/bulk-import`](#post-apisettingsproxiesbulk-import)
+- [`GET /api/settings/proxies/egress`](#get-apisettingsproxiesegress)
+- [`POST /api/settings/proxies/egress`](#post-apisettingsproxiesegress)
+- [`GET /api/settings/proxies/health`](#get-apisettingsproxieshealth)
+- [`POST /api/settings/proxies/migrate`](#post-apisettingsproxiesmigrate)
+- [`GET /api/settings/proxies/pool`](#get-apisettingsproxiespool)
+- [`PUT /api/settings/proxies/pool`](#put-apisettingsproxiespool)
+- [`PATCH /api/settings/proxies/pool`](#patch-apisettingsproxiespool)
+- [`DELETE /api/settings/proxies/pool`](#delete-apisettingsproxiespool)
+- [`GET /api/settings/proxies/pool/egress-observation`](#get-apisettingsproxiespoolegress-observation)
+- [`POST /api/settings/proxy/cloudflare-deploy`](#post-apisettingsproxycloudflare-deploy)
+- [`POST /api/settings/proxy/deno-deploy`](#post-apisettingsproxydeno-deploy)
+- [`POST /api/settings/proxy/vercel-deploy`](#post-apisettingsproxyvercel-deploy)
+- [`POST /api/settings/purge-call-logs`](#post-apisettingspurge-call-logs)
+- [`POST /api/settings/purge-detailed-logs`](#post-apisettingspurge-detailed-logs)
+- [`POST /api/settings/purge-logs`](#post-apisettingspurge-logs)
+- [`POST /api/settings/purge-quota-snapshots`](#post-apisettingspurge-quota-snapshots)
+- [`GET /api/settings/quota/state`](#get-apisettingsquotastate)
+- [`POST /api/settings/quota/state`](#post-apisettingsquotastate)
+- [`GET /api/settings/reasoning-routing-rules`](#get-apisettingsreasoning-routing-rules)
+- [`POST /api/settings/reasoning-routing-rules`](#post-apisettingsreasoning-routing-rules)
+- [`GET /api/settings/reasoning-routing-rules/{id}`](#get-apisettingsreasoning-routing-rulesid)
+- [`PATCH /api/settings/reasoning-routing-rules/{id}`](#patch-apisettingsreasoning-routing-rulesid)
+- [`DELETE /api/settings/reasoning-routing-rules/{id}`](#delete-apisettingsreasoning-routing-rulesid)
+- [`POST /api/settings/reasoning-routing-rules/simulate`](#post-apisettingsreasoning-routing-rulessimulate)
+- [`GET /api/settings/task-routing`](#get-apisettingstask-routing)
+- [`POST /api/settings/task-routing`](#post-apisettingstask-routing)
+- [`PUT /api/settings/task-routing`](#put-apisettingstask-routing)
+- [`GET /api/settings/tier-config`](#get-apisettingstier-config)
+- [`PUT /api/settings/tier-config`](#put-apisettingstier-config)
+
 ### GET /api/settings/memory
 
 Get memory settings
@@ -184,7 +315,6 @@ are sent upstream.
 
 Requires a dashboard management session cookie when management auth is enabled.
 
-
 ```bash
 curl https://localhost:20128/api/settings/payload-rules \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -198,7 +328,6 @@ Persists and hot reloads payload rules. The legacy input field `default-raw` is 
 on writes and normalized to `defaultRaw` in responses/runtime state.
 
 Requires a dashboard management session cookie when management auth is enabled.
-
 
 ```bash
 curl -X PUT https://localhost:20128/api/settings/payload-rules \
@@ -274,7 +403,6 @@ curl https://localhost:20128/api/settings/ip-filter \
 Update IP filter configuration
 
 Configure IP filtering with blacklist/whitelist modes, add/remove individual IPs, and manage temp bans.
-
 
 ```bash
 curl -X PUT https://localhost:20128/api/settings/ip-filter \

@@ -4,6 +4,82 @@
 
 ## Table of contents
 
+- [`GET /api/cli-tools/backups`](#get-apicli-toolsbackups)
+- [`POST /api/cli-tools/backups`](#post-apicli-toolsbackups)
+- [`GET /api/cli-tools/runtime/{toolId}`](#get-apicli-toolsruntimetoolid)
+- [`GET /api/cli-tools/guide-settings/{toolId}`](#get-apicli-toolsguide-settingstoolid)
+- [`GET /api/cli-tools/antigravity-mitm`](#get-apicli-toolsantigravity-mitm)
+- [`POST /api/cli-tools/antigravity-mitm`](#post-apicli-toolsantigravity-mitm)
+- [`DELETE /api/cli-tools/antigravity-mitm`](#delete-apicli-toolsantigravity-mitm)
+- [`GET /api/cli-tools/antigravity-mitm/alias`](#get-apicli-toolsantigravity-mitmalias)
+- [`PUT /api/cli-tools/antigravity-mitm/alias`](#put-apicli-toolsantigravity-mitmalias)
+- [`GET /api/cli-tools/claude-settings`](#get-apicli-toolsclaude-settings)
+- [`POST /api/cli-tools/claude-settings`](#post-apicli-toolsclaude-settings)
+- [`DELETE /api/cli-tools/claude-settings`](#delete-apicli-toolsclaude-settings)
+- [`GET /api/cli-tools/cline-settings`](#get-apicli-toolscline-settings)
+- [`POST /api/cli-tools/cline-settings`](#post-apicli-toolscline-settings)
+- [`DELETE /api/cli-tools/cline-settings`](#delete-apicli-toolscline-settings)
+- [`GET /api/cli-tools/codex-profiles`](#get-apicli-toolscodex-profiles)
+- [`POST /api/cli-tools/codex-profiles`](#post-apicli-toolscodex-profiles)
+- [`PUT /api/cli-tools/codex-profiles`](#put-apicli-toolscodex-profiles)
+- [`DELETE /api/cli-tools/codex-profiles`](#delete-apicli-toolscodex-profiles)
+- [`GET /api/cli-tools/codex-settings`](#get-apicli-toolscodex-settings)
+- [`POST /api/cli-tools/codex-settings`](#post-apicli-toolscodex-settings)
+- [`DELETE /api/cli-tools/codex-settings`](#delete-apicli-toolscodex-settings)
+- [`GET /api/cli-tools/droid-settings`](#get-apicli-toolsdroid-settings)
+- [`POST /api/cli-tools/droid-settings`](#post-apicli-toolsdroid-settings)
+- [`DELETE /api/cli-tools/droid-settings`](#delete-apicli-toolsdroid-settings)
+- [`GET /api/cli-tools/kilo-settings`](#get-apicli-toolskilo-settings)
+- [`POST /api/cli-tools/kilo-settings`](#post-apicli-toolskilo-settings)
+- [`DELETE /api/cli-tools/kilo-settings`](#delete-apicli-toolskilo-settings)
+- [`GET /api/cli-tools/openclaw-settings`](#get-apicli-toolsopenclaw-settings)
+- [`POST /api/cli-tools/openclaw-settings`](#post-apicli-toolsopenclaw-settings)
+- [`DELETE /api/cli-tools/openclaw-settings`](#delete-apicli-toolsopenclaw-settings)
+- [`GET /api/cli-tools/crush-settings`](#get-apicli-toolscrush-settings)
+- [`POST /api/cli-tools/crush-settings`](#post-apicli-toolscrush-settings)
+- [`DELETE /api/cli-tools/crush-settings`](#delete-apicli-toolscrush-settings)
+- [`GET /api/cli-tools/codewhale-settings`](#get-apicli-toolscodewhale-settings)
+- [`POST /api/cli-tools/codewhale-settings`](#post-apicli-toolscodewhale-settings)
+- [`DELETE /api/cli-tools/codewhale-settings`](#delete-apicli-toolscodewhale-settings)
+- [`GET /api/cli-tools/all-statuses`](#get-apicli-toolsall-statuses)
+- [`POST /api/cli-tools/apply`](#post-apicli-toolsapply)
+- [`GET /api/cli-tools/config`](#get-apicli-toolsconfig)
+- [`POST /api/cli-tools/config`](#post-apicli-toolsconfig)
+- [`GET /api/cli-tools/deepseek-tui-settings`](#get-apicli-toolsdeepseek-tui-settings)
+- [`POST /api/cli-tools/deepseek-tui-settings`](#post-apicli-toolsdeepseek-tui-settings)
+- [`DELETE /api/cli-tools/deepseek-tui-settings`](#delete-apicli-toolsdeepseek-tui-settings)
+- [`GET /api/cli-tools/detect`](#get-apicli-toolsdetect)
+- [`GET /api/cli-tools/forge-settings`](#get-apicli-toolsforge-settings)
+- [`POST /api/cli-tools/forge-settings`](#post-apicli-toolsforge-settings)
+- [`DELETE /api/cli-tools/forge-settings`](#delete-apicli-toolsforge-settings)
+- [`GET /api/cli-tools/grok-build-settings`](#get-apicli-toolsgrok-build-settings)
+- [`POST /api/cli-tools/grok-build-settings`](#post-apicli-toolsgrok-build-settings)
+- [`DELETE /api/cli-tools/grok-build-settings`](#delete-apicli-toolsgrok-build-settings)
+- [`GET /api/cli-tools/hermes-agent-settings`](#get-apicli-toolshermes-agent-settings)
+- [`POST /api/cli-tools/hermes-agent-settings`](#post-apicli-toolshermes-agent-settings)
+- [`GET /api/cli-tools/jcode-settings`](#get-apicli-toolsjcode-settings)
+- [`POST /api/cli-tools/jcode-settings`](#post-apicli-toolsjcode-settings)
+- [`DELETE /api/cli-tools/jcode-settings`](#delete-apicli-toolsjcode-settings)
+- [`GET /api/cli-tools/keys`](#get-apicli-toolskeys)
+- [`GET /api/cli-tools/letta-settings`](#get-apicli-toolsletta-settings)
+- [`POST /api/cli-tools/letta-settings`](#post-apicli-toolsletta-settings)
+- [`DELETE /api/cli-tools/letta-settings`](#delete-apicli-toolsletta-settings)
+- [`GET /api/cli-tools/logs`](#get-apicli-toolslogs)
+- [`GET /api/cli-tools/omp-settings`](#get-apicli-toolsomp-settings)
+- [`POST /api/cli-tools/omp-settings`](#post-apicli-toolsomp-settings)
+- [`DELETE /api/cli-tools/omp-settings`](#delete-apicli-toolsomp-settings)
+- [`GET /api/cli-tools/openclaw/auto-order`](#get-apicli-toolsopenclawauto-order)
+- [`GET /api/cli-tools/pi-settings`](#get-apicli-toolspi-settings)
+- [`POST /api/cli-tools/pi-settings`](#post-apicli-toolspi-settings)
+- [`DELETE /api/cli-tools/pi-settings`](#delete-apicli-toolspi-settings)
+- [`GET /api/cli-tools/qwen-settings`](#get-apicli-toolsqwen-settings)
+- [`POST /api/cli-tools/qwen-settings`](#post-apicli-toolsqwen-settings)
+- [`DELETE /api/cli-tools/qwen-settings`](#delete-apicli-toolsqwen-settings)
+- [`GET /api/cli-tools/smelt-settings`](#get-apicli-toolssmelt-settings)
+- [`POST /api/cli-tools/smelt-settings`](#post-apicli-toolssmelt-settings)
+- [`DELETE /api/cli-tools/smelt-settings`](#delete-apicli-toolssmelt-settings)
+- [`GET /api/cli-tools/status`](#get-apicli-toolsstatus)
+
 ### GET /api/cli-tools/backups
 
 List CLI tool backups
@@ -388,31 +464,38 @@ curl https://localhost:20128/api/cli-tools/all-statuses \
 
 POST cli tools › apply
 
+Submit the original toolId, apiKey, optional baseUrl/model and optional dryRun in the JSON body. Returned content is a redacted, non-cacheable preview, not an importable configuration. A non-dry-run request writes the original generated configuration; the container write guard remains active.
+
 ```bash
 curl -X POST https://localhost:20128/api/cli-tools/apply \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{"toolId":"claude","apiKey":"<configuration-api-key>","dryRun":true}'
 ```
 
 ### GET /api/cli-tools/config
 
 GET cli tools › config
 
+Returns redacted, non-cacheable previews. Send the configuration API key in x-omniroute-config-api-key, separate from management authentication. API keys in query strings are rejected. Preview content must not be copied into a credential-bearing configuration or submitted as an apply payload.
+
 ```bash
 curl https://localhost:20128/api/cli-tools/config \
-  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "x-omniroute-config-api-key: <configuration-api-key>"
 ```
 
 ### POST /api/cli-tools/config
 
 POST cli tools › config
 
+Submit toolId, apiKey and optional baseUrl/model as JSON. Unknown fields are rejected. Returned content is a redacted, non-cacheable preview, not an importable configuration. To apply, submit the original inputs to POST /api/cli-tools/apply instead of replaying the preview content.
+
 ```bash
 curl -X POST https://localhost:20128/api/cli-tools/config \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{"toolId":"claude","apiKey":"<configuration-api-key>"}'
 ```
 
 ### GET /api/cli-tools/deepseek-tui-settings

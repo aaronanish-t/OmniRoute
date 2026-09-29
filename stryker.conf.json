@@ -489,6 +489,7 @@
       "tests/unit/auth-grok-cli-402-shared-wallet.test.ts",
       "tests/unit/chat-correlation-id-exhaustion.test.ts",
       "tests/unit/cline-401-oauth-12594.test.ts",
+      "tests/unit/oauth-401-backoff.test.ts",
       "tests/unit/cliproxyapi-unknown-provider-400-12800.test.ts",
       "tests/unit/combo-predicates-epoch-cooldown.test.ts",
       "tests/unit/combo/combo-skipped-targets-summary.test.ts",

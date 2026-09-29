@@ -13,7 +13,10 @@ import {
   providerHonorsOpenAIFormatCacheControl,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
-import { isInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
+import {
+  isInternalReasoningPlaceholder,
+  requiresReasoningContentPresence,
+} from "../utils/reasoningPlaceholder.ts";
 import {
   coerceToolSchemas,
   injectEmptyReasoningContentForToolCalls,
@@ -178,37 +181,6 @@ function isReasoningOnlyReplayTarget(provider: unknown, model: unknown): boolean
       model: normalizedModel,
       allowLegacyFallback: false,
     })
-  );
-}
-
-/**
- * Upstreams that reject an ABSENT reasoning_content on replay turns, so the
- * placeholder must survive the cache miss.
- *
- * #9573/#9610 removed the placeholder globally because the model echoed it as
- * its own reasoning and stopped (empty turns). That holds for DeepSeek, where
- * an absent field was verified to be accepted — but Xiaomi MiMo still 400s
- * ("Param Incorrect: The reasoning_content in the thinking mode must be passed
- * back to the API", 9router#1321/#1337), so omitting the field there trades one
- * live bug for another. The opencode console gateways (opencode-go /
- * opencode-zen / opencode) enforce the same contract on their Responses
- * transport for deepseek/glm thinking models (production: 54× 400 "The
- * reasoning_text in the thinking mode must be passed back to the API" in one
- * day). Keep the placeholder only for those providers; the echo that comes
- * back is still stripped on the way in by isInternalReasoningPlaceholder(), so
- * it never re-poisons cache or history.
- */
-function requiresReasoningContentPresence(provider: unknown, model: unknown): boolean {
-  const normalizedProvider = String(provider ?? "")
-    .trim()
-    .toLowerCase();
-  const normalizedModel = String(model ?? "")
-    .trim()
-    .toLowerCase();
-  return (
-    normalizedProvider === "xiaomi-mimo" ||
-    /(^|\/)mimo/i.test(normalizedModel) ||
-    ["opencode", "opencode-go", "opencode-zen"].includes(normalizedProvider)
   );
 }
 
@@ -508,24 +480,6 @@ export function translateRequest(
     result.messages.push({ role: "user", content: "(continue)" });
   }
 
-  if (
-    sourceFormat === FORMATS.OPENAI &&
-    targetFormat === FORMATS.OPENAI_RESPONSES &&
-    isReasoner &&
-    Array.isArray(result.messages)
-  ) {
-    const messages = result.messages as Array<Record<string, unknown>>;
-    const replayOptions: OpenAIReplayOptions = {
-      canReplayReasoningOnly: isReasoningOnlyReplayTarget(normalizedProvider, normalizedModel),
-      requiresExplicitReasoningReplay,
-      provider: normalizedProvider,
-      model: normalizedModel,
-      reasoningCacheScope: options?.reasoningCacheScope,
-    };
-    for (let messageIndex = 0; messageIndex < messages.length; messageIndex += 1) {
-      replayOpenAIReasoningMessage(messages, messageIndex, replayOptions);
-    }
-  }
   // If same format, skip translation steps
   if (sourceFormat !== targetFormat) {
     // Check for direct translation path first (e.g., Claude → Gemini)

@@ -4,7 +4,10 @@
  * Extracted verbatim from openai-responses.ts. Registration stays in the host.
  */
 import { isOpenAIResponsesStoreEnabled } from "@/lib/providers/requestDefaults";
-import { isInternalReasoningPlaceholder } from "../../../utils/reasoningPlaceholder.ts";
+import {
+  isInternalReasoningPlaceholder,
+  requiresReasoningContentPresence,
+} from "../../../utils/reasoningPlaceholder.ts";
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
 import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
 import {
@@ -233,7 +236,10 @@ export function openaiToOpenAIResponsesRequest(
           // for opaque items in reasoningInputPolicy.ts (#11108).
           summary: [],
         });
-      } else if (isInternalReasoningPlaceholder(reasoning)) {
+      } else if (
+        isInternalReasoningPlaceholder(reasoning) &&
+        requiresReasoningContentPresence(credentialRecord._provider, model)
+      ) {
         // Reasoning-presence validation on strict Responses upstreams (opencode
         // console gateways) rejects thinking-mode history whose assistant turns
         // lack a reasoning_text item — even when OmniRoute's replay cache missed
@@ -241,6 +247,9 @@ export function openaiToOpenAIResponsesRequest(
         // replayOpenAIReasoningMessage's requiresExplicitReasoningReplay branch).
         // Emit the sentinel text: it satisfies presence validation, and the
         // response translators suppress the sentinel again on echo (#9573).
+        // Gated to presence-enforcing upstreams only: everywhere else (e.g.
+        // DeepSeek) the sentinel is never promoted, since models echo it as
+        // their own reasoning and stop (#9573/#9610).
         input.push({
           type: "reasoning",
           content: [{ type: "reasoning_text", text: reasoning }],

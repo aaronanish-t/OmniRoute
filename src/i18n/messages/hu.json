@@ -1203,6 +1203,8 @@
     "batchGroup": "Kötegelt feldolgozás",
     "homeSubtitle": "Irányítópult áttekintése",
     "providersSubtitle": "AI-szolgáltatók kezelése",
+    "modelCatalog": "Modellkatalógus",
+    "modelCatalogSubtitle": "Modellek böngészése szolgáltatók között",
     "quotaTrackerSubtitle": "Használati korlátok nyomon követése",
     "providerQuotaSubtitle": "Szolgáltatói használati korlátok nyomon követése",
     "runtimeSubtitle": "Valós idejű hibatűrés és munkamenetek",
@@ -3287,6 +3289,8 @@
     "strictRandomDesc": "Paklikeverés — minden modellt egyszer használ, mielőtt újrakeverné őket",
     "fusion": "Fúzió",
     "fusionDesc": "Párhuzamosan kiküldi a promptot az összes panelmodellnek, majd egy bíró modell szintetizálja a végső választ",
+    "pipeline": "Folyamatlánc",
+    "pipelineDesc": "Sorban futtatja a modelleket, és minden lépés kimenetét a következőnek adja át; csak a végső válasz kerül visszaadásra",
     "fusionJudgeModel": "Bíró modell",
     "fusionJudgeModelHelp": "Modell, amely a panel válaszait egyetlen végső válasszá szintetizálja. Hagyja üresen az első panelmodell használatához.",
     "fusionMinPanel": "Min. panel",
@@ -3668,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Ingyenes csomag ($0)",
-    "templateFreeStackDesc": "Ciklikus elosztás az összes ingyenes szolgáltató között: Kiro (Claude), Qoder (5 modell), Qwen (4 modell). Nulla költség, megszakítás nélküli kódolás.",
+    "templateFreeStackDesc": "Ciklikus elosztás az összes ingyenes szolgáltató között: Antigravity (Gemini), Kiro (Claude), Qoder (3 modell), NVIDIA, Groq. Nulla költség, megszakítás nélküli kódolás.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP mód",
@@ -4960,6 +4964,7 @@
     "export": "Exportálás",
     "exporting": "Exportálás...",
     "exportFailed": "Az exportálás sikertelen",
+    "exportTruncated": "Az exportálás csonkolva: a(z) {total} naplóbejegyzésből csak {exported} került bele. A többi exportálásához válasszon rövidebb időtartományt.",
     "cleanHistoryButton": "Előzmények törlése",
     "cleanHistoryTitle": "Törli a naplózási előzményeket?",
     "cleanHistoryMessage": "Ez véglegesen törli az összes kérésnapló-sort, a korábbi részletsorokat és a DATA_DIR/call_logs alatti helyi artifact fájlokat. Az élő oldal a tisztítás után frissülni fog.",
@@ -11033,6 +11038,7 @@
     "batchActivateSelected": "{count} kijelölt engedélyezése",
     "testPassed": "✓ OK",
     "sweepVerdict": "Utolsó ellenőrzés: {cause} ({code}) {age}",
+    "blockedHistory": "Blokkolt előzmények: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Indítás óta még nincs ellenőrzés",
     "sweepLabel": {
       "unproven": "cél elutasítva",
@@ -11079,6 +11085,7 @@
     "poolSetAsideReason": "Félretéve: {kind}",
     "poolSetAsideKindProxyUnreachable": "a proxy nem érhető el",
     "poolSetAsideKindIpQuota429": "IP-alapú sebességkorlát (429)",
+    "poolSetAsideKindSlow": "lassú válaszok",
     "poolSetAsideUntil": "Vissza a rotációba {endsAt}",
     "poolSetAsideRepeat": "Félretéve {count, plural, one {# alkalommal} other {# alkalommal}}",
     "poolUnknownAddress": "Ismeretlen cím",
@@ -11516,6 +11523,7 @@
       "output": "Kimenet",
       "totalOut": "Összes Kiadás: {value}",
       "reasoning": "Indoklás: {value}",
+      "reasoningObserved": "{value} · {chars} karakter észlelve",
       "requestedModel": "Kért Modell",
       "requestProtocol": "Követelmény Protokoll",
       "cacheSource": "Gyorsítótár Forrás",
@@ -12862,7 +12870,8 @@
     "inheritedProxy": "Örökölt kapcsolat: {host}",
     "inheritedPool": "Örökölt kapcsolati készlet ({count})",
     "poolEmptyBlocked": "A készlet üres — a kérések meghiúsulnak (nem közvetlen)",
-    "directEgress": "Közvetlen (proxy nélkül)"
+    "directEgress": "Közvetlen (proxy nélkül)",
+    "ownProxy": "Saját proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14195,6 +14204,8 @@
     "upstreamStatus": "Felfelé állapot",
     "noResponse": "Nincs válasz",
     "egressIp": "Kimeneti IP",
+    "headersAfter": "Fejlécek után",
+    "firstChunkAfter": "Első darab után",
     "servedBy": "Szolgáltatva általa",
     "correlationId": "Korelációs azonosító"
   },

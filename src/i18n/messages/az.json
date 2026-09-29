@@ -1203,6 +1203,8 @@
     "batchGroup": "Dəstə",
     "homeSubtitle": "İdarə panelinə ümumi baxış",
     "providersSubtitle": "Süni intellekt provayderlərini idarə edin",
+    "modelCatalog": "Model kataloqu",
+    "modelCatalogSubtitle": "Provayderlər üzrə modellərə baxın",
     "quotaTrackerSubtitle": "İstifadə limitlərini izləyin",
     "providerQuotaSubtitle": "Provayderlərin istifadə limitlərini izləyin",
     "runtimeSubtitle": "Real vaxt rejimində dayanıqlılıq və sessiyalar",
@@ -3287,6 +3289,8 @@
     "strictRandomDesc": "Qarışdırılmış dəst — yenidən qarışdırmazdan əvvəl hər modeldən bir dəfə istifadə edir",
     "fusion": "Birləşmə",
     "fusionDesc": "Sorğunu paralel olaraq hər bir panel modelinə göndərir, sonra isə hakim model bir yekun cavab sintez edir",
+    "pipeline": "Emal ardıcıllığı",
+    "pipelineDesc": "Modelləri ardıcıl işlədir, hər addımın nəticəsini növbəti addıma ötürür; yalnız son cavab qaytarılır",
     "fusionJudgeModel": "Hakim model",
     "fusionJudgeModelHelp": "Panel cavablarını bir yekun cavaba sintez edən model. Birinci panel modelindən istifadə etmək üçün boş buraxın.",
     "fusionMinPanel": "Min. panel",
@@ -3668,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Pulsuz Paket ($0)",
-    "templateFreeStackDesc": "Bütün pulsuz provayderlər arasında növbəli yönləndirmə: Kiro (Claude), Qoder (5 model), Qwen (4 model). Sıfır xərc, kodlaşdırma heç vaxt dayanmır.",
+    "templateFreeStackDesc": "Bütün pulsuz provayderlər arasında növbəli yönləndirmə: Antigravity (Gemini), Kiro (Claude), Qoder (3 model), NVIDIA, Groq. Sıfır xərc, kodlaşdırma heç vaxt dayanmır.",
     "auto": "Ağıllı Avtomatik Rejim",
     "autoDesc": "Çoxfaktorlu qiymətləndirməyə malik, özünü bərpa edən ağıllı yönləndirmə hovuzu",
     "lkgp": "LKGP Rejimi",
@@ -4960,6 +4964,7 @@
     "export": "İxrac et",
     "exporting": "İxrac edilir...",
     "exportFailed": "İxrac baş tutmadı",
+    "exportTruncated": "İxrac kəsildi: {total} jurnal qeydindən yalnız {exported} daxil edildi. Qalanını ixrac etmək üçün daha qısa zaman aralığı seçin.",
     "cleanHistoryButton": "Tarixçəni təmizlə",
     "cleanHistoryTitle": "Jurnal tarixçəsi təmizlənsin?",
     "cleanHistoryMessage": "Bu, DATA_DIR/call_logs altındakı bütün sorğu jurnalı sətirlərini, köhnə təfərrüat sətirlərini və yerli artefakt fayllarını həmişəlik təmizləyir. Canlı səhifə təmizləmədən sonra yenilənəcək.",
@@ -11033,6 +11038,7 @@
     "batchActivateSelected": "Seçilmiş {count} elementi aktivləşdir",
     "testPassed": "✓ OK",
     "sweepVerdict": "Son yoxlama: {cause} ({code}) {age}",
+    "blockedHistory": "Bloklanmış tarix: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Başlanğıcdan bəri yoxlama yoxdur",
     "sweepLabel": {
       "unproven": "hədəf rədd etdi",
@@ -11079,6 +11085,7 @@
     "poolSetAsideReason": "Kənara qoyuldu: {kind}",
     "poolSetAsideKindProxyUnreachable": "proksiyə çatmaq mümkün deyil",
     "poolSetAsideKindIpQuota429": "IP sürət limiti (429)",
+    "poolSetAsideKindSlow": "yavaş cavablar",
     "poolSetAsideUntil": "Rotasiyaya qayıtdı {endsAt}",
     "poolSetAsideRepeat": "Kənara qoyuldu {count, plural, one {# dəfə} other {# dəfə}}",
     "poolUnknownAddress": "Naməlum ünvan",
@@ -11516,6 +11523,7 @@
       "output": "Çıxış",
       "totalOut": "Ümumi Çıxış: {value}",
       "reasoning": "Müqayisə: {value}",
+      "reasoningObserved": "{value} · {chars} simvol müşahidə edildi",
       "requestedModel": "Tələb Olunan Model",
       "requestProtocol": "Req Protokolu",
       "cacheSource": "Keş Mənbəyi",
@@ -12862,7 +12870,8 @@
     "inheritedProxy": "Bağlantını miras alır: {host}",
     "inheritedPool": "Bağlantı hovuzunu miras alır ({count})",
     "poolEmptyBlocked": "Hovuz boşdur — sorğular uğursuz olur (birbaşa deyil)",
-    "directEgress": "Birbaşa (proksisiz)"
+    "directEgress": "Birbaşa (proksisiz)",
+    "ownProxy": "Öz proksi"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14195,6 +14204,8 @@
     "upstreamStatus": "Yuxarı axın statusu",
     "noResponse": "Cavab yoxdur",
     "egressIp": "Çıxış IP",
+    "headersAfter": "Başlıqlar sonra",
+    "firstChunkAfter": "İlk hissə sonra",
     "servedBy": "Təmin edən",
     "correlationId": "Korrelyasiya ID"
   },

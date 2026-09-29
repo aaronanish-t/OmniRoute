@@ -1203,6 +1203,8 @@
     "batchGroup": "Batch",
     "homeSubtitle": "Oversigt over dashboard",
     "providersSubtitle": "Administrer AI-udbydere",
+    "modelCatalog": "Modelkatalog",
+    "modelCatalogSubtitle": "Gennemse modeller på tværs af udbydere",
     "quotaTrackerSubtitle": "Spor forbrugsgrænser",
     "providerQuotaSubtitle": "Spor udbydernes forbrugsgrænser",
     "runtimeSubtitle": "Modstandsdygtighed og sessioner i realtid",
@@ -3287,6 +3289,8 @@
     "strictRandomDesc": "Blandet kortbunke — bruger hver model én gang, før der blandes igen",
     "fusion": "Fusion",
     "fusionDesc": "Fordeler prompten til alle panelmodeller parallelt, hvorefter en dommermodel syntetiserer ét endeligt svar",
+    "pipeline": "Pipeline",
+    "pipelineDesc": "Kører modellerne i rækkefølge og sender hvert trins output videre til det næste; kun det endelige svar returneres",
     "fusionJudgeModel": "Dommermodel",
     "fusionJudgeModelHelp": "Model, der syntetiserer panelsvarene til ét endeligt svar. Lad stå tom for at bruge den første panelmodel.",
     "fusionMinPanel": "Min. panel",
@@ -3668,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Gratis stak ($0)",
-    "templateFreeStackDesc": "Round-robin på tværs af alle gratis udbydere: Kiro (Claude), Qoder (5 modeller), Qwen (4 modeller). Ingen omkostninger, fortsæt med at kode uden afbrydelser.",
+    "templateFreeStackDesc": "Round-robin på tværs af alle gratis udbydere: Antigravity (Gemini), Kiro (Claude), Qoder (3 modeller), NVIDIA, Groq. Ingen omkostninger, fortsæt med at kode uden afbrydelser.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP-tilstand",
@@ -4960,6 +4964,7 @@
     "export": "Eksportér",
     "exporting": "Eksporterer...",
     "exportFailed": "Eksport mislykkedes",
+    "exportTruncated": "Eksporten blev afkortet: kun {exported} af {total} logposter kom med. Vælg et kortere tidsinterval for at eksportere resten.",
     "cleanHistoryButton": "Ryd historik",
     "cleanHistoryTitle": "Ryd loghistorik?",
     "cleanHistoryMessage": "Dette rydder permanent alle anmodningslogrækker, ældre detaljerækker og lokale artefaktfiler under DATA_DIR/call_logs. Livesiden opdateres efter oprydning.",
@@ -11033,6 +11038,7 @@
     "batchActivateSelected": "Aktivér {count} valgte",
     "testPassed": "✓ OK",
     "sweepVerdict": "Seneste scanning: {cause} ({code}) {age}",
+    "blockedHistory": "Blokeret historik: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ingen scanning endnu siden opstart",
     "sweepLabel": {
       "unproven": "målet afviste",
@@ -11079,6 +11085,7 @@
     "poolSetAsideReason": "Sat til side: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy kan ikke nås",
     "poolSetAsideKindIpQuota429": "IP-hastighedsbegrænsning (429)",
+    "poolSetAsideKindSlow": "langsomme svar",
     "poolSetAsideUntil": "Tilbage i rotation {endsAt}",
     "poolSetAsideRepeat": "Sat til side {count, plural, one {# gang} other {# gange}}",
     "poolUnknownAddress": "Ukendt adresse",
@@ -11516,6 +11523,7 @@
       "output": "Udgivelse",
       "totalOut": "Total Udbetaling: {value}",
       "reasoning": "Begrundelse: {value}",
+      "reasoningObserved": "{value} · {chars} tegn observeret",
       "requestedModel": "Anmodet Model",
       "requestProtocol": "Req Protokol",
       "cacheSource": "Cache Kilde",
@@ -12862,7 +12870,8 @@
     "inheritedProxy": "Arver forbindelse: {host}",
     "inheritedPool": "Arver forbindelsespulje ({count})",
     "poolEmptyBlocked": "Pulje tom — anmodninger mislykkes (ikke direkte)",
-    "directEgress": "Direkte (ingen proxy)"
+    "directEgress": "Direkte (ingen proxy)",
+    "ownProxy": "Egen proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14195,6 +14204,8 @@
     "upstreamStatus": "Opstrøm status",
     "noResponse": "Ingen respons",
     "egressIp": "Udgående IP",
+    "headersAfter": "Headers efter",
+    "firstChunkAfter": "Første chunk efter",
     "servedBy": "Betjent af",
     "correlationId": "Korrelation ID"
   },

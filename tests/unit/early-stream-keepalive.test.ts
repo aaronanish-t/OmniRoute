@@ -693,52 +693,41 @@ test("deadline token registry returns to its original size after N requests", as
   );
 });
 
-// #14808 regression: Next.js App Router route handlers receive a Proxy-wrapped
-// Request — reads are forwarded to the target (so `.url`/`.signal`/`.headers`
-// work), but the object identity is the Proxy, so the native constructor's
-// private-brand read on the input (`input.#state`) still fails. The old shape,
-// `new Request(request, { signal, headers })`, therefore threw "Cannot read
-// private member #state from an object whose class did not declare it" and every
-// wrapped inference request died with a 500. The wrapper must rebuild from
-// primitives instead.
-function proxyWrappedRequest(request: Request): Request {
-  return new Proxy(request, {
-    get(target, prop) {
-      const value = Reflect.get(target, prop, target);
-      return typeof value === "function" ? value.bind(target) : value;
+// Regression guard for the #14808 incident (2026-09-26): under the Next.js
+// App Router, inbound route requests are Proxies around the real request
+// (dynamic "auto" rendering). `withDeadlineSignal` must NOT pass the proxy
+// itself as the `new Request` constructor input — undici reads `#state` on
+// the receiver and ECMAScript mandates that a Proxy has no private-field
+// slots, so the wrap throws
+// "TypeError: Cannot read private member #state from an object whose class
+// did not declare it". The wrap is built field-by-field instead; this test
+// pins that form. Bug-injection check: restoring `new Request(request, …)`
+// makes this test throw (verified during review).
+test("withDeadlineSignal wraps a Next-style proxied request without throwing", async () => {
+  const body = JSON.stringify({ model: "space-grok", messages: [{ role: "user", content: "hi" }] });
+  const req = new Request("http://localhost/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Custom": "keep-me" },
+    body,
+  });
+  // Mirror the Next.js app-route runtime trap: every get forwards with the
+  // receiver forced to the target (not the proxy), which is what makes
+  // property reads safe while native private-field access on the proxy
+  // receiver is not.
+  const proxied = new Proxy(req, {
+    get(target, prop, _receiver) {
+      return Reflect.get(target, prop, target);
     },
   });
-}
-
-test("withDeadlineSignal wraps a Proxy-request without private-brand failure", async () => {
-  const inner = new Request("http://localhost/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "m", messages: [{ role: "user", content: "hi" }] }),
-  });
-
-  const { wrappedReq, deadlineController } = withDeadlineSignal(proxyWrappedRequest(inner));
-
-  assert.equal(wrappedReq.method, "POST", "method must survive the rebuild");
-  assert.equal(
-    wrappedReq.url,
-    "http://localhost/v1/chat/completions",
-    "url must survive the rebuild"
-  );
-  assert.equal(
-    wrappedReq.headers.get("content-type"),
-    "application/json",
-    "headers must survive the rebuild"
-  );
-  assert.equal(deadlineController.signal.aborted, false);
-  assert.equal(
-    getDeadlineController(wrappedReq),
-    deadlineController,
-    "the rebuilt request must still resolve to its deadline controller"
-  );
-  assert.deepEqual(
-    await wrappedReq.json(),
-    { model: "m", messages: [{ role: "user", content: "hi" }] },
-    "the unread body stream must be handed over byte-for-byte"
-  );
+  const { wrappedReq, deadlineController } = withDeadlineSignal(proxied);
+  assert.equal(wrappedReq.method, "POST");
+  assert.equal(wrappedReq.url, "http://localhost/v1/chat/completions");
+  assert.equal(wrappedReq.headers.get("Content-Type"), "application/json");
+  assert.equal(wrappedReq.headers.get("X-Custom"), "keep-me");
+  assert.ok(wrappedReq.headers.get("x-deadline-token") !== null);
+  // Body survived the wrap and is readable end-to-end.
+  const text = await wrappedReq.text();
+  assert.equal(text, body);
+  // The deadline token mechanism still resolves the controller downstream.
+  assert.equal(getDeadlineController({ headers: wrappedReq.headers }), deadlineController);
 });

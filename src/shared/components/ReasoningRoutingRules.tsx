@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
+import { codexModelFamilySupportsExtendedEffort } from "@/shared/reasoning/codexExtendedEffort";
 import Button from "./Button";
 import Card from "./Card";
 import Input from "./Input";
@@ -91,14 +92,10 @@ function emptyRule(apiKeyId?: string): FormState {
   };
 }
 
+// Same alias-set source as the routing policy, but any provider namespace
+// (`openai/`, `github/`, `opencode-zen/`, `codex/`…) is stripped first.
 function supportsExtendedCodexEffort(model: string, effort: "max" | "ultra"): boolean {
-  const normalized = model
-    .trim()
-    .toLowerCase()
-    .replace(/^[^/]+\//, "");
-  return effort === "ultra"
-    ? /^gpt-5\.6-(?:sol|terra)(?:-|$)/.test(normalized)
-    : /^gpt-5\.6-(?:sol|terra|luna)(?:-|$)/.test(normalized);
+  return codexModelFamilySupportsExtendedEffort(model.trim().replace(/^[^/]+\//, ""), effort);
 }
 
 export default function ReasoningRoutingRules({

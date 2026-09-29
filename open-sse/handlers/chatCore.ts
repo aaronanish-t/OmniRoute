@@ -1,5 +1,5 @@
 import {
-  extractRequestToolIdentityMap,
+  extractRequestToolMetadata,
   resolveResponseToolNameMap,
 } from "./chatCore/requestToolIdentity.ts";
 import {
@@ -2745,8 +2745,9 @@ async function handleChatCoreInner({
   // Keep the request translator's namespace identities separate from toolNameMap:
   // the latter is a Kiro/Claude passthrough alias channel with string values,
   // while namespace identities carry `{namespace, name}` for the #7936 response
-  // seam. Extract first because Kiro merge may reuse `_toolNameMap` below.
-  const requestToolIdentityMap = extractRequestToolIdentityMap(translatedBody);
+  // seam. Capture both before stripping their side channels: a Responses ->
+  // Gemini/Antigravity pivot carries both maps, not one recoverable ledger.
+  const { requestToolIdentityMap, toolNameAliasMap } = extractRequestToolMetadata(translatedBody);
 
   // Kiro: sanitize tool schemas before dispatch. Kiro returns 400 "Improperly
   // formed request" for unsupported JSON-Schema keywords (anyOf/$ref/if-then,
@@ -2787,13 +2788,13 @@ async function handleChatCoreInner({
   }
 
   // Extract toolNameMap for response translation (Claude OAuth)
-  const translatedToolNameMap = translatedBody._toolNameMap;
+  const translatedToolNameMap = translatedBody._toolNameMap ?? toolNameAliasMap;
   const nativeClaudeToolNameMap = isClaudePassthrough
     ? buildClaudePassthroughToolNameMap(body)
     : null;
-  // Resolution order matters: `_toolNameMap` was already deleted by
-  // `extractRequestToolIdentityMap`, so Gemini/Antigravity depend on the
-  // `requestToolIdentityMap` fallback inside this helper (#9568 / #7936).
+  // A later provider-specific ledger (Kiro above) wins; otherwise use the
+  // alias map captured before extraction. Namespace identities are distinct
+  // from aliases and cannot restore sanitized Gemini names on their own.
   const toolNameMap = resolveResponseToolNameMap(
     translatedToolNameMap,
     nativeClaudeToolNameMap,
@@ -5788,6 +5789,7 @@ async function handleChatCoreInner({
     provider,
     model,
     body: (finalBody || translatedBody) as Record<string, unknown> | null | undefined,
+    sourceBody: body as Record<string, unknown> | null | undefined,
     maxTimeoutMs: agentGoalPolicy.detected
       ? Math.max(STREAM_READINESS_MAX_TIMEOUT_MS, agentGoalPolicy.readinessMaxTimeoutMs)
       : STREAM_READINESS_MAX_TIMEOUT_MS,

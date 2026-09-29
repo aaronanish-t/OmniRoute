@@ -112,6 +112,7 @@ async function getCommittedTeamEstimatedListCostUsd(
        WHERE team_id = @teamId
          AND date >= @completeSummaryStartDate
          AND date < @completeSummaryEndDateExclusive
+         AND successful_requests > 0
        GROUP BY LOWER(provider), LOWER(model), serviceTier`
     )
     .all({

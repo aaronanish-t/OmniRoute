@@ -296,6 +296,95 @@ test("soft Team budget fails closed when committed usage has no catalog price", 
   assert.equal(status?.exceeded, true);
 });
 
+test("retained Team budgets ignore failed-only unpriced usage", async () => {
+  const nowMs = Date.now();
+  const todayMs = Date.parse(new Date(nowMs).toISOString().slice(0, 10) + "T00:00:00.000Z");
+  const usageTimestamp = new Date(todayMs - 12 * 60 * 60 * 1_000).toISOString();
+  const resetAt = new Date(todayMs + 24 * 60 * 60 * 1_000).toISOString();
+  const assignedAt = new Date(todayMs - 2 * 24 * 60 * 60 * 1_000).toISOString();
+
+  async function createBudgetTeam(name: string) {
+    const key = await apiKeys.createApiKey(`agent-${name}`, `machine-${name}`);
+    const team = teams.createTeam({ name, maxBudgetUsd: 100, budgetDuration: "7d" });
+    core
+      .getDbInstance()
+      .prepare("UPDATE teams SET budget_reset_at = ? WHERE id = ?")
+      .run(resetAt, team.id);
+    teams.assignApiKeyBillingTeam(key.id, team.id, assignedAt);
+    return { key, team };
+  }
+
+  const failedOnly = await createBudgetTeam("retained-failed-only");
+  await usageHistory.saveRequestUsage({
+    provider: "unpriced-team-provider",
+    model: "failed-only-model",
+    apiKeyId: failedOnly.key.id,
+    success: false,
+    status: "error",
+    tokens: { input: 0, output: 0 },
+    timestamp: usageTimestamp,
+  });
+
+  const mixed = await createBudgetTeam("retained-mixed");
+  for (const success of [false, true]) {
+    await usageHistory.saveRequestUsage({
+      provider: "unpriced-team-provider",
+      model: "mixed-model",
+      apiKeyId: mixed.key.id,
+      success,
+      status: success ? "success" : "error",
+      tokens: { input: success ? 1 : 0, output: 0 },
+      timestamp: usageTimestamp,
+    });
+  }
+
+  const successfulZeroToken = await createBudgetTeam("retained-successful-zero-token");
+  await usageHistory.saveRequestUsage({
+    provider: "unpriced-team-provider",
+    model: "successful-zero-token-model",
+    apiKeyId: successfulZeroToken.key.id,
+    tokens: { input: 0, output: 0 },
+    timestamp: usageTimestamp,
+  });
+
+  const failedOnlyRaw = await teamBudgets.getTeamUsageLimitStatusForApiKey(
+    failedOnly.key.id,
+    nowMs
+  );
+  const mixedRaw = await teamBudgets.getTeamUsageLimitStatusForApiKey(mixed.key.id, nowMs);
+  const zeroTokenRaw = await teamBudgets.getTeamUsageLimitStatusForApiKey(
+    successfulZeroToken.key.id,
+    nowMs
+  );
+  assert.equal(failedOnlyRaw?.hasUnpricedUsage, false);
+  assert.equal(failedOnlyRaw?.exceeded, false);
+  assert.equal(mixedRaw?.hasUnpricedUsage, true);
+  assert.equal(mixedRaw?.exceeded, true);
+  assert.equal(zeroTokenRaw?.hasUnpricedUsage, true);
+  assert.equal(zeroTokenRaw?.exceeded, true);
+
+  const rollup = await aggregateHistory.rollupUsageHistoryBeforeDate(
+    new Date(todayMs).toISOString().slice(0, 10)
+  );
+  assert.equal(rollup.errors, 0);
+
+  const failedOnlyRetained = await teamBudgets.getTeamUsageLimitStatusForApiKey(
+    failedOnly.key.id,
+    nowMs
+  );
+  const mixedRetained = await teamBudgets.getTeamUsageLimitStatusForApiKey(mixed.key.id, nowMs);
+  const zeroTokenRetained = await teamBudgets.getTeamUsageLimitStatusForApiKey(
+    successfulZeroToken.key.id,
+    nowMs
+  );
+  assert.equal(failedOnlyRetained?.hasUnpricedUsage, false);
+  assert.equal(failedOnlyRetained?.exceeded, false);
+  assert.equal(mixedRetained?.hasUnpricedUsage, true);
+  assert.equal(mixedRetained?.exceeded, true);
+  assert.equal(zeroTokenRetained?.hasUnpricedUsage, true);
+  assert.equal(zeroTokenRetained?.exceeded, true);
+});
+
 test("a non-budget update advances an expired budget window instead of resetting its cadence", async () => {
   const team = teams.createTeam({
     name: "Stable cadence team",

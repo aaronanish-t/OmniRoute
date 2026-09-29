@@ -6368,8 +6368,7 @@
       "kiro": "Безплатен план: 50 кредита/месец (~25K–100K токена). ⚠️ Условията за ползване на Kiro забраняват използването на прокси/инструменти от трети страни.",
       "codex": "Свързване на OpenAI Codex със съществуващия OAuth поток.",
       "qwen": "Свързване на Qwen Code със съществуващия OAuth поток.",
-      "github-models": "Създайте GitHub PAT с обхват 'models: read' на github.com/settings/tokens",
-      "suno": "Поставете сесийната бисквитка от suno.ai (Clerk auth)"
+      "github-models": "Създайте GitHub PAT с обхват 'models: read' на github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} приема собствени идентификатори на модела на доставчика. Импортирайте от /models или добавете персонализирани идентификатори за маршрутизиране.",
     "bedrockModelsDescription": "Моделите на Amazon Bedrock са обхванати от регион на AWS. Импортирайте от /models или добавете идентификатори на модел Bedrock, активирани в избрания регион.",

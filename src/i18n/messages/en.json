@@ -6368,8 +6368,7 @@
       "kiro": "Free tier: 50 credits/month (~25K–100K tokens). ⚠️ Kiro ToS prohibits third-party proxy/harness use.",
       "codex": "Connect OpenAI Codex with the existing OAuth flow.",
       "qwen": "Connect Qwen Code with the existing OAuth flow.",
-      "github-models": "Create a GitHub PAT with 'models: read' scope at github.com/settings/tokens",
-      "suno": "Paste session cookie from suno.ai (Clerk auth)"
+      "github-models": "Create a GitHub PAT with 'models: read' scope at github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} accepts provider-native model IDs. Import from /models or add custom IDs for routing.",
     "bedrockModelsDescription": "Amazon Bedrock models are scoped by AWS region. Import from /models or add Bedrock model IDs enabled in the selected region.",

@@ -6368,8 +6368,7 @@
       "kiro": "Piano gratuito: 50 crediti/mese (~25K–100K token). ⚠️ I ToS di Kiro vietano l'uso di proxy/harness di terze parti.",
       "codex": "Connetti OpenAI Codex al flusso OAuth esistente.",
       "qwen": "Connetti Qwen Code al flusso OAuth esistente.",
-      "github-models": "Crea un PAT di GitHub con ambito 'models: read' su github.com/settings/tokens",
-      "suno": "Incolla il cookie di sessione da suno.ai (autenticazione Clerk)"
+      "github-models": "Crea un PAT di GitHub con ambito 'models: read' su github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} accetta ID modello nativi del provider. Importa da /modelli o aggiungi ID personalizzati per il routing.",
     "bedrockModelsDescription": "I modelli Amazon Bedrock hanno come ambito la regione AWS. Importa da /models o aggiungi gli ID modello Bedrock abilitati nella regione selezionata.",

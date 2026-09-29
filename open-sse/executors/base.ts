@@ -19,6 +19,8 @@ import { createCopilotIdentityFallback } from "./copilotIdentityFallback.ts";
 import {
   findOffendingField,
   detectUnsupportedParam,
+  isAdvisorUndecryptableError,
+  replaceRedactedAdvisorResults,
   stripGroqUnsupportedFields,
 } from "../config/providerFieldStrips.ts";
 import {
@@ -31,7 +33,6 @@ import {
   isAutoLearnGloballyEnabled,
 } from "@/lib/db/paramFilters";
 import { applyFingerprint, isCliCompatEnabled, stripInternalBodyFields } from "../config/cliFingerprints.ts"; // prettier-ignore
-import { supportsClaudeMaxEffort, supportsXHighEffort } from "../config/providerModels.ts";
 import { getThinkingBudgetConfig, ThinkingMode } from "../services/thinkingBudget.ts";
 import {
   recordFreeWindowAttempt,
@@ -46,11 +47,7 @@ import type { PoolConfig } from "../services/sessionPool/types.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { SessionPool } from "../services/sessionPool/sessionPool.ts";
 import { PoolRegistry } from "../services/sessionPool/poolRegistry.ts";
-import {
-  getRotatingApiKey,
-  getValidApiKey,
-  resolveKeyForRequest,
-} from "../services/apiKeyRotator.ts";
+import { resolveKeyForRequest } from "../services/apiKeyRotator.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import { getOpenAICompatibleType, isClaudeCodeCompatible } from "../services/provider.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
@@ -534,6 +531,7 @@ export class BaseExecutor {
   ): Record<string, string> {
     void clientHeaders;
     void model;
+    void health;
     const { headers, effectiveKey } = this.buildHeadersPreamble(credentials, stream);
 
     if (credentials.accessToken) {
@@ -846,6 +844,7 @@ export class BaseExecutor {
     // later retry URLs (bounded per URL); also recorded via recordLearnedThinkingCap.
     let thinkingBudgetClampedMax: number | null = null;
     let reasoningEffortClamped = false; // reasoning_effort 4xx clamp-and-retry below.
+    let advisorResultsReplaced = false;
     const applyCopilotIdentityFallback = createCopilotIdentityFallback(this.provider, log);
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
@@ -914,6 +913,9 @@ export class BaseExecutor {
       // fallback URL). No-op when nothing has been learned this execute().
       if (thinkingBudgetClampedMax !== null) {
         clampNestedThinkingBudget(transformedBody, thinkingBudgetClampedMax);
+      }
+      if (advisorResultsReplaced) {
+        transformedBody = replaceRedactedAdvisorResults(transformedBody).body;
       }
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
@@ -1650,6 +1652,34 @@ export class BaseExecutor {
                   `Failed to persist auto-learned param "${autoLearned}" for ${this.provider}: ${String(learnError)}`
                 );
               }
+            }
+          }
+        }
+
+        if (
+          !advisorResultsReplaced &&
+          response.status === HTTP_STATUS.BAD_REQUEST &&
+          transformedBody &&
+          typeof transformedBody === "object"
+        ) {
+          const errText = await response
+            .clone()
+            .text()
+            .catch(() => "");
+          if (isAdvisorUndecryptableError(errText)) {
+            const { body: replacedBody, replaced } = replaceRedactedAdvisorResults(transformedBody);
+            if (replaced > 0) {
+              advisorResultsReplaced = true;
+              transformedBody = replacedBody;
+              let retryBody = JSON.stringify(transformedBody);
+              if (usesClaudeCodeProtocol || this.provider === "claude") {
+                retryBody = await signRequestBody(retryBody);
+              }
+              log?.info?.(
+                "ADVISOR_UNDECRYPTABLE",
+                `Upstream 400 could not decrypt ${replaced} advisor result(s) on ${url}, retrying with them marked unavailable`
+              );
+              response = await fetchWithStartTimeout(url, { ...fetchOptions, body: retryBody });
             }
           }
         }

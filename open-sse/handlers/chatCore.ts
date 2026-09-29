@@ -45,12 +45,9 @@ import { buildNonStreamingResponseHeaders } from "./chatCore/nonStreamingRespons
 import { maybeWrapForcedNonStreamingResponsesJson } from "./chatCore/responsesJsonToSse.ts";
 import { enforceOutputTokenBudget } from "./chatCore/outputTokenBudget.ts";
 import { maybeConvertJsonBodyToSse } from "./chatCore/jsonBodyToSse.ts";
-import {
-  formatBufferedVerdictLog,
-  judgeBufferedTurn,
-  readBoundedResponseOutcome,
-  FLUSH_EMPTY_RETRY_MAX_BYTES,
-} from "../utils/emptyTurnRetry.ts";
+import { withResilienceActionsContext } from "./chatCore/resilienceAttemptContext.ts";
+import { runEmptyTurnRetryLoop } from "./chatCore/emptyTurnRetryLoop.ts";
+import { notePreviousResponseResumed } from "./chatCore/resumedResilienceNotes.ts";
 import { assembleStreamingResponseHeaders } from "./chatCore/streamingResponseHeaders.ts";
 import { storeStreamingSemanticCacheResponse } from "./chatCore/streamingSemanticCacheStore.ts";
 import { captureStreamReasoningForReplay } from "./chatCore/streamReasoningCapture.ts";
@@ -474,7 +471,13 @@ type VideoBridgeLogParam = { observed: boolean; redaction: VideoBridgeLogRedacti
  */
 // extractSystemRoleMessages extracted to chatCore/claudeSystemRole.ts (#3501); re-exported above so
 // existing importers (e.g. tests/unit/system-role-extraction.test.ts) keep resolving it from here.
-export async function handleChatCore({
+export async function handleChatCore(args: Parameters<typeof handleChatCoreInner>[0]) {
+  // one implicit resilience store per attempt (combo legs each run
+  // handleChatCore, so each leg gets its own isolated store).
+  return withResilienceActionsContext([args], (forwarded) => handleChatCoreInner(forwarded));
+}
+
+async function handleChatCoreInner({
   body,
   modelInfo,
   credentials,
@@ -514,7 +517,9 @@ export async function handleChatCore({
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
   forcedConnectionId = null, // #14116: caller's pinned/requested connection, vs credentials.connectionId below
+  previousResponseResumed = undefined, // rehydrated-continuation flag from chat.ts; noted below, no semantics.
 }) {
+  delete (body as Record<string, unknown>)._omniroutePreviousResponseResumed;
   const {
     model: originModel,
     resolvedThinkingEffort,
@@ -540,6 +545,8 @@ export async function handleChatCore({
   // (chatCore/memoryExtraction.ts::runMemoryExtractionGate).
   const videoBridgeObserved: boolean =
     (videoBridgeLog as VideoBridgeLogParam | undefined)?.observed === true;
+  // resume flag from chat.ts, noted under the attempt store opened above.
+  notePreviousResponseResumed(previousResponseResumed);
   const resilienceSettings = resolveResilienceSettings(cachedSettings);
   if (!skipResourcePressureGuard) {
     try {
@@ -5887,85 +5894,32 @@ export async function handleChatCore({
       targetFormat === FORMATS.OPENAI_RESPONSES ||
       needsTranslation(targetFormat, clientResponseFormat);
     if (flushEmptyRetryArmed && isTranslatePath) {
-      for (
-        let emptyTurnRetries = 0;
-        emptyTurnRetries <= STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX;
-        emptyTurnRetries++
-      ) {
-        const verdict = judgeBufferedTurn(
-          await readBoundedResponseOutcome(
-            providerResponse,
-            FLUSH_EMPTY_RETRY_MAX_BYTES,
-            streamReadinessPolicy.timeoutMs
-          ),
-          targetFormat,
-          clientResponseFormat,
-          clientRawRequest?.signal?.aborted === true
-        );
-        if (verdict.kind === "pass") {
-          const v = formatBufferedVerdictLog(verdict, correlationId, traceId);
-          log?.[v.level]?.("FLUSH_EMPTY_RETRY", v.line);
-          break;
-        }
-        if (emptyTurnRetries >= STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX) {
-          log?.warn?.(
-            "FLUSH_EMPTY_RETRY",
-            "retry budget exhausted, falling back to current behavior"
-          );
-          break;
-        }
-        log?.warn?.(
-          "FLUSH_EMPTY_RETRY",
-          `${verdict.reason}, bounded retry through the normal credential path`
-        );
-        const nextCreds = await getProviderCredentials(
-          provider,
-          null,
-          null,
-          currentModel
-        ).catch(() => null);
-        if (!nextCreds?.connectionId) break;
-        const retryConnectionId = String(nextCreds.connectionId);
-        Object.assign(credentials, nextCreds);
-        log?.info?.("FLUSH_EMPTY_RETRY", `retrying on ${retryConnectionId}`);
-        await providerResponse.body?.cancel().catch(() => {});
-        let retryResult: unknown = null;
-        try {
-          retryResult = await executeProviderRequest(currentModel, false);
-        } catch {
-          break;
-        }
-        const retryResponse = (retryResult as { response?: Response })?.response;
-        if (!retryResponse?.ok || !retryResponse.body) {
-          if (retryResponse) await retryResponse.body?.cancel().catch(() => {});
-          break;
-        }
-        const prepared = await maybeConvertJsonBodyToSse(retryResponse, {
-          log,
-          provider,
-          model,
-        });
-        const ready = prepared.ok
-          ? await ensureStreamReadiness(prepared, {
-              timeoutMs: streamReadinessPolicy.timeoutMs,
-              maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
-              provider,
-              model,
-              log,
-            })
-          : null;
-        const preparedStream = ready && ready.ok ? ready.response : null;
-        if (!preparedStream) {
-          await retryResponse.body?.cancel().catch(() => {});
-          break;
-        }
-        // Swap BEFORE re-classifying so the next loop iteration reads the retry.
-        providerResponse = preparedStream;
-        finalBody = providerRequestCapture.body(
-          (retryResult as { transformedBody?: unknown })?.transformedBody ?? translatedBody
-        );
-        reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-      }
+      const retried = await runEmptyTurnRetryLoop({
+        providerResponse,
+        credentials,
+        provider,
+        currentModel,
+        model,
+        targetFormat,
+        clientResponseFormat,
+        isAborted: () => clientRawRequest?.signal?.aborted === true,
+        timeoutMs: streamReadinessPolicy.timeoutMs,
+        maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
+        maxRetries: STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX,
+        translatedBody,
+        finalBody,
+        providerUrl,
+        providerHeaders,
+        correlationId,
+        traceId,
+        log,
+        getProviderCredentials,
+        executeProviderRequest,
+        logTargetRequest: (url, headers, body) => reqLogger.logTargetRequest(url, headers, body),
+        captureBody: (body) => providerRequestCapture.body(body),
+      });
+      providerResponse = retried.providerResponse;
+      if (retried.adopted) finalBody = retried.finalBody;
     }
   }
 

@@ -68,6 +68,39 @@ test("invalidation during an in-flight pricing load starts a fresh load", async 
   }
 });
 
+test("a failed shared pricing load rejects every waiter and is not cached", async () => {
+  const db = core.getDbInstance();
+  const original = db.prepare.bind(db);
+  let failures = 0;
+  db.prepare = ((sql: string) => {
+    if (sql === PRICING_READ && failures === 0) {
+      failures++;
+      throw new Error("pricing read failed");
+    }
+    return original(sql);
+  }) as typeof db.prepare;
+  try {
+    const waiters = Array.from({ length: 10 }, () => readCache.getCachedPricing());
+    const settled = await Promise.allSettled(waiters);
+    assert.equal(failures, 1);
+    assert.ok(settled.every((result) => result.status === "rejected"));
+  } finally {
+    db.prepare = original;
+  }
+
+  // The slot was cleared on error: the next call starts a fresh load and succeeds.
+  const spy = countPricingReads(db);
+  try {
+    const pricing = await readCache.getCachedPricing();
+    assert.equal(typeof pricing, "object");
+    assert.equal(spy.counter.reads, 3);
+    assert.equal(await readCache.getCachedPricing(), pricing);
+    assert.equal(spy.counter.reads, 3);
+  } finally {
+    spy.restore();
+  }
+});
+
 test("usage_history rollup reads pricing once for a day of distinct token shapes", async () => {
   const db = core.getDbInstance();
   const insert = db.prepare(

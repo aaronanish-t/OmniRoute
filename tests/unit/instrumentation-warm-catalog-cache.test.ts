@@ -199,3 +199,29 @@ test("isBackgroundServicesDisabled correctly parses environment flag values", ()
     }
   }
 });
+
+// #14076 — registerNodejs() is too heavy to boot in a unit test, so this pins
+// the call-site structure instead: the startup warmup must sit INSIDE the
+// `if (!isBackgroundServicesDisabled())` block, otherwise
+// OMNIROUTE_DISABLE_BACKGROUND_SERVICES=1 still triggers the OpenRouter
+// catalog network fetch at boot.
+test("registerNodejs only warms the model catalog when background services are enabled", () => {
+  const source = fs.readFileSync(
+    path.join(import.meta.dirname, "../../src/instrumentation-node.ts"),
+    "utf8"
+  );
+  const registerStart = source.indexOf("export async function registerNodejs(");
+  assert.ok(registerStart >= 0, "registerNodejs() must exist");
+  const body = source.slice(registerStart);
+  const callIndex = body.indexOf("void warmModelCatalogCache();");
+  assert.ok(callIndex >= 0, "registerNodejs() must still warm the catalog");
+  const gate = "if (!isBackgroundServicesDisabled()) {";
+  const gateIndex = body.lastIndexOf(gate, callIndex);
+  assert.ok(gateIndex >= 0, "warmModelCatalogCache() must be preceded by the background gate");
+  let depth = 0;
+  for (let i = gateIndex + gate.length - 1; i < callIndex; i++) {
+    if (body[i] === "{") depth++;
+    else if (body[i] === "}") depth--;
+  }
+  assert.ok(depth > 0, "warmModelCatalogCache() must run inside the background-services gate");
+});

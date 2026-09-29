@@ -50,6 +50,11 @@ export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
   "src/lib/db/healthCheckWorker.js",
   "package.json",
   "peer-stamp.mjs",
+  // #13636/#14064: server-ws.mjs imports ./httpClientAbortGuard.mjs (process crash
+  // guard); assembleStandalone copies it from src/shared/utils. Without this entry
+  // the prepublish prune deletes it and every boot of the published package dies
+  // with ERR_MODULE_NOT_FOUND — the 3.8.47 head-response-guard class.
+  "httpClientAbortGuard.mjs",
   "main-server-timeouts.mjs",
   // server-ws.mjs import (sd_notify helper) — enforced by the closure test
   // tests/unit/pack-artifact-server-ws-closure.test.ts.
@@ -66,7 +71,6 @@ export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
   // crashes with ERR_MODULE_NOT_FOUND (regressed in the published 3.8.41 tarball).
   "tls-options.mjs",
   "webdav-handler.mjs",
-  "httpClientAbortGuard.mjs",
 ];
 
 export const APP_STAGING_ALLOWED_PATH_PREFIXES: string[] = [
@@ -100,6 +104,9 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "config/release/wreq-js-rust-license-inventory.json",
   "config/release/wreq-js-rust-notices.md",
   "bin/aliasResolver.mjs",
+  // #14006: Antigravity MITM bridge (operator tool for the Antigravity IDE/CLI).
+  // Pure node:* imports, shipped via package.json "files": ["bin/"].
+  "bin/antigravity-bridge.mjs",
   "bin/chatgpt-web-codex-mcp.mjs",
   // #7808: ESM loader hook split out of bin/aliasResolver.mjs to silence CodeQL
   // js/incomplete-url-substring-sanitization (the old code built a
@@ -202,6 +209,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "dist/main-server-timeouts.mjs",
   // server-ws.mjs import (sd_notify helper) — enforced by the closure test.
   "dist/systemd-notify.mjs",
+  // server-ws.mjs import (process crash guard, #13636/#14064) — enforced by the closure test.
+  "dist/httpClientAbortGuard.mjs",
   "dist/http-method-guard.cjs",
   // #5452: regression guard — make check:pack-artifact fail loudly if the TLS
   // opt-in sidecar (imported by dist/server-ws.mjs) ever vanishes from the tarball.
@@ -209,13 +218,14 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // #7065: regression guard for the HEAD response guard (dist/server-ws.mjs import).
   "dist/head-response-guard.cjs",
   "dist/webdav-handler.mjs",
-  "dist/httpClientAbortGuard.mjs",
   "bin/cli/program.mjs",
   // Direct imports of bin/omniroute.mjs — bin/cli/ is only an allowlist PREFIX, so a
   // file vanishing from the tarball never fails the unexpected-paths check; only these
   // required entries make its absence loud (#7065 class; derived + enforced by
   // tests/unit/pack-artifact-entrypoint-closures.test.ts).
   "bin/cli/data-dir.mjs",
+  // GHSA-2pg2-xm9r-8544: private-by-default DATA_DIR / .env modes, called on every boot.
+  "bin/cli/privateDataDir.mjs",
   "bin/cli/utils/ensureAndroidCacheDir.mjs",
   "bin/cli/utils/parseEnvValue.mjs",
   "bin/cli/utils/storageKeyProvision.mjs",

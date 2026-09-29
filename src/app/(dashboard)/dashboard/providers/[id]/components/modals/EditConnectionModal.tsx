@@ -55,7 +55,7 @@ import ClaudeConnectionFields from "./ClaudeConnectionFields";
 import {
   claudeConnectionFieldPatch,
   claudeConnectionFieldValues,
-} from "./claudeConnectionFieldHelpers";
+} from "./claudeConnectionFieldValues";
 import { CodexConnectionFields } from "./CodexFingerprintFields";
 import { assignEditApiKeyProviderSpecificData } from "./connectionProviderSpecificData";
 import { isM365TierCapableProvider, normalizeM365TierValue, type M365TierValue } from "./m365Tier";

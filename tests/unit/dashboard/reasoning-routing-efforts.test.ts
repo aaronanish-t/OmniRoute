@@ -48,3 +48,16 @@ test("openai/ prefixed ids read the same Codex alias sets as the executor (#1472
     "ultra",
   ]);
 });
+
+test("github/ and opencode-zen/ prefixed luna ids offer max but not ultra (#14059)", () => {
+  for (const model of ["github/gpt-5.6-luna", "opencode-zen/gpt-5.6-luna"]) {
+    assert.deepEqual(getReasoningRoutingTargetEffortOptions(model, "medium"), [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max",
+    ]);
+  }
+});

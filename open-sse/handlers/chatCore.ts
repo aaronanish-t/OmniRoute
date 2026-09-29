@@ -5920,9 +5920,9 @@ async function handleChatCoreInner({
   // issue bounded retries through the normal credential path BEFORE anything is
   // exposed to the client — in particular before `onRequestSuccess` below.
   // Empty turns are stochastic upstream misses, not account faults, so no
-  // cooldown and no forced exclusion: the round-robin picker may rotate
-  // fingerprint slots opportunistically, a single slot simply replays the same
-  // account. Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
+  // cooldown: the retry prefers another allowed connection, a single slot
+  // replays itself, and a leased or pinned connection never rotates (#14715).
+  // Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
   // back to the current behavior. Translate-path streams only (mirror of the
   // empty-stream guard); flag off = byte-for-byte unchanged. Bounded reader
   // (abandon past the cap, never a full `text()` read); the original
@@ -5961,6 +5961,7 @@ async function handleChatCoreInner({
         traceId,
         log,
         getProviderCredentials,
+        routing: { leased: Boolean(managedLease), forcedConnectionId, apiKey: apiKeyInfo },
         executeProviderRequest,
         logTargetRequest: (url, headers, body) => reqLogger.logTargetRequest(url, headers, body),
         captureBody: (body) => providerRequestCapture.body(body),

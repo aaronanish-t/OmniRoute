@@ -205,26 +205,39 @@ export default function ReasoningRoutingRules({
 
   const targetModelForCapability =
     form.targetKind === "model" ? form.targetModel : form.modelPattern;
+  const isLunaTarget = useMemo(() => {
+    const normalized = targetModelForCapability
+      .trim()
+      .toLowerCase()
+      .replace(/^[^/]+\//, "");
+    return /^gpt-5\.6-luna(?:-|$)/.test(normalized);
+  }, [targetModelForCapability]);
+
+  // gpt-5.6-luna accepts `max` but not `ultra`: a saved `ultra` is coerced to
+  // `max` so the editor never re-offers (or re-saves) a tier the upstream 400s.
+  const currentTargetEffort =
+    isLunaTarget && form.targetEffort === "ultra" ? "max" : form.targetEffort;
+
   const effortOptions = useMemo(
     () =>
-      getReasoningRoutingTargetEffortOptions(targetModelForCapability, form.targetEffort).map(
+      getReasoningRoutingTargetEffortOptions(targetModelForCapability, currentTargetEffort).map(
         (value) => ({ value, label: value })
       ),
-    [form.targetEffort, targetModelForCapability]
+    [currentTargetEffort, targetModelForCapability]
   );
 
   const capabilityWarning = useMemo(() => {
     if (form.effortMode === "inherit") return "";
-    if (!(EXTENDED_REASONING_EFFORTS as readonly string[]).includes(form.targetEffort)) return "";
+    if (!(EXTENDED_REASONING_EFFORTS as readonly string[]).includes(currentTargetEffort)) return "";
     if (form.targetKind === "combo") return t("extendedComboWarning");
     if (!targetModelForCapability.trim()) return t("extendedUnknownWarning");
     return supportsExtendedCodexEffort(
       targetModelForCapability,
-      form.targetEffort as "max" | "ultra"
+      currentTargetEffort as "max" | "ultra"
     )
       ? ""
       : t("extendedUnsupportedWarning");
-  }, [form.effortMode, form.targetEffort, form.targetKind, t, targetModelForCapability]);
+  }, [currentTargetEffort, form.effortMode, form.targetKind, t, targetModelForCapability]);
 
   const dirty = editorOpen && JSON.stringify(form) !== baseline;
   const confirmDiscard = (action: () => void) => {
@@ -310,7 +323,7 @@ export default function ReasoningRoutingRules({
         .split(",")
         .map((tag) => tag.trim())
         .filter(Boolean),
-      targetEffort: form.effortMode === "inherit" ? null : form.targetEffort,
+      targetEffort: form.effortMode === "inherit" ? null : currentTargetEffort,
       targetKind,
       targetModel: targetKind === "model" ? form.targetModel || null : null,
       targetComboId: targetKind === "combo" ? form.targetComboId || null : null,
@@ -756,13 +769,12 @@ export default function ReasoningRoutingRules({
                       options={[
                         { value: "any", label: t("any") },
                         { value: "missing", label: t("missing") },
-                        ...[
-                          ...STANDARD_REASONING_EFFORTS,
-                          ...EXTENDED_REASONING_EFFORTS,
-                        ].map((value) => ({
-                          value,
-                          label: value,
-                        })),
+                        ...[...STANDARD_REASONING_EFFORTS, ...EXTENDED_REASONING_EFFORTS].map(
+                          (value) => ({
+                            value,
+                            label: value,
+                          })
+                        ),
                       ]}
                     />
                   </div>
@@ -826,7 +838,7 @@ export default function ReasoningRoutingRules({
                     <div className={grid}>
                       <Select
                         label={t("targetEffort")}
-                        value={form.targetEffort}
+                        value={currentTargetEffort}
                         onChange={(event) => setForm({ ...form, targetEffort: event.target.value })}
                         options={effortOptions}
                       />
@@ -910,7 +922,7 @@ export default function ReasoningRoutingRules({
                   </p>
                   <p className="mt-1 text-text-muted">
                     {e("effort." + form.effortMode)}
-                    {form.effortMode !== "inherit" ? ": " + form.targetEffort : ""}
+                    {form.effortMode !== "inherit" ? ": " + currentTargetEffort : ""}
                   </p>
                   <p className="mt-2 text-xs text-text-muted">{e("draftNotice")}</p>
                 </div>
@@ -954,7 +966,7 @@ export default function ReasoningRoutingRules({
             options={[
               { value: "missing", label: t("missing") },
               { value: "signal", label: t("signalOnly") },
-              ...[...STANDARD_EFFORTS, ...EXTENDED_EFFORTS].map((value) => ({
+              ...[...STANDARD_REASONING_EFFORTS, ...EXTENDED_REASONING_EFFORTS].map((value) => ({
                 value,
                 label: value,
               })),

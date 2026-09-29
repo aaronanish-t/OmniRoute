@@ -152,8 +152,14 @@ test("bounded read abandons past the cap without buffering everything", async ()
   assert.equal(out, null, "past-cap body must be abandoned, not buffered");
 });
 
+// #14691: a turn that already carries content or a tool call stops the bounded read at its
+// first useful chunk (`early-pass`); only content-free turns are drained to the end. The
+// "intact body" contract therefore applies to a content-free (reasoning-only) turn.
+const contentFreeBody = () =>
+  sse(chatChunk({ reasoning_content: "thinking" }), chatChunk({}, "stop"));
+
 test("bounded read returns small bodies intact", async () => {
-  const body = sse(chatChunk({ content: "hi" }));
+  const body = contentFreeBody();
   const res = new Response(body, { status: 200 });
   const out = await readBoundedResponseText(res, FLUSH_EMPTY_RETRY_MAX_BYTES);
   assert.equal(out, body);
@@ -183,12 +189,48 @@ test("bounded read outcome tells a read failure apart from an over-cap body", as
   );
   assert.equal(skipped.kind, "skipped", "an over-cap body is passed through, not retried");
 
-  const body = sse(chatChunk({ content: "hi" }));
+  const body = contentFreeBody();
   const ok = await readBoundedResponseOutcome(
     new Response(body, { status: 200 }),
     FLUSH_EMPTY_RETRY_MAX_BYTES
   );
   assert.deepEqual(ok, { kind: "text", text: body });
+
+  const useful = await readBoundedResponseOutcome(
+    new Response(sse(chatChunk({ content: "hi" })), { status: 200 }),
+    FLUSH_EMPTY_RETRY_MAX_BYTES
+  );
+  assert.deepEqual(
+    useful,
+    { kind: "early-pass" },
+    "a content turn stops at its first useful chunk"
+  );
+});
+
+test("bounded read returns skipped without awaiting a tee clone cancel", async () => {
+  const BUDGET_MS = 2000;
+  const neverClosing = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode("x".repeat(FLUSH_EMPTY_RETRY_MAX_BYTES + 1)));
+    },
+  });
+  let res: Response | undefined;
+  const start = Date.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    res = new Response(neverClosing, { status: 200 });
+    const outcome = await Promise.race([
+      readBoundedResponseOutcome(res, FLUSH_EMPTY_RETRY_MAX_BYTES),
+      new Promise<never>((_, rej) => {
+        timer = setTimeout(() => rej(new Error("bounded read timed out")), BUDGET_MS);
+      }),
+    ]);
+    assert.equal(outcome.kind, "skipped");
+    assert.ok(Date.now() - start < BUDGET_MS, `expected bounded skipped well under ${BUDGET_MS}ms`);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+    await res?.body?.cancel().catch(() => undefined);
+  }
 });
 
 test("buffered turn verdict: a dropped stream retries unless the client went away", () => {
@@ -251,13 +293,14 @@ test("a stalled stream that already carries content is passed through, not repla
     FLUSH_EMPTY_RETRY_MAX_BYTES,
     50
   );
-  assert.equal(out.kind, "idle");
+  // #14691: the content chunk ends the read before the stall is ever observed.
+  assert.equal(out.kind, "early-pass");
   const verdict = judgeBufferedTurn(out, FORMATS.OPENAI, FORMATS.OPENAI, false);
   assert.equal(verdict.kind, "pass", "content already produced is worth keeping");
 });
 
 test("bounded read keeps no budget when the idle budget is zero", async () => {
-  const body = sse(chatChunk({ content: "hi" }));
+  const body = contentFreeBody();
   const out = await readBoundedResponseOutcome(new Response(body, { status: 200 }), 256_000, 0);
   assert.deepEqual(out, { kind: "text", text: body }, "a disabled budget must not change reads");
 });

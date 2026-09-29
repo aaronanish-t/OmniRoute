@@ -436,37 +436,10 @@ export function resolveTokenLimit(
   return { limit: DEFAULT_LIMITS.default, specific: false };
 }
 
-/**
- * Resolve the context limit to use for proactive compression of a COMBO
- * request.
- *
- * chatCore always executes with the CONCRETE target's provider/model
- * (handleSingleModel resolves the target before delegating), so the
- * executing target's own limit is authoritative. Using min(...allTargets)
- * here — the previous behavior — compressed at the smallest sibling's
- * window even when running on the largest target, destructively purging
- * history long before the real window filled ("agent keeps forgetting").
- *
- * min(...comboTargetLimits) is kept only as a defensive fallback for the
- * case where the current provider/model resolves no specific limit at all.
- */
-export function resolveComboContextLimit(options: {
-  provider: string;
-  model: string | null;
-  comboTargetLimits: number[];
-}): { limit: number; source: "target" | "combo-min" | "fallback" } {
-  const own = resolveTokenLimit(options.provider, options.model ?? null);
-  if (own.specific) {
-    return { limit: own.limit, source: "target" };
-  }
-  const knownTargets = (options.comboTargetLimits || []).filter(
-    (value) => Number.isFinite(value) && value > 0
-  );
-  if (knownTargets.length > 0) {
-    return { limit: Math.min(...knownTargets), source: "combo-min" };
-  }
-  return { limit: own.limit, source: "fallback" };
-}
+// Combo context-limit resolution lives in ./comboContextLimit.ts; re-exported
+// here so existing importers keep working.
+export { resolveComboContextLimit } from "./comboContextLimit.ts";
+export type { ComboContextLimitSource } from "./comboContextLimit.ts";
 
 /**
  * Apply context compression to request body.
@@ -678,8 +651,11 @@ function purifyHistory(messages: Record<string, unknown>[], targetTokens: number
   // index 0 is accepted by every provider (same slot the old splice used when
   // system[] was empty).
   if (keep < nonSystem.length) {
-    const dropped = nonSystem.length - keep;
-    const droppedNotice = `[Context compressed: ${dropped} earlier messages removed to fit context window]`;
+    // Byte-stable: no interpolated drop count. A per-request count here
+    // changes messages[0] on nearly every request over a growing
+    // conversation, busting the upstream provider's prefix cache anchored
+    // at index 0 (issue #14600).
+    const droppedNotice = "[Context compressed: earlier messages removed to fit context window]";
     const first = result[0];
     if (first && (first.role === "system" || first.role === "developer")) {
       if (typeof first.content === "string") {

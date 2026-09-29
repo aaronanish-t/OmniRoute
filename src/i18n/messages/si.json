@@ -11520,6 +11520,7 @@
       "compressed": "සම්පීඩිතයි: {from} → {to} ({percent}% ඉතිරි විය)",
       "output": "ප්රතිදානය",
       "totalOut": "මුළු ප්රතිදානය: {value}",
+      "reasoningObserved": "{value} · අක්ෂර {chars}ක් නිරීක්ෂණය විය",
       "reasoning": "තාර්කිකකරණය: {value}",
       "requestedModel": "ඉල්ලා ඇති මාදිලිය",
       "requestProtocol": "ඉල්ලීම් ප්රොටෝකෝලය",

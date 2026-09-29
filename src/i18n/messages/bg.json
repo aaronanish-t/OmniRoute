@@ -11521,6 +11521,7 @@
       "output": "Изход",
       "totalOut": "Обща сума: {value}",
       "reasoning": "Обосновка: {value}",
+      "reasoningObserved": "{value} · наблюдавани {chars} знака",
       "requestedModel": "Заявеният Модел",
       "requestProtocol": "Протокол на заявката",
       "cacheSource": "Кеш Източник",

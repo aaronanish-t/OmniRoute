@@ -11520,6 +11520,7 @@
       "compressed": "Saspiests: {from} → {to} (ietaupīts {percent}%)",
       "output": "Izvade",
       "totalOut": "Kopā izvadē: {value}",
+      "reasoningObserved": "{value} · novērotas {chars} rakstzīmes",
       "reasoning": "Spriešana: {value}",
       "requestedModel": "Pieprasītais modelis",
       "requestProtocol": "Pieprasījuma protokols",

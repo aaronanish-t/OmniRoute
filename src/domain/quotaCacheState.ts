@@ -12,6 +12,8 @@
  * @module domain/quotaCacheState
  */
 
+import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface QuotaInfo {
@@ -26,12 +28,14 @@ export interface QuotaInfo {
   fractionReported?: boolean;
   displayName?: string;
   windowSeconds?: number | null;
+  claudeQuota?: ClaudeQuotaMetadata;
 }
 
 export interface QuotaCacheEntry {
   connectionId: string;
   provider: string;
   quotas: Record<string, QuotaInfo>;
+  modelQuotas: Record<string, QuotaInfo>;
   fetchedAt: number;
   exhausted: boolean;
   nextResetAt: string | null;

@@ -315,7 +315,7 @@ export async function sendAntigravityRequest(
   headers: Record<string, string>,
   transformedBody: Record<string, unknown>,
   credentials: AntigravityCredentials,
-  stream: boolean,
+  _stream: boolean,
   signal: AbortSignal | null | undefined,
   log: SafeAntigravityLog,
   retryAttempt: number,

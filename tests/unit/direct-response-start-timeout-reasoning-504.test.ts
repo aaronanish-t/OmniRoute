@@ -16,7 +16,10 @@
 // response that the readiness layer would have permitted.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolveDirectHeadersTimeoutMs } from "../../open-sse/utils/directResponseStartTimeout.ts";
+import {
+  directHeadersTimeoutResolver,
+  resolveDirectHeadersTimeoutMs,
+} from "../../open-sse/utils/directResponseStartTimeout.ts";
 
 const REASONING_HIGH_BODY = JSON.stringify({
   model: "glm-5.2",
@@ -122,4 +125,33 @@ test("remote direct target keeps the flat 30s default (zombie-socket detection p
     "https://api.openai.com/v1/chat/completions"
   );
   assert.equal(got, 30_000);
+});
+
+test("proxyFetch resolver applies the local floor to the pooled attempt of a LAN target", () => {
+  const saved = {
+    flat: process.env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS,
+    local: process.env.OMNIROUTE_LOCAL_DIRECT_HEADERS_TIMEOUT_MS,
+  };
+  delete process.env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS;
+  delete process.env.OMNIROUTE_LOCAL_DIRECT_HEADERS_TIMEOUT_MS;
+  try {
+    const local = directHeadersTimeoutResolver(
+      { body: NON_REASONING_BODY },
+      "http://localhost:11434/api/chat"
+    );
+    const remote = directHeadersTimeoutResolver(
+      { body: NON_REASONING_BODY },
+      "https://api.openai.com/v1/chat/completions"
+    );
+    assert.equal(local(0), 300_000);
+    assert.equal(remote(0), 30_000);
+  } finally {
+    for (const [key, value] of [
+      ["OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS", saved.flat],
+      ["OMNIROUTE_LOCAL_DIRECT_HEADERS_TIMEOUT_MS", saved.local],
+    ] as const) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
 });

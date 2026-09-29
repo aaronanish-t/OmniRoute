@@ -91,6 +91,22 @@ export function resolveDirectHeadersTimeoutMs(
 }
 
 /**
+ * Per-request resolver for the direct no-proxy attempts in proxyFetch: binds the
+ * request body (reasoning-effort awareness), caller-deadline presence (retry
+ * ceiling) and target URL (local/LAN floor) once, so each attempt
+ * (0 = pooled dispatcher, 1+ = fresh-socket retry) resolves its own budget.
+ */
+export function directHeadersTimeoutResolver(
+  options: { body?: unknown; signal?: unknown },
+  targetUrl?: string | null
+): (attempt: number) => number {
+  const body = typeof options.body === "string" ? options.body : null;
+  const hasCallerDeadline = !!options.signal;
+  return (attempt) =>
+    resolveDirectHeadersTimeoutMs(process.env, body, attempt, hasCallerDeadline, targetUrl);
+}
+
+/**
  * Resolves the fresh-socket RETRY attempt's response-start ceiling (#13703).
  *
  * `hasCallerDeadline` is true when the caller already attached its own

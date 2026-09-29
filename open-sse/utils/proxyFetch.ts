@@ -27,7 +27,7 @@ import {
 import {
   directFetchWithBoundedResponseStart,
   isDirectResponseStartTimeout,
-  resolveDirectHeadersTimeoutMs,
+  directHeadersTimeoutResolver,
 } from "./directResponseStartTimeout.ts";
 
 // #9100: relay egress (Vercel / Deno / Cloudflare edge functions) used to go
@@ -940,14 +940,7 @@ async function patchedFetchUnrecorded(
     }
 
     let lastDispatcherError: unknown = null;
-    const directBodyForTimeout = typeof options.body === "string" ? options.body : null;
-    const directHeadersTimeoutMs = resolveDirectHeadersTimeoutMs(
-      undefined,
-      directBodyForTimeout,
-      0,
-      !!options.signal,
-      targetUrl
-    );
+    const timeoutFor = directHeadersTimeoutResolver(options, targetUrl);
     let targetHostForLogs = "";
     try {
       targetHostForLogs = new URL(targetUrl).host;
@@ -963,19 +956,13 @@ async function patchedFetchUnrecorded(
             dispatcher: attempt === 0 ? getDefaultDispatcher() : getRetryDispatcher(),
           },
           _undiciDirect,
-          resolveDirectHeadersTimeoutMs(
-            undefined,
-            directBodyForTimeout,
-            attempt,
-            !!options.signal,
-            targetUrl
-          )
+          timeoutFor(attempt)
         );
       } catch (dispatcherError) {
         if (isDirectResponseStartTimeout(dispatcherError)) {
           if (attempt === 0 && maxAttempts > 1) {
             console.warn(
-              `[ProxyFetch] Direct response-start timeout (${directHeadersTimeoutMs}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetHostForLogs}`
+              `[ProxyFetch] Direct response-start timeout (${timeoutFor(0)}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetHostForLogs}`
             );
             lastDispatcherError = dispatcherError;
             continue;

@@ -14,6 +14,7 @@ import {
 } from "./encryption";
 import { createLazyRowProxy } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
+import { invalidateConnectionUpdate } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
 import {
   removeConnectionHealth,
@@ -1033,8 +1034,13 @@ export async function updateProviderConnection(
   })();
   backupDbFile("pre-write");
   // #13389: callers that only rotated credentials/health state (OAuth token
-  // refresh) pass skipModelCatalog so the /v1/models response cache survives.
-  invalidateDbCache("connections", undefined, opts); // Bust connections read cache
+  // refresh) pass skipModelCatalog so the /v1/models response cache survives;
+  // everyone else goes through the field-based runtime-state check.
+  if (opts?.skipModelCatalog) {
+    invalidateDbCache("connections", id, { skipModelCatalog: true });
+  } else {
+    invalidateConnectionUpdate(id, data);
+  }
   bumpProxyConfigGeneration();
 
   if (data.priority !== undefined) {

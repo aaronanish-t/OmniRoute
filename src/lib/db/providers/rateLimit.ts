@@ -44,9 +44,9 @@ export function setConnectionRateLimitUntil(connectionId: string, until: number 
   db.prepare(
     "UPDATE provider_connections SET rate_limited_until = ?, updated_at = ? WHERE id = ?"
   ).run(until, new Date().toISOString(), connectionId);
-  // #13389: routing/health-only write (rate_limited_until) — the unified model
-  // catalog never reads it, so keep the /v1/models response cache alive.
-  invalidateDbCache("connections", undefined, { skipModelCatalog: true });
+  // Routing-only write (rate_limited_until) — the /v1/models builder never reads
+  // it, so bust the connections read cache without dropping the catalog cache.
+  invalidateDbCache("connections", connectionId, { skipModelCatalog: true });
 }
 
 /**
@@ -238,8 +238,8 @@ export function clearStaleCrashCooldowns(): { cleared: number } {
     stmt.run(now, row.id);
   }
 
-  // #13389: batch recovery touches only routing/health columns — skip the
-  // model-catalog bust so routine recovery sweeps don't cold-rebuild /v1/models.
+  // Routing/health-only fields (rate_limited_until, test_status, backoff_level,
+  // last_error*, error_code) — the /v1/models builder never reads them.
   invalidateDbCache("connections", undefined, { skipModelCatalog: true });
 
   return { cleared: toReset.length };
@@ -305,9 +305,9 @@ export async function clearConnectionErrorIfUnchanged(
     );
   const applied = (result.changes ?? 0) > 0;
   if (applied) {
-    // #13389: clears only error/cooldown state — the catalog builder never
-    // reads those fields, so leave the /v1/models response cache intact.
-    invalidateDbCache("connections", undefined, { skipModelCatalog: true });
+    // Routing/health-only fields + codex-scope cooldown keys — none are read by
+    // the /v1/models builder (it only reads providerSpecificData.excludedModels).
+    invalidateDbCache("connections", id, { skipModelCatalog: true });
     bumpProxyConfigGeneration();
   }
   return applied;

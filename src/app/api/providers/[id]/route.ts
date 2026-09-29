@@ -42,6 +42,7 @@ import {
 // tiktoken_bg.wasm" after 17-50s, never touching chatgpt-web-codex at all).
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
 import { chatGptWebStorageStateFromCookieHeader } from "@omniroute/open-sse/utils/chatgptWebExecutorAdapter.ts";
+import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 
 function normalizeCodexLimitPolicy(
   incoming: unknown,
@@ -370,6 +371,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       }
     }
 
+    // Fields the caller changed, for the audit trail. Captured before the
+    // operator-intent marker below, which is bookkeeping for isActive and not a
+    // providerSpecificData edit by the caller.
+    const changedFields = Object.keys(updateData);
+
+    // Record the operator's explicit on/off intent so automated activation paths
+    // (the connection test) do not turn a deliberately disabled connection back on.
+    if (typeof isActive === "boolean") {
+      updateData.providerSpecificData = applyOperatorActivationIntent(
+        updateData.providerSpecificData ?? existing.providerSpecificData,
+        isActive
+      );
+    }
+
     const updated = await updateProviderConnection(id, updateData);
 
     // If rateLimitOverrides was included in the request, refresh the in-memory
@@ -413,7 +428,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       requestId: auditContext.requestId,
       metadata: {
         provider: existing.provider,
-        changedFields: Object.keys(updateData),
+        changedFields,
         before: summarizeProviderConnectionForAudit(existing),
         after: summarizeProviderConnectionForAudit(updated),
       },

@@ -16,6 +16,8 @@ way to connect a headless or containerized OmniRoute to the **Claude Code** prov
    **Setup Token** tab; nothing is sent to claude.ai unless you switch to **Browser Login**.
 3. Paste the token and save. The connection is named "Setup token"; rename it if you add several.
 
+![Connect Claude Code dialog on the Setup Token tab](../screenshots/claude-setup-token-1-dialog.png)
+
 Before anything is stored, OmniRoute sends one `max_tokens: 1` request to Anthropic with the token.
 A token that does not start with `sk-ant-oat`, or that Anthropic rejects, is refused with a 400
 and no connection is created.

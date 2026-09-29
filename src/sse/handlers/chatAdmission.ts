@@ -258,7 +258,10 @@ export function createChatAdmissionContext(
       const result = await runtime.acquire({
         tenantKey: resolveAdmissionTenantKey(apiKeyId),
         body,
-        signal: effectiveSignal,
+        // Callers pass the lifecycle signal explicitly as `request.signal`
+        // (chat.ts forwards `{ signal }`, the deadline-aware lifecycle signal), so the stream
+        // deadline reaches the admission wait without rebuilding a Request.
+        signal: request?.signal ?? undefined,
         streaming,
       });
 

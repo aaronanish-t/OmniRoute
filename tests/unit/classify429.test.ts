@@ -71,6 +71,26 @@ test("classify429: TPD rate limit body with short retry hint still returns 'quot
   assert.equal(classify429({ status: 429, body }), "quota_exhausted");
 });
 
+// #13041: credit exhaustion is not always signalled with a 429 — some upstreams
+// answer 402/403 (or even 5xx) with a terminal "out of credits" body. Those must
+// classify as quota_exhausted so the breaker applies the long quota cooldown,
+// while a non-429 without terminal quota wording stays transient.
+test("classify429: non-429 credit-exhausted bodies return 'quota_exhausted' (#13041)", () => {
+  const body = { error: { message: "You have exhausted all your credits." } };
+  assert.equal(classify429({ status: 402, body }), "quota_exhausted");
+  assert.equal(classify429({ status: 403, body: "Account is out of credits" }), "quota_exhausted");
+  assert.equal(
+    classify429FromError({ status: 402, message: "You have exhausted all your credits." }),
+    "quota_exhausted"
+  );
+});
+
+test("classify429: non-429 errors without terminal quota wording stay 'transient' (#13041)", () => {
+  assert.equal(classify429({ status: 500, body: "Internal server error" }), "transient");
+  assert.equal(classify429({ status: 403, body: "rate limit exceeded, retry in 5s" }), "transient");
+  assert.equal(classify429({ status: 200, body: "out of credits" }), "transient");
+});
+
 test("classify429: Google RESOURCE_EXHAUSTED with a billing-period reset is quota exhausted", () => {
   const body = "Resource has been exhausted (e.g. check quota). (reset after 24h)";
   assert.equal(looksLikeQuotaExhausted(body), true);

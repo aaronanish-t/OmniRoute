@@ -4,7 +4,7 @@ import {
   SEARCH_CREDENTIAL_FALLBACKS,
   SEARCH_PROVIDERS,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
-import { PROVIDER_CONNECTION_FAMILY_ALIASES } from "@/shared/constants/providers";
+import { foldUsageRowsByFamily } from "@/lib/providerFamilyAgg";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 
 /**
@@ -30,6 +30,8 @@ export interface ProviderMetricRow {
   lastErrorAt: string | null;
   lastStatus: number | null;
   lastErrorStatus: number | null;
+  /** COUNT(duration) — weight for folding avgLatencyMs across a family. */
+  latencySamples?: number | null;
 }
 
 /** One provider's traffic over a bounded window. See `getProviderUsageSince`. */
@@ -39,6 +41,7 @@ export interface ProviderUsageRow {
   successes: number;
   avgLatencyMs: number | null;
   lastRequestAt: string | null;
+  latencySamples?: number | null;
 }
 
 export interface SearchProviderStatRow {
@@ -67,129 +70,61 @@ export interface SearchProviderCountRow {
 }
 
 // ---------------------------------------------------------------------------
-// Provider family grouping — one stats group per declared connection family
-// ---------------------------------------------------------------------------
-
-type FamilyColumn = "c.provider" | "c2.provider" | "c3.provider";
-
-/**
- * Resolution entries that win over the declared family map. xai-oauth stays
- * the stats key for the xai family (dashboard keeps a single xai-oauth row).
- */
-const FAMILY_SPECIAL_CANONICAL: ReadonlyArray<readonly [string, string]> = [
-  ["xao", "xai-oauth"],
-  ["xai-oauth", "xai-oauth"],
-  ["xai", "xai"],
-];
-
-/**
- * Member id to canonical family id. Special entries first, then per map entry
- * the canonical identity before its members; the first writer wins so the
- * freepik/magnific pair resolves to magnific either way round.
- */
-export function buildFamilyCanonicalOf(): Map<string, string> {
-  const table = new Map<string, string>();
-  const setIfAbsent = (member: string, canonical: string) => {
-    if (!table.has(member)) table.set(member, canonical);
-  };
-  for (const [member, canonical] of FAMILY_SPECIAL_CANONICAL) {
-    setIfAbsent(member, canonical);
-  }
-  for (const [canonical, members] of Object.entries(PROVIDER_CONNECTION_FAMILY_ALIASES)) {
-    setIfAbsent(canonical, canonical);
-    for (const member of members) setIfAbsent(member, canonical);
-  }
-  return table;
-}
-
-let familyCanonicalOf: Map<string, string> | null = null;
-const familyCanonicalCaseSql = new Map<FamilyColumn, string>();
-
-function getFamilyCanonicalOf(): Map<string, string> {
-  if (familyCanonicalOf === null) familyCanonicalOf = buildFamilyCanonicalOf();
-  return familyCanonicalOf;
-}
-
-/**
- * CASE expression mapping a provider column to its canonical family id.
- * Unknown ids pass through unchanged. Cached per column (bounded: one entry
- * per known alias, same pattern as getErrorTypeVocabSql below).
- */
-export function getFamilyCanonicalSql(column: FamilyColumn): string {
-  const cached = familyCanonicalCaseSql.get(column);
-  if (cached !== undefined) return cached;
-  const branches = [...getFamilyCanonicalOf().entries()]
-    .filter(([member, canonical]) => member !== canonical)
-    .map(
-      ([member, canonical]) =>
-        `WHEN ${sqlStringLiteral(member)} THEN ${sqlStringLiteral(canonical)}`
-    )
-    .join(" ");
-  const sql = branches.length > 0 ? `CASE ${column} ${branches} ELSE ${column} END` : column;
-  familyCanonicalCaseSql.set(column, sql);
-  return sql;
-}
-
-// ---------------------------------------------------------------------------
 // /api/provider-metrics — aggregate per-provider stats
 // ---------------------------------------------------------------------------
 
 /**
- * Returns one row per provider family with call-level aggregates plus
- * last-status subselects. Members of a declared connection family (e.g.
- * kimi-coding + kimi-coding-apikey) collapse into the canonical family id.
- * Excludes rows where provider is NULL or '-', and excludes
+ * Returns one row per provider with call-level aggregates plus last-status
+ * subselects. Excludes rows where provider is NULL or '-', and excludes
  * providers with no live row in `provider_connections` — a deleted provider
  * connection must not keep surfacing as a ghost topology node forever from
  * its retained historical call_logs rows. See #10714.
+ *
+ * Rows stay per raw provider (one per topology node, index-backed subqueries);
+ * family totals are folded in JS by `foldMetricRowsByFamily` (#15005).
  */
-export function getProviderMetrics(): ProviderMetricRow[] {
-  const db = getDbInstance();
-  const familyOf = getFamilyCanonicalSql("c.provider");
-  const familyOfC2 = getFamilyCanonicalSql("c2.provider");
-  const familyOfC3 = getFamilyCanonicalSql("c3.provider");
-  return db
-    .prepare(
-      `SELECT
-          ${familyOf} as provider,
-          COUNT(*) as totalRequests,
-          SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) as totalSuccesses,
-          ROUND(AVG(duration)) as avgLatencyMs,
-          MAX(timestamp) as lastRequestAt,
-          MAX(
-            CASE
-              WHEN (status IS NOT NULL AND (status < 200 OR status >= 400))
-                OR error_summary IS NOT NULL
-              THEN timestamp
-              ELSE NULL
-            END
-          ) as lastErrorAt,
-          (
-            SELECT c2.status
-            FROM call_logs c2
-            WHERE ${familyOfC2} = ${familyOf}
-            ORDER BY c2.timestamp DESC, c2.id DESC
-            LIMIT 1
-          ) as lastStatus,
-          (
-            SELECT c3.status
-            FROM call_logs c3
-            WHERE ${familyOfC3} = ${familyOf}
-              AND (
-                (c3.status IS NOT NULL AND (c3.status < 200 OR c3.status >= 400))
-                OR c3.error_summary IS NOT NULL
-              )
-            ORDER BY c3.timestamp DESC, c3.id DESC
-            LIMIT 1
-          ) as lastErrorStatus
-        FROM call_logs c
-        WHERE c.provider IS NOT NULL AND c.provider != '-'
-          AND EXISTS (
-            SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider
+export const PROVIDER_METRICS_SQL = `SELECT
+      c.provider,
+      COUNT(*) as totalRequests,
+      SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) as totalSuccesses,
+      ROUND(AVG(duration)) as avgLatencyMs,
+      COUNT(duration) as latencySamples,
+      MAX(timestamp) as lastRequestAt,
+      MAX(
+        CASE
+          WHEN (status IS NOT NULL AND (status < 200 OR status >= 400))
+            OR error_summary IS NOT NULL
+          THEN timestamp
+          ELSE NULL
+        END
+      ) as lastErrorAt,
+      (
+        SELECT c2.status
+        FROM call_logs c2
+        WHERE c2.provider = c.provider
+        ORDER BY c2.timestamp DESC, c2.id DESC
+        LIMIT 1
+      ) as lastStatus,
+      (
+        SELECT c3.status
+        FROM call_logs c3
+        WHERE c3.provider = c.provider
+          AND (
+            (c3.status IS NOT NULL AND (c3.status < 200 OR c3.status >= 400))
+            OR c3.error_summary IS NOT NULL
           )
-        GROUP BY 1`
-    )
-    .all() as ProviderMetricRow[];
+        ORDER BY c3.timestamp DESC, c3.id DESC
+        LIMIT 1
+      ) as lastErrorStatus
+    FROM call_logs c
+    WHERE c.provider IS NOT NULL AND c.provider != '-'
+      AND EXISTS (
+        SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider
+      )
+    GROUP BY c.provider`;
+
+export function getProviderMetrics(): ProviderMetricRow[] {
+  return getDbInstance().prepare(PROVIDER_METRICS_SQL).all() as ProviderMetricRow[];
 }
 
 // ---------------------------------------------------------------------------
@@ -209,14 +144,14 @@ export function getProviderMetrics(): ProviderMetricRow[] {
  */
 export function getProviderUsageSince(since: string): ProviderUsageRow[] {
   const db = getDbInstance();
-  const familyOf = getFamilyCanonicalSql("c.provider");
-  return db
+  const rows = db
     .prepare(
       `SELECT
-          ${familyOf} as provider,
+          c.provider,
           COUNT(*) as requests,
           SUM(CASE WHEN c.status >= 200 AND c.status < 400 THEN 1 ELSE 0 END) as successes,
           ROUND(AVG(c.duration)) as avgLatencyMs,
+          COUNT(c.duration) as latencySamples,
           MAX(c.timestamp) as lastRequestAt
         FROM call_logs c
         WHERE c.provider IS NOT NULL AND c.provider != '-'
@@ -224,9 +159,11 @@ export function getProviderUsageSince(since: string): ProviderUsageRow[] {
           AND EXISTS (
             SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider
           )
-        GROUP BY 1`
+        GROUP BY c.provider`
     )
     .all({ since }) as ProviderUsageRow[];
+  // Grouped by the raw column in SQL, folded per connection family here (#15005).
+  return foldUsageRowsByFamily(rows);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,8 +1,10 @@
 /**
- * Provider family aggregation — call_logs rows for members of a declared
+ * Provider family aggregation (#15005) — usage rows for members of a declared
  * connection family (e.g. kimi-coding + kimi-coding-apikey) collapse into a
- * single canonical group. DB handles are released in test.after to prevent
- * Node native test runner from hanging.
+ * single canonical group, while /api/provider-metrics keeps one row per member
+ * (topology nodes) plus folded `familyMetrics`, and its correlated last-status
+ * subqueries keep seeking idx_cl_provider_timestamp. DB handles are released in
+ * test.after to prevent Node native test runner from hanging.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -15,6 +17,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../../src/lib/db/core.ts");
 const mod = await import("../../../src/lib/db/callLogStats.ts");
+const fam = await import("../../../src/lib/providerFamilyAgg.ts");
+const route = await import("../../../src/app/api/provider-metrics/route.ts");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -96,7 +100,7 @@ test.after(() => {
 // ---------------------------------------------------------------------------
 
 test("family aggregation — resolution table maps every member to its canonical id", () => {
-  const table = mod.buildFamilyCanonicalOf();
+  const table = fam.buildFamilyCanonicalOf();
   assert.equal(table.get("xao"), "xai-oauth");
   assert.equal(table.get("xai-oauth"), "xai-oauth");
   assert.equal(table.get("xai"), "xai");
@@ -107,16 +111,20 @@ test("family aggregation — resolution table maps every member to its canonical
   assert.equal(table.get("magnific"), "magnific");
 });
 
-test("family aggregation — canonical CASE sql only branches on non-canonical members", () => {
-  const sql = mod.getFamilyCanonicalSql("c.provider");
-  assert.ok(sql.startsWith("CASE c.provider"), "expression scoped to the given column");
-  assert.ok(sql.includes("WHEN 'xao' THEN 'xai-oauth'"), "special branch wins over the map");
-  assert.ok(
-    sql.includes("WHEN 'kimi-coding-apikey' THEN 'kimi-coding'"),
-    "family member branch present"
-  );
-  assert.ok(!sql.includes("WHEN 'xai'"), "canonical ids emit no branch");
-  assert.ok(sql.endsWith("ELSE c.provider END"), "unknown providers pass through");
+test("family aggregation — last-status subqueries seek the provider index (migration 175)", () => {
+  const db = core.getDbInstance();
+  const plan = (
+    db.prepare("EXPLAIN QUERY PLAN " + mod.PROVIDER_METRICS_SQL).all() as Array<{
+      detail: string;
+    }>
+  )
+    .map((r) => r.detail)
+    .join(" | ");
+  const correlated = plan.match(/SEARCH c[23] USING (?:COVERING )?INDEX (\w+)/g) ?? [];
+  assert.equal(correlated.length, 2, `both correlated subqueries must SEARCH an index: ${plan}`);
+  for (const step of correlated) {
+    assert.ok(step.includes("idx_cl_provider_timestamp"), `expected provider index: ${step}`);
+  }
 });
 
 // ---------------------------------------------------------------------------
@@ -143,9 +151,12 @@ test("family aggregation — xai-oauth and xao form one xai-oauth group", () => 
   const metrics = mod.getProviderMetrics();
   assert.ok(
     metrics.some((r) => r.provider === "xai-oauth"),
-    "metrics group present"
+    "canonical member metrics row present"
   );
-  assert.ok(!metrics.some((r) => r.provider === "xao"), "no alias metrics group");
+  assert.ok(
+    metrics.some((r) => r.provider === "xao"),
+    "alias keeps its own topology metrics row"
+  );
 });
 
 test("family aggregation — member without a live connection is excluded (#10714)", () => {
@@ -221,9 +232,72 @@ test("family aggregation — kimi-coding and kimi-coding-apikey form one group",
   assert.equal(row.successes, beforeSuccesses + 1, "successes are summed across members");
 
   const metrics = mod.getProviderMetrics();
-  const metric = metrics.find((r) => r.provider === "kimi-coding");
-  assert.ok(metric, "canonical metrics group present");
-  assert.ok(metric.totalRequests >= 2);
-  assert.equal(metric.lastStatus, 500, "newest member row wins across members");
-  assert.equal(metric.lastErrorStatus, 500);
+  const member = metrics.find((r) => r.provider === "kimi-coding-apikey");
+  assert.ok(member, "family member keeps its own metrics row for its topology node");
+  assert.ok(member.totalRequests >= 1);
+  assert.equal(member.lastStatus, 500);
+  const canonicalOnly = metrics.find((r) => r.provider === "kimi-coding");
+  assert.ok(canonicalOnly, "canonical member row present");
+  assert.equal(canonicalOnly.lastStatus, 200, "canonical row is not overwritten by the family");
+
+  const family = fam.foldMetricRowsByFamily(metrics).find((r) => r.provider === "kimi-coding");
+  assert.ok(family, "family aggregate present");
+  assert.equal(family.totalRequests, member.totalRequests + canonicalOnly.totalRequests);
+  assert.equal(family.lastErrorStatus, 500);
+});
+
+test("family aggregation — /api/provider-metrics serves member metrics and familyMetrics", async () => {
+  seedConnection("kimi-coding");
+  seedConnection("kimi-coding-apikey");
+  insertCallLog({
+    provider: "kimi-coding-apikey",
+    status: 503,
+    duration: 50,
+    error_summary: "late",
+    timestamp: "2025-07-03T00:00:00.000Z",
+    id: "log-family-route-1",
+  });
+  const res = await route.GET();
+  assert.equal(res.status, 200);
+  const body = (await res.json()) as {
+    metrics: Record<string, { totalRequests: number; lastStatus: number | null }>;
+    familyMetrics: Record<string, { totalRequests: number; lastStatus: number | null }>;
+    topology: { providers: string[] };
+  };
+  assert.ok(body.metrics["kimi-coding-apikey"], "member topology node keeps its metrics");
+  assert.equal(body.metrics["kimi-coding-apikey"].lastStatus, 503);
+  assert.ok(body.topology.providers.includes("kimi-coding-apikey"));
+  const family = body.familyMetrics["kimi-coding"];
+  assert.ok(family, "family aggregate keyed by the canonical id");
+  assert.equal(
+    family.totalRequests,
+    body.metrics["kimi-coding-apikey"].totalRequests + body.metrics["kimi-coding"].totalRequests
+  );
+  assert.equal(family.lastStatus, 503, "newest member request drives the family lastStatus");
+  assert.equal(body.familyMetrics["kimi-coding-apikey"], undefined);
+});
+
+test("family aggregation — avg latency folds weighted by samples", () => {
+  const rows = fam.foldUsageRowsByFamily([
+    {
+      provider: "kimi-coding",
+      requests: 3,
+      successes: 3,
+      avgLatencyMs: 100,
+      latencySamples: 3,
+      lastRequestAt: "2025-07-01T00:00:00.000Z",
+    },
+    {
+      provider: "kimi-coding-apikey",
+      requests: 1,
+      successes: 0,
+      avgLatencyMs: 500,
+      latencySamples: 1,
+      lastRequestAt: "2025-07-02T00:00:00.000Z",
+    },
+  ]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].provider, "kimi-coding");
+  assert.equal(rows[0].avgLatencyMs, 200, "(100*3 + 500*1) / 4");
+  assert.equal(rows[0].lastRequestAt, "2025-07-02T00:00:00.000Z");
 });

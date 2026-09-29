@@ -144,6 +144,7 @@ returns 429 `WAITING_FOR_CAPACITY` with `Retry-After`. Acquire, renew, and relea
 their connection-free response shapes. The explicit status action is owner-, key-, and
 generation-fenced and returns only privacy-safe display metadata for an active binding.
 
+
 ```bash
 curl -X POST https://localhost:20128/api/v1/session-leases \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \

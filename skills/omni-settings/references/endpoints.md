@@ -315,6 +315,7 @@ are sent upstream.
 
 Requires a dashboard management session cookie when management auth is enabled.
 
+
 ```bash
 curl https://localhost:20128/api/settings/payload-rules \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -328,6 +329,7 @@ Persists and hot reloads payload rules. The legacy input field `default-raw` is 
 on writes and normalized to `defaultRaw` in responses/runtime state.
 
 Requires a dashboard management session cookie when management auth is enabled.
+
 
 ```bash
 curl -X PUT https://localhost:20128/api/settings/payload-rules \
@@ -403,6 +405,7 @@ curl https://localhost:20128/api/settings/ip-filter \
 Update IP filter configuration
 
 Configure IP filtering with blacklist/whitelist modes, add/remove individual IPs, and manage temp bans.
+
 
 ```bash
 curl -X PUT https://localhost:20128/api/settings/ip-filter \

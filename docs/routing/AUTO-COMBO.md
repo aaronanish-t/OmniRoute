@@ -781,7 +781,7 @@ To strongly favor Tier 1 (subscription), increase `tierPriority` weight:
 }
 ```
 
-See `docs/marketing/TIERS.md` for tier definitions and provider classification.
+See [`docs/guides/TIERS.md`](../guides/TIERS.md) for tier definitions and provider classification.
 
 ## Testing & Coverage
 

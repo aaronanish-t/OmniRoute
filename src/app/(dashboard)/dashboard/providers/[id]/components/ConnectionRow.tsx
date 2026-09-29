@@ -58,10 +58,6 @@ export interface ConnectionRowConnection {
   perKeyProxyEnabled?: boolean;
   quotaVisible?: boolean;
   codexAccountPool?: CodexAccountPoolProjection;
-  /** Latest cached usage/limits snapshot for this account (see useProviderQuota). */
-  quotaCache?: ProviderQuotaCacheEntry | null;
-  quotaRefreshing?: boolean;
-  onRefreshQuota?: () => void;
 }
 
 export interface ConnectionRowProps {
@@ -117,6 +113,10 @@ export interface ConnectionRowProps {
   isApplyingClaudeAuthLocal?: boolean;
   onExportClaudeAuthFile?: () => void;
   isExportingClaudeAuthFile?: boolean;
+  /** Latest cached usage/limits snapshot for this account (see useProviderQuota). */
+  quotaCache?: ProviderQuotaCacheEntry | null;
+  quotaRefreshing?: boolean;
+  onRefreshQuota?: () => void;
 }
 
 // ---------------------------------------------------------------------------

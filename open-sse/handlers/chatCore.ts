@@ -95,7 +95,6 @@ import {
   shouldUseNativeOpenAICompatibleResponsesPassthrough,
   stampNativeResponsesPassthroughBody,
   redactPassthroughThinkingSignatures,
-  dropUnsignedPassthroughThinkingBlocks,
   stripClaudeRejectedTopLevelFields,
   isClaudeCodeSemanticPassthroughRequest,
 } from "./chatCore/passthroughHelpers.ts";
@@ -2492,10 +2491,6 @@ async function handleChatCoreInner({
         translatedBody.messages = redactPassthroughThinkingSignatures(
           translatedBody.messages,
           DEFAULT_THINKING_CLAUDE_SIGNATURE
-        ) as typeof translatedBody.messages;
-        // Unsigned thinking history (relayed from a non-Anthropic leg) can only 400 here (#12917).
-        translatedBody.messages = dropUnsignedPassthroughThinkingBlocks(
-          translatedBody.messages
         ) as typeof translatedBody.messages;
 
         stripClaudeRejectedTopLevelFields(translatedBody, clientRawRequest?.headers);

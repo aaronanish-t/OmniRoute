@@ -152,12 +152,17 @@ export function shouldUseNativeOpenAICompatibleResponsesPassthrough({
  * responses. The redaction is therefore both unnecessary and the cause of the
  * regression, so the blocks are now returned verbatim. The `signature` parameter
  * is kept for call-site compatibility.
+ *
+ * The one exception is a block that carries no signature at all (see
+ * {@link dropUnsignedPassthroughThinkingBlocks}): it was never issued by Anthropic,
+ * so it is dropped instead of forwarded.
  */
 export function redactPassthroughThinkingSignatures(
   messages: unknown,
   _signature: string
 ): unknown {
-  return messages;
+  // Signed blocks stay verbatim; only blocks Anthropic never issued are dropped (#12917).
+  return dropUnsignedPassthroughThinkingBlocks(messages);
 }
 
 type MessageLike = {

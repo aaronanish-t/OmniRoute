@@ -8,6 +8,7 @@ import {
 } from "@/lib/compliance/providerAudit";
 import {
   getProviderConnections,
+  getProviderConnectionById,
   getProviderConnectionsCount,
   createProviderConnection,
   deleteProviderConnections,
@@ -60,6 +61,11 @@ import {
 import { isAutoFetchModelsEnabled } from "@/lib/providerModels/modelDiscovery";
 import { testSingleConnection } from "./[id]/test/route";
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
+import {
+  chatGptWebStorageStateFromCookieHeader,
+  normalizeChatGptWebStorageState,
+} from "@omniroute/open-sse/utils/chatgptWebExecutorAdapter.ts";
+import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
 function projectCodexAccountPoolWithRoutingQuota(
@@ -212,6 +218,27 @@ export async function POST(request: Request) {
 
     if (provider === "qoder") {
       providerSpecificData = normalizeQoderPatProviderData(providerSpecificData || {});
+    }
+
+    if (provider === "chatgpt-web" && typeof apiKey === "string") {
+      try {
+        persistedApiKey = JSON.stringify(normalizeChatGptWebStorageState(JSON.parse(apiKey)));
+      } catch (error) {
+        if (!(error instanceof SyntaxError)) {
+          return NextResponse.json(
+            { error: "ChatGPT Web storage state JSON is invalid or contains foreign origins" },
+            { status: 400 }
+          );
+        }
+        try {
+          persistedApiKey = JSON.stringify(chatGptWebStorageStateFromCookieHeader(apiKey));
+        } catch {
+          return NextResponse.json(
+            { error: "ChatGPT Web storage state JSON or Cookie header is invalid" },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     if (provider === "chatgpt-web-codex") {
@@ -466,7 +493,18 @@ export async function PATCH(request: Request) {
     const updatedIds: string[] = [];
     const notFoundIds: string[] = [];
     for (const id of ids) {
-      const updated = await updateProviderConnection(id, { isActive });
+      // Record the operator's on/off intent next to isActive, so the connection
+      // test does not re-enable a connection that was switched off on purpose.
+      const existing = (await getProviderConnectionById(id)) as Record<string, unknown> | null;
+      const updated = existing
+        ? await updateProviderConnection(id, {
+            isActive,
+            providerSpecificData: applyOperatorActivationIntent(
+              existing.providerSpecificData,
+              isActive
+            ),
+          })
+        : null;
       if (updated) updatedIds.push(id);
       else notFoundIds.push(id);
     }

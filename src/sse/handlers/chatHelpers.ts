@@ -325,6 +325,19 @@ export async function resolveModelOrError(
   };
 }
 
+// Credential-provider override for a combo target. An explicit providerId wins;
+// otherwise the target's own provider still applies (#11840: an alias-prefixed
+// passthrough target such as kilocode/cline must keep routing to that provider),
+// except the "unknown" sentinel getTargetProvider() stamps on bare model ids,
+// which must never override the provider inferred from the model (#14743).
+export function comboTargetCredentialProviderId(
+  target?: { providerId?: string | null; provider?: string | null } | null
+): string | null {
+  if (target?.providerId != null) return target.providerId;
+  const provider = target?.provider;
+  return provider && provider !== "unknown" ? provider : null;
+}
+
 export async function checkPipelineGates(
   provider: string,
   model: string,
@@ -952,6 +965,22 @@ export function shouldRetryStreamEarlyEof(
     typeof errorCode === "string" &&
     RETRYABLE_STREAM_EMPTY_CODES.has(errorCode) &&
     attempt < STREAM_EARLY_EOF_MAX_RETRIES
+  );
+}
+
+export const STREAM_READINESS_TIMEOUT_MAX_RETRIES = 1;
+
+export function shouldRetryStreamReadinessTimeout(
+  errorCode: string | null | undefined,
+  attempt: number,
+  isCombo: boolean,
+  clientAborted: boolean
+): boolean {
+  return (
+    !isCombo &&
+    !clientAborted &&
+    errorCode === "STREAM_READINESS_TIMEOUT" &&
+    attempt < STREAM_READINESS_TIMEOUT_MAX_RETRIES
   );
 }
 

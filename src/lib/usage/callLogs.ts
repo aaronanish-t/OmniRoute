@@ -99,6 +99,7 @@ type CallLogSummaryRow = {
   account: string | null;
   connection_id: string | null;
   duration: number | null;
+  ttft_ms: number | null;
   tokens_in: number | null;
   tokens_out: number | null;
   tokens_cache_read: number | null;
@@ -160,6 +161,13 @@ function isCallLogIdCollision(error: unknown): boolean {
   if (/SQLITE_CONSTRAINT_PRIMARYKEY/i.test(code)) return true;
   if (/SQLITE_CONSTRAINT_UNIQUE/i.test(code) && /call_logs\.id/i.test(msg)) return true;
   return /UNIQUE constraint failed: call_logs\.id/i.test(msg);
+}
+
+// TTFT is only meaningful when measured and non-negative; normalize anything
+// else (undefined/NaN/negative) to the column's "not tracked" state.
+function toNullableTtftMs(value: unknown): number | null {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? Math.round(n) : null;
 }
 
 async function resolveAccountName(connectionId: string | null | undefined) {
@@ -472,6 +480,7 @@ function mapSummaryRow(row: CallLogSummaryRow) {
     account: row.resolved_account || row.account,
     connectionId: row.connection_id,
     duration: toNumber(row.duration),
+    ttft: row.ttft_ms != null ? toNumber(row.ttft_ms) : null,
     tokens: {
       in: toNumber(row.tokens_in),
       out: toNumber(row.tokens_out),
@@ -688,6 +697,11 @@ async function saveCallLogOperation(entry: any): Promise<void> {
       account,
       connectionId: entry.connectionId || null,
       duration: entry.duration || 0,
+      // #13130: TTFT (ms to first forwarded stream chunk) when the streaming
+      // pipeline measured it; null for non-streaming rows. The dashboard TPS
+      // divides by duration - ttft so queueing/prefill wait does not drag the
+      // reported generation rate down.
+      ttftMs: toNullableTtftMs(entry.ttftMs ?? entry.ttft),
       tokensIn: toNumber(getLoggedInputTokens(entry.tokens)),
       tokensOut: toNumber(getLoggedOutputTokens(entry.tokens)),
       tokensCacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
@@ -774,7 +788,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
       `
       INSERT INTO call_logs (
         id, timestamp, method, path, status, model, requested_model, provider,
-        account, connection_id, duration, tokens_in, tokens_out,
+        account, connection_id, duration, ttft_ms, tokens_in, tokens_out,
         tokens_cache_read, tokens_cache_creation, tokens_reasoning, tokens_compressed,
         reasoning_source, reasoning_chars,
         reasoning_duration_ms, reasoning_effort_requested, reasoning_effort_upstream,
@@ -789,7 +803,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
       )
       VALUES (
         @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
-        @account, @connectionId, @duration, @tokensIn, @tokensOut,
+        @account, @connectionId, @duration, @ttftMs, @tokensIn, @tokensOut,
         @tokensCacheRead, @tokensCacheCreation, @tokensReasoning, @tokensCompressed,
         @reasoningSource, @reasoningChars,
         @reasoningDurationMs, @reasoningEffortRequested, @reasoningEffortUpstream,

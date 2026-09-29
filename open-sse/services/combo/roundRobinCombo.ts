@@ -107,6 +107,7 @@ import { isRecord } from "./comboData.ts";
 import { createRRDashboardEvents } from "./rrDashboardEvents.ts";
 import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
 import { applyRequestTagRouting } from "./autoStrategy.ts";
+import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   expandProviderWildcardsInCombo,
   expandProviderWildcardsInCollection,
@@ -841,23 +842,15 @@ export async function handleRoundRobinCombo({
 
             if (provider) {
               const connId = effectiveConnectionId || undefined;
-              void (async () => {
-                try {
-                  const { setLKGP } = await import("@/lib/db/settings");
-                  await Promise.all([
-                    setLKGP(combo.name, target.executionKey, provider, connId),
-                    setLKGP(combo.name, combo.id || combo.name, provider, connId),
-                  ]);
-                } catch (err) {
-                  log.warn(
-                    "COMBO-RR",
-                    "Failed to record Last Known Good Provider. This is non-fatal.",
-                    {
-                      err,
-                    }
-                  );
-                }
-              })();
+              recordLkgpPin({
+                comboName: combo.name,
+                executionKey: target.executionKey,
+                comboId: combo.id,
+                provider,
+                connectionId: connId,
+                log,
+                tag: "COMBO-RR",
+              });
             }
             // Clone is consumed by quality check; original stays unlocked.
             return result;

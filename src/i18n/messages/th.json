@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "สแต็กฟรี ($0)",
-    "templateFreeStackDesc": "กระจายแบบ Round-robin ระหว่างผู้ให้บริการฟรีทั้งหมด: Kiro (Claude), Qoder (5 โมเดล), Qwen (4 โมเดล) ไม่มีค่าใช้จ่ายและเขียนโค้ดได้อย่างต่อเนื่อง",
+    "templateFreeStackDesc": "กระจายแบบ Round-robin ระหว่างผู้ให้บริการฟรีทั้งหมด: Antigravity (Gemini), Kiro (Claude), Qoder (3 โมเดล), NVIDIA, Groq ไม่มีค่าใช้จ่ายและเขียนโค้ดได้อย่างต่อเนื่อง",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "โหมด LKGP",

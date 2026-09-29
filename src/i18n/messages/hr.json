@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Besplatni paket (0 $)",
-    "templateFreeStackDesc": "Izmjenično usmjeravanje među svim besplatnim pružateljima: Kiro (Claude), Qoder (5 modela), Qwen (4 modela). Bez troškova, kodiranje bez prestanka.",
+    "templateFreeStackDesc": "Izmjenično usmjeravanje među svim besplatnim pružateljima: Antigravity (Gemini), Kiro (Claude), Qoder (3 modela), NVIDIA, Groq. Bez troškova, kodiranje bez prestanka.",
     "auto": "Inteligentni automatski način",
     "autoDesc": "Samooporavljajući skup za pametno usmjeravanje s višečimbeničkim ocjenjivanjem",
     "lkgp": "Način rada LKGP",

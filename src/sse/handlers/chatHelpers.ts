@@ -325,6 +325,19 @@ export async function resolveModelOrError(
   };
 }
 
+// Credential-provider override for a combo target. An explicit providerId wins;
+// otherwise the target's own provider still applies (#11840: an alias-prefixed
+// passthrough target such as kilocode/cline must keep routing to that provider),
+// except the "unknown" sentinel getTargetProvider() stamps on bare model ids,
+// which must never override the provider inferred from the model (#14743).
+export function comboTargetCredentialProviderId(
+  target?: { providerId?: string | null; provider?: string | null } | null
+): string | null {
+  if (target?.providerId != null) return target.providerId;
+  const provider = target?.provider;
+  return provider && provider !== "unknown" ? provider : null;
+}
+
 export async function checkPipelineGates(
   provider: string,
   model: string,

@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Безплатен пакет ($0)",
-    "templateFreeStackDesc": "Round-robin разпределение между всички безплатни доставчици: Kiro (Claude), Qoder (5 модела), Qwen (4 модела). Без разходи и без прекъсване на програмирането.",
+    "templateFreeStackDesc": "Round-robin разпределение между всички безплатни доставчици: Antigravity (Gemini), Kiro (Claude), Qoder (3 модела), NVIDIA, Groq. Без разходи и без прекъсване на програмирането.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "Режим LKGP",

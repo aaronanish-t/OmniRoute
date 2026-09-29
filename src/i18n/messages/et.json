@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Tasuta komplekt ($0)",
-    "templateFreeStackDesc": "Ringjaotus kõigi tasuta teenusepakkujate vahel: Kiro (Claude), Qoder (5 mudelit), Qwen (4 mudelit). Nullkulu ja katkematu kodeerimine.",
+    "templateFreeStackDesc": "Ringjaotus kõigi tasuta teenusepakkujate vahel: Antigravity (Gemini), Kiro (Claude), Qoder (3 mudelit), NVIDIA, Groq. Nullkulu ja katkematu kodeerimine.",
     "auto": "Nutikas automaatrežiim",
     "autoDesc": "Isetaastuv nutikas suunamiskogum mitmel teguril põhineva hindamisega",
     "lkgp": "LKGP-režiim",

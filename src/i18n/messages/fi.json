@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Ilmainen pino ($0)",
-    "templateFreeStackDesc": "Vuorottelu kaikkien ilmaisten palveluntarjoajien välillä: Kiro (Claude), Qoder (5 mallia), Qwen (4 mallia). Täysin ilmainen, koodaus ei keskeydy koskaan.",
+    "templateFreeStackDesc": "Vuorottelu kaikkien ilmaisten palveluntarjoajien välillä: Antigravity (Gemini), Kiro (Claude), Qoder (3 mallia), NVIDIA, Groq. Täysin ilmainen, koodaus ei keskeydy koskaan.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP-tila",

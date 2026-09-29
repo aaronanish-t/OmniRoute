@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "מערך חינמי ($0)",
-    "templateFreeStackDesc": "ניתוב בשיטת סבב בין כל הספקים החינמיים: Kiro (Claude), Qoder (5 מודלים), Qwen (4 מודלים). ללא עלות, ממשיך לכתוב קוד ללא הפסקה.",
+    "templateFreeStackDesc": "ניתוב בשיטת סבב בין כל הספקים החינמיים: Antigravity (Gemini), Kiro (Claude), Qoder (3 מודלים), NVIDIA, Groq. ללא עלות, ממשיך לכתוב קוד ללא הפסקה.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "מצב LKGP",

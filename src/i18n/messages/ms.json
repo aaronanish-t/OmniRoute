@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Tindanan Percuma ($0)",
-    "templateFreeStackDesc": "Penggiliran round-robin merentas semua penyedia percuma: Kiro (Claude), Qoder (5 model), Qwen (4 model). Kos sifar, pengekodan tidak pernah berhenti.",
+    "templateFreeStackDesc": "Penggiliran round-robin merentas semua penyedia percuma: Antigravity (Gemini), Kiro (Claude), Qoder (3 model), NVIDIA, Groq. Kos sifar, pengekodan tidak pernah berhenti.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "Mod LKGP",

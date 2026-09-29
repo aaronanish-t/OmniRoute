@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Mkusanyiko wa Bure ($0)",
-    "templateFreeStackDesc": "Zungusha kwa mpangilio kupitia watoa huduma wote wa bure: Kiro (Claude), Qoder (modeli 5), Qwen (modeli 4). Gharama sifuri, haiachi kamwe kuandika msimbo.",
+    "templateFreeStackDesc": "Zungusha kwa mpangilio kupitia watoa huduma wote wa bure: Antigravity (Gemini), Kiro (Claude), Qoder (modeli 3), NVIDIA, Groq. Gharama sifuri, haiachi kamwe kuandika msimbo.",
     "auto": "Otomatiki Janja",
     "autoDesc": "Kundi mahiri la uelekezaji linalojirekebisha lenye utoaji wa alama kwa vipengele vingi",
     "lkgp": "Hali ya LKGP",

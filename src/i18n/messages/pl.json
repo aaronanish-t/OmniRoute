@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "Darmowy stos ($0)",
-    "templateFreeStackDesc": "Round-robin po wszystkich darmowych providers: Kiro (Claude), Qoder (5 models), Qwen (4 models). Zerowy koszt, nigdy nie przestaje kodować.",
+    "templateFreeStackDesc": "Round-robin po wszystkich darmowych dostawcach: Antigravity (Gemini), Kiro (Claude), Qoder (3 modele), NVIDIA, Groq. Zerowy koszt, nigdy nie przestaje kodować.",
     "auto": "Inteligentne Auto",
     "autoDesc": "Samonaprawiająca się inteligentna pula routingu z ocenianiem wieloczynnikowym",
     "lkgp": "Tryb LKGP",

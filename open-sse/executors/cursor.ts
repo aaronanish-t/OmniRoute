@@ -81,6 +81,7 @@ import {
 import { CursorServerConfigError, resolveCursorAgentUrl } from "./cursor/agentEndpoint.ts";
 import { driveCursorH2 } from "./cursor/streamDriver.ts";
 import { buildExecRejection } from "./cursor/execRejections.ts";
+import { openCursorH2 } from "./cursor/h2AgentStream.ts";
 import {
   classifyCursorError,
   isCursorBenignCancelError,
@@ -1099,18 +1100,6 @@ export class CursorExecutor extends BaseExecutor {
     });
   }
 
-  // ─── h2 lifecycle: open + drive (Phase 4 streaming refactor) ─────────────
-  //
-  // openH2 establishes the bidirectional stream and waits for the response
-  // headers (so we can decide whether to commit to a streaming SSE Response
-  // or return an error). driveH2 then consumes data events incrementally,
-  // dispatching frames through processFrame so SSE chunks land on the
-  // ReadableStream controller as the upstream produces them.
-  //
-  // The fetch fallback (cloud envs without http2) preserves the legacy
-  // buffer-then-decode behavior — Connect-RPC bidirectional ack-on-same-stream
-  // can't run over a one-shot fetch anyway.
-
   private async openH2(
     url: string,
     headers: Record<string, string>,
@@ -1125,116 +1114,7 @@ export class CursorExecutor extends BaseExecutor {
     consumeError: () => Promise<Buffer>;
   }> {
     if (!http2) throw new Error("http2 module not available");
-
-    return new Promise((resolve, reject) => {
-      const urlObj = new URL(url);
-      const client = http2!.connect(`https://${urlObj.host}`);
-      const earlyChunks: Buffer[] = [];
-      let resolved = false;
-
-      client.on("error", (err) => {
-        if (!resolved) reject(err);
-      });
-
-      const req = client.request({
-        ":method": "POST",
-        ":path": urlObj.pathname,
-        ":authority": urlObj.host,
-        ":scheme": "https",
-        ...headers,
-      });
-
-      const onAbort = () => {
-        try {
-          req.close();
-          client.close();
-        } catch {
-          // Expected: connection may already be closed
-        }
-        if (!resolved) {
-          resolved = true;
-          reject(new Error("aborted"));
-        }
-      };
-      if (signal) signal.addEventListener("abort", onAbort);
-
-      req.on("response", (h) => {
-        if (resolved) return;
-        resolved = true;
-        const status = Number(h[":status"] ?? HTTP_STATUS.SERVER_ERROR);
-        // For non-200 statuses, drain the remaining body for an error message.
-        // The caller calls consumeError() to await the full body.
-        const consumeError = () =>
-          new Promise<Buffer>((res) => {
-            const out = [...earlyChunks];
-            req.on("data", (c) => out.push(Buffer.from(c)));
-            req.on("end", () => {
-              try {
-                req.close();
-                client.close();
-              } catch {
-                // Expected: connection may already be closed
-              }
-              if (signal) signal.removeEventListener("abort", onAbort);
-              res(Buffer.concat(out));
-            });
-            req.on("error", () => {
-              try {
-                req.close();
-                client.close();
-              } catch {
-                // Expected: connection may already be closed
-              }
-              if (signal) signal.removeEventListener("abort", onAbort);
-              res(Buffer.concat(out));
-            });
-          });
-        resolve({
-          status,
-          headers: h as Record<string, string | number>,
-          client,
-          req,
-          initialBytes: Buffer.concat(earlyChunks),
-          consumeError,
-        });
-      });
-
-      // Buffer any data that arrives before the response event resolves.
-      // (In practice the response event fires first, but this guards against
-      // implementation differences in node:http2.)
-      req.on("data", (chunk) => {
-        if (!resolved) earlyChunks.push(Buffer.from(chunk));
-      });
-
-      req.on("error", (err) => {
-        if (!resolved) {
-          resolved = true;
-          if (signal) signal.removeEventListener("abort", onAbort);
-          reject(err);
-        }
-      });
-
-      // Bidirectional streaming: write the init message but DO NOT send
-      // END_STREAM — cursor's server stops responding once we close our side.
-      // Guard the write like every h2Req.write in processFrame: a synchronous
-      // failure here (e.g. stream already torn down) would otherwise leave the
-      // request hung until the safety timeout instead of failing fast.
-      try {
-        req.write(body);
-      } catch (err) {
-        if (!resolved) {
-          resolved = true;
-          if (signal) signal.removeEventListener("abort", onAbort);
-          try {
-            req.close();
-            client.close();
-          } catch {
-            // Expected: connection may already be closed
-          }
-          reject(err instanceof Error ? err : new Error(String(err)));
-        }
-      }
-    });
+    return openCursorH2(http2, url, headers, body, signal);
   }
 
   /** Drive one Cursor turn while retaining the h2 stream for tool-result follow-ups. */

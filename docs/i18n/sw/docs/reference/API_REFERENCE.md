@@ -86,15 +86,11 @@ Content-Type: application/json
 
 > **Semantiki za gharama ya cache-hit:** kunapokuwa na HIT ya akiba ya kisemantiki (`X-OmniRoute-Cache-Hit: true`), hakuna ombi linalotumwa kwa mtoa huduma wa upstream, kwa hivyo `X-OmniRoute-Response-Cost` huwa `0.0000000000` (gharama ya **ziada** ya kutoa hit hiyo). Gharama ya awali/ambayo ingekuwepo huripotiwa kando katika `X-OmniRoute-Cost-Saved`. Watumiaji wa data ya utozaji wanapaswa kujumlisha `X-OmniRoute-Response-Cost` (hit hazigharimu chochote); uchanganuzi wa akiba unaweza kujumlisha `X-OmniRoute-Cost-Saved`.
 
-## Ukodishaji wa Vipindi Vinavyosimamiwa wa Kipekee
+## Mikataba ya Kipekee ya Kukodisha Vipindi Vinavyosimamiwa
 
-Ukodishaji wa vipindi vinavyosimamiwa wa kipekee ni mkataba wa uelekezaji wa hiari, usiofungamana na mteja mahususi: mmiliki mmoja anayetumika
-anashikilia muunganisho mmoja unaostahiki wa OmniRoute. Haukodishi modeli, hauhitaji OAuth, hautambui
-mteja mahususi, wala hauhitaji mtoa huduma mahususi.
+Ukodishaji wa vipindi vinavyosimamiwa vya kipekee ni mkataba wa hiari, usioegemea mteja wa uelekezaji: mmiliki mmoja anayefanya kazi anashikilia muunganisho mmoja unaostahiki wa OmniRoute. Haikodishi modeli, haihitaji OAuth, haitambui mteja maalum, au haihitaji mtoa huduma maalum.
 
-Ufunguo wa API unaotumika kuthibitisha utambulisho lazima uwe na wigo `lease:exclusive` na orodha bayana isiyo tupu ya
-`allowedConnections`. Mpaka wa mabadiliko ya hifadhidata hutekeleza masharti yote mawili pamoja wakati wa kuunda ufunguo
-na kufanya masasisho ya sehemu.
+Kitufe cha API cha uthibitishaji lazima kiwe na wigo `lease:exclusive` na orodha wazi isiyo tupu ya `allowedConnections`. Mpaka wa mabadiliko ya hifadhidata unatekeleza sehemu zote mbili pamoja wakati wa kuunda kitufe na masasisho ya sehemu.
 
 ```http
 POST /api/v1/session-leases
@@ -105,9 +101,7 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-Majibu yaliyofaulu ya kupata, kusasisha na kuachilia huonyesha mihuri ya muda, `state`, na thamani chanya halisi ya
-`generation`, lakini kamwe hayaonyeshi muunganisho uliochaguliwa au vitambulisho. Kusasisha na kuachilia huwasilisha
-generation katika mwili wa JSON:
+Majibu yenye mafanikio ya kupata, kusasisha, na kutoa yanaonyesha mihuri ya muda, `state`, na `generation` halisi chanya, lakini kamwe muunganisho uliochaguliwa au vitambulisho. Kusasisha na kutoa hutoa kizazi katika mwili wa JSON:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -117,7 +111,7 @@ generation katika mwili wa JSON:
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-Mmiliki wa ukodishaji unaotumika anaweza kuomba bayana metadata salama kwa faragha ya kuonyesha kwa ufungamanisho wake wa sasa:
+Mmiliki wa ukodishaji anayefanya kazi anaweza kuomba waziwazi metadata ya kuonyesha salama ya faragha kwa muunganisho wake wa sasa:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -137,37 +131,22 @@ Mmiliki wa ukodishaji unaotumika anaweza kuomba bayana metadata salama kwa farag
 }
 ```
 
-Kitendo hiki cha hali cha hiari kinalindwa na mmiliki fiche, ufunguo wa API unaosimamiwa uliothibitishwa, na
-generation halisi inayotumika ndani ya muamala mmoja wa hifadhidata. `displayName` ni jina la muunganisho lililosanidiwa
-lililoondolewa nafasi za pembeni pekee; huwa `null` wakati hakuna jina salama lililosanidiwa. OmniRoute haibadilishi kamwe jina hilo kwa
-barua pepe au utambulisho wa akaunti uliozalishwa. Thamani ya mtoa huduma ni lebo isiyo nyeti ya kuonyesha na kamwe si
-kitambulishi kilichozalishwa cha mtoa huduma tangamanifu. Vitambulisho, tokeni, vidakuzi, vitambulishi ghafi vya muunganisho au ufunguo wa
-API, hashi za wamiliki, siri za uzio, na data ya ndani ya uelekezaji havijumuishwi.
+Kitendo hiki cha hali ya hiari kinalindwa na mmiliki asiyejulikana, kitufe cha API kinachosimamiwa kilichothibitishwa, na kizazi halisi kinachotumika katika muamala mmoja wa hifadhidata. `displayName` ni jina la muunganisho lililopunguzwa tu; ni `null` wakati hakuna jina salama lililosanidiwa. OmniRoute kamwe haibadilishi barua pepe au kitambulisho cha akaunti kilichozalishwa. Thamani ya mtoa huduma ni lebo ya kuonyesha isiyo nyeti na kamwe si kitambulisho cha mtoa huduma kinachooana kilichozalishwa. Vitambulisho, tokeni, vidakuzi, vitambulisho vya muunganisho ghafi au API, heshi za mmiliki, siri za uzio, na data ya uelekezaji wa ndani zimetengwa.
 
-Utafutaji wenye ufunguo usio sahihi, mmiliki asiye sahihi, generation iliyopitwa na wakati, unaokosekana, uliokwisha muda, ulioachiliwa, au uliobatilishwa, wote
-hurudisha hitilafu ileile ya `409 LEASE_FENCE_STALE` bila metadata ya muunganisho. Mteja aliyepokea jibu la kusubiri nafasi hana ufungamanisho unaotumika wa kukagua. Uelekezaji unapohamisha ukodishaji unaotumika,
-generation ileile hubaki halali na hali hurudisha kiatomiki ufungamanisho mpya, kamwe si wa zamani.
-Wateja waliopo hawabadiliki kwa sababu majibu ya kupata, kusasisha, kuachilia na kusubiri huhifadhi
-miundo yao ya awali.
+Utafutaji wa kitufe kibaya, mmiliki mbaya, kizazi kilichopitwa na wakati, kilichokosekana, kilichopitwa na muda, kilichotolewa, na kisichofaa vyote hurejesha hitilafu sawa ya `409 LEASE_FENCE_STALE` bila metadata ya muunganisho. Mteja aliyepokea jibu la kusubiri uwezo hana muunganisho amilifu wa kukagua. Wakati uelekezaji unabadilisha ukodishaji amilifu, kizazi kilekile kinabaki halali na hali hurejesha kiatomiki muunganisho mpya, kamwe sio wa zamani. Wateja waliopo wanabaki bila kubadilika kwa sababu majibu ya kupata, kusasisha, kutoa, na kusubiri yanabaki na maumbo yao ya awali.
 
-Mkataba huu wa seva haubadilishi `/status` ya kawaida ya OpenAI Codex. Codex ya kawaida kwa sasa huripoti
-mtoa huduma wa modeli yake na hali iliyojengewa ndani ya uthibitishaji/akaunti lakini haionyeshi metadata holela ya akaunti ya
-mtoa huduma maalum; ujumuishaji wa mteja wa baadaye lazima uite kitendo hiki na kuamua jinsi ya
-kuonyesha `connection.displayName`.
+Mkataba huu wa seva haubadilishi `/status` ya kawaida ya OpenAI Codex. Codex ya kawaida kwa sasa inaripoti mtoa huduma wake wa modeli na hali ya uthibitishaji/akaunti iliyojengwa ndani lakini haitoi metadata ya akaunti ya mtoa huduma maalum; ujumuishaji wa mteja wa baadaye lazima upige hatua hii na kuamua jinsi ya kuonyesha `connection.displayName`.
 
-Kisha kila ombi la utambuzi linalosimamiwa huwasilisha vichwa vyote viwili vya udhibiti:
+Kila ombi la utambuzi linalosimamiwa kisha hutoa vichwa vyote viwili vya udhibiti:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-Mmiliki halisi, generation, muunganisho unaotumika, na ufunguo wa API uliothibitishwa hulindwa mara moja
-kabla ya kila jaribio linalotumika la mfumo wa juu. Kucheza tena mmiliki na generation kwa ufunguo mwingine hushindwa hata
-wakati ufunguo huo unaruhusu muunganisho huohuo. Wamiliki ghafi hawahifadhiwi, hawawekwi kwenye kumbukumbu, hawabakizwi kwenye
-picha ya ombi, wala hawatumwi kwa mfumo wa juu.
+Mmiliki halisi, kizazi, muunganisho amilifu, na kitufe cha API kilichothibitishwa vinalindwa mara moja kabla ya kila jaribio la juu linaloungwa mkono. Kurudia mmiliki na kizazi kwa kitufe kingine kutashindwa hata kama kitufe hicho kinaruhusu muunganisho uleule. Wamiliki ghafi hawahifadhiwi, hawajaingizwa kwenye kumbukumbu, hawahifadhiwi kwenye picha ya ombi, au hawajasambazwa juu.
 
-Ushindani wa muda mfupi hurudisha HTTP `429` pamoja na `Retry-After` na:
+Mzozo wa muda hurejesha HTTP `429` na `Retry-After` na:
 
 ```json
 {
@@ -178,30 +157,29 @@ Ushindani wa muda mfupi hurudisha HTTP `429` pamoja na `Retry-After` na:
 }
 ```
 
-Jibu hili linamaanisha tu kwamba mkusanyiko wa kawaida unaostahiki haukuwa tupu na kila muunganisho huru uliotarajiwa
-ulikuwa umeshikiliwa na ukodishaji unaotumika wa mmiliki mwingine. Modeli/watoa huduma wasiotumika, kutolingana kwa sera, kipindi cha kusubiri,
-kikomo cha matumizi, afya, na mapungufu mengine ya kawaida ya ustahiki huhifadhi majibu yao yaliyopo ya OmniRoute.
+Jibu hili linamaanisha tu kwamba seti ya kawaida inayostahiki haikuwa tupu na kila mgombea huru alishikiliwa na ukodishaji amilifu wa kigeni. Modeli/watoa huduma wasioungwa mkono, kutolingana kwa sera, kupoa, kiasi, afya, na hitilafu zingine za kawaida za kustahiki zinabaki na majibu yao yaliyopo ya OmniRoute.
 
 ### `x-omniroute-compression`
 
-Ubatilishaji kwa kila ombi wa mpango wa mbano. Una kipaumbele cha juu zaidi — unashinda ubatilishaji wa mchanganyiko wa uelekezaji,
-wasifu unaotumika, kichochezi kiotomatiki, na Default ya paneli. Thamani:
+Kubatilisha mpango wa mbano kwa kila ombi. Kipaumbele cha juu zaidi — kinashinda ubatilishaji wa mchanganyiko wa uelekezaji, profaili amilifu, kichochezi kiotomatiki, na paneli Chaguomsingi. Thamani:
 
-| Thamani       | Athari                                                                                                 |
-| ------------- | ------------------------------------------------------------------------------------------------------ |
-| `off`         | Hakuna mbano kwa ombi hili.                                                                            |
-| `default`     | Wasifu wa Default unaotokana na paneli (hupuuza wasifu unaotumika).                                    |
-| `engine:<id>` | Injini moja inapowezeshwa, k.m. `engine:rtk`.                                                          |
-| `<combo>`     | Mchanganyiko wenye jina, unaolinganishwa kwanza kwa jina (bila kujali ukubwa wa herufi), kisha kwa id. |
+| Thamani       | Athari                                                                                                              |
+| :------------ | :------------------------------------------------------------------------------------------------------------------ |
+| `off`         | Hakuna mbano kwa ombi hili.                                                                                         |
+| `default`     | Profaili Chaguomsingi inayotokana na paneli (hupuuza profaili inayotumika). Injini zenye upotevu huachwa zimezimwa. |
+| `safe`        | Kupunguza marudio na kukunja nafasi nyeupe pekee.                                                                   |
+| `allow-lossy` | Weka mpango wa opereta kwa ombi hili, ikijumuisha muhtasari na uandishi upya wa mtindo.                             |
+| `engine:<id>` | Injini moja inapowezeshwa, k.m. `engine:rtk`. Kujiunga kwa hiari kwa injini hiyo kwa kila ombi.                     |
+| `<combo>`     | Mchanganyiko uliotajwa, unaolinganishwa kwa jina (bila kujali herufi kubwa/ndogo) kwanza, kisha kwa kitambulisho.   |
 
 Vidokezo:
 
-- Thamani zisizojulikana hupuuzwa (ombi halikataliwi kamwe); utatuzi huendelea hadi kwenye mpangilio wa kawaida wa kipaumbele cha waendeshaji.
-- Ikiwa michanganyiko mingi ina jina moja, wasilisha **id** ya mchanganyiko ili kupata ulinganishaji thabiti.
-- Mchanganyiko ambao jina lake ni `off` au `default` hauwezi kuchaguliwa kwa jina (maneno hayo muhimu hutafsiriwa kwanza); rejelea mchanganyiko huo kwa id yake.
-- Swichi kuu ya mbano ni kizuizi madhubuti: mbano unapozimwa kwa mfumo mzima, kichwa hiki hakiwezi kuuwezesha.
+- Thamani zisizojulikana hupuuzwa (ombi halikataliwi kamwe); utatuzi huangukia kwenye kipaumbele cha kawaida cha opereta.
+- Ikiwa michanganyiko mingi inashiriki jina, pitisha **kitambulisho** cha mchanganyiko kwa ulinganifu usiobadilika.
+- Mchanganyiko ambao jina lake ni `off` au `default` hauwezi kuchaguliwa kwa jina (maneno hayo muhimu hutafsiriwa kwanza); rejelea mchanganyiko kama huo kwa kitambulisho chake.
+- Swichi kuu ya mbano ni lango gumu: mbano inapozimwa kimataifa, kichwa hiki hakiwezi kuiwasha.
 
-Mpango uliotumika hurudishwa katika kichwa cha jibu:
+Mpango uliotumika unarudishwa kwenye kichwa cha jibu:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
@@ -429,42 +407,42 @@ Tumia endpoint hii wakati sidecar inaendeshwa nje ya mchakato na haiwezi kuleta
 
 ---
 
-## Njia za Mwisho za Uoanifu
+## Vituo vya Mwisho vya Upatanifu
 
-| Mbinu | Njia                                      | Muundo                                   |
-| ----- | ----------------------------------------- | ---------------------------------------- |
-| POST  | `/v1/chat/completions`                    | OpenAI                                   |
-| POST  | `/v1/messages`                            | Anthropic                                |
-| POST  | `/v1/responses`                           | OpenAI Responses                         |
-| POST  | `/v1/embeddings`                          | OpenAI                                   |
-| POST  | `/v1/images/generations`                  | OpenAI Images                            |
-| POST  | `/v1/images/edits`                        | OpenAI Images (kuhariri/inpaint)         |
-| POST  | `/v1/videos/generations`                  | Uzalishaji wa video wa mtindo wa OpenAI  |
-| POST  | `/v1/music/generations`                   | Uzalishaji wa muziki wa mtindo wa OpenAI |
-| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                       |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (hurejesha data ya sauti)     |
-| POST  | `/v1/rerank`                              | Upangaji upya wa mtindo wa Cohere/Voyage |
-| POST  | `/v1/classify`                            | Uainishaji wa Jina (`api.jina.ai`)       |
-| POST  | `/v1/segment`                             | Kigawanyaji cha Jina (`segment.jina.ai`) |
-| POST  | `/v1/moderations`                         | OpenAI Moderations                       |
-| GET   | `/v1/models`                              | OpenAI                                   |
-| POST  | `/v1/messages/count_tokens`               | Anthropic                                |
-| GET   | `/v1beta/models`                          | Gemini                                   |
-| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                   |
-| POST  | `/v1/api/chat`                            | Ollama                                   |
-| GET   | `/api/v1/vscode/{token}/`                 | Lakabu ya katalogi ya OpenAI             |
-| GET   | `/api/v1/vscode/{token}/models`           | Lakabu ya modeli za OpenAI               |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | Lakabu ya OpenAI yenye tokeni            |
-| POST  | `/api/v1/vscode/{token}/responses`        | Lakabu ya OpenAI Responses yenye tokeni  |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Lakabu ya Ollama yenye tokeni            |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Lakabu ya lebo za Ollama yenye tokeni    |
+| Mbinu | Njia                                      | Muundo                                      |
+| ----- | ----------------------------------------- | ------------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                      |
+| POST  | `/v1/messages`                            | Anthropic                                   |
+| POST  | `/v1/responses`                           | Majibu ya OpenAI                            |
+| POST  | `/v1/embeddings`                          | OpenAI                                      |
+| POST  | `/v1/images/generations`                  | Picha za OpenAI                             |
+| POST  | `/v1/images/edits`                        | Picha za OpenAI (hariri/jaza)               |
+| POST  | `/v1/videos/generations`                  | Utengenezaji wa video kwa mtindo wa OpenAI  |
+| POST  | `/v1/music/generations`                   | Utengenezaji wa muziki kwa mtindo wa OpenAI |
+| POST  | `/v1/audio/transcriptions`                | Sauti ya OpenAI (STT)                       |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (hurejesha mwili wa sauti)       |
+| POST  | `/v1/rerank`                              | Upangaji upya kwa mtindo wa Cohere/Voyage   |
+| POST  | `/v1/classify`                            | Uainishaji wa Jina (`api.jina.ai`)          |
+| POST  | `/v1/segment`                             | Kigawanyaji cha Jina (`segment.jina.ai`)    |
+| POST  | `/v1/moderations`                         | Udhibiti wa Maudhui wa OpenAI               |
+| GET   | `/v1/models`                              | OpenAI                                      |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                                   |
+| GET   | `/v1beta/models`                          | Gemini                                      |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                      |
+| POST  | `/v1/api/chat`                            | Ollama                                      |
+| GET   | `/api/v1/vscode/{token}/`                 | Lakabu ya katalogi ya OpenAI                |
+| GET   | `/api/v1/vscode/{token}/models`           | Lakabu ya modeli za OpenAI                  |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | Lakabu ya OpenAI yenye tokeni               |
+| POST  | `/api/v1/vscode/{token}/responses`        | Lakabu ya Majibu ya OpenAI yenye tokeni     |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Lakabu ya Ollama yenye tokeni               |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Lakabu ya lebo za Ollama yenye tokeni       |
 
-Njia zote za POST hufuata muundo uleule: `Bearer your-api-key` + data ya JSON iliyothibitishwa na Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, n.k., angalia `src/shared/validation/schemas.ts`). 4xx hurejeshwa uthibitishaji wa schema unaposhindwa.
+Njia zote za POST zina muundo sawa: `Bearer your-api-key` + mwili wa JSON uliothibitishwa na Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, n.k., angalia `src/shared/validation/schemas.ts`). 4xx hurejeshwa uthibitishaji wa schema unaposhindwa.
 
-Kwa wateja wasioweza kuambatisha `Authorization: Bearer ...`, OmniRoute pia hukubali funguo za API katika URL kupitia uoanifu wa query-string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) au njia maalum za mwisho za `/api/v1/vscode/{token}/...` zilizoelezwa hapa chini.
+Kwa viteja ambavyo haviwezi kuambatisha `Authorization: Bearer ...`, OmniRoute pia hukubali funguo za API katika URL kupitia upatanifu wa kamba ya hoja (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) au vituo maalum vya mwisho vya `/api/v1/vscode/{token}/...` vilivyoandikwa hapa chini.
 
 ```bash
-# Upangaji upya (mtoa huduma wa sajili ya wingu, au nodi ya mtoa huduma inayooana na OpenAI kama "<prefix>/<model>")
+# Panga upya (mtoa huduma wa sajili ya wingu, au nodi ya mtoa huduma inayooana na OpenAI kama "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Uainishaji wa Jina (vitambulisho vya Foundation API)
@@ -473,49 +451,50 @@ POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."
 # Kigawanyaji cha Jina
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Utafutaji wa Jina (s.jina.ai; lakabu za watoa huduma: jina-search, jina-ai, jina)
+# Utafutaji wa Jina (s.jina.ai; lakabu za mtoa huduma: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
 # Udhibiti wa maudhui
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — hurejesha data ya audio/mpeg (au muundo ulioombwa)
+# TTS — hurejesha mwili wa audio/mpeg (au muundo ulioombwa)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
+
+# Soniox TTS huhitaji lugha na sauti: `language` huwa "en" kwa chaguomsingi; sauti inayokosekana
+# au jina la kawaida la sauti ya OpenAI (alloy, nova, …) hubadilishwa kuwa "Adrian"
+POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # Uhariri wa picha (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Uzalishaji wa video / muziki (kitambulisho cha modeli chenye kiambishi awali cha mtoa huduma)
+# Utengenezaji wa video / muziki (kitambulisho cha modeli chenye kiambishi awali cha mtoa huduma)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
-POST /v1/music/generations  { "model": "suno/v3.5",   "prompt": "..." }
+POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Nodi za watoa huduma za upangaji upya:** `POST /v1/rerank` pia huelekeza maombi kwa nodi za watoa huduma
-> zinazoana na OpenAI (oMLX, vLLM, Infinity, TEI nyuma ya lango, …) zinazotambuliwa kama
-> `<node-prefix>/<model>`. Nodi za loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) zinafaa kila wakati.
-> Nodi kwenye host nyingine yoyote — kifaa cha LAN au kifaa rika cha Tailscale — zinafaa tu ikiwa
-> mwendeshaji amewasha alama ya kipengele ya `RERANK_REMOTE_PROVIDER_NODES` **na** URL ya msingi ya nodi
-> inakidhi sera ya URL zinazotoka za mtoa huduma (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` /
-> `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`); maombi hayaelekezwi kamwe kwa host za metadata za wingu.
-> Hatua ya upangaji upya ya injini ya kumbukumbu huita njia hii kupitia loopback, kwa hivyo kanuni hiyo hiyo
-> hudhibiti `rerankProviderModel` katika mipangilio ya Kumbukumbu.
+> **Nodi za watoa huduma za upangaji upya:** `POST /v1/rerank` pia huelekeza kwa nodi za watoa huduma zinazooana na OpenAI
+> (oMLX, vLLM, Infinity, TEI nyuma ya lango, …) zinazotambuliwa kama `<node-prefix>/<model>`. Nodi za loopback
+> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) zinastahiki kila wakati. Nodi kwenye seva nyingine yoyote
+> — kifaa cha LAN au kifaa rika cha Tailscale — zinastahiki tu wakati mwendeshaji anawasha alama ya kipengele cha
+> `RERANK_REMOTE_PROVIDER_NODES` **na** URL msingi ya nodi inapita sera ya URL zinazotoka ya mtoa huduma
+> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`);
+> seva za metadata ya wingu hazielekezewi kamwe. Hatua ya upangaji upya ya injini ya kumbukumbu huita njia hii kupitia
+> loopback, hivyo kanuni hiyo hiyo inasimamia `rerankProviderModel` katika mipangilio ya Kumbukumbu.
 >
-> **Miundo ya seva za ndani:** nodi huitwa kupitia `<base>/v1/rerank` na, inapopatikana 404, kupitia
-> `<base>/rerank` (Infinity, TEI). Data inayotumwa kwenda juu hubeba tahajia ya Cohere/OpenAI
-> (`documents`, `return_documents`) pamoja na tahajia ya TEI (`texts`, `return_text`), na jibu kutoka juu
-> husawazishwa kuwa kifurushi cha Cohere: orodha tupu ya TEI `[{index, score, text}]`,
-> `{results: [{index, score}]}` kutoka kwa malango mepesi, na `{data: [...]}` ya mtindo wa Voyage, zote
-> humfikia mteja kama `{results: [{index, relevance_score, document?}]}`, zikiwa zimepangwa kulingana na
-> alama na kupunguzwa hadi `top_n`.
+> **Miundo ya seva za ndani:** nodi huitwa kupitia `<base>/v1/rerank` na, inapopatikana 404, kupitia `<base>/rerank`
+> (Infinity, TEI). Mwili unaotumwa juu una tahajia ya Cohere/OpenAI (`documents`,
+> `return_documents`) pamoja na tahajia ya TEI (`texts`, `return_text`), na jibu la juu
+> husawazishwa kuwa bahasha ya Cohere: orodha tupu ya TEI ya `[{index, score, text}]`, `{results: [{index, score}]}`
+> kutoka kwenye malango mepesi, na `{data: [...]}` ya mtindo wa Voyage, zote hurudi kwa kiteja kama
+> `{results: [{index, relevance_score, document?}]}`, zikiwa zimepangwa kwa alama na kupunguzwa hadi `top_n`.
 
-> **Ugunduzi wa nodi za watoa huduma:** modeli kwenye nodi ya mtoa huduma inayoana na OpenAI huonekana
-> katika `GET /v1/models` chini ya kiambishi awali cha nodi. Safu zisizo na metadata ya njia ya mwisho
-> (hali ya kawaida kwa orodha za ndani za `/v1/models`) hurithi `apiType` ya nodi, hivyo modeli za nodi ya
-> `embeddings` huwa `type: "embedding"` na modeli za nodi ya `rerank` huwa `type: "rerank"` badala ya
-> kutumia gumzo kama chaguo-msingi; `supportedEndpoints` iliyobainishwa wazi kwenye safu iliyosawazishwa
-> au iliyoongezwa mwenyewe bado hupewa kipaumbele.
+> **Ugunduzi wa nodi ya mtoa huduma:** modeli kwenye nodi ya mtoa huduma inayooana na OpenAI huonekana katika `GET /v1/models`
+> chini ya kiambishi awali cha nodi. Safu mlalo zisizo na metadata ya endpoint (kama ilivyo kawaida katika orodha za ndani za `/v1/models`)
+> hurithi `apiType` ya nodi, kwa hivyo modeli za nodi ya `embeddings` huwa na `type: "embedding"` na
+> modeli za nodi ya `rerank` huwa na `type: "rerank"` badala ya kutumia chat kama chaguo-msingi; `supportedEndpoints` iliyobainishwa wazi
+> kwenye safu mlalo iliyosawazishwa au iliyoongezwa mwenyewe bado hupewa kipaumbele.
 
-### Njia Maalum za Watoa Huduma
+### Njia Mahususi za Mtoa Huduma
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -523,7 +502,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Kiambishi awali cha mtoa huduma huongezwa kiotomatiki ikiwa hakipo. Miundo isiyolingana hurejesha `400`.
+Kiambishi awali cha mtoa huduma huongezwa kiotomatiki ikiwa hakipo. Modeli zisizolingana hurejesha `400`.
 
 ---
 
@@ -1453,22 +1432,22 @@ Hurejesha kadi ya umma ya ajenti wa A2A (jina, maelezo, uwezo, katalogi ya ujuzi
 
 ---
 
-## Wingu, Tathmini za Utendaji na Ukadiriaji
+## Cloud, Tathmini & Ukadiriaji
 
 | Mbinu | Njia | Maelezo |
-| ----- | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | Thibitisha ufunguo wa Bearer na urejeshe miunganisho ya watoa huduma iliyofichwa kwa kiasi + lakabu za modeli kwa wateja wa usawazishaji wa wingu |
-| POST | `/api/cloud/credentials/update` | Sasisha vitambulisho vilivyosimbwa kwa njia fiche vya mtoa huduma aliyesawazishwa na wingu |
-| POST | `/api/cloud/model/resolve` | Geuza kitambulisho mantiki cha modeli kuwa mtoa huduma/modeli mahususi kwa kutumia jedwali la ndani la uelekezaji |
-| GET | `/api/cloud/models/alias` | Orodhesha lakabu za modeli jinsi zinavyoonyeshwa kwa usawazishaji wa wingu |
+| ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
+| POST | `/api/cloud/auth` | Thibitisha ufunguo wa Bearer na urejeshe miunganisho ya watoa huduma iliyofichwa sehemu zake + lakabu za modeli kwa wateja wa ulandanishaji wa cloud |
+| POST | `/api/cloud/credentials/update` | Sasisha vitambulisho vilivyosimbwa kwa mtoa huduma aliyelandanishwa na cloud |
+| POST | `/api/cloud/model/resolve` | Tatua kitambulisho cha kimantiki cha modeli kuwa mtoa huduma/modeli mahususi kwa kutumia jedwali la ndani la uelekezaji |
+| GET | `/api/cloud/models/alias` | Orodhesha lakabu za modeli kama zinavyoonyeshwa kwa ulandanishaji wa cloud |
 | GET | `/api/assess` | Soma uainishaji wa hivi karibuni wa ukadiriaji (kwa kila mtoa huduma/modeli) |
 | POST | `/api/assess` | Tekeleza ukadiriaji — mwili: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | Orodhesha seti za tathmini za utendaji zilizojengewa ndani + utekelezaji wa hivi karibuni |
-| POST | `/api/evals` | Anzisha utekelezaji wa tathmini ya utendaji |
-| POST | `/api/evals/suites` | Unda seti maalum ya tathmini ya utendaji — mwili huthibitishwa na `evalSuiteSaveSchema` |
-| GET | `/api/evals/suites/[id]` | Chukua seti maalum ya tathmini ya utendaji |
+| GET | `/api/evals` | Orodhesha vifurushi vya eval vilivyojengewa ndani + utekelezaji wa hivi karibuni zaidi |
+| POST | `/api/evals` | Anzisha utekelezaji wa eval |
+| POST | `/api/evals/suites` | Unda kifurushi maalum cha eval — mwili unathibitishwa na `evalSuiteSaveSchema` |
+| GET | `/api/evals/suites/[id]` | Pata kifurushi maalum cha eval |
 
-**Uthibitishaji:** `/api/cloud/auth` huthibitisha ufunguo wa Bearer moja kwa moja; njia nyingine za `/api/cloud/*`, `/api/evals/*`, na `/api/assess` zinahitaji kipindi cha usimamizi/ufunguo wa API. POST ya `/api/assess` hutumia `validateBody` pamoja na skima ya upeo ya muungano wenye kibaguzi.
+**Uthibitishaji:** `/api/cloud/auth` huthibitisha ufunguo wa Bearer moja kwa moja na kurejesha ufunguo uliofichwa sehemu zake na `projectId` ya kila muunganisho kwa ufunguo wenye wigo wa `manage` / `admin` pekee; njia nyingine za `/api/cloud/*`, `/api/evals/*`, na `/api/assess` zinahitaji kipindi cha usimamizi/ufunguo wa API. Ombi la POST la `/api/assess` hutumia `validateBody` pamoja na skima ya wigo wa muungano unaobainishwa.
 
 ---
 

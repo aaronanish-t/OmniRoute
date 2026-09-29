@@ -6,14 +6,14 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute'i juhtpaneel" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute juhtpaneel" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — tasuta AI-lüüs
+# 🚀 OmniRoute — Tasuta tehisintellekti lüüs
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ära kunagi lõpeta koodi kirjutamist. Kõik AI-tööriistad → 359 teenusepakkujat — üle 150 tasuta — ühe lõpp-punkti kaudu. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity TASUTA Claude'i / GPT / Gemini jaoks koos automaatse varulahendusele ümberlülitumisega. RTK + Cavemani kombineeritud tihendus säästab 15–95% tokenitest (keskmiselt ~89%) — piirangud ei takista sind kunagi. 359 AI-teenusepakkujat · üle 150 tasuta paketi · ~1,62 miljardit tasuta tokenit kuus · 19 marsruutimisstrateegiat · alustamine maksab $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ära kunagi lõpeta kodeerimist. Iga tehisintellekti tööriist → 358 pakkujat — 150+ tasuta — ühe lõpp-punkti kaudu. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity TASUTA Claude / GPT / Gemini-sse automaatse tagavaraga. RTK + Caveman virnastatud tihendus säästab 15–95% tokeneid (~89% keskmiselt) — ei ületa kunagi piire. 358 tehisintellekti pakkujat · 150+ tasuta tasandit · ~1.62B tasuta tokenit/kuus · 19 marsruutimisstrateegiat · $0 alustamiseks."/>
 
 </div>
 
@@ -214,22 +214,22 @@
 
 <div align="center">
 
-## 🆓 Töötab kohe pärast installimist — võtmeid ega seadistamist pole vaja
+## 🆓 Töötab kohe pärast installimist — pole võtmeid, pole seadistust
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Töötab kohe pärast installimist — null seadistamist. Kolm sammu: 1. Installi — npm i -g omniroute, server käivitub aadressil localhost:20128. 2. Suuna oma tööriist aadressile http://localhost:20128/v1 — sobib iga OpenAI-ga ühilduv tööriist (Claude Code, Cursor, Cline). 3. See vastab — kohese vastuse saamiseks kasuta mudelit auto, ilma API-võtme, registreerumise või seadistamiseta. Võtmeta teenusepakkuja OpenCode Free on auto-komplekti juba ühendatud, seega vastab värske install kohe pärast paigaldamist."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Töötab kohe pärast installimist — null seadistust. Kolm sammu: 1. Installi — npm i -g omniroute, server käivitub aadressil localhost:20128. 2. Suuna oma tööriist aadressile http://localhost:20128/v1 — mis tahes OpenAI-ga ühilduv tööriist (Claude Code, Cursor, Cline). 3. See vastab — kutsu mudelit auto kohese vastuse saamiseks, ilma API võtmeta, registreerimiseta, seadistuseta. Võtmeta pakkuja OpenCode Free on eelnevalt ühendatud auto komboga, nii et värske install vastab kohe karbist välja võttes."/>
 
 ```bash
-# Värske install, ilma mandaatideta — `auto` juba töötab:
+# Värske install, null mandaati — `auto` juba töötab:
 curl http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>Eelistad kindlat tasuta taustateenust? Kasuta otse `oc/…`-d (OpenCode Free). Seejärel võta kasutusele `auto` ja lase OmniRoute'il valida.</sub>
+<sub>Eelistad spetsiifilist tasuta taustaprogrammi? Kutsu `oc/…` (OpenCode Free) otse. Seejärel mine üle `auto` peale ja lase OmniRoute'il valida.</sub>
 
-<sub>📦 Kopeeritavad kiirstardiskriptid **Pythoni, Node.js-i, PHP ja cURL-i** jaoks → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Kopeeri-kleebi kiirkäivitusstsenaariumid **Pythoni, Node.js, PHP ja cURLi** jaoks → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 359 teenusepakkujat. Automaatne varuvariandile lülitumine hoiab marsruutimise töös seni, kuni saadaval on mõni teine töötav sihtmärk. Kuus alustala: töökindel varuvariandile lülitumine 359 teenusepakkuja vahel · sobivate töökoormuste puhul kuni 95% väiksem tokenikulu · alustamine 0 dollari eest tänu enam kui 150 tasuta paketile ja 54 korduvalt kasutatavale või võtmeta igavesti tasuta teenusepakkujale · 36 CLI-/agendiintegratsiooni ühe konfiguratsiooni kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus aadressil /v1 · tootmiskeskkonna juhtelemendid, sealhulgas kaitselülitid, TLS-i varjestus, MCP 110 tööriista, A2A, mälu, kaitsepiirded, hindamised ning enam kui 39 000 staatilist testideklaratsiooni rohkem kui 5 100 jälgitavas testifailis."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — Üks lõpp-punkt ja 358 pakkujat. Automaatne varuühendus hoiab marsruutimise töös, kuni on saadaval teine terve sihtmärk. Kuus sammast: vastupidav varuühendus üle 358 pakkuja · kuni 95% märgi kokkuhoid sobivate töökoormuste puhul · 0 $ alustamiseks 150+ tasuta tasemega ja 54 korduva/võtmeta igavesti tasuta pakkujaga · 36 CLI/agendi integratsiooni ühe konfiguratsiooni kaudu · OpenAI, Claude, Gemini ja Responses API ühilduvus aadressil /v1 · tootmiskontrollid, sealhulgas kaitselülitid, TLS stealth, MCP 110 tööriistad, A2A, mälu, piirangud, hindamised ja 39 000+ staatilist testideklaratsiooni üle 5100+ jälgitava testifaili."/>
 
 <br/>
 <br/>
@@ -250,11 +250,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Miks OmniRoute — lõpeta žongleerimine 10 juhtpaneeli, aegunud API-võtmete ja ootamatute arvetega. Kümme igapäevast probleemi ja nende lahendused: kasutamata kvoot aegub → kasuta tellimusi maksimaalselt; kiiruspiirangud keset koodimist → neljatasemeline automaatne varuvariandile lülitumine (tellimus → API → soodne → tasuta); tööriistade väljundid kulutavad tokeneid → RTK + Cavemani tihendus (15–95%); kallid API-d → kulupõhine marsruutimine; iga tööriist vajab eraldi seadistamist → üks lõpp-punkt, üks juhtpaneel; tehisintellekt on blokeeritud → kolmetasemeline puhverserver + TLS-i varjestus; aegunud võtmed → kolmekihiline töökindlus (kaitselülitid, võtme ooteaeg, mudeli lukustus); meeskond jagab üht tellimust → võtmepangad õiglase jaotusega kvootidega; viibad liiguvad läbi kellegi teise pilve → lokaalne eelistus koos AES-256-GCM-iga krüptitud võtmetega; puudub ülevaade kuludest → reaalajas analüütika (kasutus, kvoot, sääst, p95 latentsus)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Miks OmniRoute — lõpeta 10 armatuurlaua, surnud API võtmete ja üllatusarvetega žongleerimine. Kümme igapäevast valu vs lahendused: kvoot aegub kasutamata → maksimeeri tellimusi; kiirusepiirangud kodeerimise ajal → 4-astmeline automaatne varuühendus (Tellimus → API → Odav → Tasuta); tööriista väljundid põletavad märke → RTK + Caveman tihendus (15–95%); kallid API-d → kuludele optimeeritud marsruutimine; igal tööriistal oma seadistus → üks lõpp-punkt, üks armatuurlaud; AI blokeeritud → 3-tasemeline puhverserver + TLS stealth; surnud võtmed → 3-kihiline vastupidavus (kaitselülitid, võtme jahtumine, mudeli lukustus); meeskond jagab ühte tellimust → võtmekogumid õiglase jagamise kvootidega; viiped kellegi pilve kaudu → kohalik-esimene AES-256-GCM krüpteeritud võtmetega; kulude nähtavuse puudumine → reaalajas analüütika (kasutus, kvoot, kokkuhoid, p95 latentsus)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute'i päringuvoog: sinu IDE või CLI (Claude Code, Cursor, Cline…) kutsub üht kohalikku lõpp-punkti (http://localhost:20128/v1); OmniRoute Smart Router (RTK + Cavemani tihendus, 19 marsruutimisstrateegiat, kaitselülitid, TLS-i varjestus, MCP, A2A, kaitsepiirded) saab sobiva töötava sihtmärgi olemasolul lülituda varuvariandina nelja teenusepakkuja taseme vahel — 1. tase: tellimus, 2. tase: API-võti, 3. tase: soodne ja 4. tase: tasuta."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute'i päringuvoog: teie IDE või CLI (Claude Code, Cursor, Cline…) kutsub ühte kohalikku lõpp-punkti (http://localhost:20128/v1); OmniRoute'i nutikas ruuter (RTK + Caveman tihendus, 19 marsruutimisstrateegiat, kaitselülitid, TLS stealth, MCP, A2A, piirangud) saab varuühenduse luua üle 4 pakkuja taseme, kuni on saadaval sobiv terve sihtmärk — Tase 1 Tellimus, Tase 2 API võti, Tase 3 Odav ja Tase 4 Tasuta."/>
 
 </div>
 
@@ -262,17 +262,17 @@ curl http://localhost:20128/v1/chat/completions \
 
 <div align="center">
 
-## 🤝 Meie avatud lähtekoodi sõprade toel
+## 🤝 Meie avatud lähtekoodiga sõprade toetusel
 
 </div>
 
 <p align="center">
   <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
-    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — Open Frontier Intelligence · 2.8T parameters · 1M-token context"/>
+    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — Avatud Piiride Intelligentsus · 2.8T parameetrit · 1M-tokeni kontekst"/>
   </a>
 </p>
 
-> **Soovid liituda avatud lähtekoodi sõbrana?** Need on ettevõtted, kes toetavad avatud lähtekoodi ja aitavad OmniRoute'i liikuma hoida — ja me avaldame avalikult, kuhu iga neilt saadud toke läheb. Võta ühendust: [diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
+> **Kas soovite liituda avatud lähtekoodiga sõbrana?** Need on ettevõtted, mis toetavad avatud lähtekoodi ja aitavad OmniRoute'il edasi liikuda – ja me ütleme avalikult, kuhu iga nende antud token läheb. Võtke ühendust: [diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
 
 <table>
   <tr>
@@ -284,38 +284,38 @@ curl http://localhost:20128/v1/chat/completions \
         </picture>
       </a>
       <br/><b>Kimi</b><br/><sub>Moonshot AI</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="Founding Open Source Friend"/>
+      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="Asutav avatud lähtekoodiga sõber"/>
     </td>
     <td>
-      Tänud <b>Kimile (Moonshot AI)</b>, meie esimesele avatud lähtekoodi sõbrale, selle projekti toetamise eest! Kimi on AI-labor, mis on avatud kaaludega K2 ja K3 mudeliperede loojad — <b>Kimi K3</b> pakub 1M-tokenilist kontekstiakent, sisseehitatud nägemisvõimet ja tipptasemel koodikirjutamist murdosa hinnaga suletud mudelitest, ning töötab kohe kastist välja koos Claude Code'i, Codexi ja kõigi teiste koodivahenditega, mida OmniRoute teenindab.
+      Tänu <b>Kimile (Moonshot AI)</b>, meie asutavale avatud lähtekoodiga sõbrale, selle projekti toetamise eest! Kimi on AI labor avatud kaaluga K2 ja K3 mudeliperekondade taga — <b>Kimi K3</b> pakub 1M-tokeni kontekstiakent, natiivset nägemist ja piiritasemel kodeerimist murdosa suletud mudelite hindadest ning töötab koheselt Claude Code, Codexi ja iga kodeerimistööriistaga, mida OmniRoute pakub.
       <br/><br/>
-      <b>Mida Kimi toetus võimaldab:</b> Kimi API krediidid toidavad OmniRoute'i AI-valideeritud väljalaskeprotsessi — <i>Kimi K3 toega ühendamise valideerimist</i>, mis vaatab läbi iga pull request'i enne selle avaldamist — lisaks igapäevasele funktsioonide arendusele. Esmaklassiline Kimi tugi on olemas mõlemal teel: otsene <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a> (<code>kimi-k3</code>) ja <a href="https://www.kimi.com/code?aff=omniroute">Kimi Code koodiplaan</a> (OAuth ja API võti). OmniRoute on ka esimene brasiillik avatud lähtekoodi projekt Kimi toetusprogrammis. <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>Hangi Kimi API võti, millega saad 15% lisakrediiti →</b></a>
+      <b>Mida Kimi toetus võimaldab:</b> Kimi API krediidid toetavad OmniRoute'i AI-ga valideeritud väljalaskeprotsessi — <i>Kimi K3 poolt valideeritud ühendamise</i> etappi, mis vaatab läbi iga tõmbepäringu enne selle avaldamist — pluss igapäevast funktsioonide arendust. Esimese klassi Kimi tugi on saadaval mõlemal viisil: otse <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a> (<code>kimi-k3</code>) ja <a href="https://www.kimi.ai/code?aff=omniroute">Kimi Code kodeerimisplaan</a> (OAuth ja API võti). OmniRoute on ka esimene Brasiilia avatud lähtekoodiga projekt Kimi tugiprogrammis. <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>Hankige Kimi API võti 15% lisakrediidiga →</b></a>
     </td>
   </tr>
   <tr>
     <td align="center" width="150">
       <a href="https://cheaperinference.com/?utm_source=omniroute">
-        <img src="./public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
+        <img src="./public/providers/cli-generic.svg" width="64" alt="Odavam järeldus"/>
       </a>
-      <br/><b>Cheaper Inference</b><br/><sub>cheaperinference.com</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Open Source Friend"/>
+      <br/><b>Odavam järeldus</b><br/><sub>cheaperinference.com</sub><br/><br/>
+      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Avatud lähtekoodiga sõber"/>
     </td>
     <td>
-      Tänud <b>Cheaper Inference'ile</b>, OmniRoute'i avatud lähtekoodi sõbrale, selle projekti toetamise eest! Cheaper Inference on hinna järgi järjestatud vahendussüsteem, mis vahendab 42 tipptasemel mudelit — Claude, GPT-5.x, Gemini, Kimi K3, GLM, DeepSeek, Grok ja MiniMax — ühe OpenAI-ga ühilduva otspunkti tagant, suunates iga päringu odavaimale sobivale pakkujale, ilma et hind ületaks kunagi mudeli looja avaldatud hinnakirja.
+      Tänu <b>Cheaper Inference'ile</b>, OmniRoute'i avatud lähtekoodiga sõbrale, selle projekti toetamise eest! Cheaper Inference on kulupõhine lüüs, mis edasimüüb 42 piirimudelit — Claude, GPT-5.x, Gemini, Kimi K3, GLM, DeepSeek, Grok ja MiniMax — ühe OpenAI-ga ühilduva lõpp-punkti taga, suunates iga päringu odavaimale sobivale pakkujale, ilma et kunagi küsiks mudeli tootja nimekirjahinnast kõrgemat hinda.
       <br/><br/>
-      <b>Esmaklassiline tugi OmniRoute'is:</b> Chat Completions, natiivne <code>/v1/responses</code> otspunkt, nägemine, tööriistade kutsumine ja 3 pildimudelit (<code>grok-imagine</code>, <code>nano-banana-pro</code>, <code>nano-banana-2</code>, kättesaadavad kui <code>cheaperinference/&lt;model&gt;</code>). <a href="https://cheaperinference.com/?utm_source=omniroute"><b>Hangi API võti →</b></a>
+      <b>Esimese klassi tugi OmniRoute'is:</b> Vestluse lõpetamised, natiivne <code>/v1/responses</code> lõpp-punkt, nägemine, tööriistakõned ja 3 pildimudelit (<code>grok-imagine</code>, <code>nano-banana-pro</code>, <code>nano-banana-2</code>, kättesaadav kui <code>cheaperinference/&lt;model&gt;</code>). <a href="https://cheaperinference.com/?utm_source=omniroute"><b>Hankige API võti →</b></a>
     </td>
   </tr>
 </table>
 
-<sub>Lingid tähisega <code>aff=omniroute</code> on partnerlingid. Need rahastavad projekti, ilma et see sulle lisakulu tooks.</sub>
+<sub>Lingid, millel on märge <code>aff=omniroute</code>, on partnerlingid. Need rahastavad projekti teile lisakuludeta.</sub>
 
 <br/>
 
 <details open>
-<summary><sub><b>🎟️ Partnerprogrammi soodustused</b> — pakkujate tasuta registreerimiskupongid, keda me ei sponsoreeri (klõpsa avamiseks)</sub></summary>
+<summary><sub><b>🎟️ Sidusettevõtete pakkumine</b> — tasuta registreerimiskupongid pakkujatelt, keda me ei sponsoreeri (laiendamiseks klõpsake)</sub></summary>
 
-<sub><i>See jaotis on mõeldud ainult soovitus-/kupongikoodidele. Sponsoreeritud partnerlused on toodud eespool jaotises <b>🤝 Meie avatud lähtekoodi sõprade toel</b>. OmniRoute'il ei ole sponsorlust ega partnerlust siin loetletud pakkujatega — need on avalikud kupongid, mida igaüks saab kasutada.</i></sub>
+<sub><i>See jaotis on ainult viite-/kupongikoodide jaoks. Sponsorluspartnerlused asuvad ülal jaotises <b>🤝 Meie avatud lähtekoodiga sõprade toetusel</b>. OmniRoute'il puudub sponsorlus või partnerlus siin loetletud pakkujatega – need on avalikud kupongid, mida igaüks saab kasutada.</i></sub>
 
 <table>
   <tr>
@@ -326,14 +326,14 @@ curl http://localhost:20128/v1/chat/completions \
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
     <td>
-      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — partnerregistreerimine · <b>$100 tasuta krediiti</b> registreerumisel (tasuta server, arvesta suurema latentsusega — sobib parimini testimiseks, mitte tootmiseks). Esmaklassiline tugi OmniRoute'is alates versioonist <b>v3.8.50</b>: Chat Completions, Anthropicuga ühilduv edastusvorming ja OpenAI-ga ühilduv tee. Saadaval mudelite hulgas on <code>claude-opus-4-8</code>, <code>claude-opus-5</code>, <code>gpt-5.6-sol</code> ja teised. <b><a href="https://agentrouter.org/register?aff=70LM">Hangi oma $100 →</a></b></sub>
+      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — sidusettevõtte registreerimine · <b>$100 tasuta krediiti</b> registreerimisel (tasuta server, oodata suuremat latentsust — parim testimiseks, mitte tootmiseks). Esimese klassi tugi OmniRoute'is alates <b>v3.8.50</b>: vestluse lõpetamised, Anthropic-ühilduv traadiformaat ja OpenAI-ühilduv tee. Saadaval olevad mudelid hõlmavad <code>claude-opus-4-8</code>, <code>claude-opus-5</code>, <code>gpt-5.6-sol</code> ja palju muud. <b><a href="https://agentrouter.org/register?aff=70LM">Haara oma $100 →</a></b></sub>
       <br/><br/>
-      <sub>⚠️ <i>Partnerlink — OmniRoute'il ei ole sponsorlust ega partnerlust selle pakkujaga.</i></sub>
+      <sub>⚠️ <i>Sidusettevõtte link — OmniRoute'il puudub sponsorlus või partnerlus selle pakkujaga.</i></sub>
     </td>
   </tr>
 </table>
 
-<sub>Tead veel pakkujat, kellel on helde tasuta registreerimiskupong, mis oleks OmniRoute'i kasutajatele kasulik? Ava probleem (issue) ja me lisame selle siia.</sub>
+<sub>Kas teate mõnda teist pakkujat, kellel on helde tasuta registreerimiskupong, mis toob kasu OmniRoute'i kasutajatele? Avage probleem ja me lisame selle siia.</sub>
 
 </details>
 
@@ -341,160 +341,160 @@ curl http://localhost:20128/v1/chat/completions \
 
 <div align="center">
 
-## 🎯 Combos — lipulaev
+## 🎯 Kombod — lipulaev
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="All 19 combo routing strategies animated — one tile per strategy: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, cache-optimized, lkgp, auto, fusion, pipeline. See the table above for what each one does."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Kõik 19 kombo marsruutimisstrateegiat animeerituna — üks paan strateegia kohta: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, cache-optimized, lkgp, auto, fusion, pipeline. Vaadake ülalolevast tabelist, mida igaüks neist teeb."/>
 
-> **Combo** on mudelite ahel, mille vahel OmniRoute suunab liiklust **automaatselt**. Kui kvoot saab otsa, teenusepakkuja tõrgub või kulud tõusevad hüppeliselt, saab combo liikuda järgmise sobiva ja töökorras mudeli juurde. 🛡️
+> **Kombo** on mudelite ahel, mille vahel OmniRoute marsruudib **automaatselt**. Kui kvoot saab otsa, teenusepakkuja töös tekib tõrge või kulud hüppeliselt kasvavad, saab kombo liikuda järgmise sobiva ja töökorras mudeli juurde. 🛡️
 
-### ⚡ Nullkonfiguratsiooniga — kasuta lihtsalt `auto`
+### ⚡ Nullkonfiguratsioon — kasutage lihtsalt mudelit `auto`
 
-Combo't ei pea looma. Sea mudeliks `auto` (või selle variant) ja OmniRoute loob sinu ühendatud teenusepakkujatest virtuaalse combo, mida hinnatakse jooksvalt:
+Kombot pole vaja luua. Määrake mudeliks `auto` (või mõni selle variant) ja OmniRoute koostab teie ühendatud teenusepakkujatest virtuaalse kombo, mida hinnatakse reaalajas:
 
 <table>
-  <tr><th align="left">Mudeli ID</th><th align="left">Mille jaoks see on optimeeritud</th></tr>
-  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 Tasakaalustatud vaikeseade (LKGP — jääb kinni sinu viimasest töökorras teenusepakkujast)</td></tr>
-  <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 Kvaliteedile suunatud kaalud koodi genereerimiseks</td></tr>
-  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ Väikseim latentsus esikohal</td></tr>
-  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 Odavaim tunnihind esikohal</td></tr>
-  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 Suurim kvoodi- / määramäära reserv esikohal</td></tr>
-  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 Kvaliteedile suunatud + 10% avastamist parema mudeli leidmiseks</td></tr>
-  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 Selgesõnaline viimase-töötanud-teenusepakkuja kinnihoidmine</td></tr>
-  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 Veainjektsiooni kaalud vastupidavuse testimiseks (kaosetehnika)</td></tr>
+  <tr><th align="left">Mudeli ID</th><th align="left">Mida see optimeerib</th></tr>
+  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 Tasakaalustatud vaikevalik (LKGP — jääb teie viimase hästi töötanud teenusepakkuja juurde)</td></tr>
+  <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 Kvaliteeti eelistavad kaalud koodi genereerimiseks</td></tr>
+  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ Esimesena väikseim latentsus</td></tr>
+  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 Esimesena odavaim hind tokeni kohta</td></tr>
+  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 Esimesena suurim kvoodi / päringusageduse piirangu varu</td></tr>
+  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 Kvaliteet esikohal + 10% katsetamist paremate mudelite leidmiseks</td></tr>
+  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 Selgesõnaline viimase teadaolevalt hästi töötanud teenusepakkuja eelistamine</td></tr>
+  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 Paralleelne hargnemine mudelite paneelile (üks iga teenusepakkuja kohta, vaikimisi 5), tagastab ühe vastuse; üks ülesvoolupäring paneeli iga mudeli kohta, mitte tõrgete tekitamine</td></tr>
 </table>
 
 ##
 
-### 🔀 Või loo endale sobiv — 19 suunamisstrateegiat
+### 🔀 Või koostage oma kombo — 19 marsruutimisstrateegiat
 
-Kõik **19** strateegiat — segunda ja kombineeri iga combo etapi kaupa:
+Kõik **19** strateegiat — kombineerige neid kombo eri sammudes:
 
 <table>
   <tr>
     <th>#</th>
     <th align="left">Strateegia</th>
-    <th align="left">Mida see tähendab</th>
+    <th align="left">Mida see teeb</th>
   </tr>
   <tr>
     <td align="center">1</td>
     <td nowrap><code>priority</code></td>
-    <td>Esmase sihtmärgi järjestatud loend — kasutab ühe ammendumiseni enne järgmise juurde liikumist 🥇</td>
+    <td>Esimest sihtmärki eelistav järjestatud loend — ammendab iga sihtmärgi enne järgmise juurde liikumist 🥇</td>
   </tr>
   <tr>
     <td align="center">2</td>
     <td nowrap><code>fill-first</code></td>
-    <td>Täidab igas sihtmärgis kvoodi täielikult, enne kui liigub edasi</td>
+    <td>Kasutab iga sihtmärgi kvoodi täielikult ära enne järgmise juurde liikumist</td>
   </tr>
   <tr>
     <td align="center">3</td>
     <td nowrap><code>weighted</code></td>
-    <td>Kaalutud juhuslikkus vastavalt igale sihtmärgile määratud kaalule</td>
+    <td>Kaalutud juhuvalik sihtmärgipõhise kaalu järgi</td>
   </tr>
   <tr>
     <td align="center">4</td>
     <td nowrap><code>round-robin</code></td>
-    <td>Käib sihtmärgid järjekorras läbi tsükliliselt</td>
+    <td>Liigub sihtmärkide vahel järjestikku</td>
   </tr>
   <tr>
     <td align="center">5</td>
     <td nowrap><code>p2c</code></td>
-    <td>Kahe-juhusliku-valiku (power-of-two-choices) koormuse jaotus</td>
+    <td>Kahe valiku meetodil juhuslik koormuse tasakaalustamine</td>
   </tr>
   <tr>
     <td align="center">6</td>
     <td nowrap><code>least-used</code></td>
-    <td>Valib sihtmärgi, mille koormus on hetkel väikseim</td>
+    <td>Valib väikseima praeguse koormusega sihtmärgi</td>
   </tr>
   <tr>
     <td align="center">7</td>
     <td nowrap><code>random</code></td>
-    <td>Ühtlane juhuslik valik (duplikaadid eemaldatud)</td>
+    <td>Ühtlane juhuvalik (duplikaadid eemaldatakse)</td>
   </tr>
   <tr>
     <td align="center">8</td>
     <td nowrap><code>strict-random</code></td>
-    <td>Juhuslik valik korduste eemaldamiseta 🎲</td>
+    <td>Juhuvalik kordusi eemaldamata 🎲</td>
   </tr>
   <tr>
     <td align="center">9</td>
     <td nowrap><code>cost-optimized</code></td>
-    <td>Minimeerib $ päringu kohta, kasutades reaalajas hinnakataloogi 💸</td>
+    <td>Minimeerib reaalajas kataloogihindade põhjal kulu päringu kohta 💸</td>
   </tr>
   <tr>
     <td align="center">10</td>
     <td nowrap><code>headroom</code></td>
-    <td>Valib sihtmärgi, kus on jäänud kvooti kõige rohkem</td>
+    <td>Valib suurima allesjäänud kvoodiga sihtmärgi</td>
   </tr>
   <tr>
     <td align="center">11</td>
     <td nowrap><code>reset-window</code></td>
-    <td>Eelistab sihtmärki, mille kvoodiaken lähtestub kõige varem</td>
+    <td>Eelistab sihtmärki, mille kvoodiaken lähtestatakse kõige varem</td>
   </tr>
   <tr>
     <td align="center">12</td>
     <td nowrap><code>reset-aware</code></td>
-    <td>Järjestab kvoodi lähtestamise aja järgi — lühimad aknad esikohal 📊</td>
+    <td>Järjestab kvoodi lähtestamisaja järgi — lühikesed aknad esimesena 📊</td>
   </tr>
   <tr>
     <td align="center">13</td>
     <td nowrap><code>context-relay</code></td>
-    <td>Annab konteksti üle sihtmärkide vahel pikkade vestluste jaoks 🧠</td>
+    <td>Annab pikkade vestluste konteksti sihtmärkide vahel edasi 🧠</td>
   </tr>
   <tr>
     <td align="center">14</td>
     <td nowrap><code>context-optimized</code></td>
-    <td>Valib parima sobivuse hetke konteksti suuruse jaoks</td>
+    <td>Valib praeguse konteksti suurusega kõige paremini sobiva sihtmärgi</td>
   </tr>
   <tr>
     <td align="center">15</td>
     <td nowrap><code>cache-optimized</code></td>
-    <td>Kinnitab igasse taaskasutatava viipe eesliite sama konto juurde — maksimeerib viipe vahemälu tabamusi 🎯</td>
+    <td>Seob iga korduskasutatava viiba prefiksi sama kontoga — maksimeerib viibavahemälu tabamusi 🎯</td>
   </tr>
   <tr>
     <td align="center">16</td>
     <td nowrap><code>lkgp</code></td>
-    <td>Last-Known-Good Path — kinnitub viimasele õnnestunud teenusepakkujale, seejärel langeb tagasi reeglitele</td>
+    <td>Viimane teadaolevalt hästi töötanud tee — seob viimase eduka teenusepakkujaga, seejärel kasutab varuvariandina reegleid</td>
   </tr>
   <tr>
     <td align="center">17</td>
     <td nowrap><code>auto</code></td>
-    <td>16-teguriline reaalajas hindamine igal ühenduse üle 🤖</td>
+    <td>16 teguril põhinev reaalajahindamine kõigi ühenduste lõikes 🤖</td>
   </tr>
   <tr>
     <td align="center">18</td>
     <td nowrap><code>fusion</code></td>
-    <td>Jagab päringu mudelite paneelile + kohtunik sünteesib ühe vastuse 🧬</td>
+    <td>Hargneb mudelite paneelile + hindaja sünteesib ühe vastuse 🧬</td>
   </tr>
   <tr>
     <td align="center">19</td>
     <td nowrap><code>pipeline</code></td>
-    <td>Ahelastatud etapid — igas etapis on väljund sisendiks järgmisele 🔗</td>
+    <td>Aheldab sammud — iga sihtmärgi väljund edastatakse järgmisele 🔗</td>
   </tr>
 </table>
 
-<sub>Auto-Combo mootor hindab igat kandidaati **16 teguri** alusel (töökindlus, kvoot, kulu, latentsus, ülesande sobivus, kvaliteet, sessiooni saadavus…) — vaata [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md).</sub>
+<sub>Auto-Combo mootor hindab iga kandidaati **16 teguri** alusel (tööseisund, kvoot, kulu, latentsus, sobivus ülesandega, kvaliteet, seansi saadavus…) — vaadake [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md).</sub>
 
 ##
 
-### 🧱 Vastupidavus on sisse ehitatud (3 sõltumatut kihti)
+### 🧱 Töökindlus on sisse ehitatud (3 sõltumatut kihti)
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute resilience — 3 independent self-healing layers, the right layer for the right failure. Layer 1 provider circuit breaker (whole provider): trips only on 408/5xx, thresholds OAuth 8× / API-key 12× / local 2×, resets 60s/30s/15s into a HALF-OPEN probe, lazy recovery; while OPEN the combo reroutes to the next provider. Layer 2 connection cooldown (one key/account): base 5s OAuth / 3s API-key, exponential ×2 backoff with anti-thundering-herd guard, 429 honors Retry-After, success clears all error state; one cooling key is skipped while sibling keys keep serving. Layer 3 model lockout (one model): per-model 429, local 404 or mode denials lock just that model — never the whole connection. Terminal states (banned, expired, credits exhausted) are for the operator, not cooldowns."/>
+<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute'i töökindlus — 3 sõltumatut isetaastuvat kihti, õige kiht õige tõrke jaoks. Kiht 1: teenusepakkuja kaitselüliti (kogu teenusepakkuja): rakendub ainult 408/5xx korral, lävendid OAuth 8× / API-võti 12× / lokaalne 2×, lähtestub 60s/30s/15s järel HALF-OPEN-prooviks, laisk taastumine; OPEN-olekus suunab kombinatsioon päringu järgmisele teenusepakkujale. Kiht 2: ühenduse jahtumisperiood (üks võti/konto): baasaeg OAuth 5s / API-võti 3s, eksponentsiaalne ×2 ooteaja pikenemine koos päringutulva vältiva kaitsega, 429 järgib Retry-After väärtust, õnnestumine kustutab kogu veaoleku; jahtumisperioodil olev võti jäetakse vahele, samal ajal kui teised võtmed jätkavad teenindamist. Kiht 3: mudeli lukustus (üks mudel): mudelipõhine 429, lokaalne 404 või režiimi keelamised lukustavad ainult selle mudeli — mitte kunagi kogu ühendust. Lõppolekud (blokeeritud, aegunud, krediit ammendatud) on operaatori lahendada, mitte jahtumisperioodid."/>
 
-<sub>📖 [Auto-Combo mootor](docs/routing/AUTO-COMBO.md) · [Vastupidavuse juhend](docs/architecture/RESILIENCE_GUIDE.md)</sub>
+<sub>📖 [Automaatse kombinatsiooni mootor](docs/routing/AUTO-COMBO.md) · [Töökindluse juhend](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-## 🏆 Mille poolest OmniRoute erineb
+## 🏆 Mis eristab OmniRoute'i
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mille poolest OmniRoute erineb — kuupäevastatud funktsioonide ülevaade, milles võrreldakse 13 võimekuse lõikes lahendustega 9router, OpenRouter, CLIProxyAPI ja LiteLLM. OmniRoute: 359 teenusepakkujat, üle 150 sisseehitatud tasuta paketi, 19 marsruutimisstrateegiat, 12 mootoriga tokenite tihendamine, sisseehitatud 110 tööriistaga MCP-server, A2A-agendiprotokoll, püsimälu, kaitsepiirded, pilveagendid, TLS-sõrmejälje varjamine, Desktop/Termux/PWA ning 42 lokaliseeritud kasutajaliidese keelt. OmniRoute on MIT-litsentsiga ja isemajutatav. Konkurentide võimekused ja arvud võivad muutuda; vaadake lingitud metoodikat."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mis eristab OmniRoute'i – aegunud funktsioonide ülevaade võrreldes 9routeri, OpenRouteri, CLIProxyAPI ja LiteLLM-iga 13 võimekuse lõikes. OmniRoute: 358 pakkujat, 150+ sisseehitatud tasuta taset, 19 marsruutimisstrateegiat, 12-mootoriline märgi tihendus, sisseehitatud MCP server 110 tööriistaga, A2A agendi protokoll, püsiv mälu, piirangud, pilveagendid, TLS sõrmejälje varjamine, Desktop/Termux/PWA ja 42 i18n UI lokaati. OmniRoute on MIT-litsentsiga ja isehostitav. Konkurentide võimekused ja arvud võivad muutuda; vaata lingitud metoodikat."/>
 
-<sub>📊 Täielik metoodika ja funktsioonipõhine üksikasjalik võrdlus lahendustega 9router, OpenRouter, CLIProxyAPI ja LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 Täielik metoodika &amp; funktsioonide detailid võrreldes 9routeri, OpenRouteri, CLIProxyAPI &amp; LiteLLM-iga → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -562,29 +562,29 @@ Radar on vabatahtlik ja kasutab ainult GET-päringuid. OmniRoute'i klient ei laa
 
 </div>
 
-> Viimased esiletõstetud uuendused vahemikus **v3.8.20 → v3.8.50**. Täielik ajalugu failis [`CHANGELOG.md`](CHANGELOG.md).
+> **v3.8.20 → v3.8.50** viimase aja tähtsündmused. Täielik ajalugu on failis [`CHANGELOG.md`](CHANGELOG.md).
 
-- **🎛️ OmniConductor** — sissetulev A2A delegeerimine sinu agentide flotillile, Conductor'i oskused Agent Card'il ning armatuurlaua paneel Faro push-to-talk häälvestlusega. → [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 Adaptiivne lubamine ja ülekoormuskaitse** — raske vestluspäringud jäävad järjekorda selle asemel, et tagastada 503, koos atomaarsete RPM-i rullivate rendilepingutega iga ühenduse kohta. → [Vastupidavuse juhend](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Kanooniline `/v1/models` järjestus** — üks sidus tootja kaupa grupeeritud plokk igale tootjale (kombinatsioonid kinnitatud esimesena), stabiilne kõikide kataloogiallikate lõikes. → [API viitedokumentatsioon](docs/reference/API_REFERENCE.md)
-- **🗜️ Tihendamise tugevdamine** — vaikimisi sisselülitatud paisumiskaitse, Caveman'i paketid DE / FR / JA + hiina keele (wényán) jaoks, RTK filtrid Gradle'i ja .NET-i jaoks. → [Tihendamine](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Aus fikseeritud hinnaga maksumus** — tellimuse / koodimisplaani tootjad näitavad kuluanalüütikas **0 $**; eelarve, kvoot ja ruutimine jätkavad hindamist. → [API viitedokumentatsioon](docs/reference/API_REFERENCE.md)
-- **⚖️ Kvoodijaotuse ruutimine** — ühiskonto kvoodi õiglane jagamine kogutud võtmete vahel, töökonserveeriv, nii et jõude olevad tükid laenatakse edasi. → [Vastupidavuse juhend](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Ühe käsuga CLI/agendi seadistus** — 13 registreeritud `setup-*` käsku; `omniroute run` käivitab 7 CLI-d (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` toetab 10 sihtmärki interaktiivse tootja- ja mudelivalija ning kontekstipõhiste lemmikutega. → [CLI integratsioonid](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Kaugrežiim** — juhi kaugjuhtimisega OmniRoute't piiratud õigustega tokenitega (`connect` / `contexts` / `tokens`) + `antigravity` OAuth abivahend VPS-i paigaldustele. → [Kaugrežiim](docs/guides/REMOTE-MODE.md)
-- **🧭 Nutikam automaatne ruutimine** — `auto/<category>:<tier>` kombinatsioonid, **Fusion** (mudelipaneel + kohtunik), ülesandeteadlik ruutimine, päringupõhised mudeli / režiimi / USD-eelarve ülekirjutused. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Ühendatavad tihendusmoodulid** — 12 kombineeritavat mootorit + tihendusstuudioid: LLMLingua-2, kaheastmeline Ultra, omniglyph, sammupõhine täpsuskontroll, GCF v3.2, lohista-ümberjärjestamise redaktor. → [Tihendamine](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Läbipaistev MITM-dekrüpteerimine (TPROXY)** — jäädvustab CLI-d, mis ignoreerivad puhverserveri keskkonnamuutujaid, koos SNI-põhise CA-ga ja usaldushoidla installeerijaga. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Kuludelemeetria kõikjal** — `X-OmniRoute-*` kulu/kasutuse päised igal lõpp-punktil, vahemälu-HIT-i säästupäis, võtmepõhised USD-kulude kvoodid. → [API viitedokumentatsioon](docs/reference/API_REFERENCE.md)
-- **🧠 Sinu kontrolli all mälu** — vaikimisi väljas, valikuline int8 vektorkvantimine + tüübipõhine vähenemine, päringupõhine `x-omniroute-no-memory`. → [Mälu](docs/frameworks/MEMORY.md)
-- **🛡️ Turvalisus** — süstesõna-süstimise kaitse igal LLM-marsruudil (red-team komplekt), valikuline mandaadi-varjamise kaitsemeede (peidab lekkinud API-võtmed/saladused mõlemas suunas), tasuta DuckDuckGo viimase abinõu veebiotsing ja valikuline OIDC sisselogimislävi armatuurlauale (parooliga sisselogimine on alati saadaval). → [Kaitsemeetmed](docs/security/GUARDRAILS.md)
-- **🖼️ Uued lõpp-punktid** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisper-stiilis) täiendavad meediapinda. → [API viitedokumentatsioon](docs/reference/API_REFERENCE.md)
-- **🎨 Pildi/video/audio genereerimine** — üks API meedia jaoks: xAI Grok Imagine ja Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ja kõnetootjad nagu ElevenLabs. → [API viitedokumentatsioon](docs/reference/API_REFERENCE.md)
-- **🌍 Juurutamine ja käitamine** — pöördpuhverserveri `basePath`, brauseri keele automaatne tuvastamine, võtmepõhine seadmejälgimine, juurõigusteta MITM-usaldus, zh-TW lokaliseerimine. → [Keskkond](docs/reference/ENVIRONMENT.md)
-- **🤝 Rohkem tootjaid ja agente** — pilveagendid (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) brauseri- ja OAuth-sisselogimisega, Ollama esmaklassilise kaardiga, Claude Opus 5 ja Sonnet 5, Kimi ametlik partnerlus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ning uuendatud **352 tootjaga kataloog**. → [Tootjad](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Ruutimise läbipaistvus** — igas vastuses on `X-OmniRoute-Decision` päis, mis nimetab strateegia/tootja/latentsuse, mis päringu teenindas; uus `cache-optimized` kombinatsioonistrateegia + Auto-Combo `cacheAffinity` tegur suunavad kordunud päringud tagasi ühendusele, mille käes on vahemällu salvestatud eesliide; ning kirjutuskaitstud `/v1/auto-combo/{channel}/candidates` lõpp-punkt näitab `auto/*` kanali reaalajas kandidaatide kogumit. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Kohalik jõudlus ja infrastruktuur** — ühe klõpsuga kohalik Redis, Cloudflare Workers / Deno Deploy edastuse juurutajad, Bifrost ja Mux hallatud manustatud teenustena. → [Manustatud teenused](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Karbis on veel** — pluginate raamistik + turuplats, Omni/Agent/GitHub oskuste raamistikud, Obsidian vault'i integratsioon (22 MCP tööriista), OpenAI-ga ühilduvad Batch ja Files API-d, semantiline vastuste vahemälu, gamifikatsioon edetabelitega, ACP agentide avastamine (15 sisseehitatud agenti), ajastatud logide eksport BigQuery-sse, `auto/chaos` veasüstimine, Telegrami boti sild, rakendusesisene versioonihaldur ja LMArena-ELO tasuta tootjate edetabelid. → [Dokumentatsioon](docs/README.md)
+- **🎛️ OmniConductor** — sissetulev A2A-delegeerimine sinu agentide parvele, Conductor-skills’id Agent Cardil ning juhtpaneeli paneel Faro raadiosaatja-laadse häälvestlusega. → [A2A-server](docs/frameworks/A2A-SERVER.md)
+- **🛂 Kohanduv vastuvõtt ja ülekoormuskaitse** — ressursimahukad vestluspäringud lisatakse 503-vea tagastamise asemel järjekorda ning iga ühenduse kohta kasutatakse atomaarseid jooksvaid RPM-rendilepinguid. → [Töökindluse juhend](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Kanooniline `/v1/models` järjestus** — iga teenusepakkuja kohta üks katkematu pakkuja järgi rühmitatud plokk (kombinatsioonid esimesena), mis on kõigis kataloogiallikates stabiilne. → [API viide](docs/reference/API_REFERENCE.md)
+- **🗜️ Tugevdatud tihendamine** — vaikimisi lubatud lahtipakkimiskaitse, Cavemani paketid DE / FR / JA + hiina keelele (wényán), RTK-filtrid Gradle’i ja .NET-i jaoks. → [Tihendamine](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Aus fikseeritud maksumus** — tellimuse / programmeerimispaketi pakkujate maksumuseks kuvatakse analüütikas **$0**; eelarve, kvoot ja marsruutimine jätkavad hinnangute arvutamist. → [API viide](docs/reference/API_REFERENCE.md)
+- **⚖️ Kvoodiosa-põhine marsruutimine** — jaga ühise konto kvoot koondatud võtmete vahel õiglaselt ja tööd säilitavalt, nii et kasutamata osad laenatakse välja. → [Töökindluse juhend](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 CLI/agentide seadistamine ühe käsuga** — 13 registreeritud `setup-*` käsku; `omniroute run` käivitab 7 CLI-d (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` toetab 10 sihtmärki koos interaktiivse pakkuja- ja mudelivalija ning kontekstipõhiste lemmikutega. → [CLI-integratsioonid](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ Kaugrežiim** — juhi OmniRoute’i kaugserveris piiratud õigustega lubade (`connect` / `contexts` / `tokens`) abil ning kasuta VPS-i paigalduste jaoks `antigravity` OAuthi abivahendit. → [Kaugrežiim](docs/guides/REMOTE-MODE.md)
+- **🧭 Nutikam automaatmarsruutimine** — `auto/<category>:<tier>` kombinatsioonid, **Fusion** (mudelipaneel + hindaja), ülesandeteadlik marsruutimine ning päringupõhised mudeli / režiimi / USD-eelarve alistused. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ Laiendatav tihendamine** — 12 kombineeritavat mootorit + Compression Studios: LLMLingua-2, kahetasemeline Ultra, omniglyph, sammupõhine täpsusvärav, GCF v3.2 ja lohistamisega ümberjärjestatav redaktor. → [Tihendamine](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Läbipaistev MITM-dekrüptimine (TPROXY)** — jäädvusta CLI-de liiklus, mis eiravad puhverserveri keskkonnamuutujaid, kasutades SNI-põhist CA-d ja usaldushoidla installerit. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Kulutelemeetria kõikjal** — `X-OmniRoute-*` kulu-/kasutuspäised igal lõpp-punktil, vahemälu HIT-säästu päis ja võtmepõhised USD-kulukvoodid. → [API viide](docs/reference/API_REFERENCE.md)
+- **🧠 Mälu, mida juhid sina** — vaikimisi väljas, soovi korral kasutatav int8-vektorkvantisatsioon + tüübitud aegumine ning päringupõhine `x-omniroute-no-memory`. → [Mälu](docs/frameworks/MEMORY.md)
+- **🛡️ Turvalisus** — käsusüstimise vastane kaitse igal LLM-marsruudil (red-team testikomplekt), valikuline mandaate maskeeriv kaitsemeede (peidab lekkinud API-võtmed ja saladused mõlemas suunas), tasuta DuckDuckGo viimase abinõu veebiotsing ning valikuline OIDC-sisselogimisvärav juhtpaneelile (parooliga sisselogimine jääb alati saadavale). → [Kaitsemeetmed](docs/security/GUARDRAILS.md)
+- **🖼️ Uued lõpp-punktid** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisperi-laadne) täiendavad meedialiidest. → [API viide](docs/reference/API_REFERENCE.md)
+- **🎨 Pildi / video / heli genereerimine** — üks API meedia jaoks: xAI Grok Imagine’i ja Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ning kõneteenuse pakkujad, nagu ElevenLabs. → [API viide](docs/reference/API_REFERENCE.md)
+- **🌍 Juurutamine ja käitus** — pöördpuhverserveri `basePath`, brauseri keele automaattuvastus, võtmepõhine seadmete jälgimine, juurõigusteta MITM-usaldus ning zh-TW lokaliseerimine. → [Keskkond](docs/reference/ENVIRONMENT.md)
+- **🤝 Rohkem pakkujaid ja agente** — pilveagendid (Codex Cloud, Cursor, Devin, Jules), brauseri ja OAuth-sisselogimisega Grok Build (xAI), Ollama täisfunktsionaalne kaart, Claude Opus 5 ja Sonnet 5, ametlik partnerlus Kimiga (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ning uuendatud **352 pakkujaga kataloog**. → [Pakkujad](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 Marsruutimise läbipaistvus** — iga vastus sisaldab `X-OmniRoute-Decision` päist, mis nimetab kasutatud strateegia/pakkuja/latentsuse; uus `cache-optimized` kombinatsioonistrateegia + Auto-Combo `cacheAffinity` tegur suunab korduspäringud tagasi ühendusele, mis hoiab vahemällu salvestatud prefiksit, ning kirjutuskaitstud `/v1/auto-combo/{channel}/candidates` lõpp-punkt avaldab `auto/*` kanali reaalajas kandidaatide kogumi. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ Kohalik jõudlus ja taristu** — ühe klõpsuga kohalik Redis, Cloudflare Workersi / Deno Deploy releejuurutajad ning Bifrost ja Mux järelevalvega manustatud teenustena. → [Manustatud teenused](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 Lisaks komplektis** — pistikprogrammiraamistik + turuplats, Omni/Agenti/GitHubi skills’ide raamistikud, Obsidiani hoidla integratsioon (22 MCP-tööriista), OpenAI-ga ühilduvad Batch- ja Files-APId, semantiline vastuste vahemälu, edetabelitega mängustamine, ACP-agentide avastamine (15 sisseehitatud agenti), ajastatud logide eksport BigQuerysse, `auto/chaos` paralleelne mitme mudeli hargnemine, Telegrami botisild, rakendusesisene versioonihaldur ning LMArena-ELO tasuta pakkujate paremusjärjestused. → [Dokumentatsioon](docs/README.md)
 
 <br/>
 
@@ -1226,21 +1226,21 @@ Kanoonilised näitajad 2026-08-24 seisuga: **1029 unikaalset videot** · **11 13
 <table>
   <tr><th align="left">Kiht</th><th align="left">Tehnoloogia</th></tr>
   <tr><td nowrap><b>Täituskeskkond</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Keel</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kataloogides <code>src/</code> ja <code>open-sse/</code> (alates versioonist v2.0 pole tuumkoodis ühtegi <code>any</code>-tüüpi)</td></tr>
+  <tr><td nowrap><b>Keel</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kataloogides <code>src/</code> ja <code>open-sse/</code> (alates versioonist v2.0 pole tuumas ühtegi <code>any</code> tüüpi)</td></tr>
   <tr><td nowrap><b>Raamistik</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-päevik) + LowDB (pärandvormingus JSON) — 122 domeenimoodulit, 178 migratsiooni</td></tr>
-  <tr><td nowrap><b>Mälu</b></td><td>SQLite FTS5 täistekstiotsing + int8-kvanditud vektormanused, tüübitud hääbumine</td></tr>
+  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-logimine) + LowDB (pärand-JSON) — 136 domeenimoodulit, 193 migratsiooni</td></tr>
+  <tr><td nowrap><b>Mälu</b></td><td>SQLite FTS5 täistekstiotsing + int8-kvantiseeritud vektormanused, tüübistatud aegumine</td></tr>
   <tr><td nowrap><b>Skeemid</b></td><td>Zod 4 — MCP-tööriistade sisendi/väljundi valideerimine + API-lepingud</td></tr>
   <tr><td nowrap><b>Protokollid</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Voogedastus</b></td><td>Server-Sent Events (SSE) + WebSocketi sild (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Tihendamine</b></td><td>12 mootoriga konveier — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentimine ja turvalisus</b></td><td>OAuth 2.0 (PKCE) + JWT + API-võtmed + MCP piiratud ulatusega autentimine · AES-256-GCM jõudeolekus · DOMPurify</td></tr>
-  <tr><td nowrap><b>Varjatus</b></td><td>wreq-js — JA3 / JA4 TLS-sõrmejälje jäljendamine, 3-tasemeline puhverserver</td></tr>
-  <tr><td nowrap><b>Vastupidavus</b></td><td>Kaitselüliti, eksponentsiaalne tagasipõrge, päringuvalangu vältimine, automaatkombinatsioonide iseparanemine</td></tr>
+  <tr><td nowrap><b>Autentimine &amp; turvalisus</b></td><td>OAuth 2.0 (PKCE) + JWT + API-võtmed + MCP ulatusepõhine autentimine · AES-256-GCM andmete talletamisel · DOMPurify</td></tr>
+  <tr><td nowrap><b>Varjatus</b></td><td>wreq-js — JA3 / JA4 TLS-sõrmejälgede matkimine, 3-tasemeline puhverserver</td></tr>
+  <tr><td nowrap><b>Tõrkekindlus</b></td><td>Katkesti, eksponentsiaalne korduskatsete viivitus, päringuvalangu vältimine, automaatkombinatsioonide isetaastumine</td></tr>
   <tr><td nowrap><b>Logimine</b></td><td>pino — struktureeritud JSON-logid koos päringukontekstiga</td></tr>
-  <tr><td nowrap><b>Testimine</b></td><td>Node.js-i testikäitaja + Vitest — <b>39 000+ staatilist testideklaratsiooni</b> enam kui 5100 jälgitavas testifailis (üksus-, integratsiooni-, E2E-, turbe- ja ökosüsteemitestid)</td></tr>
+  <tr><td nowrap><b>Testimine</b></td><td>Node.js testikäitaja + Vitest — <b>39 000+ staatilist testideklaratsiooni</b> enam kui 5100 jälgitavas testifailis (üksus-, integratsiooni-, E2E-, turbe- ja ökosüsteemitestid)</td></tr>
   <tr><td nowrap><b>Platvormid</b></td><td>Töölaud (Electron) · Android (Termux) · PWA (mis tahes brauser)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automaatne avaldamine npm-is + Docker Hubis väljalaske korral</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automaatne npm-is avaldamine + Docker Hubi avaldamine väljalaskel</td></tr>
   <tr><td nowrap><b>Lingid</b></td><td><a href="https://omniroute.online">Veebisait</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

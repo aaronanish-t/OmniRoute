@@ -208,10 +208,10 @@ test("ensureCallLogsColumns back-fills video_content_removed on a pre-173 lineag
   }
 });
 
-// #13130: migration 187 adds call_logs.ttft_ms (dashboard generation-time TPS
-// reads it via mapSummaryRow on every row). A lineage that skipped 187 must
+// #13130: migration 195 adds call_logs.ttft_ms (dashboard generation-time TPS
+// reads it via mapSummaryRow on every row). A lineage that skipped 195 must
 // still expose the column, same reconciliation pattern as #12150/#12470.
-test("ensureCallLogsColumns back-fills ttft_ms on a pre-187 lineage", () => {
+test("ensureCallLogsColumns back-fills ttft_ms on a pre-195 lineage", () => {
   const db = openMemoryDb();
   try {
     db.exec("CREATE TABLE call_logs (id TEXT PRIMARY KEY, timestamp TEXT)");

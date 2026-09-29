@@ -489,3 +489,17 @@ test("#13376 a generation-only model is skipped with a 4xx and is never dispatch
     globalThis.fetch = originalFetch;
   }
 });
+
+test("detectTestKind prioritizes chat/responses capability over secondary audio-transcriptions", () => {
+  const result = detectTestKind(
+    "cx/gpt-6-sol-high",
+    {
+      apiFormat: "responses",
+      supportedEndpoints: ["chat", "images", "audio-transcriptions"],
+    },
+    undefined
+  );
+  assert.equal(result.isAudioTranscription, false);
+  assert.equal(result.isRerank, false);
+  assert.equal(result.isEmbedding, false);
+});

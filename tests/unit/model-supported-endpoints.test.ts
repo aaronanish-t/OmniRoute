@@ -56,3 +56,8 @@ test("classifies operation-specific media endpoints for the model catalog", () =
     type: "audio",
   });
 });
+
+test("classifyModelSupportedEndpoints returns empty object when chat or responses is supported", () => {
+  assert.deepEqual(classifyModelSupportedEndpoints(["chat", "images"]), {});
+  assert.deepEqual(classifyModelSupportedEndpoints(["responses", "audio-transcriptions"]), {});
+});

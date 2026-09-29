@@ -271,17 +271,27 @@ export function detectTestKind(modelStr: string, customModel: any, nodeApiType?:
   // "All AI backends exhausted for chat".
   const nodeType = typeof nodeApiType === "string" ? nodeApiType : "";
   const lowerModel = modelStr.toLowerCase();
+  const isExplicitChat =
+    apiFormat === "chat-completions" ||
+    apiFormat === "responses" ||
+    nodeType === "chat" ||
+    nodeType === "responses" ||
+    supportedEndpoints.includes("chat") ||
+    supportedEndpoints.includes("responses");
   const isAudioTranscription =
-    apiFormat === "audio-transcriptions" ||
-    nodeType === "audio-transcriptions" ||
-    supportedEndpoints.includes("audio-transcriptions");
+    !isExplicitChat &&
+    (apiFormat === "audio-transcriptions" ||
+      nodeType === "audio-transcriptions" ||
+      supportedEndpoints.includes("audio-transcriptions"));
   const isRerank =
+    !isExplicitChat &&
     !isAudioTranscription &&
     (apiFormat === "rerank" ||
       nodeType === "rerank" ||
       supportedEndpoints.includes("rerank") ||
       lowerModel.includes("rerank"));
   const isEmbedding =
+    !isExplicitChat &&
     !isAudioTranscription &&
     !isRerank &&
     (apiFormat === "embeddings" ||

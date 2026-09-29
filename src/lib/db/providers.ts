@@ -1029,7 +1029,6 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
   })();
   backupDbFile("pre-write");
-  // Runtime-state-only updates keep the memoized /v1/models catalog (see readCache).
   invalidateConnectionUpdate(id, data);
   bumpProxyConfigGeneration();
 

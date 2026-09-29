@@ -73,6 +73,16 @@ test("computeLogTps measures generation throughput, not wall-clock TPS", () => {
   assert.equal(logTps.computeLogTps(100, 0, 0, 0), 0);
 });
 
+test("buildLogTpsTitle explains TTFT, generation window and reasoning (#13130)", () => {
+  const fmt = (ms: number) => `${ms}ms`;
+  assert.equal(
+    logTps.buildLogTpsTitle({ duration: 10_000, ttft: 4_000, tokens: { reasoning: 120 } }, 50, fmt),
+    "50.00 tokens/sec · TTFT 4000ms · generation 6.0s · reasoning 120 tok"
+  );
+  // No TTFT recorded (old row / non-streaming): only the rate, no fake breakdown.
+  assert.equal(logTps.buildLogTpsTitle({ duration: 10_000 }, 12.5, fmt), "12.50 tokens/sec");
+});
+
 test("accumulateLatencySample uses generation window + reasoning-aware numerator", () => {
   const { accumulateLatencySample } = usageHelpers;
   const buckets = {

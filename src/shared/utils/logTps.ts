@@ -65,3 +65,27 @@ export function computeLogTps(
   if (tokens <= 0 || generationMs === null || generationMs <= 0) return 0;
   return tokens / (generationMs / 1000);
 }
+
+/**
+ * Tooltip for the TPS cell (#13130): exposes the generation-time breakdown so
+ * thinking-model rows (long TTFT / prefill) explain why their TPS differs from
+ * wall-clock perception. `formatDuration` is injected to keep this module
+ * dependency-free.
+ */
+export function buildLogTpsTitle(
+  log: { duration?: number | null; ttft?: number | null; tokens?: { reasoning?: number | null } },
+  tps: number,
+  formatDuration: (ms: number) => string
+): string {
+  const parts = [`${tps.toFixed(2)} tokens/sec`];
+  if (typeof log?.ttft === "number" && log.ttft > 0) {
+    parts.push(`TTFT ${formatDuration(log.ttft)}`);
+  }
+  const genMs = resolveGenerationMs(log?.duration, log?.ttft);
+  if (genMs != null && genMs !== log?.duration) {
+    parts.push(`generation ${(genMs / 1000).toFixed(1)}s`);
+  }
+  const reasoning = log?.tokens?.reasoning ?? 0;
+  if (reasoning > 0) parts.push(`reasoning ${reasoning} tok`);
+  return parts.join(" · ");
+}

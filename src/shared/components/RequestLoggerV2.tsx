@@ -28,7 +28,7 @@ import {
   formatCachePercentage,
 } from "@/shared/utils/formatting";
 import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
-import { computeLogTps, resolveGenerationMs } from "@/shared/utils/logTps";
+import { buildLogTpsTitle, computeLogTps } from "@/shared/utils/logTps";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import {
   computeLogsSignature,
@@ -71,10 +71,7 @@ function getLogTotalTokens(log) {
   return (log?.tokens?.in || 0) + (log?.tokens?.out || 0);
 }
 
-// #13130: TPS measures GENERATION throughput — output tokens (reasoning
-// included via the defensive max() in computeLogTps) divided by generation
-// time (duration minus TTFT), not by end-to-end wall clock. Old rows and
-// non-streaming calls have no TTFT recorded and fall back to full duration.
+// #13130: generation-time TPS (duration - TTFT, reasoning-aware); see logTps.ts.
 function getLogTps(log): number {
   return computeLogTps(log?.tokens?.out, log?.tokens?.reasoning, log?.duration, log?.ttft);
 }
@@ -1656,22 +1653,11 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                                       : tps >= 30
                                         ? "text-sky-600 dark:text-sky-400"
                                         : "text-amber-600 dark:text-amber-400";
-                                // #13130: expose the generation-time breakdown so
-                                // thinking-model rows (long TTFT / prefill) explain
-                                // why their TPS differs from wall-clock perception.
-                                const genMs = resolveGenerationMs(log?.duration, log?.ttft);
-                                const parts = [`${tps.toFixed(2)} tokens/sec`];
-                                if (typeof log?.ttft === "number" && log.ttft > 0) {
-                                  parts.push(`TTFT ${formatDuration(log.ttft)}`);
-                                }
-                                if (genMs != null && genMs !== log?.duration) {
-                                  parts.push(`generation ${(genMs / 1000).toFixed(1)}s`);
-                                }
-                                if ((log?.tokens?.reasoning ?? 0) > 0) {
-                                  parts.push(`reasoning ${log.tokens.reasoning} tok`);
-                                }
                                 return (
-                                  <span className={color} title={parts.join(" · ")}>
+                                  <span
+                                    className={color}
+                                    title={buildLogTpsTitle(log, tps, formatDuration)}
+                                  >
                                     {formatTps(tps)}
                                   </span>
                                 );
@@ -1681,9 +1667,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         )}
                         {visibleColumns.ttft && (
                           <td className="px-3 py-2 text-right text-text-muted font-mono">
-                            {formatDuration(
-                              typeof log.ttft === "number" && log.ttft > 0 ? log.ttft : null
-                            )}
+                            {formatDuration(log.ttft > 0 ? log.ttft : null)}
                           </td>
                         )}
                         {visibleColumns.duration && (

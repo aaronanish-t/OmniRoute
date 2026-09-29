@@ -46,7 +46,7 @@
   },
   "open-sse/executors/antigravity.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 2
+      "count": 1
     }
   },
   "open-sse/executors/awsPollyTts.ts": {
@@ -1780,11 +1780,6 @@
   "src/shared/components/OAuthModal.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 3
-    }
-  },
-  "src/shared/components/ProxyLogDetail.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "src/shared/components/RequestLoggerV2.tsx": {
@@ -5059,11 +5054,6 @@
   "tests/unit/translator-resp-antigravity-thinking-boundary.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 6
-    }
-  },
-  "tests/unit/translator-resp-claude-to-openai.test.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 17
     }
   },
   "tests/unit/translator-resp-empty-string-tool-arg.test.ts": {

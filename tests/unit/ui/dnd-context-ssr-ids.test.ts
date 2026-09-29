@@ -32,9 +32,9 @@ function describedByIds(html: string) {
 }
 
 // Without an `id`, DndContext numbers its drag handles' aria-describedby from a counter that
-// lives for the whole server process, while each browser load starts from zero, so the server
-// HTML never matches the client render. A second server render in the same process must emit
-// the same ids as the first.
+// lives for the whole server process, while each browser load starts from zero, so once the
+// server has rendered a page its HTML stops matching the client render. A second server render
+// in the same process must emit the same ids as the first.
 const cases: Array<[string, () => React.ReactElement]> = [
   [
     "CompressionPipelineEditor",

@@ -21,6 +21,7 @@ import GheConfigStep from "@/shared/components/oauthModal/GheConfigStep";
 import GitlabDuoSetupStep from "@/shared/components/oauthModal/GitlabDuoSetupStep";
 import OAuthErrorStep from "@/shared/components/oauthModal/OAuthErrorStep";
 import OAuthWaitingStep from "@/shared/components/oauthModal/OAuthWaitingStep";
+import { getPasteTokenCopyKeys } from "@/shared/components/oauthModal/pasteTokenCopy";
 import { parseGrokCliPasteToken } from "@/lib/oauth/utils/grokCliAuthJson";
 import { buildGoogleLoopbackHint } from "@/lib/oauth/utils/googleLoopbackHint";
 import { errorMessageFromBody } from "@/shared/utils/fetchError";
@@ -53,7 +54,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "muse-code",
 ]);
 
-const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli"]);
+const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
 const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
 
 // POST a bare Codex access token to the access-token-only import endpoint
@@ -166,6 +167,7 @@ export default function OAuthModal({
 
   const supportsTokenPaste = TOKEN_PASTE_PROVIDERS.has(provider);
   const importTokenOnly = IMPORT_TOKEN_ONLY_PROVIDERS.has(provider);
+  const pasteCopyKeys = getPasteTokenCopyKeys(provider);
   const popupRef = useRef(null);
   const deviceFlowRunRef = useRef(0);
   const deviceVerificationUrl =
@@ -1035,21 +1037,15 @@ export default function OAuthModal({
               className={`text-sm px-3 py-1 rounded-t ${showPasteToken ? "font-semibold border-b-2 border-primary text-primary" : "text-text-muted"}`}
               onClick={handlePasteMode}
             >
-              {provider === "grok-cli" ? t("tabImportAuthJson") : t("tabPasteApiKey")}
+              {t(pasteCopyKeys.tab)}
             </button>
           </div>
         )}
 
-        {/* Paste-token form (Devin Desktop / Devin CLI) */}
+        {/* Paste-token form (Devin Desktop / Devin CLI / Grok auth.json / Claude setup-token) */}
         {supportsTokenPaste && showPasteToken && step !== "success" && (
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-text-muted">
-              {provider === "devin-desktop"
-                ? t("devinDesktopPasteDescription")
-                : provider === "grok-cli"
-                  ? t("grokAuthJsonDescription")
-                  : t("devinPasteDescription")}
-            </p>
+            <p className="text-sm text-text-muted">{t(pasteCopyKeys.description)}</p>
             {provider === "grok-cli" ? (
               <textarea
                 className="w-full h-32 p-3 text-sm font-mono bg-input border border-border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary"
@@ -1062,7 +1058,7 @@ export default function OAuthModal({
               <Input
                 value={pasteToken}
                 onChange={(e) => setPasteToken(e.target.value)}
-                placeholder={t("apiTokenPlaceholder")}
+                placeholder={t(pasteCopyKeys.placeholder)}
                 type="password"
                 label={t("apiKeyTokenLabel")}
               />

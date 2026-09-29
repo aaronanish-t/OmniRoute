@@ -111,6 +111,7 @@ async function importSetupToken(token: unknown) {
     );
   }
   return {
+    name: "Setup token",
     accessToken,
     refreshToken: null,
     expiresIn: null,

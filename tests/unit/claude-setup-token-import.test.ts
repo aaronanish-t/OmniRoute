@@ -89,6 +89,7 @@ test("importToken_ValidSetupToken_CreatesRefreshLessOAuthConnection", async () =
   assert.equal(row.accessToken, SETUP_TOKEN);
   assert.ok(!row.refreshToken);
   assert.ok(!row.expiresAt);
+  assert.equal(row.name, "Setup token");
   assert.match(String(row.providerSpecificData?.cliUserID), /^[a-f0-9]{64}$/);
   const inference = probes.filter((p) => p.url.startsWith("https://api.anthropic.com/v1/messages"));
   assert.equal(inference.length, 1);

@@ -56,6 +56,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
 
 const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
 const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
+const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "claude"]);
 
 // POST a bare Codex access token to the access-token-only import endpoint
 // (#1290); shared by the bare-JWT and session-JSON paste branches (#6636).
@@ -154,7 +155,7 @@ export default function OAuthModal({
   // effect below and re-anchored whenever a device flow (re)starts.
   const [now, setNow] = useState(() => Date.now());
   // API-key paste mode for direct-token providers.
-  const [showPasteToken, setShowPasteToken] = useState(IMPORT_TOKEN_ONLY_PROVIDERS.has(provider));
+  const [showPasteToken, setShowPasteToken] = useState(PASTE_FIRST_PROVIDERS.has(provider));
   const [pasteToken, setPasteToken] = useState("");
   const [savingToken, setSavingToken] = useState(false);
   // grok-cli only (#7013 rework): device_code is the default method (matches
@@ -704,7 +705,7 @@ export default function OAuthModal({
   if (startKey !== prevStartKey) {
     setPrevStartKey(startKey);
     if (startKey) {
-      setShowPasteToken(IMPORT_TOKEN_ONLY_PROVIDERS.has(provider));
+      setShowPasteToken(PASTE_FIRST_PROVIDERS.has(provider));
       setGrokBrowserMode(false);
       setAuthData(null);
       setCallbackUrl("");
@@ -721,7 +722,7 @@ export default function OAuthModal({
 
   useEffect(() => {
     if (!isOpen || !provider || flowStartedRef.current) return;
-    const startsInPasteMode = IMPORT_TOKEN_ONLY_PROVIDERS.has(provider);
+    const startsInPasteMode = PASTE_FIRST_PROVIDERS.has(provider);
     const startsInGitlabDuoSetup = provider === "gitlab-duo";
     if (startsInGitlabDuoSetup) {
       // Auto-start is skipped — setStep("gitlab-duo-setup") already happened

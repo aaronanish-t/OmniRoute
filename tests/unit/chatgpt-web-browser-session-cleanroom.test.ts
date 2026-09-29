@@ -8,6 +8,7 @@ import {
   type ChatGptWebBrowserSession,
   type ChatGptWebBrowserSessionHandlers,
   composerAcceptedPrompt,
+  isNewAssistantAnswer,
 } from "../../open-sse/utils/chatgptWebBrowserSession.ts";
 
 const HANDOFF_SSE =
@@ -477,5 +478,28 @@ describe("ChatGPT Web clean-room browser-owned session", () => {
     assert.equal(composerAcceptedPrompt(prompt, ""), false);
     // And a different prompt is not accepted.
     assert.equal(composerAcceptedPrompt(prompt, "something else entirely"), false);
+  });
+
+  test("treats a bubble that mounted before the baseline as the new answer", () => {
+    // Captured live: a complete <tool> envelope was in the DOM, but the baseline count had already
+    // included the bubble, so `count > initial` rejected it and the turn burned 153s.
+    const baseline = { count: 1, text: "" };
+    const state = {
+      count: 1,
+      text: '<tool>{"name":"list","arguments":{"path":"."},"_nonce":"mkcbwu8b"}</tool>',
+    };
+    assert.equal(isNewAssistantAnswer(state, baseline), true);
+  });
+
+  test("still ignores history that was already on the page", () => {
+    const baseline = { count: 1, text: "the previous answer" };
+    assert.equal(isNewAssistantAnswer(baseline, baseline), false);
+    // An extra node with no text yet is not an answer either.
+    assert.equal(isNewAssistantAnswer({ count: 2, text: "" }, baseline), false);
+    assert.equal(isNewAssistantAnswer({ count: 2, text: "   " }, baseline), false);
+  });
+
+  test("accepts a genuinely new message that only added a node", () => {
+    assert.equal(isNewAssistantAnswer({ count: 1, text: "Hello!" }, { count: 0, text: "" }), true);
   });
 });

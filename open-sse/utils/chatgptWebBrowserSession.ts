@@ -39,6 +39,12 @@ const COMPOSER_SUBMIT_MS = 1_200;
 const COMPOSER_TYPED_TIMEOUT_MS = 15_000;
 const RENDERED_POLL_MS = 1_500;
 const RENDERED_STABLE_TICKS = 2;
+/**
+ * How long an assistant bubble may stay mounted-empty with generation already finished before the
+ * turn is declared dead. Short on purpose: the adapter retries and that retry is what actually
+ * produces the answer (observed ~15s), so waiting longer only delays the inevitable.
+ */
+const COMPOSER_EMPTY_ASSISTANT_GRACE_MS = 6_000;
 
 export interface ChatGptWebBrowserSession {
   url(): string;
@@ -77,6 +83,23 @@ export interface ChatGptWebBrowserTurnRequest {
 export function composerAcceptedPrompt(prompt: string, composerText: string): boolean {
   const expectedTail = prompt.replace(/\s+/g, "").slice(-40);
   return composerText.replace(/\s+/g, "").includes(expectedTail);
+}
+
+/**
+ * Is the last assistant message a NEW answer, or history that was already on the page when the turn
+ * started?
+ *
+ * Counting alone is not enough: the SPA can mount the assistant bubble before the baseline is
+ * captured, so `count > initial` rejected the genuine answer forever. Observed live with a complete
+ * `<tool>` envelope sitting in the DOM (`count=1 initial=1 textLen=73`) while the turn burned its
+ * entire budget and only the retry — whose timing differed — returned in ~15s.
+ */
+export function isNewAssistantAnswer(
+  state: { count: number; text: string },
+  baseline: { count: number; text: string }
+): boolean {
+  if (!state.text.trim()) return false;
+  return state.count > baseline.count || state.text !== baseline.text;
 }
 
 export interface ChatGptWebBrowserTurnResult {
@@ -421,6 +444,7 @@ class ChatGptWebBrowserTurnRunner {
   }
 
   private handleBootstrap(sseText: string): void {
+    this.bootstrapCount += 1;
     if (this.settled) return;
     if (this.topicStream) {
       this.fail(new Error("ChatGPT Web browser turn received more than one handoff"));
@@ -444,7 +468,11 @@ class ChatGptWebBrowserTurnRunner {
     }
   }
 
+  private frameCount = 0;
+  private bootstrapCount = 0;
+
   private handleWebSocketFrame(frameText: string): void {
+    this.frameCount += 1;
     if (this.settled) return;
     if (this.topicStream) {
       this.ingestFrame(frameText);
@@ -684,6 +712,7 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
   }
 
   async submitPromptViaComposer(request: ChatGptWebBrowserSubmission): Promise<void> {
+    const __stallStart = Date.now();
     requireFirstPartyUrl(this.page.url());
     const prompt = requirePrompt(request.prompt);
 
@@ -727,6 +756,9 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
         throw new Error("ChatGPT Web composer did not accept the prompt");
       }
     }
+    console.warn(
+      `[chatgpt-web] composer accepted the prompt (${Date.now() - __stallStart}ms since submit start)`
+    );
     // Enter is the reliable submit; the send button can render before it is enabled.
     await this.page.keyboard.press("Enter");
     await this.page.waitForTimeout(COMPOSER_SUBMIT_MS);
@@ -788,33 +820,79 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
   }
 
   /** Wait for a new assistant message and return its rendered text once it stops growing. */
+  /** Count of assistant messages plus the current text of the last one, read atomically. */
+  private async readAssistantState(): Promise<{
+    count: number;
+    text: string;
+    streaming: boolean;
+    emptyNode: boolean;
+  }> {
+    return this.page.evaluate(() => {
+      const nodes = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-message-author-role="assistant"]')
+      );
+      const lastNode = nodes[nodes.length - 1];
+      // textContent, not innerText: the message node can mount with its content not yet laid
+      // out, and innerText returns "" for a visible-but-unrendered subtree.
+      const text = lastNode ? (lastNode.textContent ?? "").trim() : "";
+      return {
+        count: nodes.length,
+        text,
+        streaming: Boolean(document.querySelector('[data-testid="stop-button"]')),
+        emptyNode: Boolean(lastNode) && !text,
+      };
+    });
+  }
+
   async awaitRenderedAssistantText(timeoutMs: number): Promise<string | null> {
     const deadline = Date.now() + timeoutMs;
-    const initial = await this.countAssistantMessages();
+    // Baseline must be captured atomically with the text it corresponds to. Counting alone raced
+    // the SPA: when the assistant bubble mounted before the count was taken, `initial` already
+    // included the NEW message, so the `count > initial` guard rejected the real answer forever and
+    // the turn burned its whole budget with a complete `<tool>` envelope sitting in the DOM.
+    const baseline = await this.readAssistantState();
+    const initial = baseline.count;
+    const initialText = baseline.text;
     let last = "";
     let stableTicks = 0;
+    // Diagnostics: remember what the page looked like when we gave up, so a stalled turn can be
+    // attributed instead of guessed. Never returned to clients.
+    let lastState: Record<string, unknown> = {};
+    let emptySince = 0;
+    const startedAt = Date.now();
+    let nextDiagAt = startedAt + 10_000;
     while (Date.now() < deadline) {
       await this.page.waitForTimeout(RENDERED_POLL_MS);
-      const state = await this.page.evaluate(() => {
-        const nodes = Array.from(
-          document.querySelectorAll<HTMLElement>('[data-message-author-role="assistant"]')
-        );
-        const lastNode = nodes[nodes.length - 1];
-        // textContent, not innerText: the message node can mount with its content not yet
-        // laid out, and innerText returns "" for a visible-but-unrendered subtree.
-        const text = lastNode ? (lastNode.textContent ?? "").trim() : "";
-        return {
-          count: nodes.length,
-          text,
-          streaming: Boolean(document.querySelector('[data-testid="stop-button"]')),
-        };
-      });
+      const state = await this.readAssistantState();
       // A newly mounted node may still be empty; keep polling rather than treating the
       // blank as the final answer.
-      if (state.count <= initial || !state.text) {
+      lastState = {
+        count: state.count,
+        initial,
+        textLen: state.text.length,
+        streaming: state.streaming,
+        tail: state.text.slice(-80),
+      };
+      void startedAt;
+      void nextDiagAt;
+      if (!isNewAssistantAnswer(state, { count: initial, text: initialText })) {
         stableTicks = 0;
+        // An assistant bubble that mounted, finished generating (no stop button) and stayed empty
+        // is a dead turn: ChatGPT produced no answer for this attempt. Observed live as
+        // `<div class="flex w-full flex-col gap-1 empty:hidden"></div>` with no stream text —
+        // waiting the full budget only burns 153s before the retry that succeeds in ~15s.
+        // Fail fast so the adapter retries immediately instead.
+        if (state.count > initial && !state.streaming && state.emptyNode) {
+          if (!emptySince) emptySince = Date.now();
+          else if (Date.now() - emptySince >= COMPOSER_EMPTY_ASSISTANT_GRACE_MS) {
+            throw new Error("ChatGPT Web assistant response stayed empty");
+          }
+        } else {
+          emptySince = 0;
+        }
         continue;
       }
+      emptySince = 0;
       if (state.text === last && !state.streaming) {
         stableTicks += 1;
         if (stableTicks >= RENDERED_STABLE_TICKS) return state.text;
@@ -823,6 +901,30 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
       }
       last = state.text;
     }
+    const deep = await this.page
+      .evaluate(() => {
+        const nodes = Array.from(
+          document.querySelectorAll<HTMLElement>("[data-message-author-role]")
+        );
+        const last = nodes[nodes.length - 1] as HTMLElement | undefined;
+        return {
+          url: location.href.replace("https://chatgpt.com", ""),
+          roles: nodes.map((n) => n.getAttribute("data-message-author-role")),
+          lastHtml: (last?.innerHTML ?? "").slice(0, 240),
+          lastChildClasses: Array.from(last?.querySelectorAll("*") ?? [])
+            .slice(0, 6)
+            .map((el) => String(el.className).slice(0, 40)),
+          stopButton: Boolean(document.querySelector('[data-testid="stop-button"]')),
+          sendButton: Boolean(document.querySelector('[data-testid="send-button"]')),
+          bodyTextHead: (document.body?.innerText ?? "").replace(/\s+/g, " ").slice(0, 200),
+        };
+      })
+      .catch((error) => ({ evaluateFailed: String(error).slice(0, 120) }));
+    console.warn(
+      `[chatgpt-web] rendered read gave up after ${timeoutMs}ms: ` +
+        `last=${JSON.stringify(lastState)} returnedLen=${last.trim().length} ` +
+        `deep=${JSON.stringify(deep)}`
+    );
     return last.trim() ? last.trim() : null;
   }
 }

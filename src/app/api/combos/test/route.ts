@@ -9,6 +9,7 @@ import {
   resolveModelTestTimeoutMs,
 } from "@/lib/api/modelTestRunner";
 import { getRuntimePorts } from "@/lib/runtime/ports";
+import { requiresWebSessionCredential } from "@/shared/providers/webSessionCredentials";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import type { ResolvedComboTarget } from "@omniroute/open-sse/services/combo/types.ts";
 import { testComboSchema } from "@/shared/validation/schemas";
@@ -76,6 +77,14 @@ async function testComboTarget(
       return buildComboTestResult(target, {
         status: "error",
         error: "Combo step is missing a model id (modelStr). Re-save the combo to refresh it.",
+        latencyMs: 0,
+      });
+    }
+    if (requiresWebSessionCredential(target.provider)) {
+      return buildComboTestResult(target, {
+        status: "error",
+        error:
+          "Skipped: web-session providers are excluded from chat probes to avoid creating provider conversations",
         latencyMs: 0,
       });
     }

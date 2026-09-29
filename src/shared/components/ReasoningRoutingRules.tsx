@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
-import { codexModelFamilySupportsExtendedEffort } from "@/shared/reasoning/codexExtendedEffort";
 import Button from "./Button";
 import Card from "./Card";
 import Input from "./Input";
@@ -12,6 +11,12 @@ import Toggle from "./Toggle";
 import { ConfirmModal } from "./Modal";
 import RoutingChoice from "./routing/RoutingChoice";
 import { readCatalogModels } from "./ModelSelectField";
+import {
+  EXTENDED_REASONING_EFFORTS,
+  getReasoningRoutingTargetEffortOptions,
+  STANDARD_REASONING_EFFORTS,
+  supportsExtendedCodexEffort,
+} from "@/shared/reasoning/reasoningRoutingEfforts";
 
 type RuleScope = "global" | "apiKey" | "combo" | "model" | "connection";
 type TargetKind = "keep" | "model" | "combo";
@@ -65,9 +70,6 @@ type FormState = {
   enabled: boolean;
 };
 
-const STANDARD_EFFORTS = ["none", "low", "medium", "high", "xhigh"];
-const EXTENDED_EFFORTS = ["max", "ultra"];
-
 function emptyRule(apiKeyId?: string): FormState {
   return {
     name: "",
@@ -90,12 +92,6 @@ function emptyRule(apiKeyId?: string): FormState {
     priority: "0",
     enabled: true,
   };
-}
-
-// Same alias-set source as the routing policy, but any provider namespace
-// (`openai/`, `github/`, `opencode-zen/`, `codex/`…) is stripped first.
-function supportsExtendedCodexEffort(model: string, effort: "max" | "ultra"): boolean {
-  return codexModelFamilySupportsExtendedEffort(model.trim().replace(/^[^/]+\//, ""), effort);
 }
 
 export default function ReasoningRoutingRules({
@@ -217,28 +213,22 @@ export default function ReasoningRoutingRules({
     return /^gpt-5\.6-luna(?:-|$)/.test(normalized);
   }, [targetModelForCapability]);
 
+  // gpt-5.6-luna accepts `max` but not `ultra`: a saved `ultra` is coerced to
+  // `max` so the editor never re-offers (or re-saves) a tier the upstream 400s.
   const currentTargetEffort =
     isLunaTarget && form.targetEffort === "ultra" ? "max" : form.targetEffort;
 
-  const effortOptions = useMemo(() => {
-    const values = [...STANDARD_EFFORTS];
-    for (const effort of EXTENDED_EFFORTS) {
-      if (effort === "ultra" && isLunaTarget) {
-        continue;
-      }
-      if (
-        supportsExtendedCodexEffort(targetModelForCapability, effort as "max" | "ultra") ||
-        currentTargetEffort === effort
-      ) {
-        values.push(effort);
-      }
-    }
-    return values.map((value) => ({ value, label: value }));
-  }, [currentTargetEffort, isLunaTarget, targetModelForCapability]);
+  const effortOptions = useMemo(
+    () =>
+      getReasoningRoutingTargetEffortOptions(targetModelForCapability, currentTargetEffort).map(
+        (value) => ({ value, label: value })
+      ),
+    [currentTargetEffort, targetModelForCapability]
+  );
 
   const capabilityWarning = useMemo(() => {
     if (form.effortMode === "inherit") return "";
-    if (!EXTENDED_EFFORTS.includes(currentTargetEffort)) return "";
+    if (!(EXTENDED_REASONING_EFFORTS as readonly string[]).includes(currentTargetEffort)) return "";
     if (form.targetKind === "combo") return t("extendedComboWarning");
     if (!targetModelForCapability.trim()) return t("extendedUnknownWarning");
     return supportsExtendedCodexEffort(
@@ -779,10 +769,12 @@ export default function ReasoningRoutingRules({
                       options={[
                         { value: "any", label: t("any") },
                         { value: "missing", label: t("missing") },
-                        ...[...STANDARD_EFFORTS, ...EXTENDED_EFFORTS].map((value) => ({
-                          value,
-                          label: value,
-                        })),
+                        ...[...STANDARD_REASONING_EFFORTS, ...EXTENDED_REASONING_EFFORTS].map(
+                          (value) => ({
+                            value,
+                            label: value,
+                          })
+                        ),
                       ]}
                     />
                   </div>
@@ -974,7 +966,7 @@ export default function ReasoningRoutingRules({
             options={[
               { value: "missing", label: t("missing") },
               { value: "signal", label: t("signalOnly") },
-              ...[...STANDARD_EFFORTS, ...EXTENDED_EFFORTS].map((value) => ({
+              ...[...STANDARD_REASONING_EFFORTS, ...EXTENDED_REASONING_EFFORTS].map((value) => ({
                 value,
                 label: value,
               })),

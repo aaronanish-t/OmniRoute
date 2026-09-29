@@ -2238,8 +2238,8 @@ export function checkFallbackError(
     };
   }
 
-  // 400 — context overflow / malformed request / model access denied
-  if (status === HTTP_STATUS.BAD_REQUEST) {
+  // 400/422 — context overflow / malformed or rejected request shape / model access denied
+  if (status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
     const modelUnavailable = getOpencodeModelUnavailableMatch(provider, status, headers, errorStr);
     if (modelUnavailable) return ruleScopedResult(modelUnavailable);
     // Check structured error codes first (more reliable, no false positives)

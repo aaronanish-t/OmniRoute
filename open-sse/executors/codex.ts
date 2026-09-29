@@ -45,7 +45,7 @@ import { CORS_HEADERS } from "../utils/cors.ts";
 import { projectCodexPublicError } from "../utils/codexPublicError.ts";
 import { errorResponse } from "../utils/error.ts";
 import { buildSyntheticResponsesFailedEvent } from "../utils/responsesSequence.ts";
-import { hasStreamReadinessSignal } from "../utils/streamReadiness.ts";
+import { hasCodexSsePeekProgress } from "./codex/ssePeekProgress.ts";
 import { normalizeCodexResponsesInput } from "../utils/responsesInputNormalization.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
 import { createRequire } from "module";
@@ -687,13 +687,9 @@ export async function peekCodexSseTransientError(
         matched = hit;
         break;
       }
-      // A valid SSE readiness event means the normal readiness/stream watchdog
-      // pipeline can take over. Do not keep reasoning/tool/lifecycle frames in
-      // this pre-read until a text delta or an arbitrary byte cap: that would
-      // leave the combo target deadline running while the upstream is making
-      // progress. `hasStreamReadinessSignal` accepts Responses lifecycle,
-      // reasoning, and tool events while ignoring comments/heartbeats.
-      if (hasStreamReadinessSignal(text)) {
+      // Hand off actual text/reasoning/tool progress, but retain the early
+      // error window across lifecycle-only frames such as response.created.
+      if (hasCodexSsePeekProgress(text)) {
         break;
       }
     }

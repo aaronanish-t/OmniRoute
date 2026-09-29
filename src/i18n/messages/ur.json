@@ -3670,7 +3670,7 @@
       }
     },
     "templateFreeStack": "مفت اسٹیک ($0)",
-    "templateFreeStackDesc": "تمام مفت فراہم کنندگان میں باری باری تقسیم: Kiro (Claude)، Qoder (5 ماڈلز)، Qwen (4 ماڈلز)۔ کوئی لاگت نہیں، کوڈنگ کبھی نہیں رکتی۔",
+    "templateFreeStackDesc": "تمام مفت فراہم کنندگان میں باری باری تقسیم: Antigravity (Gemini)، Kiro (Claude)، Qoder (3 ماڈلز)، NVIDIA، Groq۔ کوئی لاگت نہیں، کوڈنگ کبھی نہیں رکتی۔",
     "auto": "ذہین آٹو",
     "autoDesc": "کثیر عنصری اسکورنگ کے ساتھ خودکار طور پر بحال ہونے والا اسمارٹ روٹنگ پول",
     "lkgp": "LKGP موڈ",

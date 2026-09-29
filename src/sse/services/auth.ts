@@ -5,6 +5,7 @@ import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
 import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
+import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
 import {
   getCachedRawProviderConnections,
   getCachedProviderNodes,
@@ -3029,12 +3030,12 @@ export async function markAccountUnavailable(
       provider &&
       provider !== "codex" &&
       model &&
-      (status === 404 || isNvidiaModelGone || status === 429 || status >= 500)
+      isModelScopedFailure(status, isNvidiaModelGone, fallbackResult)
     ) {
       const reason =
         status === 404 || isNvidiaModelGone
           ? "not_found"
-          : status === 429 && fallbackResult.reason === RateLimitReason.QUOTA_EXHAUSTED
+          : isQuotaExhaustedSignal(fallbackResult)
             ? "quota_exhausted"
             : status === 429
               ? "rate_limited"

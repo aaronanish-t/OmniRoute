@@ -3272,6 +3272,20 @@ async function handleChatCoreInner({
               const res = normalizeExecutorResult(rawExecutorResult);
               trace("post_executor", { status: res?.response?.status });
 
+              // When a payload override rewrote body.model (custom-model alias →
+              // real upstream id, e.g. `gemini-3.7-flash-high` → `gemini-3.7-flash`),
+              // log and track the WIRE model so dashboards/telemetry reflect what
+              // actually shipped and Gemini rate-limit accounting uses the real id
+              // (the executor already built its URL from the same rewritten model).
+              const wireModel =
+                typeof res.model === "string" && res.model ? res.model : modelToCall;
+              if (wireModel !== modelToCall) {
+                log?.debug?.(
+                  "PAYLOAD_RULES",
+                  `Payload rules rewrote model for URL: requested=${modelToCall} wire=${wireModel}`
+                );
+              }
+
               if (
                 provider === "codex" &&
                 attemptConnectionId &&
@@ -3309,7 +3323,7 @@ async function handleChatCoreInner({
 
               // Track Gemini RPM + RPD request counts for 429 classification
               if (provider === "gemini") {
-                incrementRequestCount(modelToCall);
+                incrementRequestCount(wireModel);
               }
 
               updatePendingScope(pendingScope, {
@@ -5906,9 +5920,9 @@ async function handleChatCoreInner({
   // issue bounded retries through the normal credential path BEFORE anything is
   // exposed to the client — in particular before `onRequestSuccess` below.
   // Empty turns are stochastic upstream misses, not account faults, so no
-  // cooldown and no forced exclusion: the round-robin picker may rotate
-  // fingerprint slots opportunistically, a single slot simply replays the same
-  // account. Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
+  // cooldown: the retry prefers another allowed connection, a single slot
+  // replays itself, and a leased or pinned connection never rotates (#14715).
+  // Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
   // back to the current behavior. Translate-path streams only (mirror of the
   // empty-stream guard); flag off = byte-for-byte unchanged. Bounded reader
   // (abandon past the cap, never a full `text()` read); the original
@@ -5947,6 +5961,7 @@ async function handleChatCoreInner({
         traceId,
         log,
         getProviderCredentials,
+        routing: { leased: Boolean(managedLease), forcedConnectionId, apiKey: apiKeyInfo },
         executeProviderRequest,
         logTargetRequest: (url, headers, body) => reqLogger.logTargetRequest(url, headers, body),
         captureBody: (body) => providerRequestCapture.body(body),

@@ -1203,6 +1203,8 @@
     "batchGroup": "Xử lý theo lô",
     "homeSubtitle": "Tổng quan bảng điều khiển",
     "providersSubtitle": "Quản lý nhà cung cấp AI",
+    "modelCatalog": "Danh mục mô hình",
+    "modelCatalogSubtitle": "Duyệt mô hình trên các nhà cung cấp",
     "quotaTrackerSubtitle": "Theo dõi giới hạn mức sử dụng",
     "providerQuotaSubtitle": "Theo dõi giới hạn mức sử dụng của nhà cung cấp",
     "runtimeSubtitle": "Khả năng phục hồi thời gian thực & phiên làm việc",
@@ -3670,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Bộ miễn phí ($0)",
-    "templateFreeStackDesc": "Định tuyến xoay vòng qua tất cả nhà cung cấp miễn phí: Kiro (Claude), Qoder (5 mô hình), Qwen (4 mô hình). Không tốn chi phí, không bao giờ ngừng lập trình.",
+    "templateFreeStackDesc": "Định tuyến xoay vòng qua tất cả nhà cung cấp miễn phí: Antigravity (Gemini), Kiro (Claude), Qoder (3 mô hình), NVIDIA, Groq. Không tốn chi phí, không bao giờ ngừng lập trình.",
     "auto": "Tự động thông minh",
     "autoDesc": "Nhóm định tuyến thông minh tự phục hồi với tính điểm đa yếu tố",
     "lkgp": "Chế độ LKGP",

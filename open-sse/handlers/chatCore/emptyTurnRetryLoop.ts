@@ -15,6 +15,8 @@ import {
   judgeBufferedTurn,
   readBoundedResponseOutcome,
   FLUSH_EMPTY_RETRY_MAX_BYTES,
+  pickEmptyTurnRetryCredentials,
+  type RetryRouting,
 } from "../../utils/emptyTurnRetry.ts";
 import { noteBufferedVerdictOutcome } from "./emptyTurnResilienceNotes.ts";
 import { STREAM_RECOVERY } from "../../config/constants.ts";
@@ -49,6 +51,13 @@ export interface EmptyTurnRetryDeps {
   traceId: string | null;
   log: LoggerLike;
   getProviderCredentials?: typeof defaultGetProviderCredentials;
+  /**
+   * Routing constraints of the original selection (#14715): a managed lease or a
+   * pinned connection replays itself, and the key's connection allowlist bounds
+   * the retry. Absent = no constraint (the connection that served the turn is
+   * still excluded first).
+   */
+  routing?: RetryRouting;
   executeProviderRequest: (model: string, allowDedup: boolean) => Promise<unknown>;
   noteOutcome?: typeof noteBufferedVerdictOutcome;
   logTargetRequest: (url: string, headers: Record<string, string>, body: unknown) => void;
@@ -148,12 +157,20 @@ async function attemptRetry(
     false
   );
 
-  const nextCreds = (await getProviderCredentials(
-    deps.provider,
-    null,
-    null,
-    deps.currentModel
-  ).catch(() => null)) as { connectionId?: string } | null;
+  // A direct getProviderCredentials call (not a bare reference) keeps this site in the
+  // hard-session-lease inventory; the retry is fenced by executeProviderRequest().
+  const selectRetryCredentials = (
+    provider: string,
+    excludeConnectionId: string | null,
+    allowedConnections: string[] | null,
+    requestedModel: string | null
+  ) => getProviderCredentials(provider, excludeConnectionId, allowedConnections, requestedModel);
+  const nextCreds = (await pickEmptyTurnRetryCredentials(selectRetryCredentials, {
+    ...(deps.routing ?? { leased: false, forcedConnectionId: null, apiKey: null }),
+    provider: deps.provider,
+    model: deps.currentModel,
+    current: deps.credentials,
+  })) as { connectionId?: string } | null;
   if (!nextCreds?.connectionId) return null;
 
   const snapshot = { ...deps.credentials };

@@ -87,3 +87,9 @@ test("with the SSRF Guard unset everywhere, private URLs stay closed", async () 
     assert.equal(getProviderValidationGuard(), "block-metadata");
   });
 });
+
+// The DB overrides above open the SQLite singleton; release it so the runner can exit.
+test.after(async () => {
+  const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+  resetDbInstance();
+});

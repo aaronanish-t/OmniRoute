@@ -600,9 +600,11 @@ export default function ConnectionRow({
               </Badge>
             )}
             {planLabel && (
-              <Badge variant="primary" size="sm" className="capitalize" title={t("quotaPlanBadge")}>
-                {planLabel}
-              </Badge>
+              <span title={t("quotaPlanBadge")}>
+                <Badge variant="primary" size="sm" className="capitalize">
+                  {planLabel}
+                </Badge>
+              </span>
             )}
             {/* T12: Token expiry status indicator (state-driven, no Date.now in render) */}
             {/* #5836: the red "Token Expired" badge is TERMINAL-only — for OAuth

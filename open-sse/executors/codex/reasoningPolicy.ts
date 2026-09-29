@@ -1,5 +1,6 @@
 import {
   CODEX_EFFORT_ORDER as EFFORT_ORDER,
+  getCodexAliasEffortCap,
   splitCodexReasoningSuffix,
   type CodexEffortLevel as EffortLevel,
 } from "./reasoningSuffix.ts";
@@ -15,11 +16,9 @@ function effort(value: unknown): string | undefined {
 /**
  * Maximum reasoning effort allowed per Codex model.
  * Fallback for legacy catalog entries only. Discovered metadata takes precedence.
+ * Max/ultra-tier models come from the alias sets in reasoningSuffix.ts.
  */
 const MAX_EFFORT_BY_MODEL: Record<string, EffortLevel> = {
-  "gpt-5.6-sol": "ultra",
-  "gpt-5.6-terra": "ultra",
-  "gpt-5.6-luna": "max",
   "gpt-5.3-codex": "xhigh",
   "gpt-5.1-codex-max": "xhigh",
   "gpt-5-mini": "high",
@@ -31,8 +30,12 @@ const MAX_EFFORT_BY_MODEL: Record<string, EffortLevel> = {
  * Clamp reasoning effort to the model's maximum allowed level.
  * Returns the original value if within limits, or the cap if it exceeds it.
  */
+function legacyEffortCap(model: string): EffortLevel | null {
+  return MAX_EFFORT_BY_MODEL[model] ?? getCodexAliasEffortCap(model);
+}
+
 function clampEffort(model: string, requested: string): string {
-  const max = MAX_EFFORT_BY_MODEL[model];
+  const max = legacyEffortCap(model);
   if (!max) return requested;
   const reqIdx = EFFORT_ORDER.indexOf(requested as EffortLevel);
   const maxIdx = EFFORT_ORDER.indexOf(max);
@@ -43,13 +46,47 @@ function clampEffort(model: string, requested: string): string {
   return requested;
 }
 
-/** Apply a catalog-resolved selection without parsing a real upstream ID twice. */
+/**
+ * The Codex Responses API accepts only `effort` and `summary` inside `reasoning`.
+ * Client ecosystems send OpenRouter-style keys (`enabled`, `max_tokens`, `exclude`, ...)
+ * that the upstream rejects with HTTP 400 "Unknown parameter: 'reasoning.<key>'", so the
+ * object is whitelisted before it reaches the wire (#13643). Runs even when no effort was
+ * resolved, because the client's original object is forwarded unchanged in that case.
+ */
+function whitelistWireReasoning(body: RecordValue): void {
+  const wire = body.reasoning;
+  if (!wire || typeof wire !== "object" || Array.isArray(wire)) return;
+  const record = wire as RecordValue;
+  for (const key of Object.keys(record)) {
+    if (key !== "effort" && key !== "summary") delete record[key];
+  }
+  if (Object.keys(record).length === 0) delete body.reasoning;
+}
+
+/**
+ * Apply a catalog-resolved selection without parsing a real upstream ID twice, then
+ * whitelist the wire `reasoning` object. `forcedEffort` is a server-selected force rule
+ * and outranks every request-side source.
+ */
 export function applyCodexReasoningSelection(
   model: string,
   body: RecordValue,
   metadataInput: unknown,
   connectionDefault: string | undefined,
-  allowDefaults: boolean
+  allowDefaults: boolean,
+  forcedEffort?: string
+): void {
+  selectCodexReasoning(model, body, metadataInput, connectionDefault, allowDefaults, forcedEffort);
+  whitelistWireReasoning(body);
+}
+
+function selectCodexReasoning(
+  model: string,
+  body: RecordValue,
+  metadataInput: unknown,
+  connectionDefault: string | undefined,
+  allowDefaults: boolean,
+  forcedEffort: string | undefined
 ): void {
   const metadata = asRecord(metadataInput);
   const requestedModel = typeof body.model === "string" ? body.model : model;
@@ -67,12 +104,17 @@ export function applyCodexReasoningSelection(
     hasCatalog && allowDefaults && Object.hasOwn(metadata, "requestedThinkingEffort")
       ? effort(metadata.requestedThinkingEffort)
       : effort(reasoning.effort) || effort(body.reasoning_effort);
+  // OpenRouter-style `enabled: false` asks for reasoning to be off. It wins over the
+  // connection default but still loses to any per-request effort selection.
   const selected =
+    effort(forcedEffort) ||
     split.effort ||
     requested ||
-    (allowDefaults
-      ? connectionDefault || effort(metadata.defaultThinkingEffort) || "medium"
-      : undefined);
+    (reasoning.enabled === false
+      ? "none"
+      : allowDefaults
+        ? connectionDefault || effort(metadata.defaultThinkingEffort) || "medium"
+        : undefined);
   if (!selected) return;
   // New catalog values pass through verbatim, including upstream validation errors.
   // Only the old built-in Ultra aliases retain their historical Max wire mapping.
@@ -80,8 +122,6 @@ export function applyCodexReasoningSelection(
   body.reasoning = {
     ...reasoning,
     effort:
-      !hasCatalog && MAX_EFFORT_BY_MODEL[split.baseModel] && resolved === "ultra"
-        ? "max"
-        : resolved,
+      !hasCatalog && legacyEffortCap(split.baseModel) && resolved === "ultra" ? "max" : resolved,
   };
 }

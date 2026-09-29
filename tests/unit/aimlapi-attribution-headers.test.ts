@@ -79,10 +79,11 @@ test("the generated legacy provider map carries the headers through to dispatch"
   assert.equal(legacy.headers?.["X-AIMLAPI-Source"], "agent/omniroute");
 });
 
-test("the user-facing provider label is exactly aimlapi.com", () => {
+test("the provider keeps the label OmniRoute already shipped", () => {
   // The machine id (`aimlapi`) and alias (`aiml`) are what users' configs and the
-  // DB reference, so they must not change; only the display string does.
-  assert.equal(APIKEY_PROVIDERS.aimlapi.name, "aimlapi.com");
+  // DB reference. The display string is OmniRoute's to choose, and it already had
+  // the brand right, so this integration leaves all three alone.
+  assert.equal(APIKEY_PROVIDERS.aimlapi.name, "AI/ML API");
   assert.equal(APIKEY_PROVIDERS.aimlapi.id, "aimlapi");
   assert.equal(APIKEY_PROVIDERS.aimlapi.alias, "aiml");
 });

@@ -44,12 +44,12 @@ export const aimlapiProvider: RegistryEntry = {
   // advertises tools, vision, reasoning and structured output. Same for
   // claude-opus-4.7 / 4.8.
   models: [
-    { id: "gpt-5", name: "GPT-5 (via aimlapi.com)" },
-    { id: "claude-sonnet-4.6", name: "Claude 4.6 Sonnet (via aimlapi.com)" },
-    { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro (via aimlapi.com)" },
-    { id: "glm-5", name: "GLM-5 (via aimlapi.com)" },
-    { id: "deepseek-chat", name: "DeepSeek V3 (via aimlapi.com)" },
-    { id: "mistral-large", name: "Mistral Large (via aimlapi.com)" },
+    { id: "gpt-5", name: "GPT-5 (via AI/ML API)" },
+    { id: "claude-sonnet-4.6", name: "Claude 4.6 Sonnet (via AI/ML API)" },
+    { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro (via AI/ML API)" },
+    { id: "glm-5", name: "GLM-5 (via AI/ML API)" },
+    { id: "deepseek-chat", name: "DeepSeek V3 (via AI/ML API)" },
+    { id: "mistral-large", name: "Mistral Large (via AI/ML API)" },
   ],
   passthroughModels: true,
 };

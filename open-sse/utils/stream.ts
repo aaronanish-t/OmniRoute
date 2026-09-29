@@ -1,6 +1,7 @@
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
-import { trackPendingRequest, appendRequestLog } from "@/lib/usageDb";
+import { appendRequestLog } from "@/lib/usageDb";
+import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
 import {
   extractUsage,
   hasValidUsage,
@@ -53,6 +54,7 @@ import {
   type StreamFailurePayload,
 } from "./streamErrorFormat.ts";
 import { createStreamFailureAborter } from "./streamFailureBoundary.ts";
+import { createReasoningStreamObserver } from "./responsesReasoningObservation.ts";
 import { recordToolLatency } from "../services/toolLatencyTracker.ts";
 import { extractToolSchemaMap } from "../translator/response/openai-responses/toolSchemas.ts";
 import {
@@ -144,6 +146,15 @@ type StreamCompletePayload = {
   itlMs?: number | null;
   /** True when the stream was interrupted (timeout/abort/error) before a clean finish. */
   interrupted?: boolean;
+  /**
+   * Encrypted-reasoning observation (Responses opaque `reasoning` items):
+   * flag when seen, wall-clock added→done delta when paired. Efforts are
+   * read at the sink from the request bodies — never threaded here.
+   */
+  reasoningMeta?: {
+    encryptedSeen: boolean;
+    durationMs: number | null;
+  } | null;
 };
 
 /** Queue budget every provider used before `streamBufferBytes` existed. */
@@ -197,6 +208,7 @@ type StreamOptions = {
    * codex-compatible `namespace` + `name` fields.
    */
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
+  pendingRequestId?: string | null;
 };
 
 type TranslateState = ReturnType<typeof initState> & {
@@ -608,7 +620,8 @@ function getOpenAIIntermediateChunks(value: unknown): unknown[] {
 
 export function restoreClaudePassthroughToolUseName(
   parsed: JsonRecord,
-  toolNameMap: unknown
+  toolNameMap: unknown,
+  requestTools?: unknown
 ): boolean {
   const block =
     parsed.content_block && typeof parsed.content_block === "object"
@@ -617,11 +630,82 @@ export function restoreClaudePassthroughToolUseName(
   if (!block || block.type !== "tool_use" || typeof block.name !== "string") return false;
 
   const map = toolNameMap instanceof Map ? toolNameMap : null;
-  const restoredName = restoreClaudeToolName(block.name, map);
 
+  // 1) Alias ledger, direct lookups only. restoreClaudeToolName() is NOT used
+  //    here on purpose: its canonical-upgrade fallback (bash -> Bash) fires
+  //    even when an alias ledger exists (canonical beats the identity match),
+  //    which poisoned claude->claude passthrough: the proxy_ ledger
+  //    (buildClaudePassthroughToolNameMap) is always non-empty for claude
+  //    passthrough, so every lowercase-declaring client (pi/OpenCode on
+  //    claude-format executors like devin-cli-agentic) received "Bash" on the
+  //    SSE path while the JSON path (direct map.get) stayed correct (#12721).
+  if (map && map.size > 0) {
+    const exact = map.get(block.name);
+    if (typeof exact === "string" && exact !== block.name) {
+      block.name = exact;
+      return true;
+    }
+    const lower = block.name.toLowerCase();
+    for (const [sanitized, original] of map.entries()) {
+      if (sanitized.toLowerCase() !== lower && original.toLowerCase() !== lower) {
+        continue;
+      }
+      if (original !== block.name) {
+        block.name = original;
+        return true;
+      }
+      break; // identity echo in the ledger — nothing to restore
+    }
+  }
+
+  // 2) Normalize upstream case drift to the request's DECLARED casing so a
+  //    passthrough can never hand the client a name it did not declare
+  //    (#12721). Conversely a genuine Claude Code client (declared "Bash")
+  //    still gets "Bash" back when an OpenAI-style upstream downcased it
+  //    (#7926).
+  const declaredName = findDeclaredToolName(requestTools, block.name);
+  if (declaredName !== null) {
+    if (declaredName === block.name) return false;
+    block.name = declaredName;
+    return true;
+  }
+
+  // 3) Undeclared name with no alias: legacy canonicalization (canonical
+  //    Claude Code spelling) as a last resort for CC-shaped traffic whose
+  //    request body carries no tools[] (server tools, bare probes).
+  if (map && map.size > 0) return false;
+  const restoredName = restoreClaudeToolName(block.name, null);
   if (restoredName === block.name) return false;
   block.name = restoredName;
   return true;
+}
+
+/**
+ * Exact- then case-insensitive lookup of `name` inside the request's tools[]
+ * (Anthropic `name` or OpenAI `function.name`). Returns the DECLARED spelling,
+ * or null when no declared tool matches (server tools, undeclared names).
+ */
+function findDeclaredToolName(requestTools: unknown, name: string): string | null {
+  if (!Array.isArray(requestTools)) return null;
+  const lower = name.toLowerCase();
+  let caseInsensitive: string | null = null;
+  for (const tool of requestTools) {
+    if (!tool || typeof tool !== "object" || Array.isArray(tool)) continue;
+    const item = tool as JsonRecord;
+    const directName = typeof item.name === "string" ? item.name.trim() : "";
+    const fn =
+      item.function && typeof item.function === "object" && !Array.isArray(item.function)
+        ? (item.function as JsonRecord)
+        : null;
+    const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
+    const declared = functionName || directName;
+    if (!declared) continue;
+    if (declared === name) return declared;
+    if (caseInsensitive === null && declared.toLowerCase() === lower) {
+      caseInsensitive = declared;
+    }
+  }
+  return caseInsensitive;
 }
 
 // Note: TextDecoder/TextEncoder are created per-stream inside createSSEStream()
@@ -677,8 +761,8 @@ export function createSSEStream(options: StreamOptions = {}) {
     customToolNames = new Set<string>(),
     requestToolIdentityMap = null,
     streamBufferBytes = DEFAULT_STREAM_BUFFER_BYTES,
+    pendingRequestId = null,
   } = options;
-  const signatureNamespace = connectionId;
   // Request-body-size metric (for monitoring payload size distribution & correlation with TTFT).
   // The size is JSON-serialised byte count; stored as a performance mark detail so monitoring
   // tools can query performance.getEntriesByType("mark") filtered by name.
@@ -766,7 +850,7 @@ export function createSSEStream(options: StreamOptions = {}) {
           ...(initState(sourceFormat) as TranslateState),
           provider,
           toolNameMap,
-          signatureNamespace,
+          signatureNamespace: connectionId,
           copilotCompatibleReasoning,
           suppressThinkClose,
           requestedThinking,
@@ -800,6 +884,10 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughLastChatId: string | null = null;
   let passthroughResponsesCurrentFunctionCallKey: string | null = null;
   const passthroughResponsesReasoningSummarySeen = new Set<string>();
+  // Encrypted-reasoning observation (never persisted, never stores content).
+  // Single line: the factory holds tracker + flag + duration (`take()` feeds
+  // both onComplete sites).
+  const reasoningObserver = createReasoningStreamObserver();
   // #6199 — commentary-phase items announced via `response.output_item.added` are
   // internal. Their `response.output_text.delta`/`response.output_text.done`/
   // `response.output_item.done` events do not carry the `phase`, so we remember the
@@ -1024,11 +1112,9 @@ export function createSSEStream(options: StreamOptions = {}) {
     }
   };
 
-  let pendingRequestClearedByStream = false;
+  const clearSeen = { done: false };
   const clearPendingRequestFromStream = () => {
-    if (pendingRequestClearedByStream) return;
-    pendingRequestClearedByStream = true;
-    trackPendingRequest(model, provider, connectionId, false);
+    clearPendingRequestOnce(clearSeen, { model, provider, connectionId, pendingRequestId });
   };
 
   const emitClaudeEmptyStreamErrorAndAbort = (
@@ -1594,6 +1680,12 @@ export function createSSEStream(options: StreamOptions = {}) {
                       passthroughResponsesReasoningSummarySeen.add(reasoningKey);
                     }
                   }
+                  // Track a reasoning opening (paired at `done` for the duration).
+                  if (
+                    parsed.type === "response.output_item.added" &&
+                    parsed.item?.type === "reasoning"
+                  )
+                    reasoningObserver.note(parsed, Date.now());
                   if (
                     parsed.type === "response.output_item.added" &&
                     parsed.item?.type === "function_call"
@@ -1651,6 +1743,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                   if (parsed.type === "response.output_item.done" && parsed.item) {
                     emitSyntheticResponsesReasoningSummary(controller, parsed);
                     pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [parsed.item]);
+                    // L12 replay already filtered above via isDuplicateResponsesSequence.
+                    reasoningObserver.note(parsed, Date.now());
                     if (parsed.item?.type === "function_call") {
                       const pendingKey =
                         typeof parsed.item.id === "string"
@@ -1795,7 +1889,11 @@ export function createSSEStream(options: StreamOptions = {}) {
                     return;
                   }
                   updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, parsed);
-                  const restoredToolName = restoreClaudePassthroughToolUseName(parsed, toolNameMap);
+                  const restoredToolName = restoreClaudePassthroughToolUseName(
+                    parsed,
+                    toolNameMap,
+                    body
+                  );
                   // Track content length and accumulate from Claude format
                   if (parsed.delta?.text) {
                     totalContentLength += parsed.delta.text.length;
@@ -1906,6 +2004,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed?.id != null && typeof parsed.id !== "string";
                   const rawDelta = parsed.choices?.[0]?.delta;
                   const hadReasoningAlias = hasUnsupportedReasoningSignal(rawDelta);
+                  const hadUpstreamReasoningContent =
+                    typeof rawDelta?.reasoning_content === "string" &&
+                    rawDelta.reasoning_content.length > 0;
 
                   if (!projectedFailure) {
                     parsed = sanitizeStreamingChunk(parsed);
@@ -1967,12 +2068,22 @@ export function createSSEStream(options: StreamOptions = {}) {
                   }
 
                   // Track whether we need to re-serialize (separate from injectedUsage
-                  // to avoid blocking subsequent finish_reason / usage mutations)
+                  // to avoid blocking subsequent finish_reason / usage mutations).
+                  // sanitizeStreamingChunk above can MIRROR reasoning_details[].text
+                  // into reasoning_content when the upstream only sent `reasoning`
+                  // (OpenRouter thinking models, #12665). hadReasoningAlias covers
+                  // reasoning_text/thinking/thought aliases, but a populated `reasoning`
+                  // string makes hasUnsupportedReasoningSignal return false — so we also
+                  // force a re-serialize when sanitize added a reasoning_content that the
+                  // upstream delta did not already carry.
                   const needsReserialization =
                     splitMixedReasoningContent ||
                     thinkParsed ||
                     hadReasoningAlias ||
-                    (delta?.content === "" && delta?.reasoning_content);
+                    (delta?.content === "" && delta?.reasoning_content) ||
+                    (!hadUpstreamReasoningContent &&
+                      typeof delta?.reasoning_content === "string" &&
+                      delta.reasoning_content.length > 0);
 
                   // T18: Track if we saw tool calls & accumulate for call log
                   if (delta?.tool_calls && delta.tool_calls.length > 0) {
@@ -2190,6 +2301,16 @@ export function createSSEStream(options: StreamOptions = {}) {
             continue;
           }
 
+          // Encrypted-reasoning observation on the raw event (replay already
+          // filtered above; never stores content, only presence + timing).
+          if (
+            targetFormat === FORMATS.OPENAI_RESPONSES &&
+            (parsed.type === "response.output_item.added" ||
+              parsed.type === "response.output_item.done") &&
+            (parsed as JsonRecord).item !== undefined
+          )
+            reasoningObserver.note(parsed, Date.now());
+
           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
           providerPayloadCollector.push(parsed);
           if (parsed && parsed.done) {
@@ -2244,7 +2365,17 @@ export function createSSEStream(options: StreamOptions = {}) {
               );
           }
           // Mirror only client-unsupported reasoning aliases into `reasoning_content`.
-          if (!openAiReasoning) {
+          // Gate on reasoning_content being ABSENT (not on getReadableReasoningValue
+          // which also includes the `reasoning` string): OpenRouter thinking models
+          // return BOTH `reasoning` and `reasoning_details[].text`, and `reasoning`
+          // alone previously skipped the mirror, dropping thinking traces for clients
+          // that only read `reasoning_content` (#12665).
+          const openAiReasoningContent =
+            typeof openAiDelta?.reasoning_content === "string" &&
+            openAiDelta.reasoning_content.length > 0
+              ? openAiDelta.reasoning_content
+              : "";
+          if (!openAiReasoningContent) {
             const delta = openAiDelta;
             const r = getUnsupportedReasoningValue(delta);
             if (typeof r === "string" && r.length > 0) {
@@ -2273,8 +2404,31 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
           }
 
+          // Responses-API upstream (e.g. grok-cli): only output_text deltas are the
+          // visible answer. Reasoning reaches accumulatedReasoning through the response
+          // translator (replayable text on output_item.done), and the `.done` events
+          // repeat the full text as snapshots, so the generic `delta`/`text` fallback
+          // below must not see these events at all.
+          const responsesEventType =
+            typeof (parsed as JsonRecord).type === "string" &&
+            ((parsed as JsonRecord).type as string).startsWith("response.")
+              ? ((parsed as JsonRecord).type as string)
+              : null;
+          if (responsesEventType) {
+            const d = (parsed as JsonRecord).delta;
+            if (typeof d === "string") {
+              totalContentLength += d.length;
+              if (
+                responsesEventType === "response.output_text.delta" &&
+                state?.accumulatedContent !== undefined
+              ) {
+                state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
+              }
+            }
+          }
+
           // Generic fallback: delta string, top-level content/text (e.g. some SSE payloads)
-          if (state?.accumulatedContent !== undefined) {
+          if (!responsesEventType && state?.accumulatedContent !== undefined) {
             if (typeof (parsed as JsonRecord).delta === "string") {
               const d = (parsed as JsonRecord).delta as string;
               state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
@@ -2717,6 +2871,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   status: 200,
                   usage,
                   responseBody,
+                  reasoningMeta: reasoningObserver.take(),
                   ttft: timing.ttftMs(),
                   itlMs: timing.avgItlMs(),
                   interrupted: timing.interrupted,
@@ -3006,6 +3161,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 status: 200,
                 usage: state?.usage,
                 responseBody,
+                reasoningMeta: reasoningObserver.take(),
                 // Same OPENAI_RESPONSES carve-out as the passthrough branch above —
                 // the synthesized chat-shaped responseBody drops the `response` object,
                 // and (like the passthrough branch) never carries an `object` marker at

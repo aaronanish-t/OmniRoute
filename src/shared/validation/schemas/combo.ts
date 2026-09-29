@@ -267,6 +267,15 @@ export const comboRuntimeConfigSchema = z
       })
       .strict()
       .optional(),
+    // Opt-in planner/executor mode for the pipeline strategy. The first model
+    // owns reasoning/final answers; the second emits native client tool calls.
+    agenticOrchestration: z
+      .object({
+        enabled: z.boolean().optional(),
+        maxToolRounds: z.coerce.number().int().min(1).max(32).optional(),
+      })
+      .strict()
+      .optional(),
     // Context window requirements for combo target filtering and sorting.
     // minContextWindow: filters out models with context windows below this threshold.
     // maxContextWindow: filters out models with context windows above this threshold.
@@ -432,8 +441,9 @@ export const updateComboSchema = z
     // so the one endpoint a client can flip it through stripped the field and
     // a visibility-only update was rejected as empty. #12836
     isHidden: z.boolean().optional(),
-    allowedProviders: z.array(z.string().trim().min(1).max(200)).max(100).optional(),
-    allowedModelFamilies: z.array(z.string().trim().min(1).max(100)).max(100).optional(),
+    allowedProviders: z.array(z.string().trim().min(1).max(200)).max(100).optional().nullable(),
+    allowedModelFamilies: z.array(z.string().trim().min(1).max(100)).max(100).optional().nullable(),
+    overrideAllowedProviders: z.boolean().optional(),
     // Nullable like `description` and `context_length` above: an absent field means
     // "leave unchanged" because updateCombo merges over the stored record, so clearing
     // one needs an explicit null for updateCombo's null-means-delete pass (#12158).

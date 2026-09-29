@@ -4,7 +4,7 @@ import {
   getActiveBillingTeamForApiKey,
   getTeamBudgetWindowStart,
 } from "@/lib/db/teams";
-import { calculateCost } from "./costCalculator";
+import { calculateCostDetailed } from "./costCalculator";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { toNumber } from "@/shared/utils/numeric";
 
@@ -20,6 +20,7 @@ export interface TeamUsageLimitStatus {
   actualProviderCostUsd: null;
   subscriptionQuotaUsed: null;
   compressionSavingsUsd: null;
+  hasUnpricedUsage: boolean;
   exceeded: boolean;
 }
 
@@ -38,11 +39,14 @@ function roundUsd(value: number): number {
   return Math.round(value * 1_000_000) / 1_000_000;
 }
 
-async function calculateRows(rows: CostRow[]): Promise<number> {
+async function calculateRows(
+  rows: CostRow[]
+): Promise<{ estimatedListCostUsd: number; hasUnpricedUsage: boolean }> {
   let total = 0;
+  let hasUnpricedUsage = false;
   for (const row of rows) {
     if (!row.provider || !row.model) continue;
-    total += await calculateCost(
+    const result = await calculateCostDetailed(
       row.provider,
       row.model,
       {
@@ -54,15 +58,17 @@ async function calculateRows(rows: CostRow[]): Promise<number> {
       },
       { provider: row.provider, model: row.model, serviceTier: row.serviceTier || "standard" }
     );
+    total += result.costUsd;
+    hasUnpricedUsage ||= !result.priced;
   }
-  return roundUsd(total);
+  return { estimatedListCostUsd: roundUsd(total), hasUnpricedUsage };
 }
 
 async function getCommittedTeamEstimatedListCostUsd(
   teamId: string,
   windowStartIso: string,
   resetAtIso: string
-): Promise<number> {
+): Promise<{ estimatedListCostUsd: number; hasUnpricedUsage: boolean }> {
   const db = getDbInstance();
   const rawRows = db
     .prepare(
@@ -119,7 +125,12 @@ async function getCommittedTeamEstimatedListCostUsd(
       completeSummaryEndDateExclusive: resetDate,
     }) as CostRow[];
 
-  return roundUsd((await calculateRows(rawRows)) + (await calculateRows(summaryRows)));
+  const raw = await calculateRows(rawRows);
+  const retained = await calculateRows(summaryRows);
+  return {
+    estimatedListCostUsd: roundUsd(raw.estimatedListCostUsd + retained.estimatedListCostUsd),
+    hasUnpricedUsage: raw.hasUnpricedUsage || retained.hasUnpricedUsage,
+  };
 }
 
 export async function getTeamUsageLimitStatusForApiKey(
@@ -131,7 +142,7 @@ export async function getTeamUsageLimitStatusForApiKey(
   team = advanceTeamBudgetWindow(team, nowMs);
   const windowStartIso = getTeamBudgetWindowStart(team);
   if (!windowStartIso || !team.budgetResetAt) return null;
-  const estimatedListCostUsd = await getCommittedTeamEstimatedListCostUsd(
+  const spend = await getCommittedTeamEstimatedListCostUsd(
     team.id,
     windowStartIso,
     team.budgetResetAt
@@ -144,11 +155,12 @@ export async function getTeamUsageLimitStatusForApiKey(
     budgetDuration: team.budgetDuration,
     windowStartIso,
     resetAtIso: team.budgetResetAt,
-    estimatedListCostUsd,
+    estimatedListCostUsd: spend.estimatedListCostUsd,
     actualProviderCostUsd: null,
     subscriptionQuotaUsed: null,
     compressionSavingsUsd: null,
-    exceeded: estimatedListCostUsd >= team.maxBudgetUsd,
+    hasUnpricedUsage: spend.hasUnpricedUsage,
+    exceeded: spend.estimatedListCostUsd >= team.maxBudgetUsd || spend.hasUnpricedUsage,
   };
 }
 

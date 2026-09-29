@@ -14,11 +14,12 @@ import { resolveScoresAs } from "@omniroute/open-sse/services/autoCombo/scoresAs
 
 import { isArenaEloSyncEnabled } from "@/shared/utils/featureFlags";
 
+import { getDbInstance } from "./db/core";
 import { backupDbFile } from "./db/backup";
 import {
-  bulkUpsertModelIntelligence,
-  deleteExpiredIntelligence,
+  applyArenaEloRefresh,
   deleteModelIntelligenceBySource,
+  getLatestSyncedAt,
   type ModelIntelligenceEntry,
 } from "./db/modelIntelligence";
 
@@ -167,6 +168,49 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+// ─── Failure backoff (persisted in key_value) ────────────
+// After a failed sync we stamp arena_elo/lastFailedAt so restarts and the
+// periodic timer skip retrying a rate-limited/dead upstream within the
+// window (remediation 2026-09-12: prevents boot-loop retry storms).
+const BACKOFF_MS = SYNC_INTERVAL_MS / 4; // 6h for the default 24h interval
+
+const KV_READ_SQL = `SELECT value FROM key_value WHERE namespace = ? AND key = ? LIMIT 1`;
+const KV_WRITE_SQL = `INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)`;
+
+function readLastFailedAt(): number | null {
+  try {
+    const db = getDbInstance();
+    const row = db.prepare(KV_READ_SQL).get("arena_elo", "lastFailedAt") as
+      { value: string } | undefined;
+    if (!row?.value) return null;
+    const ts = Date.parse(row.value);
+    return Number.isFinite(ts) ? ts : null;
+  } catch {
+    return null; // kv problems must never break the sync itself
+  }
+}
+
+function writeLastFailedAt(ts: number): void {
+  try {
+    const db = getDbInstance();
+    db.prepare(KV_WRITE_SQL).run("arena_elo", "lastFailedAt", new Date(ts).toISOString());
+  } catch (err) {
+    console.warn(`[ARENA_ELO_SYNC] Failed to persist lastFailedAt: ${getErrorMessage(err)}`);
+  }
+}
+
+function clearLastFailedAt(): void {
+  try {
+    const db = getDbInstance();
+    db.prepare(`DELETE FROM key_value WHERE namespace = ? AND key = ?`).run(
+      "arena_elo",
+      "lastFailedAt"
+    );
+  } catch {
+    // Swallow: a stuck kv row only costs one redundant fetch later.
+  }
+}
+
 function getEffectiveArenaEloSyncEnabled(): boolean {
   try {
     return isArenaEloSyncEnabled();
@@ -213,6 +257,25 @@ export function normalizeModelName(rawName: string): string {
 // ─── Core: Fetch ─────────────────────────────────────────
 
 /**
+ * How many consecutive per-category fetch failures to let through to
+ * `console.warn` before going quiet again. Timeouts against the Arena API
+ * repeat every sync cycle (see `startPeriodicSync()`), so logging every
+ * single one turns into log spam within a few hours (#11500). Mirrors the
+ * once-per-label dedup pattern used by `warnEmptyAutoPoolOnce()`
+ * (`open-sse/services/autoCombo/virtualFactory.ts`), except here the streak
+ * resets on the next successful fetch so a genuinely new outage warns again.
+ */
+const ARENA_ELO_FETCH_WARN_STREAK_INTERVAL = 10;
+
+/** Consecutive fetch-failure count per leaderboard category, since the last success. */
+const categoryFetchFailureStreak = new Map<string, number>();
+
+/** Test-only: reset the per-category fetch-failure streak dedup state. */
+export function resetArenaEloFetchFailureStreaksForTests(): void {
+  categoryFetchFailureStreak.clear();
+}
+
+/**
  * Fetch leaderboards from the Arena AI API for all configured categories.
  *
  * Fetches "text" and "code" leaderboards concurrently and returns
@@ -244,9 +307,18 @@ export async function fetchArenaLeaderboards(): Promise<ArenaLeaderboardMap> {
           `Arena API returned invalid JSON for "${category}" (${text.slice(0, 100)}...)`
         );
       }
+      // Recovered: let the next failure streak warn from scratch again.
+      categoryFetchFailureStreak.delete(category);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.warn(`[ARENA_ELO_SYNC] Failed to fetch "${category}" leaderboard: ${message}`);
+      const streak = (categoryFetchFailureStreak.get(category) ?? 0) + 1;
+      categoryFetchFailureStreak.set(category, streak);
+      if (streak === 1 || streak % ARENA_ELO_FETCH_WARN_STREAK_INTERVAL === 0) {
+        console.warn(
+          `[ARENA_ELO_SYNC] Failed to fetch "${category}" leaderboard: ${message}` +
+            (streak > 1 ? ` (${streak} consecutive failures; further warnings rate-limited)` : "")
+        );
+      }
       errors.push(message);
     }
   });
@@ -421,25 +493,48 @@ export async function syncArenaElo(dryRun = false): Promise<SyncResult> {
       firstSyncDone = true;
     }
 
-    // Clean up stale entries before writing new ones
     if (!dryRun) {
-      try {
-        deleteExpiredIntelligence();
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.warn(`[ARENA_ELO_SYNC] Failed to delete expired intelligence: ${message}`);
+      // Freshness guard: a non-empty dataset synced within the interval is
+      // still good — skip the fetch entirely (cheap fast path on boot).
+      const latest = getLatestSyncedAt("arena_elo");
+      if (latest) {
+        const age = Date.now() - Date.parse(latest);
+        if (Number.isFinite(age) && age >= 0 && age < SYNC_INTERVAL_MS) {
+          return {
+            success: true,
+            modelCount: lastSyncModelCount,
+            source: "arena_elo",
+          };
+        }
+      }
+
+      // Failure backoff: a recent failed sync means the upstream is probably
+      // still rate-limited or down — skip instead of hammering it.
+      const failedAt = readLastFailedAt();
+      if (failedAt !== null && Date.now() - failedAt < BACKOFF_MS) {
+        return {
+          success: false,
+          modelCount: 0,
+          source: "arena_elo",
+          error: "Skipping sync: recent failure within backoff window",
+        };
       }
     }
 
+    // Fetch FIRST — a failed fetch must never mutate stored intelligence
+    // (the old delete-before-fetch order drained the table on every failed
+    // sync while the upstream was rate-limiting; remediation 2026-09-12).
     const leaderboards = await fetchArenaLeaderboards();
     const entries = transformToModelIntelligence(leaderboards);
 
     if (!dryRun && entries.length > 0) {
       try {
-        bulkUpsertModelIntelligence(entries);
+        // Atomic replace: upsert all + prune not-in-refreshed-set in one tx.
+        applyArenaEloRefresh(entries);
+        clearLastFailedAt();
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.warn(`[ARENA_ELO_SYNC] Failed to bulk upsert intelligence: ${message}`);
+        const message = getErrorMessage(err);
+        console.warn(`[ARENA_ELO_SYNC] Failed to apply intelligence refresh: ${message}`);
         return {
           success: false,
           modelCount: 0,
@@ -465,8 +560,13 @@ export async function syncArenaElo(dryRun = false): Promise<SyncResult> {
       source: "arena_elo",
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = getErrorMessage(err);
     console.warn("[ARENA_ELO_SYNC] Sync failed:", message);
+    if (!dryRun) {
+      // Persist the failure so restarts/periodic ticks back off instead of
+      // retrying a dead upstream in a loop.
+      writeLastFailedAt(Date.now());
+    }
     return {
       success: false,
       modelCount: 0,

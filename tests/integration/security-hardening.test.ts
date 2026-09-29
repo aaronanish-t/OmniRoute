@@ -294,39 +294,55 @@ test("T06 route payload validation uses validateBody in critical endpoints", () 
 test("OAuth routes that can create provider connections require auth guard", () => {
   const targets = [
     "src/app/api/oauth/[provider]/[action]/route.ts",
+    "src/app/api/oauth/[provider]/paste-credentials/route.ts",
     "src/app/api/oauth/cursor/import/route.ts",
+    "src/app/api/oauth/cursor/login/start/route.ts",
+    "src/app/api/oauth/cursor/login/poll/route.ts",
+    "src/app/api/oauth/cursor/login/cancel/route.ts",
     "src/app/api/oauth/kiro/import/route.ts",
+    "src/app/api/oauth/kiro/api-key/route.ts",
     "src/app/api/oauth/kiro/social-authorize/route.ts",
     "src/app/api/oauth/kiro/social-exchange/route.ts",
   ];
 
-  // cursor/import and kiro/import delegate to the shared requireManagementAuth()
-  // guard, which internally performs the same checks the older inline literals
-  // asserted: isAuthRequired() (auth active?), isDashboardSessionAuthenticated()
-  // (user authenticated?) and a 401 "Authentication required" response for
-  // anonymous callers. Asserting the guard wiring keeps this contract
-  // refactor-proof.
-  const guardDelegatingTargets = new Set([
-    "src/app/api/oauth/cursor/import/route.ts",
-    "src/app/api/oauth/kiro/import/route.ts",
-  ]);
-
   for (const relPath of targets) {
     const content = readIfExists(relPath);
     assert.ok(content, `${relPath} should exist`);
-    if (guardDelegatingTargets.has(relPath)) {
-      assert.ok(
-        content.includes("requireOAuthImportAuth") && content.includes("requireManagementAuth"),
-        `${relPath} must delegate auth to requireManagementAuth via requireOAuthImportAuth`
+
+    // `/api/oauth/` is a public route prefix, so the pipeline leaves the decision to the
+    // handler, and isAuthenticated() there accepts any valid client API key. Every handler
+    // that can create or overwrite a provider connection must ask for a management
+    // principal: a dashboard session, CLI token, access token or a manage-scope key.
+    assert.ok(
+      content.includes("requireManagementAuth(request"),
+      `${relPath} must guard connection-creating handlers with requireManagementAuth`
+    );
+    const code = content
+      .split("\n")
+      .filter((line) => !line.trim().startsWith("//"))
+      .join("\n");
+    assert.ok(
+      !/isAuthenticated\s*\(/.test(code),
+      `${relPath} must not fall back to isAuthenticated(), which accepts any client API key`
+    );
+
+    // Positive anchor: a guard somewhere in the file proves nothing if one of the
+    // exported handlers skips it. Slice the file per exported handler and require
+    // EACH body to await a guard on its own `request` — a guard living only in a
+    // helper (or in a sibling handler) no longer satisfies this.
+    const handlerSlices = content
+      .split(/(?=export\s+async\s+function\s+(?:GET|POST|PUT|PATCH|DELETE)\b)/)
+      .filter((slice) =>
+        /^export\s+async\s+function\s+(?:GET|POST|PUT|PATCH|DELETE)\b/.test(slice)
       );
-      assert.ok(
-        content.includes("invalidApiKeyStatus: 401"),
-        `${relPath} must reject anonymous requests with 401`
+    assert.ok(handlerSlices.length > 0, `${relPath} should export at least one HTTP handler`);
+    for (const slice of handlerSlices) {
+      const verb = /export\s+async\s+function\s+(\w+)/.exec(slice)?.[1];
+      assert.match(
+        slice,
+        /await\s+(?:require\w*Auth|isAuthRequired)\s*\(\s*(?:request|req)\b/,
+        `${relPath}: exported handler ${verb} does not await an auth guard on its own request`
       );
-      continue;
     }
-    assert.ok(content.includes("isAuthRequired"), `${relPath} should check whether auth is active`);
-    assert.ok(content.includes("isAuthenticated"), `${relPath} should require authenticated users`);
-    assert.ok(content.includes("Unauthorized"), `${relPath} should reject anonymous requests`);
   }
 });

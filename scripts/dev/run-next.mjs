@@ -16,6 +16,7 @@ import { isTurbopackCacheCorruption, purgeAllTurbopackCaches } from "./turbopack
 import { randomUUID } from "node:crypto";
 import { getMainServerTimeoutConfig } from "./main-server-timeouts.mjs";
 import { createSystemdNotifier } from "./systemd-notify.mjs";
+import { attachRequestStreamGuards, installProcessCrashGuard } from "./httpClientAbortGuard.mjs";
 
 const { maybeHandleDisallowedMethod } = methodGuard;
 const { wrapRequestListenerWithHeadResponseGuard } = headResponseGuard;
@@ -100,6 +101,12 @@ process.env.OMNIROUTE_INTERNAL_SCHEME = "http";
 
 const { dashboardPort } = runtimePorts;
 const hostname = process.env.HOST || "0.0.0.0";
+// Publish the interface this server actually binds so in-process TypeScript
+// (src/lib/startup/nonLoopbackApiKeyGuard.ts) can warn about an exposed
+// anonymous /v1 without re-deriving it. The standalone/Docker entrypoint
+// (scripts/dev/run-standalone.mjs -> Next's own server.js) uses HOSTNAME
+// instead, which the guard falls back to. #13695
+process.env.OMNIROUTE_BOUND_HOST = hostname;
 // Turbopack by default in dev (matches the Next 16 CLI default and the production
 // build default in build-next-isolated.mjs); OMNIROUTE_USE_TURBOPACK=0 is the
 // webpack escape hatch. Under Bun, Turbopack native V8 bindings are unavailable,
@@ -133,6 +140,11 @@ function createNextApp() {
   });
 }
 
+// The custom HTTP server owns process exit. Application instrumentation still
+// registers its cleanup function, but must not install a competing signal
+// listener that can race this runner's async server/Next teardown.
+globalThis.__omnirouteCustomServerOwnsShutdown = true;
+
 let nextApp = createNextApp();
 
 // Best-effort self-heal for a corrupted Turbopack persistent dev cache (#6289):
@@ -162,6 +174,13 @@ async function prepareWithHeal() {
 }
 
 async function start() {
+  // Safety net: a client aborting a connection (browser navigation, HMR reconnect,
+  // Back/Forward cache) can emit `Error: aborted`/`ECONNRESET` on the request
+  // stream. Without this the single missed listener becomes an uncaughtException
+  // that takes the whole server down — surfacing as a wall of ERR_CONNECTION_REFUSED
+  // after login. Benign aborts are swallowed; genuine errors still crash loudly.
+  installProcessCrashGuard();
+
   await prepareWithHeal();
 
   const requestHandler = nextApp.getRequestHandler();
@@ -176,6 +195,10 @@ async function start() {
 
   const server = http.createServer(
     wrapRequestListenerWithHeadResponseGuard((req, res) => {
+      // Absorb client-abort errors (browser closes the socket during
+      // navigation/HMR/bfcache) on the request/response streams so they never
+      // surface as an uncaughtException that kills the whole server (#fix-dev-server-aborted).
+      attachRequestStreamGuards(req, res);
       if (maybeHandleDisallowedMethod(req, res)) return;
       // Stamp the real TCP peer IP before Next sees the request, so the authz
       // middleware can decide LOCAL_ONLY locality without trusting the Host header.
@@ -212,14 +235,31 @@ async function start() {
     process.exit(1);
   });
 
+  let isShuttingDown = false;
   const shutdown = async (signal) => {
+    if (isShuttingDown) {
+      // Second Ctrl+C / signal forces immediate exit
+      process.exit(1);
+    }
+    isShuttingDown = true;
+
+    // Safety net: force exit after 2s if keep-alive sockets or Next.js app close hangs
+    const forceExitTimer = setTimeout(() => {
+      process.exit(0);
+    }, 2000);
+    forceExitTimer.unref?.();
+
     systemdNotifier.stopping();
     try {
+      server.closeIdleConnections?.();
+      server.closeAllConnections?.();
       await new Promise((resolve) => server.close(resolve));
+      await globalThis.__omnirouteRequestShutdown?.(signal);
       await nextApp.close();
     } catch (error) {
       console.error("[SHUTDOWN] Failed during signal:", signal, error);
     } finally {
+      clearTimeout(forceExitTimer);
       process.exit(0);
     }
   };

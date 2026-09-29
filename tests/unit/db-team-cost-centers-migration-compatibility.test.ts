@@ -31,11 +31,13 @@ fs.copyFileSync(
   path.resolve("src/lib/db/migrations/163_radar_feed_cache_generated_at.sql"),
   path.join(migrationsDir, "163_radar_feed_cache_generated_at.sql")
 );
-// Exercise the future slot before production is changed so RED proves that the
-// compatibility map, rather than a missing test fixture, is what needs repair.
+// A harmless fixture with the current canonical 164 name is sufficient for the
+// runner's version+name collision probe; that migration's provider retirement
+// behavior has its own focused tests.
+fs.writeFileSync(path.join(migrationsDir, "164_retire_microsoft_designer_web.sql"), "SELECT 1;\n");
 fs.copyFileSync(
-  path.resolve("src/lib/db/migrations/164_team_cost_centers.sql"),
-  path.join(migrationsDir, "164_team_cost_centers.sql")
+  path.resolve("src/lib/db/migrations/197_team_cost_centers.sql"),
+  path.join(migrationsDir, "197_team_cost_centers.sql")
 );
 
 const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
@@ -46,7 +48,7 @@ test.after(() => {
   else process.env.OMNIROUTE_MIGRATIONS_DIR = originalMigrationsDir;
 });
 
-const historicalTeamVersions = ["153", "154", "155", "161", "163"] as const;
+const historicalTeamVersions = ["153", "154", "155", "161", "163", "164"] as const;
 
 test("Team compatibility uses exact version+name guards through the final slot", () => {
   const teamMappings = RENAMED_MIGRATION_COMPATIBILITY.filter(
@@ -62,7 +64,7 @@ test("Team compatibility uses exact version+name guards through the final slot",
     historicalTeamVersions.map((fromVersion) => ({
       fromVersion,
       fromName: "team_cost_centers",
-      toVersion: "164",
+      toVersion: "197",
       toName: "team_cost_centers",
     }))
   );
@@ -73,6 +75,7 @@ test("Team compatibility uses exact version+name guards through the final slot",
     ["155", "agentic_conversations"],
     ["161", "config_audit_log"],
     ["163", "radar_feed_cache_generated_at"],
+    ["164", "retire_microsoft_designer_web"],
   ]);
   for (const [fromVersion, fromName] of differentNames) {
     assert.equal(
@@ -107,7 +110,7 @@ for (const legacyVersion of historicalTeamVersions) {
         VALUES ('${legacyVersion}', 'team_cost_centers');
       `);
 
-      assert.equal(runMigrations(db), 5);
+      assert.equal(runMigrations(db), 6);
       assert.deepEqual(
         db.prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version").all(),
         [
@@ -116,7 +119,8 @@ for (const legacyVersion of historicalTeamVersions) {
           { version: "155", name: "agentic_conversations" },
           { version: "161", name: "config_audit_log" },
           { version: "163", name: "radar_feed_cache_generated_at" },
-          { version: "164", name: "team_cost_centers" },
+          { version: "164", name: "retire_microsoft_designer_web" },
+          { version: "197", name: "team_cost_centers" },
         ]
       );
       for (const table of [
@@ -149,7 +153,7 @@ for (const legacyVersion of historicalTeamVersions) {
   });
 }
 
-test("an already-applied canonical live 163 row is untouched and Team still runs at 164", () => {
+test("an already-applied canonical live 163 row is untouched and Team runs at 197", () => {
   const db = new Database(":memory:");
   try {
     db.exec(`
@@ -170,17 +174,17 @@ test("an already-applied canonical live 163 row is untouched and Team still runs
       VALUES ('163', 'radar_feed_cache_generated_at', '2026-08-25 00:00:00');
     `);
 
-    assert.equal(runMigrations(db), 5);
+    assert.equal(runMigrations(db), 6);
     const rows = db
       .prepare(
-        "SELECT version, name, applied_at FROM _omniroute_migrations WHERE version IN ('163', '164') ORDER BY version"
+        "SELECT version, name, applied_at FROM _omniroute_migrations WHERE version IN ('163', '197') ORDER BY version"
       )
       .all() as Array<{ version: string; name: string; applied_at: string }>;
     assert.deepEqual(
       rows.map(({ version, name }) => ({ version, name })),
       [
         { version: "163", name: "radar_feed_cache_generated_at" },
-        { version: "164", name: "team_cost_centers" },
+        { version: "197", name: "team_cost_centers" },
       ]
     );
     assert.equal(rows[0]?.applied_at, "2026-08-25 00:00:00");

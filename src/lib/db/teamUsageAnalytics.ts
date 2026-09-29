@@ -1,5 +1,5 @@
 import { getDbInstance } from "./core";
-import { calculateCost } from "@/lib/usage/costCalculator";
+import { calculateCostDetailed } from "@/lib/usage/costCalculator";
 import { toNumber } from "@/shared/utils/numeric";
 
 export interface TeamUsageReport {
@@ -15,6 +15,7 @@ export interface TeamUsageReport {
     actualProviderCostUsd: null;
     subscriptionQuotaUsed: null;
     compressionSavingsUsd: null;
+    hasUnpricedUsage: boolean;
   };
   byApiKey: Array<{
     apiKeyId: string;
@@ -23,6 +24,7 @@ export interface TeamUsageReport {
     inputTokens: number;
     outputTokens: number;
     estimatedListCostUsd: number;
+    hasUnpricedUsage: boolean;
   }>;
 }
 
@@ -45,8 +47,8 @@ function roundUsd(value: number): number {
   return Math.round(value * 1_000_000) / 1_000_000;
 }
 
-async function rowCost(row: TeamUsageCostRow): Promise<number> {
-  return calculateCost(
+async function rowCost(row: TeamUsageCostRow): Promise<{ costUsd: number; priced: boolean }> {
+  return calculateCostDetailed(
     row.provider,
     row.model,
     {
@@ -143,6 +145,7 @@ export async function getTeamUsageReport(
       inputTokens: number;
       outputTokens: number;
       estimatedListCostUsd: number;
+      hasUnpricedUsage: boolean;
     }
   >();
   let requests = 0;
@@ -150,14 +153,16 @@ export async function getTeamUsageReport(
   let inputTokens = 0;
   let outputTokens = 0;
   let estimatedListCostUsd = 0;
+  let hasUnpricedUsage = false;
 
   for (const row of rows) {
-    const cost = await rowCost(row);
+    const { costUsd, priced } = await rowCost(row);
     requests += toNumber(row.requests);
     successfulRequests += toNumber(row.successfulRequests);
     inputTokens += toNumber(row.inputTokens);
     outputTokens += toNumber(row.outputTokens);
-    estimatedListCostUsd += cost;
+    estimatedListCostUsd += costUsd;
+    hasUnpricedUsage ||= !priced;
     const current = byKey.get(row.apiKeyId) || {
       apiKeyId: row.apiKeyId,
       apiKeyName: row.apiKeyName || row.apiKeyId,
@@ -165,11 +170,13 @@ export async function getTeamUsageReport(
       inputTokens: 0,
       outputTokens: 0,
       estimatedListCostUsd: 0,
+      hasUnpricedUsage: false,
     };
     current.requests += toNumber(row.requests);
     current.inputTokens += toNumber(row.inputTokens);
     current.outputTokens += toNumber(row.outputTokens);
-    current.estimatedListCostUsd += cost;
+    current.estimatedListCostUsd += costUsd;
+    current.hasUnpricedUsage ||= !priced;
     byKey.set(row.apiKeyId, current);
   }
 
@@ -186,6 +193,7 @@ export async function getTeamUsageReport(
       actualProviderCostUsd: null,
       subscriptionQuotaUsed: null,
       compressionSavingsUsd: null,
+      hasUnpricedUsage,
     },
     byApiKey: [...byKey.values()]
       .map((row) => ({ ...row, estimatedListCostUsd: roundUsd(row.estimatedListCostUsd) }))

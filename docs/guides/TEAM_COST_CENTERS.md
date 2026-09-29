@@ -37,7 +37,7 @@ A Team may define:
 - `maxBudgetUsd`
 - `budgetDuration`: `1d`, `7d`, or `30d`
 
-Phase 1 enforcement mode is explicitly `soft_committed_usage`. Before a request, OmniRoute sums committed successful usage in the active Team window using `estimatedListCostUsd` and rejects new traffic after the cap is reached. Budget windows begin when the Team budget is created or changed, so they are not generally aligned to UTC midnight. After raw rows age out, only complete UTC-day rollup buckets contained inside that rolling window are counted; partial boundary days are conservatively omitted because a daily bucket cannot be split without fabricating precision.
+Phase 1 enforcement mode is explicitly `soft_committed_usage`. Before a request, OmniRoute sums committed successful usage in the active Team window using `estimatedListCostUsd` and rejects new traffic after the cap is reached. Usage without a matching local catalog price is reported as unpriced and makes an enabled Team budget fail closed rather than silently counting it as zero. A budget's reset cadence begins when it is first enabled; later amount, duration, or metadata edits preserve the established reset instant. Stale windows advance by whole durations with a compare-and-swap update, so a stale concurrent writer cannot move the cadence backward. After raw rows age out, only complete UTC-day rollup buckets contained inside that rolling window are counted; partial boundary days are conservatively omitted because a daily bucket cannot be split without fabricating precision.
 
 This is not a strict no-overshoot financial ledger. Concurrent requests can pass the preflight check before either request commits usage. Strict enforcement would require an atomic, idempotent request ledger:
 

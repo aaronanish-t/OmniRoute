@@ -51,6 +51,7 @@ export function filterPaidComboSteps<T extends { models?: unknown }>(combos: T[]
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
+
   try {
     const url = new URL(request.url);
     // Telemetry/history tables grow indefinitely and inflate backups.

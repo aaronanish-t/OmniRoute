@@ -13,7 +13,7 @@ const apiKeys = await import("../../src/lib/db/apiKeys.ts");
 const teams = await import("../../src/lib/db/teams.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const aggregateHistory = await import("../../src/lib/usage/aggregateHistory.ts");
-const localDb = await import("../../src/lib/localDb.ts");
+const pricing = await import("../../src/lib/db/settings/pricing.ts");
 const teamBudgets = await import("../../src/lib/usage/teamUsageLimits.ts");
 const teamAnalytics = await import("../../src/lib/db/teamUsageAnalytics.ts");
 
@@ -32,7 +32,7 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
-test("migration 164 creates team cost-center schema and immutable usage attribution", () => {
+test("migration 197 creates team cost-center schema and immutable usage attribution", () => {
   const db = core.getDbInstance();
   const tables = new Set(
     (
@@ -85,7 +85,7 @@ test("unassigning through the wrong team cannot close another team's active bind
   assert.equal(teams.getActiveBillingTeamForApiKey(key.id)?.id, beta.id);
 });
 
-test("usage snapshots the billing team and a later transfer does not rewrite history", async () => {
+test("terminal usage persistence resolves Team then keeps attribution immutable", async () => {
   const key = await apiKeys.createApiKey("agent-b", "machine-team-02");
   const alpha = teams.createTeam({ name: "Alpha usage" });
   const beta = teams.createTeam({ name: "Beta usage" });
@@ -132,6 +132,16 @@ test("retention rollup preserves the team dimension and all billable token class
     tokens: { input: 100, output: 50, cacheRead: 20, cacheCreation: 10, reasoning: 5 },
     timestamp: "2026-01-01T12:00:00.000Z",
   });
+  await usageHistory.saveRequestUsage({
+    provider: "claude",
+    model: "claude-test",
+    serviceTier: "priority",
+    apiKeyId: key.id,
+    apiKeyName: key.name,
+    success: false,
+    tokens: { input: 7, output: 3, cacheRead: 2, cacheCreation: 1, reasoning: 1 },
+    timestamp: "2026-01-01T13:00:00.000Z",
+  });
 
   const result = await aggregateHistory.rollupUsageHistoryBeforeDate("2026-01-02");
   assert.equal(result.errors, 0);
@@ -139,12 +149,18 @@ test("retention rollup preserves the team dimension and all billable token class
     .getDbInstance()
     .prepare("SELECT * FROM daily_team_usage_summary WHERE team_id = ?")
     .get(team.id) as Record<string, unknown>;
-  assert.equal(row.total_requests, 1);
-  assert.equal(row.total_input_tokens, 100);
-  assert.equal(row.total_output_tokens, 50);
-  assert.equal(row.total_cache_read_tokens, 20);
-  assert.equal(row.total_cache_creation_tokens, 10);
-  assert.equal(row.total_reasoning_tokens, 5);
+  assert.equal(row.total_requests, 2);
+  assert.equal(row.successful_requests, 1);
+  assert.equal(row.total_input_tokens, 107);
+  assert.equal(row.total_output_tokens, 53);
+  assert.equal(row.total_cache_read_tokens, 22);
+  assert.equal(row.total_cache_creation_tokens, 11);
+  assert.equal(row.total_reasoning_tokens, 6);
+  assert.equal(row.successful_input_tokens, 100);
+  assert.equal(row.successful_output_tokens, 50);
+  assert.equal(row.successful_cache_read_tokens, 20);
+  assert.equal(row.successful_cache_creation_tokens, 10);
+  assert.equal(row.successful_reasoning_tokens, 5);
   assert.equal(row.service_tier, "priority");
   assert.match(
     String(
@@ -166,11 +182,57 @@ test("retention rollup preserves the team dimension and all billable token class
       "SELECT total_requests, total_input_tokens FROM daily_team_usage_summary WHERE team_id = ?"
     )
     .get(team.id) as { total_requests: number; total_input_tokens: number };
-  assert.deepEqual(replayedRow, { total_requests: 1, total_input_tokens: 100 });
+  assert.deepEqual(replayedRow, { total_requests: 2, total_input_tokens: 107 });
+
+  const report = await teamAnalytics.getTeamUsageReport(team.id);
+  assert.equal(report.summary.requests, 2);
+  assert.equal(report.summary.successfulRequests, 1);
+  assert.equal(report.byApiKey[0]?.apiKeyId, key.id);
+});
+
+test("Team rollup and processed marker roll back atomically", async () => {
+  const key = await apiKeys.createApiKey("agent-atomic", "machine-team-atomic");
+  const team = teams.createTeam({ name: "Atomic rollup team" });
+  teams.assignApiKeyBillingTeam(key.id, team.id, "2025-12-31T00:00:00.000Z");
+  await usageHistory.saveRequestUsage({
+    provider: "openai",
+    model: "gpt-atomic",
+    apiKeyId: key.id,
+    tokens: { input: 4, output: 2 },
+    timestamp: "2026-01-01T12:00:00.000Z",
+  });
+  const db = core.getDbInstance();
+  db.exec(`
+    CREATE TRIGGER fail_team_rollup_marker
+    BEFORE UPDATE OF team_rollup_processed_at ON usage_history
+    WHEN NEW.team_rollup_processed_at IS NOT NULL
+    BEGIN
+      SELECT RAISE(ABORT, 'marker failure');
+    END;
+  `);
+
+  const result = await aggregateHistory.rollupUsageHistoryBeforeDate("2026-01-02");
+  assert.equal(result.errors, 1);
+  assert.equal(
+    (
+      db.prepare("SELECT COUNT(*) AS count FROM daily_team_usage_summary").get() as {
+        count: number;
+      }
+    ).count,
+    0
+  );
+  assert.equal(
+    (
+      db.prepare("SELECT team_rollup_processed_at FROM usage_history").get() as {
+        team_rollup_processed_at: string | null;
+      }
+    ).team_rollup_processed_at,
+    null
+  );
 });
 
 test("team shared budget uses committed estimated list cost and is explicit about soft enforcement", async () => {
-  await localDb.updatePricing({
+  await pricing.updatePricing({
     openai: {
       "gpt-team-budget": { input: 1, cached: 1, output: 1, reasoning: 1, cache_creation: 1 },
     },
@@ -200,6 +262,7 @@ test("team shared budget uses committed estimated list cost and is explicit abou
   assert.equal(status?.actualProviderCostUsd, null);
   assert.equal(status?.subscriptionQuotaUsed, null);
   assert.equal(status?.compressionSavingsUsd, null);
+  assert.equal(status?.hasUnpricedUsage, false);
   assert.equal(status?.exceeded, true);
 
   const rejection = await teamBudgets.buildTeamUsageLimitPolicyRejection(
@@ -208,6 +271,29 @@ test("team shared budget uses committed estimated list cost and is explicit abou
   );
   assert.equal(rejection?.status, 400);
   assert.match(JSON.stringify(await rejection?.json()), /team.*usage quota/i);
+});
+
+test("soft Team budget fails closed when committed usage has no catalog price", async () => {
+  const key = await apiKeys.createApiKey("agent-unpriced", "machine-team-unpriced");
+  const team = teams.createTeam({
+    name: "Unpriced budget team",
+    maxBudgetUsd: 100,
+    budgetDuration: "1d",
+  });
+  const now = new Date();
+  teams.assignApiKeyBillingTeam(key.id, team.id, new Date(now.getTime() - 1_000).toISOString());
+  await usageHistory.saveRequestUsage({
+    provider: "unpriced-team-provider",
+    model: "routing-alias-without-price",
+    apiKeyId: key.id,
+    tokens: { input: 1, output: 1 },
+    timestamp: now.toISOString(),
+  });
+
+  const status = await teamBudgets.getTeamUsageLimitStatusForApiKey(key.id);
+  assert.equal(status?.estimatedListCostUsd, 0);
+  assert.equal(status?.hasUnpricedUsage, true);
+  assert.equal(status?.exceeded, true);
 });
 
 test("a non-budget update advances an expired budget window instead of resetting its cadence", async () => {
@@ -229,8 +315,28 @@ test("a non-budget update advances an expired budget window instead of resetting
   assert.equal(updated.description, "metadata only");
 });
 
+test("editing a budget preserves the current rolling-window cadence", () => {
+  const team = teams.createTeam({
+    name: "Stable edited cadence team",
+    maxBudgetUsd: 5,
+    budgetDuration: "7d",
+  });
+  const establishedResetAt = "2026-10-06T00:00:00.000Z";
+  core
+    .getDbInstance()
+    .prepare("UPDATE teams SET budget_reset_at = ? WHERE id = ?")
+    .run(establishedResetAt, team.id);
+
+  const amountOnly = teams.updateTeam(team.id, { maxBudgetUsd: 8 });
+  assert.equal(amountOnly?.budgetResetAt, establishedResetAt);
+
+  const durationOnly = teams.updateTeam(team.id, { budgetDuration: "30d" });
+  assert.equal(durationOnly?.budgetResetAt, establishedResetAt);
+  assert.equal(durationOnly?.budgetDuration, "30d");
+});
+
 test("soft budget excludes rolled-up UTC buckets that only partially overlap the rolling window", async () => {
-  await localDb.updatePricing({
+  await pricing.updatePricing({
     openai: {
       "gpt-team-boundary": { input: 1, cached: 1, output: 1, reasoning: 1 },
     },
@@ -264,7 +370,7 @@ test("soft budget excludes rolled-up UTC buckets that only partially overlap the
 });
 
 test("team usage reports do not charge rolled-up partial boundary days", async () => {
-  await localDb.updatePricing({
+  await pricing.updatePricing({
     openai: {
       "gpt-team-report-boundary": { input: 1, cached: 1, output: 1, reasoning: 1 },
     },
@@ -306,11 +412,17 @@ test("JSON export/import preserves teams, temporal billing bindings, and usage s
     apiKeyId: key.id,
     apiKeyName: key.name,
     billingTeamId: team.id,
+    serviceTier: "priority",
     tokens: { input: 3, output: 2 },
     timestamp: "2026-08-11T00:00:00.000Z",
   });
 
   const db = core.getDbInstance();
+  const processedAt = "2026-08-12T00:00:00.000Z";
+  db.prepare("UPDATE usage_history SET team_rollup_processed_at = ? WHERE api_key_id = ?").run(
+    processedAt,
+    key.id
+  );
   const exported = {
     apiKeys: db.prepare("SELECT * FROM api_keys WHERE id = ?").all(key.id),
     teams: teams.listTeams({ includeArchived: true }),
@@ -343,9 +455,19 @@ test("JSON export/import preserves teams, temporal billing bindings, and usage s
   assert.equal(counts.dailyTeamUsageSummary, 1);
   assert.equal(teams.getActiveBillingTeamForApiKey(key.id)?.id, team.id);
   const usage = db
-    .prepare("SELECT billing_team_id FROM usage_history WHERE api_key_id = ?")
-    .get(key.id) as { billing_team_id: string };
-  assert.equal(usage.billing_team_id, team.id);
+    .prepare(
+      "SELECT billing_team_id, team_rollup_processed_at, service_tier FROM usage_history WHERE api_key_id = ?"
+    )
+    .get(key.id) as {
+    billing_team_id: string;
+    team_rollup_processed_at: string;
+    service_tier: string;
+  };
+  assert.deepEqual(usage, {
+    billing_team_id: team.id,
+    team_rollup_processed_at: processedAt,
+    service_tier: "priority",
+  });
   const summary = db
     .prepare("SELECT service_tier, total_requests FROM daily_team_usage_summary WHERE team_id = ?")
     .get(team.id) as { service_tier: string; total_requests: number };
@@ -397,4 +519,7 @@ test("archiving a team closes active assignments but preserves historical usage"
     .prepare("SELECT COUNT(*) as count FROM usage_history WHERE billing_team_id = ?")
     .get(team.id) as { count: number };
   assert.equal(count.count, 1);
+  assert.throws(() => teams.updateTeam(team.id, { description: "forbidden" }), /archived/i);
+  const anotherKey = await apiKeys.createApiKey("agent-archived", "machine-team-archived");
+  assert.throws(() => teams.assignApiKeyBillingTeam(anotherKey.id, team.id), /archived/i);
 });

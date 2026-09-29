@@ -558,6 +558,26 @@ export const v1CountTokensSchema = z
   })
   .catchall(z.unknown());
 
+/**
+ * POST /v1/responses/input_tokens (#13167) — local Responses token count. The
+ * counter tolerates every Responses item shape (it only tokenizes what it can
+ * read), so the schema pins the wire types the route relies on and lets the
+ * rest through: `input` is a string or an item array, `instructions` a string,
+ * `tools` an array. Anything else is a 400 instead of a silently ignored key
+ * (Hard Rule #7 / t06 gate).
+ */
+export const v1ResponsesInputTokensSchema = z
+  .object({
+    model: z.string().optional(),
+    instructions: z.string().optional(),
+    input: z.union([z.string(), z.array(z.unknown())]).optional(),
+    tools: z.array(z.unknown()).optional(),
+    tool_choice: z.unknown().optional(),
+    text: z.unknown().optional(),
+    reasoning: z.unknown().optional(),
+  })
+  .catchall(z.unknown());
+
 // ── Search Schemas ─────────────────────────────────────────────────────
 // Unified search request/response schemas. Final contract — all fields optional
 // with defaults. New features add implementations, not new fields.
@@ -569,6 +589,8 @@ export const v1SearchSchema = z.preprocess(
     const o = { ...(raw as Record<string, unknown>) };
     if (o.provider === "x_search") o.provider = "x-search";
     if (o.provider === "xquik" || o.provider === "xquik_search") o.provider = "xquik-search";
+    if (o.provider === "anysearch" || o.provider === "anysearch_search")
+      o.provider = "anysearch-search";
     if (o.provider === "x-search" || o.provider === "xquik-search") o.search_type = "x";
     return o;
   },
@@ -588,7 +610,8 @@ export const v1SearchSchema = z.preprocess(
       // Known catalog ids as of this writing: serper-search, brave-search, perplexity-search,
       // exa-search, tavily-search, firecrawl, google-pse-search, linkup-search, ollama-search,
       // searchapi-search, youcom-search, searxng-search, zai-search, jina-search, jina-ai,
-      // jina, duckduckgo-free, x-search, x_search, xquik-search, xquik (plus short aliases resolved by
+      // jina, duckduckgo-free, x-search, x_search, xquik-search, xquik, anysearch-search,
+      // anysearch (plus short aliases resolved by
       // SEARCH_PROVIDER_ALIASES).
       provider: z.string().min(1).optional(),
       max_results: z.coerce.number().int().min(1).max(100).default(5),
@@ -694,7 +717,17 @@ export const v1BatchCreateSchema = z.object({
 
 export const v1WebFetchSchema = z.object({
   url: z.string().url("url must be a valid URL (http/https)"),
-  provider: z.enum(["firecrawl", "jina-reader", "tavily-search", "tinyfish"]).optional(),
+  provider: z
+    .enum([
+      "firecrawl",
+      "jina-reader",
+      "tavily-search",
+      "tinyfish",
+      "context7",
+      "nimble-search",
+      "anysearch-search",
+    ])
+    .optional(),
   format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),
   depth: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
   wait_for_selector: z.string().max(256).optional(),

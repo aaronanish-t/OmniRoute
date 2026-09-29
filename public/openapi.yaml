@@ -52,7 +52,7 @@ tags:
   - name: API Keys
     description: API key management
   - name: Teams
-    description: Team cost-center, membership, budget, and usage management
+    description: Billing cost-center, temporal assignment, soft-budget, and usage management
   - name: Combos
     description: Routing combo management
   - name: Settings
@@ -705,6 +705,9 @@ paths:
                         type: string
                         enum:
                           - FTS5
+                          - none
+                      reason:
+                        type: string
                   embedding:
                     type: object
                     properties:
@@ -1938,9 +1941,24 @@ paths:
     post:
       tags: [Combos]
       summary: Test a combo configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [comboName]
+              properties:
+                comboName:
+                  type: string
+                  minLength: 1
       responses:
         "200":
           description: Test result
+        "400":
+          description: Missing or invalid combo name
+        "404":
+          description: Combo not found
 
   /api/settings:
     get:
@@ -5267,12 +5285,10 @@ paths:
         "503":
           description: Generator module not available
 
-  # ─── Team cost centers (#687) ────────────────────────────────────
-
   /api/teams:
     get:
       tags: [Teams]
-      summary: List billing teams
+      summary: List billing Teams
       security:
         - ManagementSessionAuth: []
       parameters:
@@ -5284,7 +5300,7 @@ paths:
         "401": { description: Unauthorized }
     post:
       tags: [Teams]
-      summary: Create a billing team with an optional soft shared budget
+      summary: Create a billing Team with an optional soft shared budget
       security:
         - ManagementSessionAuth: []
       requestBody:
@@ -5307,7 +5323,7 @@ paths:
         schema: { type: string, format: uuid }
     get:
       tags: [Teams]
-      summary: Get a billing team and its active API-key assignments
+      summary: Get a billing Team and its active API-key assignments
       security:
         - ManagementSessionAuth: []
       responses:
@@ -5316,7 +5332,7 @@ paths:
         "404": { description: Team not found }
     patch:
       tags: [Teams]
-      summary: Update a billing team
+      summary: Update a billing Team
       security:
         - ManagementSessionAuth: []
       requestBody:
@@ -5333,7 +5349,7 @@ paths:
         "409": { description: Team name already exists or the Team is archived }
     delete:
       tags: [Teams]
-      summary: Archive a billing team and close its active key assignments
+      summary: Archive a billing Team and close its active key assignments
       security:
         - ManagementSessionAuth: []
       responses:
@@ -5358,7 +5374,7 @@ paths:
         "404": { description: Team not found }
     put:
       tags: [Teams]
-      summary: Assign an API key to this billing team
+      summary: Assign an API key to this billing Team
       security:
         - ManagementSessionAuth: []
       requestBody:
@@ -5366,10 +5382,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [apiKeyId]
-              properties:
-                apiKeyId: { type: string, format: uuid }
+              $ref: "#/components/schemas/TeamMemberAssignment"
       responses:
         "200": { description: Assignment created }
         "400": { description: Invalid request }
@@ -5408,9 +5421,12 @@ paths:
       tags: [Teams]
       summary: Get immutable Team usage attribution with per-key drill-down
       description: >-
-        Reports estimated list cost separately from actual provider cost,
-        subscription quota, and compression savings. Phase 1 soft budgets use
-        committed usage and do not guarantee no overshoot under concurrency.
+        Attribution is resolved when each terminal usage row is persisted and
+        is immutable thereafter. Estimated list cost comes from the local model
+        catalog; actual provider cost, subscription quota, and compression
+        savings are null when unavailable. The budget is a soft committed-usage
+        check and can overshoot under concurrency. Retained daily data is included
+        only for complete UTC days inside the requested range.
       security:
         - ManagementSessionAuth: []
       responses:
@@ -5539,7 +5555,17 @@ components:
         description: { type: string, maxLength: 2000 }
         maxBudgetUsd: { type: number, exclusiveMinimum: 0, nullable: true }
         budgetDuration: { type: string, enum: [1d, 7d, 30d], nullable: true }
-      description: Send both budget fields to set a budget, or both as null to clear it.
+      description: >-
+        Either budget field may be edited while the other retains its current
+        value; send both as null to clear the budget. Edits preserve the
+        established rolling-window reset cadence.
+
+    TeamMemberAssignment:
+      type: object
+      additionalProperties: false
+      required: [apiKeyId]
+      properties:
+        apiKeyId: { type: string, format: uuid }
 
     PlaygroundPreset:
       type: object
@@ -6835,20 +6861,12 @@ components:
 
     ComboCreate:
       type: object
-      required: [name, models]
+      required: [name, model]
       properties:
         name:
           type: string
-        models:
-          type: array
-          minItems: 1
-          items:
-            oneOf:
-              - type: string
-                description: "provider/model reference"
-              - type: object
-                description: "structured combo step (provider, model, weight, ...)"
-                additionalProperties: true
+        model:
+          type: string
         strategy:
           type: string
           enum:
@@ -6867,3 +6885,14 @@ components:
             - lkgp
             - context-optimized
           default: priority
+        nodes:
+          type: array
+          items:
+            type: object
+            properties:
+              connectionId:
+                type: string
+              weight:
+                type: integer
+              priority:
+                type: integer

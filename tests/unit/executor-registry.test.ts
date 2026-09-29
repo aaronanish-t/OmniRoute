@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { cleanupTempDataDir } from "../_setup/tempDataDir.ts";
 
 // R0.3 — unit tests for the ExecutorRegistry seam itself (registration
 // semantics + wiring of the built-ins). Behavior parity of the full map is
@@ -13,13 +14,11 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { registerExecutor, getRegisteredExecutor, hasRegisteredExecutor, listExecutorAliases } =
   await import("../../open-sse/executors/registry.ts");
-const { getExecutor, hasSpecializedExecutor, BaseExecutor, DefaultExecutor } = await import(
-  "../../open-sse/executors/index.ts"
-);
+const { getExecutor, hasSpecializedExecutor, BaseExecutor, DefaultExecutor } =
+  await import("../../open-sse/executors/index.ts");
+const { getDefaultExecutor } = await import("../../open-sse/executors/defaultResolver.ts");
 
-test.after(() => {
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
-});
+test.after(() => cleanupTempDataDir(TEST_DATA_DIR));
 
 test("built-ins are registered at module load and resolve through the registry", async () => {
   const aliases = listExecutorAliases();
@@ -54,4 +53,10 @@ test("registry lookup is exact — Object.prototype names are not executors", as
     assert.equal(hasSpecializedExecutor(name), false, name);
     assert.ok((await getExecutor(name)) instanceof DefaultExecutor, name);
   }
+});
+
+test("the registry and leaf resolver share fallback executor instances", async () => {
+  const provider = "default-resolver-test-provider";
+  assert.equal(await getExecutor(provider), getDefaultExecutor(provider));
+  assert.equal(getDefaultExecutor(provider), getDefaultExecutor(provider));
 });

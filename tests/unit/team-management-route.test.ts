@@ -50,11 +50,23 @@ test("OpenAPI defines every Team schema referenced by Team routes", () => {
   }
 });
 
-test("JSON export uses the same Management Session Auth gate as Team APIs", () => {
-  const source = readFileSync(join(ROOT, "src/app/api/settings/export-json/route.ts"), "utf8");
-  assert.match(source, /requireManagementAuth/);
-  assert.match(source, /if \(authError\) return authError/);
-  assert.match(source, /teams: listTeams\(\{ includeArchived: true \}\)/);
-  assert.match(source, /apiKeyBillingTeamHistory: listAllApiKeyBillingHistory\(\)/);
-  assert.match(source, /exportData\.dailyTeamUsageSummary = getAllDailyTeamUsageSummary\(\)/);
+test("JSON backup and restore use Management Session Auth before reading input", () => {
+  const exportSource = readFileSync(
+    join(ROOT, "src/app/api/settings/export-json/route.ts"),
+    "utf8"
+  );
+  const importSource = readFileSync(
+    join(ROOT, "src/app/api/settings/import-json/route.ts"),
+    "utf8"
+  );
+  for (const source of [exportSource, importSource]) {
+    assert.match(source, /requireManagementAuth/);
+    assert.match(source, /if \(authError\) return authError/);
+  }
+  assert.ok(
+    importSource.indexOf("if (authError) return authError") < importSource.indexOf("request.text()")
+  );
+  assert.match(exportSource, /teams: listTeams\(\{ includeArchived: true \}\)/);
+  assert.match(exportSource, /apiKeyBillingTeamHistory: listAllApiKeyBillingHistory\(\)/);
+  assert.match(exportSource, /exportData\.dailyTeamUsageSummary = getAllDailyTeamUsageSummary\(\)/);
 });

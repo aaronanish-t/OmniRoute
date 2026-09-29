@@ -220,7 +220,13 @@ export function updateTeam(id: string, input: TeamUpdateInput): Team | null {
     );
     params.maxBudgetUsd = budget.maxBudgetUsd;
     params.budgetDuration = budget.budgetDuration;
-    params.budgetResetAt = budget.budgetResetAt;
+    // Editing a live soft budget must not restart its rolling cadence. A new
+    // reset instant is minted only when a budget is first enabled; disabling
+    // it still clears all three fields together.
+    params.budgetResetAt =
+      budget.maxBudgetUsd !== null && existing.budgetResetAt
+        ? existing.budgetResetAt
+        : budget.budgetResetAt;
   }
   db.prepare(`UPDATE teams SET ${updates.join(", ")} WHERE id = @id`).run(params);
   const updated = getTeam(id);

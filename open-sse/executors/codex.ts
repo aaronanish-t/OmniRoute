@@ -687,7 +687,7 @@ export async function peekCodexSseTransientError(
         matched = hit;
         break;
       }
-      // A valid non-error SSE event means the normal readiness/stream watchdog
+      // A valid SSE readiness event means the normal readiness/stream watchdog
       // pipeline can take over. Do not keep reasoning/tool/lifecycle frames in
       // this pre-read until a text delta or an arbitrary byte cap: that would
       // leave the combo target deadline running while the upstream is making

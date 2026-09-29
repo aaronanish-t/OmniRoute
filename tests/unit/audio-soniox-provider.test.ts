@@ -45,7 +45,7 @@ test("Soniox is registered for transcription and speech", () => {
   assert.equal(tts.baseUrl, "https://tts-rt.soniox.com/tts");
   assert.deepEqual(
     tts.models.map((model) => model.id),
-    ["tts-rt-v1"]
+    ["tts-rt-v2", "tts-rt-v1"]
   );
 });
 

@@ -706,6 +706,7 @@ export default function OAuthModal({
     setPrevStartKey(startKey);
     if (startKey) {
       setShowPasteToken(PASTE_FIRST_PROVIDERS.has(provider));
+      setPasteToken("");
       setGrokBrowserMode(false);
       setAuthData(null);
       setCallbackUrl("");
@@ -713,10 +714,9 @@ export default function OAuthModal({
       setIsDeviceCode(false);
       setDeviceData(null);
       setPolling(false);
-      // #8688: show GitLab Duo OAuth app / env setup before authorize error.
-      if (provider === "gitlab-duo") {
-        setStep("gitlab-duo-setup");
-      }
+      // #8688: show GitLab Duo OAuth app / env setup before authorize error. Every other
+      // provider restarts at "waiting", or a paste-first reopen would show the last success.
+      setStep(provider === "gitlab-duo" ? "gitlab-duo-setup" : "waiting");
     }
   }
 

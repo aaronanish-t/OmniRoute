@@ -38,18 +38,20 @@ function renderClaudeModal(onSuccess = vi.fn()) {
   document.body.appendChild(element);
   const root = createRoot(element);
   roots.push({ root, element });
-  act(() => {
-    root.render(
-      <OAuthModal
-        isOpen
-        provider="claude"
-        providerInfo={{ name: "Claude Code" }}
-        onClose={vi.fn()}
-        onSuccess={onSuccess}
-      />
-    );
-  });
-  return onSuccess;
+  const render = (isOpen: boolean) =>
+    act(() => {
+      root.render(
+        <OAuthModal
+          isOpen={isOpen}
+          provider="claude"
+          providerInfo={{ name: "Claude Code" }}
+          onClose={vi.fn()}
+          onSuccess={onSuccess}
+        />
+      );
+    });
+  render(true);
+  return { onSuccess, render };
 }
 
 function button(label: string) {
@@ -114,7 +116,7 @@ describe("OAuthModal Claude Code setup-token", () => {
   });
 
   it("OAuthModal_SaveSetupToken_PostsTokenToImportEndpoint", async () => {
-    const onSuccess = renderClaudeModal();
+    const { onSuccess } = renderClaudeModal();
     await flushEffects();
 
     typeInto(tokenInput() as HTMLInputElement, `  ${SETUP_TOKEN}  `);
@@ -142,5 +144,23 @@ describe("OAuthModal Claude Code setup-token", () => {
 
     expect(fetchMock.mock.calls.some(([u]) => String(u).includes("/api/oauth/claude/"))).toBe(true);
     expect(tokenInput()).toBeNull();
+  });
+
+  it("OAuthModal_ReopenAfterSuccessfulImport_ShowsEmptySetupTokenForm", async () => {
+    const { render } = renderClaudeModal();
+    await flushEffects();
+    typeInto(tokenInput() as HTMLInputElement, SETUP_TOKEN);
+    await act(async () => {
+      button("Save Connection")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    await flushEffects();
+    expect(tokenInput()).toBeNull();
+
+    render(false);
+    render(true);
+    await flushEffects();
+
+    expect(tokenInput()?.value).toBe("");
+    expect(openMock).not.toHaveBeenCalled();
   });
 });

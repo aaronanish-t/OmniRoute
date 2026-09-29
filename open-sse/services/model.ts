@@ -73,6 +73,14 @@ const PROVIDER_MODEL_ALIASES: ProviderModelAliasMap = {
     "claude-sonnet-4-5": "claude-sonnet-4.5",
     "claude-haiku-4-5": "claude-haiku-4.5",
   },
+  // #13364: zed-hosted's passthrough catalog exposes short hyphenated Claude ids
+  // that don't match modelSpecs' dotted canonical alias, so capMaxOutputTokens()
+  // resolves no cap and thinking+tools requests inflate max_tokens unbounded.
+  // Scoped to claude-haiku-4-5 (the reported/reproduced model) — add Sonnet/Opus
+  // entries only once confirmed against the live Zed catalog.
+  "zed-hosted": {
+    "claude-haiku-4-5": "claude-haiku-4.5",
+  },
 };
 
 const CROSS_PROXY_MODEL_ALIASES: Record<string, string> = {
@@ -117,6 +125,13 @@ const KNOWN_MODEL_IDS = new Set(MODEL_TO_PROVIDERS.keys());
 // `openai/gpt-5.6-sol`) — the prefix path always wins.
 export const CODEX_NATIVE_UNPREFIXED_MODELS = new Set([
   "codex-auto-review",
+  "gpt-6-astra",
+  "gpt-6-astra-ultra",
+  "gpt-6-astra-max",
+  "gpt-6-astra-xhigh",
+  "gpt-6-astra-high",
+  "gpt-6-astra-medium",
+  "gpt-6-astra-low",
   "gpt-5.6-sol",
   "gpt-5.6-sol-ultra",
   "gpt-5.6-sol-max",

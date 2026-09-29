@@ -1,21 +1,12 @@
-# AUTO-COMBO (አማርኛ)
+# OmniRoute Auto-Combo Engine (አማርኛ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇪 [ga](../../../ga/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ha](../../../ha/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇰🇷 [ko](../../../ko/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇳🇴 [no](../../../no/docs/routing/AUTO-COMBO.md) · 🇮🇳 [or](../../../or/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
-
----
+🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇧🇦 [bs](../../../bs/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇪 [ga](../../../ga/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ha](../../../ha/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇰🇷 [ko](../../../ko/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇳🇴 [no](../../../no/docs/routing/AUTO-COMBO.md) · 🇮🇳 [or](../../../or/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
 
 ---
 
-title: "OmniRoute ራስ-ሰር ጥምረት ሞተር"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
+> **ለተጠቃሚዎች**፦ በፍጥነት መጀመር ይፈልጋሉ? ቀላል ማብራሪያዎችን እና ምሳሌዎችን ለማግኘት [የAuto-Combo ተጠቃሚ መመሪያ](../getting-started/AUTO-COMBO-GUIDE.md)ን ይመልከቱ።
 
-# OmniRoute ራስ-ሰር ጥምረት ሞተር
-
-> **ለተጠቃሚዎች**፦ ፈጣን መነሻ ይፈልጋሉ? ቀላል ማብራሪያዎችንና ምሳሌዎችን ለማግኘት [የራስ-ሰር ጥምረት ተጠቃሚ መመሪያ](../getting-started/AUTO-COMBO-GUIDE.md)ን ይመልከቱ።
-
-> ራሱን የሚያስተዳድር የሞዴል ሰንሰለቶች፣ ከተለማጅ ነጥብ አሰጣጥ + ዜሮ-ውቅረት ራስ-ሰር ማዘዋወር ጋር
+> ራሳቸውን የሚያስተዳድሩ የሞዴል ሰንሰለቶች፣ ከተላማጅ የውጤት አሰጣጥ + ምንም ውቅር ከማይፈልግ ራስ-ሰር ማዘዋወር ጋር
 
 ## ዜሮ-ውቅረት ራስ-ሰር ማዘዋወር (`auto/` ቅድመ ቅጥያ)
 
@@ -222,9 +213,9 @@ Auto-Combo Engine ለእያንዳንዱ ጥያቄ ምርጡን አቅራቢ/ሞ�
 
 ## የሁነታ ጥቅሎች
 
-6 አስቀድሞ የተወሰኑ የክብደት መገለጫዎች በ`open-sse/services/autoCombo/modePacks.ts` ውስጥ ይገኛሉ። እያንዳንዱ ጥቅል ምርጫውን ወደ አንድ ግብ ለማድላት ነባሪ ክብደቶቹን ሙሉ በሙሉ ይተካል። እያንዳንዱ ጥቅል ድምሩ ቀድሞውኑ `1.0` ነው (እስከ አራት የአስርዮሽ ቦታዎች ሲታተም `0.9999`)፤ ስለዚህ አንድ ጥቅል ንቁ በሆነበት ጊዜ `normalizeScoringWeights()` በተጨባጭ የሚያርመው ነገር የለም — ከታች ያሉት እሴቶች፣ በማጠጋጋት ልዩነት ውስጥ፣ የውጤት ሰጪው የሚተገብራቸው ናቸው።
+በ`open-sse/services/autoCombo/modePacks.ts` ውስጥ 6 አስቀድመው የተወሰኑ የክብደት መገለጫዎች አሉ። ምርጫውን ወደ አንድ ግብ ለማድላት እያንዳንዱ ጥቅል ነባሪ ክብደቶቹን ሙሉ በሙሉ ይተካል። እያንዳንዱ ጥቅል ቀድሞውኑ ድምሩ `1.0` ነው (በአራት የአስርዮሽ ቦታዎች ሲታተም `0.9999`)፤ ስለዚህ አንድ ጥቅል ንቁ ሲሆን `normalizeScoringWeights()` በትርጉም ያለው ማስተካከያ አያደርግም — ከታች ያሉት እሴቶች፣ በማጠጋጋት ልዩነት ውስጥ፣ ነጥብ ሰጪው የሚተገብራቸው ናቸው።
 
-| መለኪያ                  | ship-fast  | cost-saver | quality-first | offline-friendly | reliability-first | chaos-mode |
+| ምክንያት                 | ship-fast  | cost-saver | quality-first | offline-friendly | reliability-first | chaos-mode |
 | :-------------------- | :--------- | :--------- | :------------ | :--------------- | :---------------- | :--------- |
 | `quota`               | 0.1133     | 0.1133     | 0.0752        | **0.3324**       | 0.1133            | 0.0376     |
 | `health`              | 0.2667     | 0.1810     | 0.1714        | 0.2667           | **0.3524**        | **0.4000** |
@@ -244,30 +235,30 @@ Auto-Combo Engine ለእያንዳንዱ ጥያቄ ምርጡን አቅራቢ/ሞ�
 
 ማስታወሻዎች፦
 
-- **ጥቅሎቹ `quality` እና `reliability` ይይዛሉ** (`quality 0.02`፣ `quality-first 0.03`፤ `reliability 0.03`፣ `reliability-first 0.04`) እና የክብደት ካርታውን ሙሉ በሙሉ ይተካሉ (`weights = pack`፣ ውህደት አይደለም)። `DEFAULT_WEIGHTS` `quality 0.03 / reliability 0` ይይዛል፤ `balanced`/`default`ን መምረጥ እነዚያን ነባሪዎች እንዳሉ ያቆያል፣ ጥቅል መምረጥ ግን ከላይ ያሉትን የጥቅሉን እሴቶች ይጠቀማል። በቀዝቃዛ ፑል ላይ (እስካሁን ምንም ምልከታዎች ስለሌሉ፣ `quality 0.5` እና `reliability 1`) እነዚህ ሁለት መለኪያዎች በአጠቃላይ ጥቅል ስር `+0.04` (`0.03 + 0.01`)፣ በ`quality-first` ስር `+0.045` እና በ`reliability-first` ስር `+0.05` ይጨምራሉ።
+- **ጥቅሎቹ `quality` እና `reliability`ን ይይዛሉ** (`quality 0.02`፣ `quality-first 0.03`፤ `reliability 0.03`፣ `reliability-first 0.04`) እና የክብደት ካርታውን በሙሉ ይተካሉ (`weights = pack` እንጂ ውህደት አይደለም)። `DEFAULT_WEIGHTS` `quality 0.03 / reliability 0`ን ይይዛል፤ `balanced`/`default`ን መምረጥ እነዚያን ነባሪዎች ያቆያል፣ ጥቅል መምረጥ ደግሞ ከላይ ያሉትን የጥቅሉን እሴቶች ይጠቀማል። በቀዝቃዛ ፑል ላይ (ገና ምንም ምልከታ የለም፣ ስለዚህ `quality 0.5` እና `reliability 1`) እነዚህ ሁለት ምክንያቶች በአጠቃላይ ጥቅል ስር `+0.04` (`0.03 + 0.01`)፣ በ`quality-first` ስር `+0.045` እና በ`reliability-first` ስር `+0.05` ይጨምራሉ።
 - `tierAffinity`፣ `specificityMatch` እና `resetWindowAffinity` በእያንዳንዱ ጥቅል ውስጥ በግልጽ `0` ተደርገዋል።
 - የእያንዳንዱ ጥቅል ትኩረት በአጭሩ፦
   - **ship-fast** → latencyInv 0.3048 + health 0.2667 (ዝቅተኛ መዘግየት ያላቸው፣ ጤናማ ግንኙነቶች)
   - **cost-saver** → costInv 0.3324 (በጣም ርካሹ ቶከኖች ያሸንፋሉ)
-  - **quality-first** → taskFit 0.3524 + stability 0.1429 + quality 0.03፣ ከማንኛውም ጥቅል ከፍተኛው (ለተግባሩ ምርጡ፣ ወጥነት ያለው ሞዴል)
-  - **offline-friendly** → quota 0.3324 + health 0.2667 (ፍጥነትን/ወጪን ሳይመለከት ከፍተኛው ትርፍ አቅም)
-  - **reliability-first** → health 0.3524 + stability 0.1905 + reliability 0.04፣ ከማንኛውም ጥቅል ከፍተኛው (በጣም ጥቂት ያልተጠበቁ ክስተቶች)
-  - **chaos-mode** → health 0.4000 + taskFit 0.1905 (የብልሽት ማስገቢያ መገለጫ)
+  - **quality-first** → taskFit 0.3524 + stability 0.1429 + quality 0.03፣ ከማንኛውም ጥቅል ከፍተኛው (ለተግባሩ ምርጥና ወጥነት ያለው ሞዴል)
+  - **offline-friendly** → quota 0.3324 + health 0.2667 (ፍጥነት/ወጪ ሳይታሰብ ከፍተኛው ትርፍ አቅም)
+  - **reliability-first** → health 0.3524 + stability 0.1905 + reliability 0.04፣ ከማንኛውም ጥቅል ከፍተኛው (አነስተኛው ያልተጠበቀ ባህሪ)
+  - **chaos-mode** → health 0.4000 + taskFit 0.1905 (የብልሽት-ማስገቢያ መገለጫ)
 
-### በእያንዳንዱ ጥያቄ የሚተገበሩ መቆጣጠሪያዎች (ራስጌዎች) — #6023 / #6024 / #6025 / #3470
+### የእያንዳንዱ ጥያቄ መቆጣጠሪያዎች (ራስጌዎች) — #6023 / #6024 / #6025 / #3470
 
-አንድ `auto` ጥምረት የተከማቸውን የጥምረቱን ውቅር ሳይለውጥ፣ በሦስት ራስጌዎች አማካኝነት **ለእያንዳንዱ ጥያቄ** ሊመራ ይችላል።
-እነዚህ የሚተገበሩት በ`auto` ስትራቴጂ ላይ ብቻ እና እነሱን ለያዘው ጥያቄ ብቻ ነው፤
-ራስጌው በማይኖርበት ጊዜ የጥምረቱ የተቀመጡ `modePack`/`budgetCap`/`budgetFallback` ጥቅም ላይ ይውላሉ።
+የኮምቦውን የተቀመጠ ውቅር ሳይለውጥ፣ አንድ `auto` ኮምቦ በሦስት ራስጌዎች አማካኝነት **ለእያንዳንዱ ጥያቄ** ሊመራ ይችላል።
+እነዚህ በ`auto` ስልት ላይ ብቻ እና እነሱን ለያዘው ጥያቄ ብቻ ይተገበራሉ፤ ራስጌው በማይኖርበት ጊዜ የኮምቦው የተቀመጡ `modePack`/`budgetCap`/`budgetFallback` እሴቶች ጥቅም ላይ ይውላሉ።
 
-| ራስጌ                           | የሚቀበላቸው                                                                                                                                                                                  | ውጤት                                                                                                                                                                           |
-| :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-Mode`            | ቀድሞ የተዘጋጀ ተለዋጭ ስም (`fast`፣ `balanced`፣ `quality`፣ `cheap`፣ `reliable`፣ `offline`) ወይም ቀጥተኛ የጥቅል ስም (`ship-fast`፣ `cost-saver`፣ `quality-first`፣ `offline-friendly`፣ `reliability-first`) | ለዚህ ጥያቄ የውጤት አሰጣጥ ክብደቶችን ይተካል። `balanced`/`default` ነባሪ ክብደቶችን ያስገድዳሉ (ምንም ጥቅል የለም)። ያልታወቁ እሴቶች ችላ ይባላሉ (ውቅሩ እንዳለ ይቆያል)።                                                      |
-| `X-OmniRoute-Budget`          | አዎንታዊ ቁጥር (በአንድ ጥያቄ ከፍተኛው USD)                                                                                                                                                           | ጥብቅ የወጪ ገደብ፦ የተገመተው ወጪያቸው ገደቡን የሚያልፍ ዕጩዎች ከምርጫው በፊት ይጣራሉ። **ሁሉም** ዕጩዎች ገደቡን ሲያልፉ ምን እንደሚከሰት ከታች ባለው `X-OmniRoute-Budget-Fallback` ይቆጣጠራል።                                     |
-| `X-OmniRoute-Budget-Fallback` | `cheapest` (ነባሪ፣ ተለዋጭ ስሞች፦ `cheapest-viable`፣ `soft`) ወይም `strict` (ተለዋጭ ስሞች፦ `block`፣ `hard`)                                                                                           | `cheapest`፦ አሁንም ከገደቡ በላይ ቢሆንም በአጠቃላይ በጣም ርካሹን ዕጩ እንደ አማራጭ ይጠቀማል (የቆየ ባህሪ)። `strict`፦ ለመምረጥ እምቢ ይላል—ጥያቄው በዝምታ ከበጀት በላይ ከማውጣት ይልቅ በ`HTTP 402` ወዲያውኑ ይከሽፋል። ያልታወቁ እሴቶች ችላ ይባላሉ። |
+| ራስጌ                           | የሚቀበላቸው እሴቶች                                                                                                                                                                                 | ውጤት                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-Mode`            | ቀድሞ የተዘጋጀ ተለዋጭ ስም (`fast`፣ `balanced`፣ `quality`፣ `cheap`፣ `reliable`፣ `offline`) ወይም ያልተቀነባበረ የጥቅል ስም (`ship-fast`፣ `cost-saver`፣ `quality-first`፣ `offline-friendly`፣ `reliability-first`) | ለዚህ ጥያቄ የውጤት አሰጣጥ ክብደቶችን ይተካል። `balanced`/`default` ነባሪ ክብደቶችን በግድ ይጠቀማሉ (ጥቅል የለም)። ያልታወቁ እሴቶች ችላ ይባላሉ (ውቅሩ እንዳለ ይቆያል)።                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Budget`          | አዎንታዊ ቁጥር (በአንድ ጥያቄ የሚፈቀደው ከፍተኛው USD)                                                                                                                                                        | ጥብቅ የወጪ ገደብ፦ ግምታዊ ወጪያቸው ከገደቡ የሚበልጥ ዕጩዎች ከምርጫው በፊት ይጣራሉ። **ሁሉም** ዕጩዎች ከገደቡ ሲያልፉ የሚከሰተው ከታች ባለው `X-OmniRoute-Budget-Fallback` ይቆጣጠራል።                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Budget-Fallback` | `cheapest` (ነባሪ፣ ተለዋጭ ስሞች፦ `cheapest-viable`፣ `soft`) ወይም `strict` (ተለዋጭ ስሞች፦ `block`፣ `hard`)                                                                                               | `cheapest`፦ አሁንም ከገደቡ ቢያልፍም በአጠቃላይ ዝቅተኛው ወጪ ያለውን ዕጩ እንደ መጠባበቂያ ይመርጣል (የቀድሞ ባህሪ)። `strict`፦ ለመምረጥ ፈቃደኛ አይሆንም — ጥያቄው በዝምታ ከመጠን በላይ ወጪ ከማውጣት ይልቅ በ`HTTP 402` ወዲያውኑ ይከሽፋል። ያልታወቁ እሴቶች ችላ ይባላሉ።                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Effort`          | `auto` (ሌሎች እሴቶች ተይዘዋል)                                                                                                                                                                      | ተስማሚ የማሰብ በጀት፦ ጥያቄው ምንም ዓይነት የማመዛዘን መስክ (`reasoning_effort`፣ `reasoning`፣ `thinking`) ካልያዘ፣ መግቢያ መንገዱ `auto`ን ከወሳኝ የጥያቄ ቅርጽ ምልክቶች (የመጨረሻው የተጠቃሚ መልዕክት ርዝመት፣ እስከ መጨረሻው የተጠቃሚ መልዕክት ያለው የአውድ መጠን፣ የቀደሙ የመሣሪያ ውጤቶች፣ የመሣሪያ ዙር ጥልቀት) በመነሳት ወደ `low`/`medium`/`high` ይወስናል። ምልክቶቹ በአሁኑ ዙር ብቻ የተገደቡ ናቸው — ከመጨረሻው የተጠቃሚ መልዕክት በኋላ ያለው ሁሉ ችላ ይባላል — ስለዚህ በመሣሪያ ዙር ውስጥ ያለ እያንዳንዱ ጥያቄ ወደ ተመሳሳይ ደረጃ ይወሰናል (ሁኔታ-አልባ የእያንዳንዱ ዙር ማጣበቂያ፣ የክፍለ-ጊዜ ሁኔታ የለም፣ የላይኛውን የጥያቄ መሸጎጫ ቅድመ ቅጥያዎች ሊያበላሽ የሚችል በዙር መካከል የደረጃ ጭማሪ የለም)። በደንበኛው በግልጽ የተጠቀሰ የማመዛዘን መስክ ሁልጊዜ ቅድሚያ ያገኛል። የላይኛው መላኪያቸው ወደ OpenAI Chat Completions ቅርጽ (`targetFormat === FORMATS.OPENAI`) በሚወሰን ጥያቄዎች ብቻ የተገደበ ነው — `reasoning_effort` የOpenAI ቅርጽ ያለው መስክ ነው፣ ስለዚህ ራስጌው ወደ Claude ወይም Gemini በተመራ ጥያቄ ላይ ምንም ውጤት አይኖረውም (`open-sse/handlers/chatCore/adaptiveEffortWiring.ts`ን ይመልከቱ)። |
 
 ```bash
-# ፈጣኑን መገለጫ አስገድድ፣ ይህን ጥያቄ በ$0.05 ገድብ፣ እና ከበጀት በላይ ከማውጣት ይልቅ በጥብቅ አግድ
+# ፈጣኑን መገለጫ በግድ ይጠቀሙ፣ ይህን ጥያቄ በ$0.05 ይገድቡ፣ እና ከበጀት በላይ ከማውጣት ይልቅ ሙሉ በሙሉ ያግዱ
 curl -sS http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-OmniRoute-Mode: fast" \
@@ -276,58 +267,84 @@ curl -sS http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"hi"}]}'
 ```
 
-የመፍትሔ ሂደቱ ንጹህ ፈንክሽን (`open-sse/services/autoCombo/requestControls.ts`) ነው፤
-የተፈቱት እሴቶች ወደ ሞተሩ ነባር `config.modePack` / `config.budgetCap` /
-`config.budgetFallback` ግብዓቶች ይገባሉ። በአንድ combo ውስጥ የተከማቸው `config.budgetFallback` ("strict" |
-"cheapest") ቋሚውን ፖሊሲ ይወስናል፤ ራስጌው ለአንድ ጥያቄ ብቻ ይተካዋል።
+መፍታቱ ንጹሕ ፋንክሽን (`open-sse/services/autoCombo/requestControls.ts`) ነው፤
+የተፈቱት እሴቶች ወደ ኤንጂኑ ነባር `config.modePack` / `config.budgetCap` /
+`config.budgetFallback` ግብዓቶች ይገባሉ። የአንድ combo የተቀመጠ `config.budgetFallback` ("strict" |
+"cheapest") ቋሚውን ፖሊሲ ይወስናል፤ header ግን ለአንድ ጥያቄ ብቻ ይተካዋል።
 
-## ሁሉም የማዘዋወሪያ ስልቶች
+## ሁሉም የማስተላለፊያ ስልቶች
 
-የOmniRoute combo ሞተር **19 የማዘዋወሪያ ስልቶችን** ይደግፋል (በ`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` ውስጥ የታወጁ)። የAuto Combo ሞተሩ ራሱ በ`auto` ስልት ስር ይቀርባል፤ ሌሎቹ ለተቀመጡ combos ይገኛሉ።
+የOmniRoute combo engine **19 የማስተላለፊያ ስልቶችን** ይደግፋል (`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` ውስጥ የተገለጹ)። Auto Combo engine ራሱ በ`auto` ስልት ስር ይቀርባል፤ ሌሎቹ ደግሞ ለተቀመጡ combos ይገኛሉ።
 
 | ስልት                 | መግለጫ                                                                                                                                                                              |
 | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | ግልጽ ቅድሚያ ያለው፣ የመጀመሪያውን ዒላማ ቀዳሚ የሚያደርግ የተደራጀ ዝርዝር                                                                                                                                  |
-| `weighted`          | በእያንዳንዱ ዒላማ ክብደት መሠረት የሚደረግ ክብደት ያለው የዘፈቀደ ምርጫ                                                                                                                                    |
-| `round-robin`       | በቅደም ተከተል በዒላማዎች መካከል መዞር                                                                                                                                                         |
-| `context-relay`     | ዐውዱን በዒላማዎች መካከል ማስተላለፍ (ረጅም ውይይቶች)                                                                                                                                               |
-| `fill-first`        | ወደ ቀጣዩ ከመሄድ በፊት የእያንዳንዱን ዒላማ ኮታ መሙላት                                                                                                                                              |
-| `p2c`               | በሁለት ምርጫዎች ኃይል የሚደረግ የዘፈቀደ ጭነት ማመጣጠን                                                                                                                                              |
+| `priority`          | ግልጽ ቅድሚያ ያለው፣ የመጀመሪያውን target ቅድሚያ የሚሰጥ የተደረደረ ዝርዝር                                                                                                                               |
+| `weighted`          | በእያንዳንዱ target ክብደት መሠረት የሚካሄድ ክብደት-ተኮር የዘፈቀደ ምርጫ                                                                                                                                 |
+| `round-robin`       | targetsን በቅደም ተከተል በዙር መጠቀም (በቡድን፤ ከታች ይመልከቱ)                                                                                                                                     |
+| `context-relay`     | contextን በtargets መካከል ማስተላለፍ (ለረጅም ውይይቶች)                                                                                                                                        |
+| `fill-first`        | ወደ ቀጣዩ ከመሸጋገር በፊት የእያንዳንዱን target ኮታ መሙላት                                                                                                                                         |
+| `p2c`               | በPower-of-2-choices የዘፈቀደ የጭነት ማመጣጠን                                                                                                                                              |
 | `random`            | ወጥ የዘፈቀደ ምርጫ                                                                                                                                                                      |
-| `least-used`        | በአሁኑ ጊዜ ዝቅተኛው ጭነት ያለበትን ዒላማ መምረጥ                                                                                                                                                  |
-| `cost-optimized`    | በካታሎግ ዋጋ አሰጣጥ መሠረት በእያንዳንዱ ጥያቄ የሚወጣውን $ መቀነስ                                                                                                                                      |
-| `reset-aware` ⭐    | በኮታ ዳግም ማስጀመሪያ ጊዜ መሠረት ቅድሚያ መስጠት — አጭር የዳግም ማስጀመሪያ ጊዜ መስኮቶች ከፍ ያለ ደረጃ ያገኛሉ                                                                                                        |
-| `reset-window`      | የኮታ ጊዜ መስኮታቸው ቀድሞ ዳግም የሚጀመርላቸውን ዒላማዎች መምረጥ                                                                                                                                        |
-| `headroom`          | ከኮታው በጣም ብዙ ቀሪ አቅም ያለውን ዒላማ መምረጥ                                                                                                                                                  |
-| `strict-random`     | ተደጋጋሚ ምርጫዎችን ሳያስወግድ በዘፈቀደ መምረጥ                                                                                                                                                    |
-| `auto`              | የAuto Combo ነጥብ አሰጣጥን (16 ምክንያቶች) መጠቀም — **የሚመከር**                                                                                                                                |
-| `lkgp`              | የመጨረሻው-የሚሠራ-ተብሎ-የታወቀ መንገድ (የመጨረሻውን ስኬታማ provider ይይዛል፣ ከዚያም ካልተሳካ ወደ ደንቦች ይመለሳል)                                                                                                  |
-| `context-optimized` | ለአሁኑ የዐውድ መጠን በጣም ተስማሚ የሆነውን ዒላማ መምረጥ                                                                                                                                             |
-| `cache-optimized`   | ዒላማዎችን ከprompt cache ጋር ባላቸው ቅርርብ እንደገና ማደራጀት — የዚህን ጥያቄ በcache የተቀመጠ prefix አስቀድሞ የያዘ ሊሆን የሚችለው connection መጀመሪያ ይሞከራል (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | በትይዩ ወደ የmodels ፓነል ማሰራጨት፣ ከዚያም በዳኛ አማካኝነት አንድ መልስ ማቀናጀት (ከታች ይመልከቱ)                                                                                                              |
-| `pipeline`          | ዒላማዎችን በቅደም ተከተል ማስኬድ፣ የእያንዳንዱን ደረጃ ውጤት ወደ ቀጣዩ ደረጃ ግብዓት ማስተላለፍ፤ የሚመለሰው የመጨረሻው መልስ ብቻ ነው (#6396)                                                                                   |
+| `least-used`        | አሁን ዝቅተኛው ጭነት ያለበትን target መምረጥ                                                                                                                                                   |
+| `cost-optimized`    | በcatalog ዋጋ መሠረት የእያንዳንዱን request የ$ ወጪ መቀነስ                                                                                                                                      |
+| `reset-aware` ⭐    | በኮታ reset ጊዜ መሠረት ቅድሚያ መስጠት — አጭር የreset መስኮቶች ከፍ ያለ ደረጃ ያገኛሉ                                                                                                                     |
+| `reset-window`      | የኮታ መስኮታቸው ቀድሞ reset የሚደረግላቸውን targets መምረጥ                                                                                                                                       |
+| `headroom`          | ከፍተኛው የቀረ የኮታ ትርፍ አቅም ያለውን target መምረጥ                                                                                                                                            |
+| `strict-random`     | የተደጋገሙ ምርጫዎችን ሳያስወግድ የሚደረግ የዘፈቀደ ምርጫ                                                                                                                                              |
+| `auto`              | Auto Combo scoringን (16-factor) መጠቀም — **የሚመከር**                                                                                                                                  |
+| `lkgp`              | Last-Known-Good Path (የመጨረሻው ስኬታማ provider ላይ ያቆያል፣ ከዚያ ወደ rules ይመለሳል)                                                                                                           |
+| `context-optimized` | ለአሁኑ context መጠን በተሻለ ሁኔታ የሚስማማውን target መምረጥ                                                                                                                                     |
+| `cache-optimized`   | targetsን በprompt-cache affinity መሠረት እንደገና ማደራጀት — የዚህን request cached prefix ቀድሞውኑ ይዞ ሊገኝ የሚችለው connection መጀመሪያ ይሞከራል (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | በትይዩ ወደ models ፓነል ማሰራጨት፣ ከዚያ በjudge አማካይነት አንድ መልስ ማዋሃድ (ከታች ይመልከቱ)                                                                                                              |
+| `pipeline`          | targetsን በቅደም ተከተል ማስኬድ፣ የእያንዳንዱን ደረጃ output ወደ ቀጣዩ ደረጃ input ማስገባት፤ የመጨረሻው መልስ ብቻ ይመለሳል (#6396)                                                                                  |
 
 ⭐ = በv3.8.0 አዲስ · 🧬 = በv3.8.36 አዲስ
 
-### የ`weighted` ትርጉም
+### የ`weighted` አሠራር
 
-`weighted` በእያንዳንዱ ጥያቄ **ተመጣጣኝ የዘፈቀደ ዕጣ ማውጣት** ነው
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`)፣ አመጣጣኝ አድራጊ አይደለም፦
+`weighted` **ለእያንዳንዱ request ተመጣጣኝ የዘፈቀደ ምርጫ** ነው
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`)፣ ማመጣጠኛ አይደለም፦
 
-- እያንዳንዱ ጥያቄ `weight / totalWeight` በሆነ ዕድል **አንድ** ደረጃ ይመርጣል፤ ቀሪዎቹ ደረጃዎች
-  ለዚያ ጥያቄ እንደ አማራጭ ሰንሰለት በክብደታቸው ከከፍተኛ ወደ ዝቅተኛ ይደረደራሉ።
-- ክብደቱ `0` የሆነ (ወይም ያልተገለጸ) ደረጃ፣ ሌላ ማንኛውም ደረጃ
-  ክብደት > 0 እስካለው ድረስ **ፈጽሞ አይመረጥም** — ሊያገለግል የሚችለው የተመረጠው ደረጃ ካልተሳካ በኋላ እንደ አማራጭ ብቻ ነው። **ሁሉም**
-  ክብደቶች 0 ሲሆኑ ብቻ ምርጫው ወጥ ይሆናል።
-- ሁሉም ዒላማዎቻቸው የማይገኙ ደረጃዎች — provider circuit breaker `OPEN`፣ connection
-  cooldown፣ model lockout — ዕጣው ከመውጣቱ በፊት ይወገዳሉ
-  (`open-sse/services/combo/targetResolution.ts`)፣ ስለዚህ አንድ ጤናማ ደረጃ ለጊዜው እያንዳንዱን
-  ጥያቄ ሊያሸንፍ ይችላል።
-- `stickyWeightedLimit` (የcombo ውቅር፣ ነባሪ `1` = ጠፍቷል) ዳግም ዕጣ ከመውጣቱ በፊት የተመረጠውን ደረጃ ለዚያ ያህል
-  ተከታታይ ስኬቶች ይይዛል።
+- እያንዳንዱ request በ`weight / totalWeight` ዕድል **አንድ** step ይመርጣል፤ የቀሩት steps
+  ለዚያ request እንደ fallback chain በክብደት ከከፍተኛ ወደ ዝቅተኛ ይደረደራሉ።
+- ክብደቱ `0` የሆነ (ወይም ያልተገለጸ) step፣ ሌላ ማንኛውም step
+  weight > 0 እስካለው ድረስ **ፈጽሞ አይመረጥም** — የተመረጠው step ካልተሳካ በኋላ እንደ fallback ብቻ ሊያገለግል ይችላል። ምርጫው ወጥ የሚሆነው **ሁሉም**
+  weights 0 ሲሆኑ ብቻ ነው።
+- ሁሉም targets የማይገኙባቸው steps — provider circuit breaker `OPEN`፣ connection
+  cooldown፣ model lockout — ምርጫው ከመካሄዱ በፊት ይወገዳሉ
+  (`open-sse/services/combo/targetResolution.ts`)፤ ስለዚህ አንድ ጤናማ step ሁሉንም requests ለጊዜው
+  ሊያሸንፍ ይችላል።
+- `stickyWeightedLimit` (የcombo ውቅር፣ default `1` = off) እንደገና ከመምረጡ በፊት የተመረጠውን step ለዚያ ብዛት
+  ተከታታይ ስኬቶች አቆይቶ ይይዛል።
 
-ጥብቅ ዙር ለማድረግ `round-robin`ን ይጠቀሙ፤ በ`weighted` ላይ እኩል ክብደቶች ስታቲስቲካዊ — ጥብቅ
+ጥብቅ የዙር ሽግግር ለማግኘት `round-robin`ን ይጠቀሙ፤ በ`weighted` ላይ እኩል weights ስታቲስቲካዊ — ጥብቅ
 ያልሆነ — ሚዛን ይሰጣሉ።
+
+### ወኪላዊ pipeline ሁነታ
+
+ባለሁለት-ደረጃ `pipeline` ጥምረት በ`config.agenticOrchestration.enabled` አማካኝነት የእቅድ አውጪ/አስፈጻሚ ማዘዋወርን መምረጥ ይችላል። የመጀመሪያው ዒላማ የእቅድ ማውጣትንና የመጨረሻ መልሶችን ይቆጣጠራል፤ ሁለተኛው ዒላማ ደግሞ ከደንበኛው ጋር ቤተኛ የሆኑ የመሣሪያ ጥሪዎችን ያወጣል። OmniRoute ከጥያቄው ፕሮቶኮል የሚመጡ የመሣሪያ-ውጤት ቀጣይ ሂደቶችን ይለያል፣ ሌላ የመሣሪያ ዙር ያስፈልግ እንደሆነ እቅድ አውጪውን ይጠይቃል፣ እና አስፈጻሚውን ወይም እቅድ አውጪውን ለደንበኛው የሚቀርበው ተለዋዋጭ የመጨረሻ ደረጃ አድርጎ ይመርጣል።
+
+```json
+{
+  "strategy": "pipeline",
+  "models": [{ "model": "provider/planner" }, { "model": "provider/executor" }],
+  "config": {
+    "agenticOrchestration": { "enabled": true, "maxToolRounds": 8 }
+  }
+}
+```
+
+አስፈጻሚው በአንድ ምላሽ ውስጥ ብዙ ገለልተኛ ጥሪዎችን ሊያወጣ ይችላል። ጥገኛ ጥሪዎች በቀጣዮቹ የደንበኛ መሣሪያ-ውጤት ዙሮች ይከናወናሉ፣ እቅድ አውጪውም እያንዳንዱን ውጤት ይገመግማል። `maxToolRounds` ነባሪው `8` ሲሆን `1`–`32` ይቀበላል፤ ገደቡ ከተደረሰ በኋላ እቅድ አውጪው በወቅቱ የሚገኘውን ምርጥ የመጨረሻ መልስ ማቅረብ አለበት። የውስጥ የእቅድ አውጪ ውሳኔዎች በቋት ይያዛሉ፣ የተመረጠው ለደንበኛ የሚቀርብ ምላሽ ግን የመጀመሪያውን የዥረት ምርጫ ይጠብቃል።
+
+### የ`round-robin` ተጣባቂ ባች እና የመለያ ማስፋፊያ
+
+Round-robin በባች ይሠራል፣ በእያንዳንዱ ደረጃ አንድ ጥያቄ አይደለም፦
+
+- `stickyRoundRobinLimit` (በቅደም ተከተል የጥምረት ውቅር፣ ከዚያ `comboStickyRoundRobinLimit`፣ በመቀጠል `settings.stickyRoundRobinLimit`፣ ነባሪው **3**) ወደ ሌላ ዒላማ ከመዞሩ በፊት ለዚያ ያህል ተከታታይ ስኬቶች ተመሳሳዩን ዒላማ ይጠቀማል። ለእያንዳንዱ-ጥያቄ መዞር የጥምረቱን መሻሪያ ወደ `1` ያቀናብሩ። የጥምረት አርታዒው ተግባራዊውን ዋጋ እና ከየትኛው ንብርብር እንደመጣ ያሳያል።
+- `connectionAwareExpansion` (በቅደም ተከተል የጥምረት ውቅር፣ ከዚያ ቅንብሮች፣ ነባሪው **false**) ከመዞሩ በፊት እያንዳንዱን በአቅራቢ-ደረጃ ያለ ደረጃ ወደ በእያንዳንዱ-መለያ ዒላማዎች ያስፋፋል። የGroup-B ስልቶች (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline) ይህ እስኪበራ ድረስ የአቅራቢ-ደረጃ እይታን ይይዛሉ። የጥምረት አርታዒው inherit / on / off አማራጮችን ያቀርባል፤ inherit ዓለም አቀፉን ነባሪ (off) ይጠቀማል።
+- የጥያቄ-ቋት አካባቢያዊነት ማዘዋወር (`promptCacheAffinityEnabled`፣ ነባሪው **true**) ተመሳሳይ የቋት ቁልፎች በአንድ መለያ ላይ እንዲቆዩ የተሰኩ ግንኙነቶችን እንደገና ያደራጃል። በተሰኩ የበእያንዳንዱ-መለያ ደረጃዎች ላይ ከround-robin እና weighted መዞር ቅድሚያ ይኖረዋል። ጥብቅ መዞር ካስፈለገዎት በSettings → Combo defaults ስር ያጥፉት። ለእያንዳንዱ ጥምረት የተለየ መሻሪያ የለም።
+
+በአንድ ሞዴል ላይ ለባለብዙ-መለያ መዞር፣ ሦስት የተሰኩ `connectionId`ዎችን ከመጠቀም ይልቅ ተጣባቂ ገደቡ `1` የሆነ **አንድ ተለዋዋጭ-መለያ ደረጃ** (ባዶ `connectionId`፣ ሙሉ ስብስቡ) መጠቀም ይመረጣል። የተሰኩ ደረጃዎች ከአቻነት ጋር ሲጣመሩ፣ የRR ቆጣሪው እየጨመረ ቢሄድም በተመሳሳዩ መለያ ላይ ይሰባሰባሉ።
 
 ## የFusion ስትራቴጂ
 

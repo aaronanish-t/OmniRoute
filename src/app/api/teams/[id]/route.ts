@@ -9,7 +9,7 @@ type RouteParams = { params: Promise<{ id: string }> };
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request, { params }: RouteParams): Promise<Response> {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
     const { id } = await params;
@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Re
 }
 
 export async function PATCH(request: Request, { params }: RouteParams): Promise<Response> {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
     const { id } = await params;
@@ -55,7 +55,7 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
 }
 
 export async function DELETE(request: Request, { params }: RouteParams): Promise<Response> {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
     const { id } = await params;

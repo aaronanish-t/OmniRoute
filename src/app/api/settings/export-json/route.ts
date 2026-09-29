@@ -49,7 +49,7 @@ export function filterPaidComboSteps<T extends { models?: unknown }>(combos: T[]
  * Exports a legacy OmniRoute-compatible JSON backup.
  */
 export async function GET(request: Request) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {

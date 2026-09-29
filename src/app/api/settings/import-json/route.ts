@@ -20,7 +20,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
  * 🔒 A pre-import backup is created automatically before any data is written.
  */
 export async function POST(request: Request) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {

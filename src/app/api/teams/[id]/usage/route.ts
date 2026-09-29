@@ -18,7 +18,7 @@ function parseIso(value: string | null, field: string): string | null {
 }
 
 export async function GET(request: Request, { params }: RouteParams): Promise<Response> {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
     const { id } = await params;

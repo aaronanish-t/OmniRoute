@@ -26,7 +26,7 @@ For subscription-backed providers, `estimatedListCostUsd` is useful for allocati
 
 ## Immutable attribution
 
-When the terminal usage row is written, OmniRoute resolves the API key's billing Team at that row's timestamp and stores the resulting Team ID on the row. Reassigning a key never rewrites rows that are already stored. Operators should avoid transferring a key while it has in-flight requests: phase 1 does not persist a separate request-start ownership reservation, so a transfer during a long stream is attributed according to the terminal usage timestamp.
+When the terminal usage row is written, OmniRoute resolves the API key's billing Team at the effective `UsageEntry.timestamp` and stores the resulting Team ID on the row. The timestamp defaults to the current wall clock only when the caller omits it; callers may supply it, so it is not an independent persistence-time clock. Reassigning a key never rewrites rows that are already stored. Operators should avoid transferring a key while it has in-flight requests: phase 1 does not persist a separate request-start ownership reservation, and attribution follows that effective usage-entry timestamp.
 
 Before raw usage retention cleanup, Team usage is rolled into `daily_team_usage_summary`, preserving Team, API key, provider, model, service tier, token classes, and successful-request counters. The retention rollup is one bucket per UTC day. For an arbitrary timestamp range that cuts through an already rolled-up day, phase 1 excludes that whole boundary bucket rather than attributing usage outside the requested range; complete UTC-day reports remain exact.
 

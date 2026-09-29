@@ -740,7 +740,7 @@ export interface UsageEntry {
   connectionId?: string | null;
   apiKeyId?: string | null;
   apiKeyName?: string | null;
-  /** Billing owner resolved when this terminal usage row is persisted. */
+  /** Billing owner resolved at the effective `timestamp` when this row is persisted. */
   billingTeamId?: string | null;
   serviceTier?: string | null;
   /** @deprecated legacy snake_case fallback, read only if `serviceTier` is unset. */

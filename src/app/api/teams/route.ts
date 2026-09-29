@@ -8,7 +8,7 @@ import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request): Promise<Response> {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
     const includeArchived = new URL(request.url).searchParams.get("includeArchived") === "true";
@@ -20,7 +20,7 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
     const parsed = TeamCreateSchema.safeParse(await request.json().catch(() => null));

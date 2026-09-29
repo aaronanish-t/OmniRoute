@@ -1,3 +1,4 @@
+import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
@@ -7,6 +8,7 @@ import {
 } from "@/lib/compliance/providerAudit";
 import {
   getProviderConnections,
+  getProviderConnectionById,
   getProviderConnectionsCount,
   createProviderConnection,
   deleteProviderConnections,
@@ -59,12 +61,15 @@ import {
 import { isAutoFetchModelsEnabled } from "@/lib/providerModels/modelDiscovery";
 import { testSingleConnection } from "./[id]/test/route";
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
+import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
 function projectCodexAccountPoolWithRoutingQuota(
   connection: Parameters<typeof projectCodexAccountPool>[0],
-  now: number
+  now: number,
+  cachedUsage?: Parameters<typeof projectCodexAccountPool>[2]
 ) {
-  const projection = projectCodexAccountPool(connection, now);
+  const projection = projectCodexAccountPool(connection, now, cachedUsage);
   const children = projection.children.map((child) => {
     const fiveHourWindow = child.key.scope === "spark" ? CODEX_SPARK_QUOTA_SESSION : "session";
     const weeklyWindow = child.key.scope === "spark" ? CODEX_SPARK_QUOTA_WEEKLY : "weekly";
@@ -124,6 +129,10 @@ export async function GET(request: Request) {
     const total = getProviderConnectionsCount(filter);
     const revealKeys = isApiKeyRevealEnabled();
 
+    const quotaCache = connections.some((c) => c.provider === "codex")
+      ? getAllProviderLimitsCache()
+      : {};
+
     // Hide or mask sensitive fields
     const safeConnections = connections.map((c) => {
       const providerSpecificData = c.providerSpecificData
@@ -144,7 +153,8 @@ export async function GET(request: Request) {
                   provider: c.provider,
                   providerSpecificData: c.providerSpecificData ?? {},
                 },
-                Date.now()
+                Date.now(),
+                quotaCache[String(c.id)]
               ),
             }
           : {}),
@@ -362,7 +372,10 @@ export async function POST(request: Request) {
     // seconds (OAuth refresh, upstream round-trip) and must not block the
     // 201 response. testSingleConnection() persists testStatus/lastError/etc.
     // itself, so nothing further is needed here beyond logging failures.
-    void testSingleConnection(newConnection.id).catch((testError: unknown) => {
+    // GHSA-jmq6-8j86-8xqj: the local CLI probe spawns on the host — only for local callers.
+    void testSingleConnection(newConnection.id, undefined, {
+      allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
+    }).catch((testError: unknown) => {
       console.log(
         `[providers] Auto-test failed for ${newConnection.id}:`,
         (testError as { message?: string })?.message || testError
@@ -455,7 +468,18 @@ export async function PATCH(request: Request) {
     const updatedIds: string[] = [];
     const notFoundIds: string[] = [];
     for (const id of ids) {
-      const updated = await updateProviderConnection(id, { isActive });
+      // Record the operator's on/off intent next to isActive, so the connection
+      // test does not re-enable a connection that was switched off on purpose.
+      const existing = (await getProviderConnectionById(id)) as Record<string, unknown> | null;
+      const updated = existing
+        ? await updateProviderConnection(id, {
+            isActive,
+            providerSpecificData: applyOperatorActivationIntent(
+              existing.providerSpecificData,
+              isActive
+            ),
+          })
+        : null;
       if (updated) updatedIds.push(id);
       else notFoundIds.push(id);
     }

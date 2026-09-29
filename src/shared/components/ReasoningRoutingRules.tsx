@@ -11,6 +11,12 @@ import Toggle from "./Toggle";
 import { ConfirmModal } from "./Modal";
 import RoutingChoice from "./routing/RoutingChoice";
 import { readCatalogModels } from "./ModelSelectField";
+import {
+  EXTENDED_REASONING_EFFORTS,
+  getReasoningRoutingTargetEffortOptions,
+  STANDARD_REASONING_EFFORTS,
+  supportsExtendedCodexEffort,
+} from "@/shared/reasoning/reasoningRoutingEfforts";
 
 type RuleScope = "global" | "apiKey" | "combo" | "model" | "connection";
 type TargetKind = "keep" | "model" | "combo";
@@ -64,9 +70,6 @@ type FormState = {
   enabled: boolean;
 };
 
-const STANDARD_EFFORTS = ["none", "low", "medium", "high", "xhigh"];
-const EXTENDED_EFFORTS = ["max", "ultra"];
-
 function emptyRule(apiKeyId?: string): FormState {
   return {
     name: "",
@@ -89,16 +92,6 @@ function emptyRule(apiKeyId?: string): FormState {
     priority: "0",
     enabled: true,
   };
-}
-
-function supportsExtendedCodexEffort(model: string, effort: "max" | "ultra"): boolean {
-  const normalized = model
-    .trim()
-    .toLowerCase()
-    .replace(/^(?:codex|cx)\//, "");
-  return effort === "ultra"
-    ? /^gpt-5\.6-(?:sol|terra)(?:-|$)/.test(normalized)
-    : /^gpt-5\.6-(?:sol|terra|luna)(?:-|$)/.test(normalized);
 }
 
 export default function ReasoningRoutingRules({
@@ -212,22 +205,17 @@ export default function ReasoningRoutingRules({
 
   const targetModelForCapability =
     form.targetKind === "model" ? form.targetModel : form.modelPattern;
-  const effortOptions = useMemo(() => {
-    const values = [...STANDARD_EFFORTS];
-    for (const effort of EXTENDED_EFFORTS) {
-      if (
-        supportsExtendedCodexEffort(targetModelForCapability, effort as "max" | "ultra") ||
-        form.targetEffort === effort
-      ) {
-        values.push(effort);
-      }
-    }
-    return values.map((value) => ({ value, label: value }));
-  }, [form.targetEffort, targetModelForCapability]);
+  const effortOptions = useMemo(
+    () =>
+      getReasoningRoutingTargetEffortOptions(targetModelForCapability, form.targetEffort).map(
+        (value) => ({ value, label: value })
+      ),
+    [form.targetEffort, targetModelForCapability]
+  );
 
   const capabilityWarning = useMemo(() => {
     if (form.effortMode === "inherit") return "";
-    if (!EXTENDED_EFFORTS.includes(form.targetEffort)) return "";
+    if (!(EXTENDED_REASONING_EFFORTS as readonly string[]).includes(form.targetEffort)) return "";
     if (form.targetKind === "combo") return t("extendedComboWarning");
     if (!targetModelForCapability.trim()) return t("extendedUnknownWarning");
     return supportsExtendedCodexEffort(
@@ -768,7 +756,10 @@ export default function ReasoningRoutingRules({
                       options={[
                         { value: "any", label: t("any") },
                         { value: "missing", label: t("missing") },
-                        ...[...STANDARD_EFFORTS, ...EXTENDED_EFFORTS].map((value) => ({
+                        ...[
+                          ...STANDARD_REASONING_EFFORTS,
+                          ...EXTENDED_REASONING_EFFORTS,
+                        ].map((value) => ({
                           value,
                           label: value,
                         })),

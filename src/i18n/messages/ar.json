@@ -4676,6 +4676,13 @@
     "installSkill": "تثبيت المهارة"
   },
   "health": {
+    "queuesTitle": "بوابات التزامن",
+    "queuesScope": "هذه العملية فقط. تغطي بوابات combo أهداف round-robin فقط، وليس جميع طلبات combo. تتداخل الأعداد بين البوابات؛ لا تجمعها.",
+    "queuesCombo": "بوابات أهداف combo ‏(round-robin)",
+    "queuesAdmission": "بوابات عامة / مزوّد / حساب",
+    "queuesEmpty": "لا توجد بوابات متتبعة في هذه اللقطة.",
+    "queuesStale": "لقطة قديمة",
+    "queuesError": "لقطة قوائم الانتظار غير متاحة. تجري إعادة المحاولة تلقائيًا.",
     "title": "صحة النظام",
     "description": "المراقبة في الوقت الحقيقي لمثيل OmniRoute الخاص بك",
     "healthy": "صحي",

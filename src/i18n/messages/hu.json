@@ -4676,6 +4676,13 @@
     "installSkill": "Telepítse a Skill-t"
   },
   "health": {
+    "queuesTitle": "Párhuzamossági kapuk",
+    "queuesScope": "Csak ez a folyamat. A combo kapuk csak a round-robin célpontokat fedik le, nem az összes combo kérést. A számlálók a kapuk között átfednek; ne adja össze őket.",
+    "queuesCombo": "Combo célpontkapuk (round-robin)",
+    "queuesAdmission": "Globális / szolgáltatói / fiókkapuk",
+    "queuesEmpty": "Ebben a pillanatképben nincs követett kapu.",
+    "queuesStale": "Elavult pillanatkép",
+    "queuesError": "A sorok pillanatképe nem érhető el. Automatikus újrapróbálkozás.",
     "title": "Rendszer egészsége",
     "description": "Az OmniRoute példány valós idejű megfigyelése",
     "healthy": "Egészséges",

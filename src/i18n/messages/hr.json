@@ -4676,6 +4676,13 @@
     "installSkill": "Instaliraj vještinu"
   },
   "health": {
+    "queuesTitle": "Kontrole istodobnosti",
+    "queuesScope": "Samo ovaj proces. Combo kontrole obuhvaćaju samo round-robin ciljeve, ne sve combo zahtjeve. Brojevi se preklapaju između kontrola; nemojte ih zbrajati.",
+    "queuesCombo": "Kontrole combo ciljeva (round-robin)",
+    "queuesAdmission": "Globalne kontrole / kontrole pružatelja / računa",
+    "queuesEmpty": "U ovoj snimci nema praćenih kontrola.",
+    "queuesStale": "Zastarjela snimka",
+    "queuesError": "Snimka redova nije dostupna. Automatski se pokušava ponovno.",
     "title": "Stanje sustava",
     "description": "Praćenje vaše instance OmniRoute u stvarnom vremenu",
     "healthy": "Ispravno",

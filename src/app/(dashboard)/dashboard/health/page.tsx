@@ -59,14 +59,21 @@ const CB_STYLES = {
 };
 
 export default function HealthPage() {
+  return (
+    <div className="space-y-6">
+      <ConcurrencyQueuesCard />
+      <HealthSnapshot />
+    </div>
+  );
+}
+
+function HealthSnapshot() {
   const locale = useLocale();
   const t = useTranslations("health");
   const tc = useTranslations("common");
   const tp = useTranslations("providers");
   const nodeMap = useProviderNodeMap();
   const [data, setData] = useState(null);
-  const [concurrency, setConcurrency] = useState(null);
-  const [concurrencyError, setConcurrencyError] = useState(null);
   const [dbHealth, setDbHealth] = useState(null);
   const [dbHealthError, setDbHealthError] = useState(null);
   const [error, setError] = useState(null);
@@ -90,18 +97,6 @@ export default function HealthPage() {
       setLastRefresh(new Date());
     } catch (err) {
       setError(err.message);
-    }
-  }, []);
-
-  const fetchConcurrency = useCallback(async () => {
-    try {
-      const res = await fetch("/api/admin/concurrency");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      setConcurrency(json);
-      setConcurrencyError(null);
-    } catch (err) {
-      setConcurrencyError(err.message);
     }
   }, []);
 
@@ -134,13 +129,11 @@ export default function HealthPage() {
   useEffect(() => {
     const initialFetch = setTimeout(() => {
       void fetchHealth();
-      void fetchConcurrency();
       void fetchExtras();
       void fetchDbHealth();
     }, 0);
     const interval = setInterval(() => {
       void fetchHealth();
-      void fetchConcurrency();
       void fetchExtras();
       void fetchDbHealth();
     }, 15000);
@@ -148,7 +141,7 @@ export default function HealthPage() {
       clearTimeout(initialFetch);
       clearInterval(interval);
     };
-  }, [fetchHealth, fetchConcurrency, fetchExtras, fetchDbHealth]);
+  }, [fetchHealth, fetchExtras, fetchDbHealth]);
 
   const handleResetHealth = async () => {
     if (!confirm(t("resetConfirm"))) return;
@@ -274,7 +267,6 @@ export default function HealthPage() {
         <button
           onClick={() => {
             fetchHealth();
-            fetchConcurrency();
             fetchExtras();
             fetchDbHealth();
           }}
@@ -289,13 +281,11 @@ export default function HealthPage() {
       {/* Verdict Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          {
-            data.status === "healthy"
-              ? t("healthVerdictReady")
-              : data.status === "cooling"
-                ? t("healthVerdictCoolingDown")
-                : t("healthVerdictActionRequired")
-          }
+          {data.status === "healthy"
+            ? t("healthVerdictReady")
+            : data.status === "cooling"
+              ? t("healthVerdictCoolingDown")
+              : t("healthVerdictActionRequired")}
         </h1>
         <p className="text-text-muted text-lg">{t("healthSubtitle")}</p>
       </div>
@@ -318,9 +308,7 @@ export default function HealthPage() {
           {data.status === "healthy" ? "check_circle" : "error"}
         </span>
         <span className={data.status === "healthy" ? "text-green-400" : "text-red-400"}>
-          {data.status === "healthy"
-            ? t("allOperational")
-            : t("issuesDetected")}
+          {data.status === "healthy" ? t("allOperational") : t("issuesDetected")}
         </span>
       </div>
 
@@ -951,8 +939,6 @@ export default function HealthPage() {
           })()
         )}
       </Card>
-
-      <ConcurrencyQueuesCard data={concurrency} error={concurrencyError} />
 
       {/* Rate Limit Status */}
       {rateLimitStatus &&

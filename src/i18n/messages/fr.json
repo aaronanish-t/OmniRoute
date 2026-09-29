@@ -4676,6 +4676,13 @@
     "installSkill": "Installer la compétence"
   },
   "health": {
+    "queuesTitle": "Contrôles de concurrence",
+    "queuesScope": "Ce processus uniquement. Les contrôles de combo couvrent uniquement les cibles round-robin, pas toutes les requêtes du combo. Les compteurs se recoupent entre contrôles ; ne les additionnez pas.",
+    "queuesCombo": "Contrôles des cibles de combo (round-robin)",
+    "queuesAdmission": "Contrôles globaux / fournisseur / compte",
+    "queuesEmpty": "Aucun contrôle suivi dans cet instantané.",
+    "queuesStale": "Instantané périmé",
+    "queuesError": "Instantané des files indisponible. Nouvelle tentative automatique.",
     "title": "Santé du système",
     "description": "Surveillance en temps réel de votre instance OmniRoute",
     "healthy": "Sain",

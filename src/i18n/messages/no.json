@@ -4676,6 +4676,13 @@
     "installSkill": "Installer Skill"
   },
   "health": {
+    "queuesTitle": "Samtidighetsbegrensninger",
+    "queuesScope": "Bare denne prosessen. Combo-begrensninger dekker kun round-robin-mål, ikke alle combo-forespørsler. Tellinger overlapper mellom begrensninger; ikke summer dem.",
+    "queuesCombo": "Combo-målbegrensninger (round-robin)",
+    "queuesAdmission": "Globale / leverandør- / kontobegrensninger",
+    "queuesEmpty": "Ingen begrensninger spores i dette øyeblikksbildet.",
+    "queuesStale": "Utdatert øyeblikksbilde",
+    "queuesError": "Øyeblikksbilde av køene er utilgjengelig. Prøver automatisk igjen.",
     "title": "Systemhelse",
     "description": "Sanntidsovervåking av din OmniRoute-forekomst",
     "healthy": "Sunn",

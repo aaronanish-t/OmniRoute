@@ -10,14 +10,20 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
-  if (authError) return authError;
+  if (authError) {
+    authError.headers.set("Cache-Control", "private, no-store");
+    return authError;
+  }
 
-  return NextResponse.json({
-    timestamp: new Date().toISOString(),
-    rateLimits: getAllRateLimitStatus(),
-    comboQueues: getComboSemaphoreStats("combo:"),
-    semaphores: getSemaphoreStats(),
-  });
+  return NextResponse.json(
+    {
+      timestamp: new Date().toISOString(),
+      rateLimits: getAllRateLimitStatus(),
+      comboQueues: getComboSemaphoreStats("combo:"),
+      semaphores: getSemaphoreStats(),
+    },
+    { headers: { "Cache-Control": "private, no-store" } }
+  );
 }
 
 export async function POST(request: Request) {

@@ -1,213 +1,166 @@
 "use client";
 
-import { Card } from "@/shared/components";
 import { useLocale, useTranslations } from "next-intl";
+import { Card } from "@/shared/components";
+import { useConcurrencySnapshot } from "./useConcurrencySnapshot";
 
-interface QueueStats {
-  running?: number;
-  queued?: number;
-  max?: number;
-  maxConcurrency?: number;
-  rateLimitedUntil?: string | null;
-  blockedUntil?: string | null;
+interface GateRow {
+  key: string;
+  identity: Array<{ label: string; value: string }>;
+  running: number;
+  queued: number;
+  limit: number;
+  until: string | null;
+  snapshotAt: number;
 }
 
-interface ConcurrencySnapshot {
-  timestamp?: string;
-  comboQueues?: Record<string, QueueStats>;
-  semaphores?: Record<string, QueueStats>;
-}
-
-interface Props {
-  data: ConcurrencySnapshot | null;
-  error: string | null;
-}
-
-function shortKey(value: string): string {
-  return value.length > 28 ? `${value.slice(0, 24)}…` : value;
-}
-
-function parseComboKey(key: string): { combo: string; target: string } {
-  const remainder = key.slice("combo:".length);
-  const separator = remainder.indexOf(":");
-  if (separator < 0) return { combo: remainder, target: "" };
-  return {
-    combo: remainder.slice(0, separator),
-    target: remainder.slice(separator + 1),
-  };
-}
-
-function parseAccountKey(key: string): { provider: string; account: string } {
-  const separator = key.indexOf(":");
-  if (separator < 0) return { provider: key, account: "" };
-  return {
-    provider: key.slice(0, separator),
-    account: key.slice(separator + 1),
-  };
-}
-
-function gateLimit(status: QueueStats): number | null {
-  if (typeof status.max === "number") return status.max;
-  if (typeof status.maxConcurrency === "number") return status.maxConcurrency;
-  return null;
-}
-
-function gateState(status: QueueStats): string | null {
-  const until = status.rateLimitedUntil || status.blockedUntil;
-  if (!until) return null;
-  const timestamp = Date.parse(until);
-  if (!Number.isFinite(timestamp) || timestamp <= Date.now()) return null;
-  return new Date(timestamp).toLocaleTimeString();
-}
-
-function QueueEntry({
-  label,
-  detail,
-  status,
-  t,
-}: {
-  label: string;
-  detail?: string;
-  status: QueueStats;
-  t: ReturnType<typeof useTranslations>;
-}) {
-  const queued = status.queued || 0;
-  const running = status.running || 0;
-  const limit = gateLimit(status);
-  const blockedUntil = gateState(status);
-  const active = queued > 0 || running > 0 || blockedUntil;
-
+function QueueEntry({ row }: { row: GateRow }) {
+  const t = useTranslations("health");
+  const tc = useTranslations("common");
+  const locale = useLocale();
+  const cooling = row.until && Date.parse(row.until) > row.snapshotAt;
   return (
-    <div
-      className={`rounded-lg border p-3 ${
-        queued > 0
-          ? "border-amber-500/25 bg-amber-500/5"
-          : active
-            ? "border-blue-500/20 bg-blue-500/5"
-            : "border-white/5 bg-surface/30"
-      }`}
-      title={detail || label}
+    <li
+      title={row.key}
+      className={`rounded-lg border p-3 ${row.queued > 0 ? "border-amber-500/25 bg-amber-500/5" : "border-border bg-surface/30"}`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-text-main">{label}</p>
-          {detail && <p className="truncate font-mono text-[10px] text-text-muted">{detail}</p>}
-        </div>
-        {queued > 0 && (
-          <span className="shrink-0 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-400">
-            {t("queued")}
-          </span>
-        )}
+      <dl className="space-y-1 text-xs">
+        {row.identity.map(({ label, value }) => (
+          <div key={label} className="flex flex-wrap gap-x-2">
+            <dt className="text-text-muted">{label}</dt>
+            <dd className="min-w-0 break-all font-mono text-text-main">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted">
+        <span className={row.queued > 0 ? "font-semibold text-amber-500" : ""}>
+          {t("queuedCount", { count: row.queued })}
+        </span>
+        <span>{t("runningCount", { count: row.running })}</span>
+        <span>
+          {tc("limit")}: {row.limit}
+        </span>
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
-        <span>{t("queuedCount", { count: queued })}</span>
-        <span>{t("runningCount", { count: running })}</span>
-        <span>{limit == null ? t("notAvailable") : `max ${limit}`}</span>
-      </div>
-      {blockedUntil && (
-        <p className="mt-1 text-[10px] text-amber-400">
-          {t("cooldown")} · {t("until", { time: blockedUntil })}
+      {cooling && (
+        <p className="mt-1 text-xs text-amber-500">
+          {t("cooldown")} · {t("until", { time: new Date(row.until!).toLocaleTimeString(locale) })}
         </p>
       )}
-    </div>
+    </li>
   );
 }
 
-export default function ConcurrencyQueuesCard({ data, error }: Props) {
-  const locale = useLocale();
+function QueueSection({ title, rows }: { title: string; rows: GateRow[] }) {
   const t = useTranslations("health");
-  const comboEntries = Object.entries(data?.comboQueues || {}).map(([key, status]) => {
-    const parsed = parseComboKey(key);
-    return { key, status, ...parsed };
-  });
-  const accountEntries = Object.entries(data?.semaphores || {}).map(([key, status]) => {
-    const parsed = parseAccountKey(key);
-    return { key, status, ...parsed };
-  });
-  const queueCount = comboEntries.length + accountEntries.length;
-  const queuedCount = [...comboEntries, ...accountEntries].reduce(
-    (total, entry) => total + (entry.status.queued || 0),
-    0
+  return (
+    <section aria-label={title}>
+      <h3 className="mb-2 text-sm font-semibold text-text-main">{title}</h3>
+      {rows.length ? (
+        <ul className="space-y-2">
+          {rows
+            .sort((a, b) => b.queued - a.queued || a.key.localeCompare(b.key))
+            .map((row) => (
+              <QueueEntry key={row.key} row={row} />
+            ))}
+        </ul>
+      ) : (
+        <p className="rounded-lg border border-dashed border-border p-3 text-sm text-text-muted">
+          {t("queuesEmpty")}
+        </p>
+      )}
+    </section>
   );
-  const runningCount = [...comboEntries, ...accountEntries].reduce(
-    (total, entry) => total + (entry.status.running || 0),
-    0
-  );
+}
+
+export default function ConcurrencyQueuesCard() {
+  const { data, error, refreshing, stale, refresh } = useConcurrencySnapshot();
+  const t = useTranslations("health");
+  const tc = useTranslations("common");
+  const ts = useTranslations("settings");
+  const ta = useTranslations("auth");
+  const locale = useLocale();
+
+  const comboRows: GateRow[] = Object.entries(data?.comboQueues ?? {}).map(([key, gate]) => {
+    // Combo names exclude colons in the schema. Everything after the first
+    // separator is the opaque execution key; never truncate or re-parse it.
+    const remainder = key.slice("combo:".length);
+    const separator = remainder.indexOf(":");
+    const identity =
+      key.startsWith("combo:") && separator > 0
+        ? [
+            { label: tc("combos"), value: remainder.slice(0, separator) },
+            { label: tc("target"), value: remainder.slice(separator + 1) },
+          ]
+        : [{ label: tc("id"), value: key }];
+    return {
+      key,
+      identity,
+      ...gate,
+      limit: gate.max,
+      until: gate.rateLimitedUntil,
+      snapshotAt: Date.parse(data!.timestamp),
+    };
+  });
+  const admissionRows: GateRow[] = Object.entries(data?.semaphores ?? {}).map(([key, gate]) => {
+    const separator = key.indexOf(":");
+    const identity =
+      key === "global"
+        ? [{ label: tc("scope"), value: ts("globalLabel") }]
+        : key.startsWith("provider:")
+          ? [{ label: tc("provider"), value: key.slice("provider:".length) }]
+          : separator > 0
+            ? [
+                { label: tc("provider"), value: key.slice(0, separator) },
+                { label: tc("account"), value: key.slice(separator + 1) },
+              ]
+            : [{ label: tc("id"), value: key }];
+    return {
+      key,
+      identity,
+      ...gate,
+      limit: gate.maxConcurrency,
+      until: gate.blockedUntil,
+      snapshotAt: Date.parse(data!.timestamp),
+    };
+  });
 
   return (
     <Card className="p-5">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-text-main">
-            <span className="material-symbols-outlined text-[20px] text-primary">account_tree</span>
-            {t("rateLimitStatus")}
-          </h2>
-          <p className="mt-1 text-xs text-text-muted">
-            {queueCount > 0
-              ? `${queueCount > 1 ? t("activeLimitersPlural", { count: queueCount }) : t("activeLimiters", { count: queueCount })} · ${t("queuedCount", { count: queuedCount })} · ${t("runningCount", { count: runningCount })}`
-              : t("noDataYet")}
-          </p>
+          <h2 className="text-lg font-semibold text-text-main">{t("queuesTitle")}</h2>
+          <p className="mt-1 max-w-3xl text-xs text-text-muted">{t("queuesScope")}</p>
         </div>
-        <span className="text-xs text-text-muted">
-          {data?.timestamp
-            ? t("updatedAt", { time: new Date(data.timestamp).toLocaleTimeString(locale) })
-            : t("notAvailable")}
-        </span>
+        <button
+          type="button"
+          onClick={refresh}
+          disabled={refreshing}
+          className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-sm text-text-main hover:bg-primary/10 disabled:opacity-50"
+        >
+          {tc("refresh")}
+        </button>
       </div>
-
-      {error && <p className="mt-3 text-sm text-red-400">{t("failedToLoad", { error })}</p>}
-
-      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <section aria-label={`${t("models")} combo queues`}>
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            {t("models")} · combo queues
-          </h3>
-          {comboEntries.length > 0 ? (
-            <div className="space-y-2">
-              {comboEntries
-                .sort((a, b) => (b.status.queued || 0) - (a.status.queued || 0))
-                .map(({ key, combo, target, status }) => (
-                  <QueueEntry
-                    key={key}
-                    label={combo || t("notAvailable")}
-                    detail={target ? shortKey(target) : undefined}
-                    status={status}
-                    t={t}
-                  />
-                ))}
-            </div>
-          ) : (
-            <p className="rounded-lg border border-dashed border-border/50 p-3 text-sm text-text-muted">
-              {t("noDataYet")}
-            </p>
-          )}
-        </section>
-
-        <section aria-label={`${t("accounts")} account queues`}>
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            {t("accounts")} · account queues
-          </h3>
-          {accountEntries.length > 0 ? (
-            <div className="space-y-2">
-              {accountEntries
-                .sort((a, b) => (b.status.queued || 0) - (a.status.queued || 0))
-                .map(({ key, provider, account, status }) => (
-                  <QueueEntry
-                    key={key}
-                    label={provider}
-                    detail={account ? shortKey(account) : undefined}
-                    status={status}
-                    t={t}
-                  />
-                ))}
-            </div>
-          ) : (
-            <p className="rounded-lg border border-dashed border-border/50 p-3 text-sm text-text-muted">
-              {t("noDataYet")}
-            </p>
-          )}
-        </section>
+      <div className="mt-3 flex flex-wrap gap-3 text-xs text-text-muted" role="status">
+        {!data && !error && <span>{tc("loading")}</span>}
+        {data && (
+          <time dateTime={data.timestamp}>
+            {t("updatedAt", { time: new Date(data.timestamp).toLocaleTimeString(locale) })}
+          </time>
+        )}
+        {stale && <span className="text-amber-500">{t("queuesStale")}</span>}
       </div>
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-red-500">
+          {t("queuesError")}
+          {error === "unauthorized" && <> · {ta("signIn")}</>}
+        </p>
+      )}
+      {data && (
+        <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <QueueSection title={t("queuesCombo")} rows={comboRows} />
+          <QueueSection title={t("queuesAdmission")} rows={admissionRows} />
+        </div>
+      )}
     </Card>
   );
 }

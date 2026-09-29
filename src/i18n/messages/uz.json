@@ -4676,6 +4676,13 @@
     "installSkill": "Ko‘nikmani o‘rnatish"
   },
   "health": {
+    "queuesTitle": "Bir vaqtda bajarish cheklovlari",
+    "queuesScope": "Faqat shu jarayon. Combo cheklovlari barcha combo so‘rovlarini emas, faqat round-robin nishonlarini qamrab oladi. Hisoblar cheklovlar orasida takrorlanadi; ularni qo‘shmang.",
+    "queuesCombo": "Combo nishoni cheklovlari (round-robin)",
+    "queuesAdmission": "Global / provayder / hisob cheklovlari",
+    "queuesEmpty": "Bu suratda kuzatilayotgan cheklovlar yo‘q.",
+    "queuesStale": "Eskirgan holat surati",
+    "queuesError": "Navbatlar holati surati mavjud emas. Avtomatik qayta urinilmoqda.",
     "title": "Tizim holati",
     "description": "OmniRoute instansiyangizni real vaqtda kuzatish",
     "healthy": "Sog‘lom",

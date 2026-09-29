@@ -4676,6 +4676,13 @@
     "installSkill": "Cài đặt kỹ năng"
   },
   "health": {
+    "queuesTitle": "Cổng kiểm soát đồng thời",
+    "queuesScope": "Chỉ tiến trình này. Cổng combo chỉ bao gồm các đích luân phiên, không phải mọi yêu cầu combo. Số đếm trùng lặp giữa các cổng; không cộng chúng lại.",
+    "queuesCombo": "Cổng đích combo (luân phiên)",
+    "queuesAdmission": "Cổng toàn cục / nhà cung cấp / tài khoản",
+    "queuesEmpty": "Không có cổng nào được theo dõi trong ảnh chụp này.",
+    "queuesStale": "Ảnh chụp đã cũ",
+    "queuesError": "Không có ảnh chụp hàng đợi. Đang tự động thử lại.",
     "title": "Trạng thái hệ thống",
     "description": "Giám sát theo thời gian thực bản triển khai OmniRoute của bạn",
     "healthy": "Hoạt động tốt",

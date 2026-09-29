@@ -4676,6 +4676,13 @@
     "installSkill": "Namesti veščino"
   },
   "health": {
+    "queuesTitle": "Omejevalniki sočasnosti",
+    "queuesScope": "Samo ta proces. Omejevalniki combo zajemajo le cilje round-robin, ne vseh zahtev combo. Števci se med omejevalniki prekrivajo; ne seštevajte jih.",
+    "queuesCombo": "Omejevalniki ciljev combo (round-robin)",
+    "queuesAdmission": "Globalni omejevalniki / omejevalniki ponudnika / računa",
+    "queuesEmpty": "V tem posnetku ni spremljanih omejevalnikov.",
+    "queuesStale": "Zastarel posnetek",
+    "queuesError": "Posnetek čakalnih vrst ni na voljo. Samodejni ponovni poskus.",
     "title": "Stanje sistema",
     "description": "Sprotno spremljanje vašega primerka OmniRoute",
     "healthy": "Brezhibno",

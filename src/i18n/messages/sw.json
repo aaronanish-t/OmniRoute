@@ -4676,6 +4676,13 @@
     "installSkill": "Sakinisha Ujuzi"
   },
   "health": {
+    "queuesTitle": "Milango ya utekelezaji sambamba",
+    "queuesScope": "Mchakato huu tu. Milango ya combo inajumuisha malengo ya round-robin pekee, si maombi yote ya combo. Hesabu zinajirudia kati ya milango; usizijumlishe.",
+    "queuesCombo": "Milango ya malengo ya combo (round-robin)",
+    "queuesAdmission": "Milango ya jumla / mtoa huduma / akaunti",
+    "queuesEmpty": "Hakuna milango inayofuatiliwa katika picha hii ya hali.",
+    "queuesStale": "Picha ya hali iliyopitwa na wakati",
+    "queuesError": "Picha ya hali ya foleni haipatikani. Inajaribu tena kiotomatiki.",
     "title": "Afya ya Mfumo",
     "description": "Ufuatiliaji wa wakati halisi wa instansi yako ya OmniRoute",
     "healthy": "Nzima",

@@ -4676,6 +4676,13 @@
     "installSkill": "I-install ang Skill"
   },
   "health": {
+    "queuesTitle": "Mga gate ng sabayang pagproseso",
+    "queuesScope": "Ang prosesong ito lamang. Saklaw ng mga combo gate ang mga round-robin na target lamang, hindi lahat ng combo request. Nagkakapatong ang mga bilang sa mga gate; huwag pagsamahin ang mga ito.",
+    "queuesCombo": "Mga gate ng target ng combo (round-robin)",
+    "queuesAdmission": "Mga global / provider / account na gate",
+    "queuesEmpty": "Walang sinusubaybayang gate sa snapshot na ito.",
+    "queuesStale": "Lumang snapshot",
+    "queuesError": "Hindi available ang snapshot ng pila. Awtomatikong sinusubukang muli.",
     "title": "Kalusugan ng System",
     "description": "Real-time na pagsubaybay sa iyong OmniRoute instance",
     "healthy": "Malusog",

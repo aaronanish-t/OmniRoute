@@ -4676,6 +4676,13 @@
     "installSkill": "Instal Keterampilan"
   },
   "health": {
+    "queuesTitle": "Gerbang konkurensi",
+    "queuesScope": "Hanya proses ini. Gerbang combo hanya mencakup target round-robin, bukan semua permintaan combo. Hitungan tumpang tindih antargerbang; jangan dijumlahkan.",
+    "queuesCombo": "Gerbang target combo (round-robin)",
+    "queuesAdmission": "Gerbang global / penyedia / akun",
+    "queuesEmpty": "Tidak ada gerbang yang dilacak dalam snapshot ini.",
+    "queuesStale": "Snapshot usang",
+    "queuesError": "Snapshot antrean tidak tersedia. Mencoba lagi secara otomatis.",
     "title": "Kesehatan Sistem",
     "description": "Pemantauan instans OmniRoute Anda secara real-time",
     "healthy": "Sehat",

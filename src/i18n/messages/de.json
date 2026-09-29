@@ -4676,6 +4676,13 @@
     "installSkill": "Skill installieren"
   },
   "health": {
+    "queuesTitle": "Parallelitätsbegrenzungen",
+    "queuesScope": "Nur dieser Prozess. Combo-Begrenzungen erfassen nur Round-Robin-Ziele, nicht alle Combo-Anfragen. Die Zähler überschneiden sich zwischen Begrenzungen; nicht addieren.",
+    "queuesCombo": "Combo-Zielbegrenzungen (Round-Robin)",
+    "queuesAdmission": "Globale / Anbieter- / Kontobegrenzungen",
+    "queuesEmpty": "Keine Begrenzungen in diesem Snapshot erfasst.",
+    "queuesStale": "Veralteter Snapshot",
+    "queuesError": "Warteschlangen-Snapshot nicht verfügbar. Automatischer neuer Versuch.",
     "title": "Systemgesundheit",
     "description": "Echtzeitüberwachung Ihrer OmniRoute-Instanz",
     "healthy": "Gesund",

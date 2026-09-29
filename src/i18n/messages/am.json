@@ -4676,6 +4676,13 @@
     "installSkill": "ክህሎት ጫን"
   },
   "health": {
+    "queuesTitle": "የተጓዳኝ አፈጻጸም በሮች",
+    "queuesScope": "ይህ ሂደት ብቻ። የcombo በሮች የround-robin ዒላማዎችን ብቻ ይሸፍናሉ፤ ሁሉንም የcombo ጥያቄዎች አይደሉም። ቆጠራዎች በበሮች መካከል ይደጋገማሉ፤ አትደምሯቸው።",
+    "queuesCombo": "የcombo ዒላማ በሮች (round-robin)",
+    "queuesAdmission": "አጠቃላይ / አቅራቢ / መለያ በሮች",
+    "queuesEmpty": "በዚህ የሁኔታ ቅጽበታዊ ምስል ውስጥ የሚከታተሉ በሮች የሉም።",
+    "queuesStale": "ያረጀ የሁኔታ ቅጽበታዊ ምስል",
+    "queuesError": "የወረፋ ሁኔታ ቅጽበታዊ ምስል አይገኝም። በራስ-ሰር እንደገና በመሞከር ላይ።",
     "title": "የስርዓት ጤና",
     "description": "የOmniRoute ኢንስታንስዎን ቅጽበታዊ ክትትል",
     "healthy": "ጤናማ",

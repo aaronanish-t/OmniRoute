@@ -1,0 +1,1 @@
+- **fix(codex):** hand off live HTTP Responses SSE after lifecycle, reasoning, or tool readiness events instead of buffering until the combo target deadline ([#15094](https://github.com/diegosouzapw/OmniRoute/pull/15094))

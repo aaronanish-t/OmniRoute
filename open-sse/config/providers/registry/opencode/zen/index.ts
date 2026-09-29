@@ -30,6 +30,12 @@ export const opencode_zenProvider: RegistryEntry = {
     ...OPENCODE_ZEN_GO_SHARED_MODELS,
     // models[0] (big-pickle) is the dashboard default; SHARED spread kept after it.
 
+    // ── GPT-5.6 ─────────────────────────────────────────────────
+    // Upstream serves this trio only on /responses — /chat/completions answers
+    // 503 "Endpoint is unavailable" (live-verified 2026-09-19 against
+    // opencode.ai/zen/v1 with the same key on both endpoints). #12196 made the
+    // same declaration for gpt-5.6-luna on opencode-go; the zen entries here
+    // never got it.
     {
       id: "gpt-5.6-sol",
       name: "GPT 5.6 Sol",

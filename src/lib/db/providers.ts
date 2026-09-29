@@ -13,11 +13,8 @@ import {
   migrateLegacyEncryptedString,
 } from "./encryption";
 import { createLazyRowProxy } from "./providers/lazyConnectionView";
-import {
-  invalidateDbCache,
-  isConnectionRuntimeStateUpdate,
-  getCachedRawProviderConnections,
-} from "./readCache";
+import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
+import { invalidateConnectionUpdate } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
 import {
   removeConnectionHealth,
@@ -1032,15 +1029,8 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
   })();
   backupDbFile("pre-write");
-  // Runtime-state-only updates (cooldowns, error fields) keep the connection
-  // read caches fresh without dropping the memoized /v1/models catalog — the
-  // builder never reads these fields. Anything else falls back to the full
-  // invalidation so config edits stay immediately visible in the catalog.
-  if (isConnectionRuntimeStateUpdate(data)) {
-    invalidateDbCache("connections", id, { skipModelCatalog: true });
-  } else {
-    invalidateDbCache("connections"); // Bust connections read cache
-  }
+  // Runtime-state-only updates keep the memoized /v1/models catalog (see readCache).
+  invalidateConnectionUpdate(id, data);
   bumpProxyConfigGeneration();
 
   if (data.priority !== undefined) {

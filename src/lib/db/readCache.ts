@@ -304,6 +304,21 @@ export function isConnectionRuntimeStateUpdate(data: Record<string, unknown>): b
 }
 
 /**
+ * Cache invalidation for `updateProviderConnection()`: runtime-state-only
+ * updates (cooldowns, error fields) keep the connection read caches fresh
+ * without dropping the memoized /v1/models catalog — the builder never reads
+ * these fields. Anything else falls back to the full invalidation so config
+ * edits stay immediately visible in the catalog.
+ */
+export function invalidateConnectionUpdate(id: string, data: Record<string, unknown>): void {
+  if (isConnectionRuntimeStateUpdate(data)) {
+    invalidateDbCache("connections", id, { skipModelCatalog: true });
+  } else {
+    invalidateDbCache("connections");
+  }
+}
+
+/**
  * Invalidate caches (call after writes to any of: settings, pricing,
  * connections, combos, nodes, model capability/context metadata).
  *

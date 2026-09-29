@@ -300,8 +300,25 @@ function openaiToGeminiBase(
       // Models not in MODEL_SPECS (thinkingBudgetCap=undefined) default to allowed.
       getModelSpec(model)?.thinkingBudgetCap !== 0
     ) {
+      let defaultBudget = getDefaultThinkingBudget(model) || capThinkingBudget(model, 24576);
+      // Gemini counts thinking tokens against maxOutputTokens. This budget was not
+      // requested by the client, so it must not be allowed to swallow the whole output
+      // cap: with max_tokens 50 and an injected budget of 24576 the model can spend
+      // every token thinking and return an empty `content`. Keep at most half of the
+      // cap for thoughts. Explicit client budgets (paths 1 and 2) are left untouched.
+      // Google documents a minimum budget for some tiers (2.5 Pro 128, 2.5 Flash-Lite
+      // 512) and a value under it may be rejected, so never shrink below that minimum.
+      const outputCap = result.generationConfig.maxOutputTokens;
+      if (typeof outputCap === "number" && outputCap > 0 && defaultBudget >= outputCap) {
+        const tierMinimum = modelLower.includes("flash-lite")
+          ? 512
+          : modelLower.includes("pro")
+            ? 128
+            : 0;
+        defaultBudget = Math.min(defaultBudget, Math.max(Math.floor(outputCap / 2), tierMinimum));
+      }
       result.generationConfig.thinkingConfig = {
-        thinkingBudget: getDefaultThinkingBudget(model) || capThinkingBudget(model, 24576),
+        thinkingBudget: defaultBudget,
         includeThoughts: true,
       };
     }
@@ -346,7 +363,8 @@ function openaiToGeminiBase(
 
   // Convert messages
   if (messages && Array.isArray(messages)) {
-    for (const msg of messages) {
+    for (let msgIndex = 0; msgIndex < messages.length; msgIndex++) {
+      const msg = messages[msgIndex];
       const role = msg.role;
       const content = msg.content;
 
@@ -482,20 +500,47 @@ function openaiToGeminiBase(
             result.contents.push({ role: "model", parts });
           }
 
+          // Collect turn-specific tool responses: in standard OpenAI chat format, tool responses
+          // immediately follow the assistant message that requested them.
+          const turnToolResponses: Record<string, unknown> = {};
+          for (let j = msgIndex + 1; j < messages.length; j++) {
+            const later = messages[j];
+            if (later.role === "assistant" || later.role === "user") break;
+            if (later.role === "tool" && later.tool_call_id) {
+              turnToolResponses[later.tool_call_id as string] = later.content;
+            }
+          }
+
+          // Build a turn-specific map of tool call IDs to function names from this assistant message's toolCalls.
+          // This prevents cross-turn ID collisions where an identical tool_call_id reused in a later turn
+          // would otherwise overwrite the function name and content of an earlier turn (#e59118).
+          const turnTcID2Name: Record<string, string> = {};
+          for (const tc of toolCalls) {
+            const fn = tc.function as { name?: string } | undefined;
+            if (tc.type === "function" && tc.id && fn?.name) {
+              turnTcID2Name[tc.id as string] = fn.name;
+            }
+          }
+
+          const resolveToolResponse = (id: string): unknown =>
+            turnToolResponses[id] !== undefined ? turnToolResponses[id] : toolResponses[id];
+          const hasToolResponse = (id: string): boolean => resolveToolResponse(id) !== undefined;
+
           // Check if there are actual tool responses in the next messages
           const hasSignaturelessTextResponses =
             contextualizeSignaturelessToolResponses &&
             toolCalls.some((tc) => {
               const id = tc.id as string;
-              return tc.type === "function" && !resolvedSignatures.has(id) && toolResponses[id];
+              return tc.type === "function" && !resolvedSignatures.has(id) && hasToolResponse(id);
             });
           const hasActualResponses =
-            toolCallIds.some((fid) => toolResponses[fid]) || hasSignaturelessTextResponses;
+            toolCallIds.some((fid) => hasToolResponse(fid)) || hasSignaturelessTextResponses;
 
           if (hasActualResponses) {
             const toolParts: GeminiPart[] = [];
             for (const fid of toolCallIds) {
-              if (!toolResponses[fid]) continue;
+              const resp = resolveToolResponse(fid);
+              if (resp === undefined) continue;
               if (
                 !toolNameOptions.supportsSignatureBypass &&
                 contextualizeSignaturelessToolResponses &&
@@ -503,7 +548,7 @@ function openaiToGeminiBase(
               )
                 continue;
 
-              let name = tcID2Name[fid];
+              let name = turnTcID2Name[fid] || tcID2Name[fid];
               if (!name) {
                 const idParts = fid.split("-");
                 if (idParts.length > 2) {
@@ -513,8 +558,6 @@ function openaiToGeminiBase(
                 }
               }
               name = sanitizeToolName(name);
-
-              const resp = toolResponses[fid];
 
               toolParts.push({
                 functionResponse: {
@@ -538,10 +581,10 @@ function openaiToGeminiBase(
               for (const tc of toolCalls) {
                 const id = tc.id as string;
                 if (tc.type !== "function" || !id) continue;
-                if (!resolvedSignatures.has(id) && toolResponses[id]) {
+                const resp = resolveToolResponse(id);
+                if (!resolvedSignatures.has(id) && resp !== undefined) {
                   const fn = tc.function as { name?: string } | undefined;
-                  const name = tcID2Name[id] || fn?.name || "unknown";
-                  const resp = toolResponses[id];
+                  const name = turnTcID2Name[id] || tcID2Name[id] || fn?.name || "unknown";
                   toolParts.push({
                     text:
                       signaturelessToolCallMode === "text"
@@ -829,7 +872,7 @@ export function openaiToAntigravityRequest(model, body, stream, credentials = nu
   const hasThinking = !!envelope.request?.generationConfig?.thinkingConfig?.thinkingBudget;
   if (
     clientRequestedMaxTokens === undefined &&
-    !hasThinking &&
+    !(isClaude && hasThinking) &&
     envelope.request?.generationConfig
   ) {
     delete envelope.request.generationConfig.maxOutputTokens;

@@ -23,9 +23,11 @@ import { stripCodexPassthroughRejectedParams } from "./codex/stripPassthroughRej
 import {
   CODEX_CLI_RS_ORIGINATOR,
   getCodexClientVersion,
+  getCodexClientVersionFromHeaders,
   getCodexUserAgent,
   normalizeCodexSessionId,
 } from "../config/codexClient.ts";
+import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import {
   applyCodexClientIdentityHeaders,
   applyCodexClientMetadata,
@@ -42,6 +44,7 @@ import { getThinkingBudgetConfig, ThinkingMode } from "../services/thinkingBudge
 import { CORS_HEADERS } from "../utils/cors.ts";
 import { projectCodexPublicError } from "../utils/codexPublicError.ts";
 import { errorResponse } from "../utils/error.ts";
+import { buildSyntheticResponsesFailedEvent } from "../utils/responsesSequence.ts";
 import { normalizeCodexResponsesInput } from "../utils/responsesInputNormalization.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
 import { createRequire } from "module";
@@ -58,10 +61,15 @@ import { isCodexFreePlan, normalizeCodexTools } from "./codex/tools.ts";
 import {
   CODEX_EFFORT_ORDER as EFFORT_ORDER,
   CODEX_ULTRA_ALIAS_MODELS,
+  getCodexAliasEffortCap,
   splitCodexReasoningSuffix,
   type CodexEffortLevel as EffortLevel,
 } from "./codex/reasoningSuffix.ts";
 import { repairMissingCodexToolCallOutputs } from "./codex/toolCallRepair.ts";
+import {
+  CODEX_REASONING_REPLAY_ERROR_CODE,
+  readCodexReasoningReplayRejection,
+} from "./codex/reasoningReplayRejection.ts";
 import { resolveAppServerConfig } from "./codex/appServerConfig.ts";
 import { CodexAppServerExecutor } from "./codex-app-server.ts";
 // Re-exported for external importers (tests + provider services).
@@ -327,12 +335,11 @@ function normalizeServiceTierValue(value: unknown): string | undefined {
   return normalized;
 }
 
-/** Maximum reasoning effort per Codex model; unlisted models keep the xhigh cap. */
+/**
+ * Maximum reasoning effort per Codex model. Max/ultra-tier models come from the alias
+ * sets in reasoningSuffix.ts; everything else unlisted keeps the xhigh cap.
+ */
 const MAX_EFFORT_BY_MODEL: Record<string, EffortLevel> = {
-  "gpt-6-astra": "ultra",
-  "gpt-5.6-sol": "ultra",
-  "gpt-5.6-terra": "ultra",
-  "gpt-5.6-luna": "max",
   "gpt-5.3-codex": "xhigh",
   "gpt-5.1-codex-max": "xhigh",
   "gpt-5-mini": "high",
@@ -345,7 +352,7 @@ const MAX_EFFORT_BY_MODEL: Record<string, EffortLevel> = {
  * Returns the original value if within limits, or the cap if it exceeds it.
  */
 function clampEffort(model: string, requested: string): string {
-  const max: EffortLevel = MAX_EFFORT_BY_MODEL[model] ?? "xhigh";
+  const max: EffortLevel = MAX_EFFORT_BY_MODEL[model] ?? getCodexAliasEffortCap(model) ?? "xhigh";
   const reqIdx = EFFORT_ORDER.indexOf(requested as EffortLevel);
   const maxIdx = EFFORT_ORDER.indexOf(max);
   if (reqIdx > maxIdx) {
@@ -509,14 +516,11 @@ function toCodexResponseFailedEvent(parsed: Record<string, unknown>): Record<str
 
   if (statusCode !== null) error.status_code = statusCode;
 
-  return {
-    type: "response.failed",
-    response: {
-      id: typeof response?.id === "string" ? response.id : null,
-      status: "failed",
-      error,
-    },
-  };
+  return buildSyntheticResponsesFailedEvent({
+    id: typeof response?.id === "string" ? response.id : null,
+    status: "failed",
+    error,
+  });
 }
 
 // Drop non-standard `codex.*` SSE events (notably `codex.rate_limits`) from
@@ -856,6 +860,19 @@ export class CodexExecutor extends BaseExecutor {
         }
       }
       const resp = (httpResult as { response?: Response }).response;
+      if (resp && !resp.ok) {
+        const replayRejection = await readCodexReasoningReplayRejection(resp);
+        if (replayRejection) {
+          input.log?.warn?.("CODEX", "upstream rejected a replayed reasoning item");
+          await resp.body?.cancel().catch(() => undefined);
+          (httpResult as { response: Response }).response = errorResponse(
+            HTTP_STATUS.BAD_REQUEST,
+            replayRejection.message,
+            { type: "invalid_request_error", code: CODEX_REASONING_REPLAY_ERROR_CODE }
+          );
+          return httpResult;
+        }
+      }
       if (resp) {
         const peek = await peekCodexSseTransientError(resp);
         if (peek.matched) {
@@ -977,14 +994,13 @@ export class CodexExecutor extends BaseExecutor {
       if (closed) return;
       nextInput.log?.warn?.("CODEX", `WebSocket stream failed (${code}): ${message}`);
       const controller = streamController;
-      const payload = JSON.stringify({
-        type: "response.failed",
-        response: {
+      const payload = JSON.stringify(
+        buildSyntheticResponsesFailedEvent({
           id: null,
           status: "failed",
           error: projectCodexPublicError({ status: 502, code, type: "provider_error" }),
-        },
-      });
+        })
+      );
       try {
         controller?.enqueue(encoder.encode(`event: response.failed\ndata: ${payload}\n\n`));
       } catch {
@@ -1117,11 +1133,30 @@ export class CodexExecutor extends BaseExecutor {
    * Always request event-stream from upstream, even when client requested stream=false.
    * Includes chatgpt-account-id header for strict workspace binding.
    */
-  buildHeaders(credentials: ProviderCredentials, stream = true) {
+  buildHeaders(
+    credentials: ProviderCredentials,
+    stream = true,
+    clientHeaders?: Record<string, string> | null,
+    model?: string,
+    health?: Record<string, KeyHealth>
+  ) {
     const isCompactRequest = isCompactResponsesEndpoint(credentials?.requestEndpointPath);
-    const headers = super.buildHeaders(credentials, isCompactRequest ? false : true);
-    headers.Version = getCodexClientVersion();
-    setUserAgentHeader(headers, getCodexUserAgent());
+    const headers = super.buildHeaders(
+      credentials,
+      isCompactRequest ? false : true,
+      clientHeaders,
+      model,
+      health
+    );
+
+    // Forward the CALLER's own Codex client version upstream instead of a pinned
+    // default. The ChatGPT backend gates newer models on the reported client
+    // version (e.g. "The 'gpt-6-astra' model requires a newer version of Codex"),
+    // so a hardcoded value silently rots whenever the user upgrades their CLI.
+    // Falls back to the configured/default version when the caller sends none.
+    const clientVersion = getCodexClientVersionFromHeaders(clientHeaders);
+    headers.Version = clientVersion ?? getCodexClientVersion();
+    setUserAgentHeader(headers, getCodexUserAgent(clientVersion));
 
     // Add workspace binding header if workspaceId is persisted
     const workspaceId = credentials?.providerSpecificData?.workspaceId;

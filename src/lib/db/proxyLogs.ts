@@ -16,7 +16,7 @@
 
 import { getDbInstance } from "./core";
 import { normalizeProxyHostForLog } from "../proxyLogger";
-import { sanitizeTimingMs } from "@omniroute/open-sse/utils/upstreamStatusCapture.ts";
+import { sanitizeTimingMs } from "@omniroute/open-sse/utils/timingMs.ts";
 
 // ---------------------------------------------------------------------------
 // Queries

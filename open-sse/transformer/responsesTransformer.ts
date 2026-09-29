@@ -9,6 +9,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { resolveRequestToolIdentity } from "../translator/response/openai-responses/requestToolIdentity.ts";
 import { plaintextCollaborationFields } from "../translator/response/openai-responses/collaborationPlaintextMarker.ts";
+import { finalizeResponsesTerminalStatus } from "../translator/helpers/responsesTerminalStatus.ts";
 
 // #10223: threshold for detecting corrupted request_id fields. Normal
 // request IDs are <100 chars. DeepSeek's SSE encoder bug produces 200+
@@ -253,6 +254,7 @@ export function createResponsesApiTransformStream(
     buffer: "",
     completedSent: false,
     usage: null,
+    finishReason: null as string | null,
     keepaliveTimer: null,
     // #6906: true once a finish_reason chunk closed all output items but deferred
     // response.completed — a trailing usage-only chunk (choices: [], usage: {...}) may
@@ -604,37 +606,21 @@ export function createResponsesApiTransformStream(
       // Sorted by output_index then by emission sequence for stable ordering.
       const output = buildDenseOutput();
 
-      // A truncated or filtered generation must surface as status:"incomplete"
-      // with incomplete_details, matching the real Responses API contract --
-      // see the sibling fix in translator/response/openai-responses.ts for the
-      // full rationale (a production truncation was previously indistinguishable
-      // from a genuine successful completion).
-      const incompleteReason =
-        state.finishReason === "length"
-          ? "max_output_tokens"
-          : state.finishReason === "content_filter"
-            ? "content_filter"
-            : undefined;
-      const isIncomplete = incompleteReason !== undefined;
-
       const response: Record<string, unknown> = {
         id: state.responseId,
         object: "response",
         created_at: state.created,
-        status: isIncomplete ? "incomplete" : "completed",
+        status: "completed",
         background: false,
         error: null,
         output,
       };
-      if (isIncomplete) {
-        response.incomplete_details = { reason: incompleteReason };
-      }
 
       if (state.usage) {
         response.usage = state.usage;
       }
 
-      const eventType = isIncomplete ? "response.incomplete" : "response.completed";
+      const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
       emit(controller, eventType, {
         type: eventType,
         response,
@@ -984,10 +970,7 @@ export function createResponsesApiTransformStream(
 
           // Handle finish_reason
           if (choice.finish_reason) {
-            // Remembered for sendCompleted(): a truncated/filtered generation
-            // must surface as status:"incomplete" with incomplete_details, not
-            // silently as "completed" -- see the sibling fix in
-            // translator/response/openai-responses.ts for the full rationale.
+            // Read by sendCompleted() → finalizeResponsesTerminalStatus (length/filter → incomplete).
             state.finishReason = choice.finish_reason;
             for (const i in state.msgItemAdded) closeMessage(controller, i);
             closeReasoning(controller);

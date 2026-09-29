@@ -7,6 +7,7 @@ import { FORMATS } from "../formats.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 import { projectCompletedStreamError } from "../../utils/streamErrorFormat.ts";
 import { fallbackToolCallId } from "../helpers/toolCallHelper.ts";
+import { finalizeResponsesTerminalStatus } from "../helpers/responsesTerminalStatus.ts";
 import { shouldParseTextualReasoningTags } from "../../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../../utils/reasoningFields.ts";
 import { resolveResponsesCacheUsageDetails } from "../../utils/resolveResponsesCacheUsageDetails.ts";
@@ -354,12 +355,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
 
   // Handle finish_reason
   if (choice.finish_reason) {
-    // Remembered for sendCompleted(): a truncated/filtered generation must
-    // surface as status:"incomplete" with incomplete_details, not silently
-    // as "completed" -- a client that trusts "completed" has no signal that
-    // the output was cut off mid-generation rather than the model actually
-    // finishing.
-    state.finishReason = choice.finish_reason;
+    state.finishReason = choice.finish_reason; // read by sendCompleted() → finalizeResponsesTerminalStatus
     for (const i in state.msgItemAdded) closeMessage(state, emit, i);
     closeReasoning(state, emit);
     for (const i in state.funcCallIds) closeToolCall(state, emit, i);
@@ -825,33 +821,15 @@ function sendCompleted(state, emit) {
     const upstreamErr = state.upstreamError;
     const publicUpstreamError = projectCompletedStreamError(upstreamErr);
 
-    // A truncated or filtered generation must surface as status:"incomplete"
-    // with incomplete_details, matching real OpenAI Responses API behavior
-    // (already implemented for the ChatGPT-web bridge in
-    // vendor/codex-chatgpt-web/bridge.ts) -- not silently as "completed",
-    // which gives a caller no signal the output was cut off mid-generation
-    // rather than the model actually finishing. Upstream errors still win:
-    // an error mid-stream is a harder failure than a length/filter cutoff.
-    const incompleteReason =
-      state.finishReason === "length"
-        ? "max_output_tokens"
-        : state.finishReason === "content_filter"
-          ? "content_filter"
-          : undefined;
-    const isIncomplete = !upstreamErr && incompleteReason !== undefined;
-
     const response: Record<string, unknown> = {
       id: state.responseId,
       object: "response",
       created_at: state.created,
-      status: upstreamErr ? "failed" : isIncomplete ? "incomplete" : "completed",
+      status: upstreamErr ? "failed" : "completed",
       background: false,
       error: publicUpstreamError,
       output,
     };
-    if (isIncomplete) {
-      response.incomplete_details = { reason: incompleteReason };
-    }
 
     // #3697: same model echo as response.created/in_progress above.
     if (state.model) {
@@ -862,11 +840,8 @@ function sendCompleted(state, emit) {
       response.usage = state.usage;
     }
 
-    const eventType = isIncomplete ? "response.incomplete" : "response.completed";
-    emit(eventType, {
-      type: eventType,
-      response,
-    });
+    const eventType = finalizeResponsesTerminalStatus(response, state.finishReason, !!upstreamErr);
+    emit(eventType, { type: eventType, response });
   }
 }
 

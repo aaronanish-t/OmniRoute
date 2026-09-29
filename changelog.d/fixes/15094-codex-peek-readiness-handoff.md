@@ -1,1 +1,1 @@
-- **fix(codex):** hand off live HTTP Responses SSE after lifecycle, reasoning, or tool readiness events instead of buffering until the combo target deadline ([#15094](https://github.com/diegosouzapw/OmniRoute/pull/15094))
+- **fix(codex):** hand off live HTTP Responses SSE after complete non-empty text/reasoning/tool delta events instead of buffering until the combo target deadline; preserve lifecycle-only capacity-error detection ([#15094](https://github.com/diegosouzapw/OmniRoute/pull/15094))

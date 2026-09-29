@@ -576,6 +576,17 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsVision: true,
     aliases: ["qwen3.7-max", "qwen3-max-2026-01-23"],
   },
+  // #14181: the GA `qwen3.8-max` is a distinct model served by opencode-go (and
+  // listed bare by alibaba/qwen-cloud/kilocode/clinepass/xkiro) — it gets its own
+  // spec row instead of aliasing to the preview, which remains a separate model.
+  "qwen3.8-max": {
+    maxOutputTokens: 65536,
+    contextWindow: 1000000,
+    thinkingBudgetCap: 38912,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+  },
   "qwen3.8-max-preview": {
     maxOutputTokens: 65536,
     contextWindow: 1000000,
@@ -583,7 +594,6 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsThinking: true,
     supportsTools: true,
     supportsVision: true,
-    aliases: ["qwen3.8-max"],
   },
   "qwen3.6-plus": {
     maxOutputTokens: 65536,
@@ -603,10 +613,14 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
   },
 
   // ── Xiaomi MiMo V2.5 (1M context, consensus across 7+ sync sources) ──
-  // Vision: ONLY mimo-v2.5 and mimo-v2-omni accept images per Xiaomi's docs
-  // (mimo.mi.com .../image-understanding). The *-pro chat models are TEXT-ONLY;
-  // models.dev mislabels them (hermes-agent#18884) — a hard override in
-  // src/lib/modelCapabilities.ts also beats that wrong synced attachment.
+  // Vision: in the v2.5 generation only `mimo-v2.5` and `mimo-v2-omni` accept
+  // images per Xiaomi's docs (mimo.mi.com .../image-understanding). The v2.5
+  // `*-pro` chat models are TEXT-ONLY; models.dev mislabels them
+  // (hermes-agent#18884) — a hard override in src/lib/modelCapabilities.ts
+  // also beats that wrong synced attachment. The v2.6 generation flips the
+  // `*-pro` rule (#14587): `mimo-v2.6-pro` accepts image input, covered by the
+  // `mimo-v2.6-pro` / `mimo-v2.6-flash` fragments in the shared vision
+  // heuristic rather than a spec.
   "mimo-v2.5-pro": {
     maxOutputTokens: 131072,
     contextWindow: 1048576,

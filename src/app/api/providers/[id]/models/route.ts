@@ -15,6 +15,7 @@ import { mergeModelsWithCustomPrecedence } from "@/lib/providers/modelMetadataPr
 import { addModelsSuffix } from "@/lib/providers/validation/urlHelpers";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { resolveProxyForProvider } from "@/lib/db/proxies";
+import { resolveProxyForConnection } from "@/lib/db/settings";
 import {
   SAFE_OUTBOUND_FETCH_PRESETS,
   SafeOutboundFetchError,
@@ -135,6 +136,7 @@ import {
   reconcileCodexDiscoveryCatalog,
 } from "./discovery/codex";
 import { getCodexDiscoveryMode } from "@/shared/services/codexDiscoveryPolicy";
+import { fetchClaudeDiscoveryModels } from "./discovery/claude";
 import { maybeHandleConolModelDiscovery } from "./conolDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
 import { buildNoAuthModelsResponse, filterModelsForRoute } from "./modelRouteProjection";
@@ -1351,6 +1353,39 @@ export async function GET(
       return buildApiDiscoveryResponse(normalizeSapModelsResponse(await response.json()));
     }
 
+    if (provider === "claude") {
+      const cachedResponse = maybeReturnCachedDiscovery();
+      if (cachedResponse) return cachedResponse;
+      const disabledResponse = maybeReturnAutoFetchDisabled();
+      if (disabledResponse) return disabledResponse;
+      try {
+        const models = await fetchClaudeDiscoveryModels({
+          accessToken,
+          apiKey,
+          fetchImpl: (url, init) =>
+            safeOutboundFetch(url, {
+              ...SAFE_OUTBOUND_FETCH_PRESETS.modelsDiscovery,
+              guard: getProviderOutboundGuard(),
+              proxyConfig: proxy,
+              ...init,
+            }),
+        });
+        return await buildApiDiscoveryResponse(models);
+      } catch (error) {
+        const detail =
+          error instanceof Error &&
+          /^Claude model discovery failed \(HTTP \d{3}\)$/.test(error.message)
+            ? ` (${error.message})`
+            : "";
+        const fallback = buildDiscoveryErrorFallbackResponse(error, {
+          cacheWarning: `Claude API unavailable${detail} — using cached catalog`,
+          localWarning: `Claude API unavailable${detail} — using local catalog`,
+        });
+        if (fallback) return fallback;
+        throw error;
+      }
+    }
+
     if (provider === "cursor") {
       const cachedResponse = maybeReturnCachedDiscovery();
       if (cachedResponse) return cachedResponse;
@@ -1369,9 +1404,17 @@ export async function GET(
 
       if (token) {
         try {
+          const cursorProxy = await resolveProxyForConnection(connectionId, undefined, provider);
           const models = await fetchCursorAvailableModels({
             accessToken: token,
             machineId,
+            fetchImpl: (url, init) =>
+              safeOutboundFetch(url, {
+                ...SAFE_OUTBOUND_FETCH_PRESETS.modelsDiscovery,
+                guard: getProviderOutboundGuard(),
+                proxyConfig: cursorProxy.proxy,
+                ...init,
+              }),
           });
           return buildApiDiscoveryResponse(models);
         } catch (err) {

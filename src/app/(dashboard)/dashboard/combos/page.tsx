@@ -32,6 +32,8 @@ import { useComboProxyAssignments } from "./useComboProxyAssignments";
 import { ResponseValidationEditor, type ResponseValidationValue } from "./ResponseValidationEditor";
 import ReasoningTokenBufferToggle from "./ReasoningTokenBufferToggle";
 import ComboTimeoutFields from "./ComboTimeoutFields";
+import ComboRrLegibilityFields from "./ComboRrLegibilityFields";
+import { persistConnectionAwareExpansion, persistStickyRoundRobinLimit } from "./comboRrLegibility";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -85,7 +87,7 @@ import {
 import { getComboStepTarget } from "@/lib/combos/steps";
 import { DEAD_COMBO_CONFIG_KEYS } from "@/lib/combos/deadConfigKeys";
 import { modelFamily } from "@/lib/combos/invariants";
-import { resolveCanonicalProviderModel } from "@omniroute/open-sse/services/model.ts";
+import { resolveProviderAlias } from "@omniroute/open-sse/services/providerAlias.ts";
 import { resolveServerErrorMessage } from "@/lib/api/serverErrorMessage";
 import { useTranslations } from "next-intl";
 
@@ -680,8 +682,8 @@ function computeAllowedRestrictionSync(
       .map((m) => {
         if (m.providerId) return m.providerId;
         if (typeof m.model !== "string" || !m.model.includes("/")) return "";
-        const [aliasOrProvider, ...rest] = m.model.split("/");
-        return resolveCanonicalProviderModel(aliasOrProvider, rest.join("/")).provider || "";
+        const [aliasOrProvider] = m.model.split("/");
+        return resolveProviderAlias(aliasOrProvider) || "";
       })
       .filter((p): p is string => Boolean(p));
     result.allowedProviders = Array.from(new Set([...existingProviders, ...stepProviders]));
@@ -702,7 +704,6 @@ function computeAllowedRestrictionSync(
 
   return result;
 }
-
 
 function getModelString(entry) {
   if (typeof entry === "string") return entry;
@@ -872,6 +873,7 @@ function CombosPageContent() {
   const [comboDragOverIndex, setComboDragOverIndex] = useState(null);
   const [savingComboOrder, setSavingComboOrder] = useState(false);
   const [comboConfigMode, setComboConfigMode] = useState("guided");
+  const [routingSettings, setRoutingSettings] = useState(null);
   const [promptCompressionEnabled, setPromptCompressionEnabled] = useState(false);
   const [selectedIntelligentComboId, setSelectedIntelligentComboId] = useState<string | null>(null);
   const comboDragIndexRef = useRef<number | null>(null);
@@ -939,7 +941,11 @@ function CombosPageContent() {
     })();
     fetch("/api/settings")
       .then((r) => (r.ok ? r.json() : null))
-      .then((settings) => setComboConfigMode(normalizeComboConfigMode(settings?.comboConfigMode)))
+      .then((settings) => {
+        if (!settings) return;
+        setComboConfigMode(normalizeComboConfigMode(settings.comboConfigMode));
+        setRoutingSettings(settings);
+      })
       .catch(() => setComboConfigMode("guided"));
     fetch("/api/settings/compression")
       .then((r) => (r.ok ? r.json() : null))
@@ -1445,6 +1451,7 @@ function CombosPageContent() {
         activeProviders={activeProviders}
         combo={null}
         comboConfigMode={comboConfigMode}
+        routingSettings={routingSettings}
       />
 
       <ComboFormModal
@@ -1455,6 +1462,7 @@ function CombosPageContent() {
         onSave={(data) => handleUpdate(editingCombo.id, data)}
         activeProviders={activeProviders}
         comboConfigMode={comboConfigMode}
+        routingSettings={routingSettings}
       />
 
       {proxyTargetCombo && (
@@ -2017,6 +2025,10 @@ function TestResultsView({ results }) {
 
   return (
     <div className="flex flex-col gap-2">
+      <p className="text-xs text-text-muted">
+        Targets are tested independently. This checks model health, not the combo’s routing strategy
+        or fallback order.
+      </p>
       {results.resolvedBy && (
         <div className="flex items-center gap-2 text-sm">
           <span className="material-symbols-outlined text-emerald-500 text-[18px]">
@@ -2024,7 +2036,7 @@ function TestResultsView({ results }) {
           </span>
           <div className="min-w-0">
             <div>
-              Resolved by:{" "}
+              First healthy target in combo order:{" "}
               <code className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded">
                 {results.resolvedBy}
               </code>
@@ -2069,6 +2081,12 @@ function TestResultsView({ results }) {
                 {r.stepId ? ` · ${r.stepId}` : ""}
               </div>
             ) : null}
+            {r.error && (
+              <p className="mt-2 whitespace-pre-wrap break-words text-red-500">
+                {r.statusCode ? `HTTP ${r.statusCode}: ` : ""}
+                {r.error}
+              </p>
+            )}
           </div>
           {r.latencyMs !== undefined && <span className="text-text-muted">{r.latencyMs}ms</span>}
           <span
@@ -2088,7 +2106,7 @@ function TestResultsView({ results }) {
   );
 }
 
-function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, comboConfigMode }) {
+function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, comboConfigMode, routingSettings }) {
   type CreateDraftSnapshot = {
     name: string;
     models: unknown[];
@@ -3099,12 +3117,12 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
       if (config.concurrencyPerModel !== undefined)
         configToSave.concurrencyPerModel = config.concurrencyPerModel;
       if (config.queueTimeoutMs !== undefined) configToSave.queueTimeoutMs = config.queueTimeoutMs;
-      if (config.stickyRoundRobinLimit !== undefined)
-        configToSave.stickyRoundRobinLimit = config.stickyRoundRobinLimit;
     }
     if (strategy === "weighted" && config.stickyWeightedLimit !== undefined) {
       configToSave.stickyWeightedLimit = config.stickyWeightedLimit;
     }
+    persistStickyRoundRobinLimit(strategy, configToSave, config);
+    persistConnectionAwareExpansion(strategy, configToSave, config);
     if (
       usesIntelligentBuilderStage &&
       !isExpertMode &&
@@ -4298,33 +4316,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
-                      <div className="col-span-2">
-                        <FieldLabelWithHelp
-                          label={getI18nOrFallback(t, "stickyLimit", "Sticky Limit")}
-                          help={getI18nOrFallback(
-                            t,
-                            "advancedHelp.stickyLimit",
-                            ADVANCED_FIELD_HELP_FALLBACK.stickyLimit
-                          )}
-                          showHelp={!isExpertMode}
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max="1000"
-                          value={config.stickyRoundRobinLimit ?? ""}
-                          placeholder={getI18nOrFallback(t, "stickyLimitInherit", "inherit")}
-                          onChange={(e) =>
-                            setConfig({
-                              ...config,
-                              stickyRoundRobinLimit: e.target.value
-                                ? Number(e.target.value)
-                                : undefined,
-                            })
-                          }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
-                        />
-                      </div>
                     </div>
                   )}
                   {strategy === "weighted" && (
@@ -4362,6 +4353,15 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                       </div>
                     </div>
                   )}
+                  <ComboRrLegibilityFields
+                    strategy={strategy}
+                    config={config}
+                    setConfig={setConfig}
+                    models={models}
+                    routingSettings={routingSettings}
+                    t={t}
+                    showHelp={!isExpertMode}
+                  />
                   <div className="grid grid-cols-1 gap-2 pt-2 border-t border-black/5 dark:border-white/5">
                     <div>
                       <FieldLabelWithHelp

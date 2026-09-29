@@ -363,19 +363,9 @@ export class BaseExecutor {
   }
 
   /**
-   * Build the upstream URL from the payload-rule-prepared body instead of the
-   * bare executor model id.
-   *
-   * Why this exists: chatCore's prepareUpstreamBody() applies operator payload
-   * rules to the request BODY (including a rewritten `model` for custom-model
-   * aliases, e.g. `gemini-3.7-flash-high` → `gemini-3.7-flash`), but the
-   * executor's `model` argument still carries the ORIGINAL alias. Providers
-   * that put the model in the URL path (Gemini: `/models/{model}:generateContent`)
-   * then send a URL naming the alias while the body names the real id — Google
-   * 404s on the alias. Building the URL from the body keeps the two in lockstep.
-   *
-   * Bodies without a string `model` (and non-rewritten bodies) fall back to the
-   * executor model, so every existing caller behaves exactly as before.
+   * Build the URL from the payload-rule-prepared body (#12826): a rule may rewrite body.model
+   * (custom-model alias -> real id) and URL-path providers (Gemini /models/{model}:...) must
+   * follow it, or Google 404s on the alias. No string body.model -> executor model (unchanged).
    */
   buildUrlForBody(
     model: string,
@@ -864,11 +854,6 @@ export class BaseExecutor {
         body,
         activeCredentials
       );
-      // Build the URL from the payload-rule-prepared body so providers that put
-      // the model in the URL path (Gemini: /models/{model}:generateContent) stay
-      // in lockstep with a payload-rule-rewritten body.model (custom-model alias
-      // → real upstream id). Falls back to the executor model when the body has
-      // no string model of its own — identical to the previous behavior.
       const url = this.buildUrlForBody(model, body, stream, urlIndex, requestCredentials);
       const headers = this.buildHeaders(
         requestCredentials,

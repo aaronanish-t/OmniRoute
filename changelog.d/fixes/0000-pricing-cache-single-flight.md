@@ -1,0 +1,1 @@
+- **fix(db):** concurrent cache misses now share one in-flight load, so the nightly `usage_history` rollup no longer loads the full pricing table once per group after a pricing sync, which could run the server out of memory

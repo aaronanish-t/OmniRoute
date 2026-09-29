@@ -1,8 +1,8 @@
 /**
  * Persisted-cooldown bypass metric: targets re-served via an allow-listed
  * rate-limited connection (transient 429 flag set, no future persisted
- * cooldown) increment a process-wide counter exposed on the combo metrics
- * view. A future persisted cooldown still skips without counting.
+ * cooldown) increment a per-combo counter exposed on that combo's metrics
+ * view only. A future persisted cooldown still skips without counting.
  */
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
@@ -124,18 +124,25 @@ describe("persisted-skip bypass metric", () => {
     resetComboTraceStore();
   });
 
-  it("counts one bypass per record call and resets to zero", () => {
-    const before = getPersistedSkipBypassed();
-    recordPersistedSkipBypass();
-    assert.equal(getPersistedSkipBypassed() - before, 1);
-    recordComboRequest("probe-combo", null, { success: true, latencyMs: 1 });
-    const view = getComboMetrics("probe-combo");
-    assert.ok(view);
-    assert.equal(view!.persistedSkipBypassed - before, 1);
-    resetComboMetrics("probe-combo");
-    assert.equal(getPersistedSkipBypassed() - before, 1);
+  it("scopes the bypass count to the combo that recorded it", () => {
+    recordComboRequest("combo-a", null, { success: true, latencyMs: 1 });
+    recordComboRequest("combo-b", null, { success: true, latencyMs: 1 });
+    recordPersistedSkipBypass("combo-b");
+    recordPersistedSkipBypass("combo-b");
+    assert.equal(getComboMetrics("combo-a")!.persistedSkipBypassed, 0);
+    assert.equal(getComboMetrics("combo-b")!.persistedSkipBypassed, 2);
+    assert.equal(getPersistedSkipBypassed("combo-a"), 0);
+    assert.equal(getPersistedSkipBypassed("combo-b"), 2);
+  });
+
+  it("resets with the combo and globally", () => {
+    recordPersistedSkipBypass("combo-a");
+    recordPersistedSkipBypass("combo-b");
+    resetComboMetrics("combo-a");
+    assert.equal(getPersistedSkipBypassed("combo-a"), 0);
+    assert.equal(getPersistedSkipBypassed("combo-b"), 1);
     resetAllComboMetrics();
-    assert.equal(getPersistedSkipBypassed(), 0);
+    assert.equal(getPersistedSkipBypassed("combo-b"), 0);
   });
 
   it("gate with allow flag and no future cooldown proceeds and counts one bypass", async () => {
@@ -155,11 +162,11 @@ describe("persisted-skip bypass metric", () => {
     });
     const deps = baseDeps();
     startComboTrace(deps.traceInvocationId, { strategy: "priority", comboName: "t" });
-    const before = getPersistedSkipBypassed();
+    const before = getPersistedSkipBypassed("t");
     try {
       const decision = await evaluateExecuteTargetGates({ index: 0, state, deps });
       assert.equal(decision.kind, "proceed");
-      assert.equal(getPersistedSkipBypassed() - before, 1);
+      assert.equal(getPersistedSkipBypassed("t") - before, 1);
     } finally {
       resetAllComboMetrics();
       resetComboTraceStore();
@@ -183,11 +190,11 @@ describe("persisted-skip bypass metric", () => {
     });
     const deps = baseDeps();
     startComboTrace(deps.traceInvocationId, { strategy: "priority", comboName: "t" });
-    const before = getPersistedSkipBypassed();
+    const before = getPersistedSkipBypassed("t");
     try {
       const decision = await evaluateExecuteTargetGates({ index: 0, state, deps });
       assert.equal(decision.kind, "skip");
-      assert.equal(getPersistedSkipBypassed() - before, 0);
+      assert.equal(getPersistedSkipBypassed("t") - before, 0);
     } finally {
       resetAllComboMetrics();
       resetComboTraceStore();
@@ -208,11 +215,11 @@ describe("persisted-skip bypass metric", () => {
     const state = emptyState({ orderedTargets: [target] });
     const deps = baseDeps();
     startComboTrace(deps.traceInvocationId, { strategy: "priority", comboName: "t" });
-    const before = getPersistedSkipBypassed();
+    const before = getPersistedSkipBypassed("t");
     try {
       const decision = await evaluateExecuteTargetGates({ index: 0, state, deps });
       assert.equal(decision.kind, "proceed");
-      assert.equal(getPersistedSkipBypassed() - before, 0);
+      assert.equal(getPersistedSkipBypassed("t") - before, 0);
     } finally {
       resetAllComboMetrics();
       resetComboTraceStore();
@@ -229,7 +236,7 @@ describe("persisted-skip bypass metric", () => {
     assert.match(rr, /recordPersistedSkipBypass/);
     assert.match(
       rr,
-      /if \(allowRateLimitedConnection && target\.connectionId\)[\s\S]*?if \(persistedSkip\)[\s\S]*?continue;[\s\S]*?\}[\s\S]*?recordPersistedSkipBypass\(\)/
+      /if \(allowRateLimitedConnection && target\.connectionId\)[\s\S]*?if \(persistedSkip\)[\s\S]*?continue;[\s\S]*?\}[\s\S]*?recordPersistedSkipBypass\(combo\.name\)/
     );
   });
 });

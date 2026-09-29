@@ -507,7 +507,8 @@ export async function handleRoundRobinCombo({
           );
           if (offset > 0) fallbackCount++;
           continue;
-        } else recordPersistedSkipBypass();
+        }
+        recordPersistedSkipBypass(combo.name);
       }
       const targetForAttempt = allowRateLimitedConnection
         ? { ...target, allowRateLimitedConnection: true, fallbackAttempts: offset }

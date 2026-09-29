@@ -193,23 +193,21 @@ const metrics = new Map<string, ComboMetricsEntry>();
 const shadowMetrics = new Map<string, ComboShadowMetricsEntry>();
 
 /**
- * Process-wide count of persisted-cooldown bypasses: targets re-served via
- * an allow-listed rate-limited connection (transient 429 flag set, no future
- * persisted cooldown). The flag itself is request-scoped (fresh Set per
- * attempt-loop iteration / round-robin call, garbage-collected with the
- * request); only this aggregate outlives the request, like the maps above.
- * Process-local, incremented synchronously in the dispatch tick (no lock
- * needed). Reset by resetAllComboMetrics() only; resetComboMetrics(name)
- * leaves it untouched.
+ * Per-combo count of persisted-cooldown bypasses: targets re-served via an
+ * allow-listed rate-limited connection (transient 429 flag set, no future
+ * persisted cooldown). The flag itself is request-scoped; only this aggregate
+ * outlives the request, like the maps above. Keyed by combo name so each
+ * combo's metrics view reports only its own bypasses. Reset with the combo
+ * (resetComboMetrics) or globally (resetAllComboMetrics).
  */
-let persistedSkipBypassed = 0;
+const persistedSkipBypassed = new Map<string, number>();
 
-export function recordPersistedSkipBypass(): void {
-  persistedSkipBypassed++;
+export function recordPersistedSkipBypass(comboName: string): void {
+  persistedSkipBypassed.set(comboName, (persistedSkipBypassed.get(comboName) ?? 0) + 1);
 }
 
-export function getPersistedSkipBypassed(): number {
-  return persistedSkipBypassed;
+export function getPersistedSkipBypassed(comboName: string): number {
+  return persistedSkipBypassed.get(comboName) ?? 0;
 }
 const MAX_METRICS_ENTRIES = 500;
 const METRICS_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -222,7 +220,10 @@ function evictOldestMetric(
   let oldestTime = Infinity;
   for (const [name, entry] of targetMap) {
     const t = entry.lastUsedAt ? new Date(entry.lastUsedAt).getTime() : Date.now();
-    if (t < oldestTime) { oldestTime = t; oldest = name; }
+    if (t < oldestTime) {
+      oldestTime = t;
+      oldest = name;
+    }
   }
   if (oldest) {
     targetMap.delete(oldest);
@@ -232,23 +233,28 @@ function evictOldestMetric(
   }
 }
 
-const _metricsCleanupTimer = setInterval(() => {
-  const now = Date.now();
-  for (const [name, entry] of metrics) {
-    const lastUsed = entry.lastUsedAt ? new Date(entry.lastUsedAt).getTime() : now;
-    if (now - lastUsed > METRICS_TTL_MS) {
-      metrics.delete(name);
-      shadowMetrics.delete(name);
+const _metricsCleanupTimer = setInterval(
+  () => {
+    const now = Date.now();
+    for (const [name, entry] of metrics) {
+      const lastUsed = entry.lastUsedAt ? new Date(entry.lastUsedAt).getTime() : now;
+      if (now - lastUsed > METRICS_TTL_MS) {
+        metrics.delete(name);
+        shadowMetrics.delete(name);
+        persistedSkipBypassed.delete(name);
+      }
     }
-  }
-  for (const [name, entry] of shadowMetrics) {
-    const lastUsed = entry.lastUsedAt ? new Date(entry.lastUsedAt).getTime() : now;
-    if (now - lastUsed > METRICS_TTL_MS) {
-      metrics.delete(name);
-      shadowMetrics.delete(name);
+    for (const [name, entry] of shadowMetrics) {
+      const lastUsed = entry.lastUsedAt ? new Date(entry.lastUsedAt).getTime() : now;
+      if (now - lastUsed > METRICS_TTL_MS) {
+        metrics.delete(name);
+        shadowMetrics.delete(name);
+        persistedSkipBypassed.delete(name);
+      }
     }
-  }
-}, 5 * 60 * 1000); // every 5 minutes
+  },
+  5 * 60 * 1000
+); // every 5 minutes
 _metricsCleanupTimer.unref?.(); // Don't prevent process exit
 
 /**
@@ -434,7 +440,7 @@ export function getComboMetrics(comboName: string): ComboMetricsView | null {
   return {
     ...combo,
     productionTraffic: !!productionCombo && productionCombo.totalRequests > 0,
-    persistedSkipBypassed,
+    persistedSkipBypassed: getPersistedSkipBypassed(comboName),
     avgLatencyMs:
       combo.totalRequests > 0 ? Math.round(combo.totalLatencyMs / combo.totalRequests) : 0,
     successRate:
@@ -490,6 +496,7 @@ export function recordComboIntent(comboName: string, intent: string): void {
 export function resetComboMetrics(comboName: string): void {
   metrics.delete(comboName);
   shadowMetrics.delete(comboName);
+  persistedSkipBypassed.delete(comboName);
 }
 
 /**
@@ -499,5 +506,5 @@ export function resetAllComboMetrics(): void {
   clearInterval(_metricsCleanupTimer);
   metrics.clear();
   shadowMetrics.clear();
-  persistedSkipBypassed = 0;
+  persistedSkipBypassed.clear();
 }

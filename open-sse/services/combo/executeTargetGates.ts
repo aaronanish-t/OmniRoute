@@ -236,7 +236,7 @@ export async function evaluateExecuteTargetGates(opts: {
     } else if (allowRateLimitedConnection) {
       // The transient flag re-served a target with no future persisted
       // cooldown: count the bypass for operators.
-      recordPersistedSkipBypass();
+      recordPersistedSkipBypass(deps.combo.name);
     }
   }
 

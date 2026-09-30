@@ -6,12 +6,22 @@ const digest = (value: string) => createHash("sha256").update(value).digest("hex
 type Owner = { connectionId: string; generation?: string; account?: string };
 type Connection = { id: string };
 
+export function usesMuseOAuthOwnership(
+  connections: { id: string; authType?: string }[],
+  selectedId?: string | null
+): boolean {
+  if (selectedId) return connections.find((item) => item.id === selectedId)?.authType === "oauth";
+  return connections.some((item) => item.authType === "oauth");
+}
+
 export class MuseOwnershipError extends Error {
+  readonly code = "MUSE_OWNERSHIP_REJECTED";
   constructor(
     message: string,
     readonly status = 409
   ) {
     super(message);
+    this.name = "MuseOwnershipError";
   }
 }
 
@@ -83,6 +93,12 @@ function continuationIds(value: unknown, ids = new Set<string>()): Set<string> {
       typeof item.call_id === "string"
     )
       ids.add(`call:${item.call_id}`);
+    if (item.role === "tool" && typeof item.tool_call_id === "string")
+      ids.add(`call:${item.tool_call_id}`);
+    if (Array.isArray(item.tool_calls)) {
+      for (const call of item.tool_calls)
+        if (call && typeof call.id === "string") ids.add(`call:${call.id}`);
+    }
     if (item.type === "item_reference" && typeof item.id === "string") ids.add(`item:${item.id}`);
     for (const nested of Object.values(item))
       if (nested && typeof nested === "object") continuationIds(nested, ids);
@@ -114,6 +130,7 @@ export function claimMuseSession(
     } else {
       if (
         opaqueHashes(body).size ||
+        continuationIds(body).size ||
         body.previous_response_id ||
         body._omniroutePreviousResponseResumed ||
         (Array.isArray(body.input) &&

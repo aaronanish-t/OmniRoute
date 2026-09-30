@@ -87,6 +87,7 @@ import {
   claimMuseSession,
   bindMuseGeneration,
   recordMuseOutput,
+  usesMuseOAuthOwnership,
 } from "../services/museSessionOwnership";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
@@ -1691,11 +1692,16 @@ async function handleSingleModelChat(
   // and selection/dispatch behave exactly as before. `attempted` survives a loop restart.
   const agy = agyLease.startAntigravityLeaseRequest(provider, runtimeOptions.correlationId);
   let museOwner: { scope: string; connectionId: string; generation?: string } | null = null;
-  if (provider === "muse-code") {
+  const museConnections = provider === "muse-code"
+    ? await getProviderConnections({ provider: "muse-code", isActive: true })
+    : [];
+  if (provider === "muse-code" && usesMuseOAuthOwnership(
+    museConnections, forcedConnectionId || initialPreselectedCredentials?.connectionId
+  )) {
     try {
       const scope = museSessionScope(body, request?.headers, apiKeyInfo?.id ?? null);
       const candidates = (
-        await getProviderConnections({ provider: "muse-code", isActive: true, authType: "oauth" })
+        museConnections.filter((connection) => connection.authType === "oauth")
       ).filter(
         (candidate) =>
           !effectiveAllowedConnections || effectiveAllowedConnections.includes(candidate.id)
@@ -2101,6 +2107,15 @@ async function handleSingleModelChat(
             videoBridgeLog: runtimeOptions.videoBridgeLog,
             previousResponseResumed: runtimeOptions.previousResponseResumed,
             fallbackAttempts: runtimeOptions.fallbackAttempts,
+            beforeUpstreamAttempt: museOwner ? (attemptCredentials) => {
+              museOwner.generation = bindMuseGeneration(
+                museOwner.scope,
+                attemptCredentials.connectionId || credentials.connectionId,
+                attemptCredentials.accessToken || attemptCredentials.apiKey,
+                credentials.providerSpecificData?.accountId || credentials.email ||
+                  credentials.refreshToken || credentials.connectionId
+              );
+            } : undefined,
             forcedConnectionId: hasForcedConnection ? forcedConnectionId : null, // #14116
           },
           runtimeOptions

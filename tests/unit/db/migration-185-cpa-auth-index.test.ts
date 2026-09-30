@@ -7,7 +7,15 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+import type Database from "better-sqlite3";
+import {
+  betterSqlite3Available,
+  BETTER_SQLITE3_SKIP_REASON,
+} from "../_helpers/betterSqlite3Availability.ts";
+
+const canUseBetterSqlite3 = betterSqlite3Available();
+const skipReason = canUseBetterSqlite3 ? false : BETTER_SQLITE3_SKIP_REASON;
 
 const repoMigrations = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -36,7 +44,9 @@ function columns(db: Database.Database): string[] {
 }
 
 function openDb(withColumn: boolean): Database.Database {
-  const db = new Database(":memory:");
+  const require = createRequire(import.meta.url);
+  const BetterSqlite3 = require("better-sqlite3") as typeof Database;
+  const db = new BetterSqlite3(":memory:");
   db.exec(
     `CREATE TABLE usage_history (id INTEGER PRIMARY KEY, provider TEXT${
       withColumn ? ", cpa_auth_index TEXT" : ""
@@ -45,7 +55,7 @@ function openDb(withColumn: boolean): Database.Database {
   return db;
 }
 
-test("an older usage_history gains cpa_auth_index and a second run is a no-op", () => {
+test("an older usage_history gains cpa_auth_index and a second run is a no-op", { skip: skipReason }, () => {
   const db = openDb(false);
   try {
     assert.equal(runMigrations(db, { isNewDb: true }), 1);
@@ -59,7 +69,7 @@ test("an older usage_history gains cpa_auth_index and a second run is a no-op", 
   }
 });
 
-test("a database that already has cpa_auth_index still records migration 185", () => {
+test("a database that already has cpa_auth_index still records migration 185", { skip: skipReason }, () => {
   const db = openDb(true);
   try {
     assert.equal(runMigrations(db, { isNewDb: true }), 1);

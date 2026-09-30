@@ -12,6 +12,7 @@ import {
   resolveChatGptWebBrowserAcquireTimeoutMs,
   shouldRetryWithToolReminder,
   TOOL_REMINDER_PROMPT,
+  isRetryableChatGptWebHandshake,
 } from "../../open-sse/utils/chatgptWebExecutorAdapter.ts";
 import { resolveChatGptWebAttachments } from "../../open-sse/utils/chatgptWebAttachments.ts";
 import type { ChatGptWebBrowserSession } from "../../open-sse/utils/chatgptWebBrowserSession.ts";
@@ -879,5 +880,28 @@ describe("ChatGPT Web clean-room executor response adapter", () => {
     assert.deepEqual(observed?.storageState, { cookies: [], origins: [] });
     assert.equal(observed?.userAgent, "CleanRoomBrowser/1.0");
     assert.equal(response.status, 200);
+  });
+
+  test("retries both dead-turn shapes observed on the live account", () => {
+    // ChatGPT mounted an assistant bubble and left it empty for 153s (count=1 textLen=0).
+    assert.equal(
+      isRetryableChatGptWebHandshake(
+        new Error(
+          "ChatGPT Web composer submission failed: ChatGPT Web assistant response stayed empty"
+        )
+      ),
+      true
+    );
+    // ChatGPT accepted the user message and never created a reply node (count=0, roles:["user"]).
+    assert.equal(
+      isRetryableChatGptWebHandshake(
+        new Error(
+          "ChatGPT Web composer submission failed: ChatGPT Web assistant response never started"
+        )
+      ),
+      true
+    );
+    // A genuine failure must still not be retried blindly.
+    assert.equal(isRetryableChatGptWebHandshake(new Error("something else went wrong")), false);
   });
 });

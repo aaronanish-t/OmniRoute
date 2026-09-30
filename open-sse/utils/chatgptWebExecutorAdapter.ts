@@ -642,7 +642,7 @@ export function chatGptWebPoolDigest(input: ChatGptWebSessionFactoryInput): stri
  */
 export function isRetryableChatGptWebHandshake(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error ?? "");
-  return /non-SSE response|assistant document is incomplete|conversation returned an invalid response|conversation request scope is unavailable|request module was not loaded|bridge did not initialize|sentinel headers are unavailable|assistant response stayed empty/i.test(
+  return /non-SSE response|assistant document is incomplete|conversation returned an invalid response|conversation request scope is unavailable|request module was not loaded|bridge did not initialize|sentinel headers are unavailable|assistant response stayed empty|assistant response never started/i.test(
     message
   );
 }

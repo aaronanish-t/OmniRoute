@@ -45,6 +45,16 @@ const RENDERED_STABLE_TICKS = 2;
  * produces the answer (observed ~15s), so waiting longer only delays the inevitable.
  */
 const COMPOSER_EMPTY_ASSISTANT_GRACE_MS = 6_000;
+/**
+ * How long a submitted turn may produce NO assistant text at all before it is declared dead.
+ *
+ * Two live flavours of a dead turn exist, and only this deadline catches both: ChatGPT may mount
+ * an assistant bubble and leave it empty (`count=1 textLen=0` for 153s), or accept the user message
+ * and never create a reply node at all (`count=0, roles:["user"]` for 153s). A healthy turn shows
+ * text by ~11s, so abandoning at 25s costs at most one fast retry (~20s) instead of burning the
+ * whole 153s read budget.
+ */
+const COMPOSER_NO_ANSWER_DEADLINE_MS = 25_000;
 
 export interface ChatGptWebBrowserSession {
   url(): string;
@@ -889,6 +899,11 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
           }
         } else {
           emptySince = 0;
+        }
+        // No assistant text at all for the whole grace window: the reply never started. Fail fast
+        // (retryable) rather than wait out the budget for an answer that is not coming.
+        if (Date.now() - startedAt >= COMPOSER_NO_ANSWER_DEADLINE_MS) {
+          throw new Error("ChatGPT Web assistant response never started");
         }
         continue;
       }

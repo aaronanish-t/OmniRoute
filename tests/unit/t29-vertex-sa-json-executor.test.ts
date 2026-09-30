@@ -56,6 +56,22 @@ test("T29: Vertex executor routes partner models to global openapi endpoint", ()
   );
 });
 
+test("T29: EU-configured partner models stay on the global host (host/location must agree)", () => {
+  const executor = new VertexExecutor();
+  const url = executor.buildUrl("deepseek-ai/deepseek-v3.2-maas", false, 0, {
+    apiKey: MIN_SA_JSON,
+    providerSpecificData: { region: "eu" },
+  });
+
+  // Regression: the partner path is a `locations/global` route, so an EU-configured connection
+  // must NOT send it to aiplatform.eu.rep.googleapis.com (multi-region host + global location
+  // is not a valid pairing) — and this route's behaviour must not change for other regions.
+  assert.equal(
+    url,
+    "https://aiplatform.googleapis.com/v1/projects/vertex-project-123/locations/global/endpoints/openapi/chat/completions"
+  );
+});
+
 test("T29: Vertex executor defaults region to us-central1 when not configured", () => {
   const executor = new VertexExecutor();
   const url = executor.buildUrl("gemini-2.5-flash", false, 0, {

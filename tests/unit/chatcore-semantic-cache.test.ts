@@ -763,18 +763,25 @@ test("#12734: identical tool_choice/tools/response_format across requests still 
   assert.ok(result, "identical tool_choice/tools/response_format must still HIT");
 });
 
-
 test("Muse successful streaming completions never create or overwrite cache entries", async () => {
-  const { storeStreamingSemanticCacheResponse } = await import("../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts");
+  const { storeStreamingSemanticCacheResponse } =
+    await import("../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts");
   for (const seeded of [false, true]) {
     const input = [{ role: "user", content: `stream muse ${seeded}` }];
     const signature = generateSignature("muse-spark", input, 0, undefined, "stream-client");
     const old = { choices: [{ message: { content: "old opaque output" }, finish_reason: "stop" }] };
     if (seeded) setCachedResponse(signature, "muse-spark", old, 1);
     storeStreamingSemanticCacheResponse({
-      enabled: true, provider: "muse-code", model: "muse-spark", apiKeyId: "stream-client",
-      body: { input, temperature: 0 }, headers: {}, streamStatus: 200,
-      streamResponseBody: { choices: [{ message: { content: "new opaque output" }, finish_reason: "stop" }] },
+      enabled: true,
+      provider: "muse-code",
+      model: "muse-spark",
+      apiKeyId: "stream-client",
+      body: { input, temperature: 0 },
+      headers: {},
+      streamStatus: 200,
+      streamResponseBody: {
+        choices: [{ message: { content: "new opaque output" }, finish_reason: "stop" }],
+      },
     });
     assert.deepEqual(getCachedResponse(signature), seeded ? old : null);
   }

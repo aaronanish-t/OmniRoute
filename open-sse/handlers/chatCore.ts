@@ -635,7 +635,12 @@ async function handleChatCoreInner({
   };
   const managedLeaseFenceErrorResult = (code: string) => {
     if (code === "MUSE_OWNERSHIP_REJECTED")
-      return createErrorResult(409, "Muse session ownership or caller generation changed; continuation rejected.", null, code);
+      return createErrorResult(
+        409,
+        "Muse session ownership or caller generation changed; continuation rejected.",
+        null,
+        code
+      );
     return {
       ...createErrorResult(409, "Managed lease request fence rejected the dispatch", null, code),
       errorType: "lease_error",

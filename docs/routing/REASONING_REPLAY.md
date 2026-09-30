@@ -165,12 +165,17 @@ The cache exposes two endpoints under `src/app/api/cache/reasoning/route.ts`. Bo
 
 ## Muse Opaque-Reasoning Ownership
 
-Muse (`muse-code`) returns caller-bound opaque reasoning (`encrypted_content`). Replaying it under a different account or reminted credential fails upstream, so Muse requests use session-level ownership instead of per-request rotation (`src/sse/services/museSessionOwnership.ts`, enforced in `src/sse/handlers/chat.ts`):
+Muse (`muse-code`) returns caller-bound opaque reasoning (`encrypted_content`). Replaying it under a different account or reminted credential fails upstream, so native OAuth requests use session-level ownership instead of per-request rotation (`src/sse/services/museSessionOwnership.ts`, enforced in `src/sse/handlers/chat.ts`). Explicitly selected API-key connections and API-key-only configurations retain their existing routing without this ownership mode.
 
-- Fresh sessions (distinct `prompt_cache_key` / session header per API key) round-robin across the active native OAuth accounts.
-- Every continuation and tool-result turn stays pinned to the session owner: connection, account identity, and inference-credential generation. Ownership records hold hashes only, never secrets.
+- Supply a stable session ID on every turn: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id`, or `x-codex-session-id`; alternatively use `prompt_cache_key`, `session_id`, `conversation_id`, or `metadata.session_id` in the body (in that precedence order). Missing or blank IDs return 400. The scope includes the caller's OmniRoute API-key ID.
+- Fresh independent sessions round-robin across active native OAuth accounts permitted by the API-key connection policy, ordered by connection ID. An explicitly forced connection bypasses round-robin for a new session but cannot override an existing owner.
+- Every continuation and tool-result turn stays pinned to the session owner: connection, account identity, and inference-credential generation, checked again before upstream attempts, including credential-refresh retries. Responses call IDs/item references and Chat Completions tool-call IDs must have been recorded for that session and generation.
+- SQLite `key_value` records in the `muse_session_ownership` namespace persist ownership and the rotation cursor across restarts. Records contain connection IDs and hashes of account identity, credentials, opaque content, and continuation references, not secrets or conversation history. Clients must retain and send their full history and opaque reasoning.
 - Unknown or foreign opaque reasoning, a missing owner, an unavailable owner account, or a generation change with recorded history fails closed with an explicit 4xx/503 — never silent cross-account failover and never dropped reasoning.
 - A reminted same-account key is adopted only when the session recorded no replayable history; recorded sessions keep failing closed until started fresh.
+- All `muse-code` requests bypass semantic-cache reads and writes, including streaming writes, so cached opaque output cannot acquire a different session owner.
+
+Regression guards: `tests/unit/muse-session-ownership.test.ts` and `tests/unit/chatcore-semantic-cache.test.ts`.
 
 ## See Also
 

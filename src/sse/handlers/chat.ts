@@ -1692,20 +1692,25 @@ async function handleSingleModelChat(
   // and selection/dispatch behave exactly as before. `attempted` survives a loop restart.
   const agy = agyLease.startAntigravityLeaseRequest(provider, runtimeOptions.correlationId);
   let museOwner: { scope: string; connectionId: string; generation?: string } | null = null;
-  const museConnections = provider === "muse-code"
-    ? await getProviderConnections({ provider: "muse-code", isActive: true })
-    : [];
-  if (provider === "muse-code" && usesMuseOAuthOwnership(
-    museConnections, forcedConnectionId || initialPreselectedCredentials?.connectionId
-  )) {
+  const museConnections =
+    provider === "muse-code"
+      ? await getProviderConnections({ provider: "muse-code", isActive: true })
+      : [];
+  if (
+    provider === "muse-code" &&
+    usesMuseOAuthOwnership(
+      museConnections,
+      forcedConnectionId || initialPreselectedCredentials?.connectionId
+    )
+  ) {
     try {
       const scope = museSessionScope(body, request?.headers, apiKeyInfo?.id ?? null);
-      const candidates = (
-        museConnections.filter((connection) => connection.authType === "oauth")
-      ).filter(
-        (candidate) =>
-          !effectiveAllowedConnections || effectiveAllowedConnections.includes(candidate.id)
-      );
+      const candidates = museConnections
+        .filter((connection) => connection.authType === "oauth")
+        .filter(
+          (candidate) =>
+            !effectiveAllowedConnections || effectiveAllowedConnections.includes(candidate.id)
+        );
       const owner = claimMuseSession(scope, body, candidates, forcedConnectionId);
       museOwner = { scope, ...owner };
     } catch (error) {
@@ -2107,15 +2112,19 @@ async function handleSingleModelChat(
             videoBridgeLog: runtimeOptions.videoBridgeLog,
             previousResponseResumed: runtimeOptions.previousResponseResumed,
             fallbackAttempts: runtimeOptions.fallbackAttempts,
-            beforeUpstreamAttempt: museOwner ? (attemptCredentials) => {
-              museOwner.generation = bindMuseGeneration(
-                museOwner.scope,
-                attemptCredentials.connectionId || credentials.connectionId,
-                attemptCredentials.accessToken || attemptCredentials.apiKey,
-                credentials.providerSpecificData?.accountId || credentials.email ||
-                  credentials.refreshToken || credentials.connectionId
-              );
-            } : undefined,
+            beforeUpstreamAttempt: museOwner
+              ? (attemptCredentials) => {
+                  museOwner.generation = bindMuseGeneration(
+                    museOwner.scope,
+                    attemptCredentials.connectionId || credentials.connectionId,
+                    attemptCredentials.accessToken || attemptCredentials.apiKey,
+                    credentials.providerSpecificData?.accountId ||
+                      credentials.email ||
+                      credentials.refreshToken ||
+                      credentials.connectionId
+                  );
+                }
+              : undefined,
             forcedConnectionId: hasForcedConnection ? forcedConnectionId : null, // #14116
           },
           runtimeOptions

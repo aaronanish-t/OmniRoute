@@ -7,7 +7,7 @@
 // in the named-combo editor. Here we expose a single active-profile selector
 // (Default-from-panel | a named combo) + a read-only preview.
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -28,6 +28,16 @@ interface NamedCombo {
   name: string;
   pipeline: { engine: string; intensity?: string }[];
 }
+
+// A settings PUT that has not answered by then counts as failed, so one stalled request cannot
+// hold the saves queued behind it forever.
+const SAVE_TIMEOUT_MS = 15_000;
+
+const FALLBACK_SETTINGS: CompressionSettings = {
+  enabled: false,
+  defaultMode: "off",
+  contextEditing: { enabled: false },
+};
 
 // ── Sub-components ──────────────────────────────────────────────────────────────
 
@@ -70,6 +80,12 @@ export default function CompressionHub() {
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Saves go out one at a time. The Hub shows the last saved settings plus the saves still
+  // queued, so a failed save rolls back only its own fields and never undoes a newer save.
+  const savedRef = useRef(FALLBACK_SETTINGS);
+  const queuedRef = useRef<Partial<CompressionSettings>[]>([]);
+  const saveQueueRef = useRef(Promise.resolve());
+
   // ── Initial load (parallel) ──────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
@@ -85,11 +101,8 @@ export default function CompressionHub() {
           .catch(() => null),
       ]);
       if (cancelled) return;
-      if (settingsData) {
-        setSettings(settingsData as CompressionSettings);
-      } else {
-        setSettings({ enabled: false, defaultMode: "off", contextEditing: { enabled: false } });
-      }
+      savedRef.current = settingsData ? (settingsData as CompressionSettings) : FALLBACK_SETTINGS;
+      setSettings(savedRef.current);
       if (Array.isArray(combosData?.combos)) {
         setCombos(combosData.combos as NamedCombo[]);
       }
@@ -103,32 +116,53 @@ export default function CompressionHub() {
 
   // ── Settings mutations ───────────────────────────────────────────────────────
   const saveSettings = useCallback(
-    async (patch: Partial<CompressionSettings>) => {
-      if (!settings) return;
-      const next = { ...settings, ...patch };
-      setSettings(next);
+    (patch: Partial<CompressionSettings>) => {
+      const showQueued = () =>
+        setSettings(
+          queuedRef.current.reduce<CompressionSettings>(
+            (shown, queued) => ({ ...shown, ...queued }),
+            savedRef.current
+          )
+        );
+      queuedRef.current.push(patch);
+      showQueued();
       setError(null);
-      try {
-        // Send only the changed fields (patch), not the full merged settings.
-        // The API schema is designed for partial updates; sending the full
-        // CompressionConfig round-trips fields unknown to the schema and causes
-        // a 400 strict-validation failure (e.g. contextBudget, pipeline engines
-        // added after the schema was written). CompressionPanel already does this.
-        const res = await fetch("/api/settings/compression", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(patch),
-        });
-        if (!res.ok) {
-          setSettings(settings); // revert
-          setError(t("saveSettingsFailed"));
+      saveQueueRef.current = saveQueueRef.current.then(async () => {
+        // A later queued save that carries every key of this one replaces it on the server.
+        const replaced = queuedRef.current
+          .slice(1)
+          .some((later) => Object.keys(patch).every((key) => key in later));
+        if (!replaced) {
+          let ok = false;
+          try {
+            // Send only the changed fields (patch), not the full merged settings.
+            // The API schema is designed for partial updates; sending the full
+            // CompressionConfig round-trips fields unknown to the schema and causes
+            // a 400 strict-validation failure (e.g. contextBudget, pipeline engines
+            // added after the schema was written). CompressionPanel already does this.
+            const res = await fetch("/api/settings/compression", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(patch),
+              signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
+            });
+            ok = res.ok;
+          } catch {
+            // A network error or the timeout counts as a failed save.
+          }
+          if (ok) {
+            savedRef.current = { ...savedRef.current, ...patch };
+          } else {
+            // The error stays up until the next edit, so a later queued save that succeeds
+            // cannot hide the field this one just rolled back.
+            setError(t("saveSettingsFailed"));
+          }
         }
-      } catch {
-        setSettings(settings);
-        setError(t("saveSettingsFailed"));
-      }
+        queuedRef.current.shift();
+        showQueued();
+      });
     },
-    [settings, t]
+    [t]
   );
 
   // ── Derived state ─────────────────────────────────────────────────────────────

@@ -578,4 +578,15 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     hasFree: true,
     freeNote: "Free API key with a 5 req/s and 200 req/m rate limit.",
   },
+  apmix: {
+    id: "apmix",
+    serviceKinds: ["llm"],
+    alias: "apmix",
+    name: "Apmix",
+    icon: "hub",
+    color: "#7C3AED",
+    textIcon: "AP",
+    website: "https://apmix.ai",
+    apiHint: "Get your API key from the Apmix dashboard (apmix.ai/dashboard).",
+  },
 };

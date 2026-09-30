@@ -9,7 +9,15 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+import type Database from "better-sqlite3";
+import {
+  betterSqlite3Available,
+  BETTER_SQLITE3_SKIP_REASON,
+} from "../_helpers/betterSqlite3Availability.ts";
+
+const canUseBetterSqlite3 = betterSqlite3Available();
+const skipReason = canUseBetterSqlite3 ? false : BETTER_SQLITE3_SKIP_REASON;
 
 const repoMigrations = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -32,7 +40,9 @@ test.after(() => {
 });
 
 function openDb(): Database.Database {
-  const db = new Database(":memory:");
+  const require = createRequire(import.meta.url);
+  const BetterSqlite3 = require("better-sqlite3") as typeof Database;
+  const db = new BetterSqlite3(":memory:");
   db.exec(
     `CREATE TABLE conversation_turn_nodes (
        id TEXT PRIMARY KEY,
@@ -58,7 +68,7 @@ function indexes(db: Database.Database): string[] {
   ).map((row) => row.name);
 }
 
-test("migration 186 creates idx_turn_nodes_last_seen and a second run is a no-op", () => {
+test("migration 186 creates idx_turn_nodes_last_seen and a second run is a no-op", { skip: skipReason }, () => {
   const db = openDb();
   try {
     assert.equal(runMigrations(db, { isNewDb: true }), 1);
@@ -72,7 +82,7 @@ test("migration 186 creates idx_turn_nodes_last_seen and a second run is a no-op
   }
 });
 
-test("the retention predicate uses the index (no full scan)", () => {
+test("the retention predicate uses the index (no full scan)", { skip: skipReason }, () => {
   const db = openDb();
   try {
     assert.equal(runMigrations(db, { isNewDb: true }), 1);

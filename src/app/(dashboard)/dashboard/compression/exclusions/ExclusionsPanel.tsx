@@ -25,22 +25,25 @@ export default function ExclusionsPanel() {
   const t = useTranslations("settings");
   const [raw, setRaw] = useState("");
   const [loading, setLoading] = useState(true);
+  // Set when the stored list could not be read: the HTTP status, or "" when the request or its
+  // body failed. The editor stays locked, so Save cannot replace the stored list with an empty one.
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"" | "saved" | "error">("");
 
   useEffect(() => {
     fetch("/api/settings/compression")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: { exclusions?: string[] } | null) => {
-        if (data && Array.isArray(data.exclusions)) {
-          setRaw(data.exclusions.join("\n"));
-        }
+      .then(async (r) => {
+        const data: { exclusions?: unknown } | null = r.ok ? await r.json() : null;
+        if (Array.isArray(data?.exclusions)) setRaw(data.exclusions.join("\n"));
+        else setLoadError(r.ok ? "" : String(r.status));
       })
-      .catch(() => {})
+      .catch(() => setLoadError(""))
       .finally(() => setLoading(false));
   }, []);
 
   const patterns = parsePatterns(raw);
+  const locked = loading || saving || loadError !== null;
 
   const save = async () => {
     setSaving(true);
@@ -52,7 +55,7 @@ export default function ExclusionsPanel() {
         body: JSON.stringify({ exclusions: patterns }),
       });
       setStatus(res.ok ? "saved" : "error");
-      if (res.ok) setTimeout(() => setStatus(""), 2000);
+      if (res.ok) setTimeout(() => setStatus((shown) => (shown === "saved" ? "" : shown)), 2000);
     } catch {
       setStatus("error");
     } finally {
@@ -67,19 +70,26 @@ export default function ExclusionsPanel() {
       data-testid="compression-exclusions-panel"
     >
       <div className="flex flex-col gap-3">
+        {loadError !== null && (
+          <p role="alert" className="flex items-center gap-1 text-xs font-medium text-red-500">
+            <span className="material-symbols-outlined text-[14px]">error</span>
+            {t("failedLoadWithStatus", { status: loadError || t("unknownError") })}
+          </p>
+        )}
         <Textarea
           rows={8}
           value={raw}
-          disabled={loading || saving}
+          disabled={locked}
           placeholder={t("compressionExclusionsPlaceholder")}
           onChange={(e) => setRaw(e.target.value)}
           data-testid="compression-exclusions-textarea"
         />
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs text-text-muted" data-testid="compression-exclusions-count">
-            {patterns.length === 0
-              ? t("compressionExclusionsEmpty")
-              : t("compressionExclusionsCount", { count: patterns.length })}
+            {loadError === null &&
+              (patterns.length === 0
+                ? t("compressionExclusionsEmpty")
+                : t("compressionExclusionsCount", { count: patterns.length }))}
           </span>
           <div className="flex items-center gap-2">
             {status === "saved" && (
@@ -87,11 +97,20 @@ export default function ExclusionsPanel() {
                 {t("compressionExclusionsSaved")}
               </span>
             )}
+            {status === "error" && (
+              <span
+                role="alert"
+                className="flex items-center gap-1 text-xs font-medium text-red-500"
+              >
+                <span className="material-symbols-outlined text-[14px]">error</span>
+                {t("saveFailed")}
+              </span>
+            )}
             <Button
               size="sm"
               variant="primary"
               loading={saving}
-              disabled={loading || saving}
+              disabled={locked}
               onClick={save}
               data-testid="compression-exclusions-save"
             >

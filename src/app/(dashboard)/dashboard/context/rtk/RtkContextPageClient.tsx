@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { SegmentedControl, Collapsible } from "@/shared/components";
 import RtkLearnDiscoverCard from "./RtkLearnDiscoverCard";
@@ -61,14 +61,64 @@ function formatNumber(value: number | undefined): string {
   return new Intl.NumberFormat().format(value ?? 0);
 }
 
+// Keeps the typed text locally and saves once the edit is committed (blur or Enter), so typing a
+// value sends one save and the schema only sees the finished value; it rejects the partial ones.
+function NumberSetting({
+  label,
+  value,
+  min,
+  max,
+  fallback,
+  onCommit,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max?: number;
+  fallback: number;
+  onCommit: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const commit = () => {
+    if (draft === null) return;
+    const next = Number(draft) || fallback;
+    setDraft(null);
+    if (next !== value) onCommit(next);
+  };
+  return (
+    <label className="flex flex-col gap-1 text-sm text-text-main">
+      {label}
+      <input
+        type="number"
+        min={min}
+        max={max}
+        value={draft ?? value}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") commit();
+        }}
+        className="rounded border border-border bg-bg px-2 py-1 text-sm"
+      />
+    </label>
+  );
+}
+
 export default function RtkContextPageClient() {
   const t = useTranslations("contextRtk");
+  const tSettings = useTranslations("settings");
   const [filters, setFilters] = useState<RtkFilter[]>([]);
   const [config, setConfig] = useState<RtkConfig | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [sample, setSample] = useState(SAMPLE_OUTPUT);
   const [preview, setPreview] = useState<PreviewResult | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
+  // Saves go out one at a time. The form shows the config the server last confirmed plus the
+  // edits still queued, so the newest edit stays on screen and a failed save rolls back only its
+  // own change.
+  const savedRef = useRef<RtkConfig | null>(null);
+  const queuedRef = useRef<Partial<RtkConfig>[]>([]);
+  const saveQueueRef = useRef(Promise.resolve());
   const [viewMode, setViewMode] = useState<"simple" | "advanced">("simple");
   const [masterEnabled, setMasterEnabled] = useState<boolean | null>(null);
 
@@ -89,7 +139,10 @@ export default function RtkContextPageClient() {
     void loadFilters();
     fetch("/api/context/rtk/config")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setConfig(data))
+      .then((data) => {
+        savedRef.current = data;
+        setConfig(data);
+      })
       .catch(() => {});
     fetch("/api/context/analytics?since=7d")
       .then((res) => (res.ok ? res.json() : null))
@@ -110,21 +163,31 @@ export default function RtkContextPageClient() {
     return filters.filter((filter) => !config.disabledFilters.includes(filter.id)).length;
   }, [config, filters]);
 
-  const saveConfig = async (patch: Partial<RtkConfig>) => {
-    if (!config) return;
-    const nextConfig = { ...config, ...patch };
-    setConfig(nextConfig);
-    setSaving(true);
-    try {
-      const res = await fetch("/api/context/rtk/config", {
+  const saveConfig = (patch: Partial<RtkConfig>) => {
+    if (!savedRef.current) return;
+    const showQueued = () =>
+      setConfig(
+        queuedRef.current.reduce<RtkConfig>(
+          (shown, queued) => ({ ...shown, ...queued }),
+          savedRef.current
+        )
+      );
+    queuedRef.current.push(patch);
+    showQueued();
+    setSaveFailed(false);
+    saveQueueRef.current = saveQueueRef.current.then(async () => {
+      const saved: RtkConfig | null = await fetch("/api/context/rtk/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),
-      });
-      if (res.ok) setConfig(await res.json());
-    } finally {
-      setSaving(false);
-    }
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null);
+      queuedRef.current.shift();
+      if (saved) savedRef.current = saved;
+      else setSaveFailed(true);
+      showQueued();
+    });
   };
 
   const toggleFilter = (filterId: string, enabled: boolean) => {
@@ -194,56 +257,45 @@ export default function RtkContextPageClient() {
         <section className="rounded-lg border border-border bg-surface p-4">
           {/* On/off + intensity now live in the panel (/dashboard/context/settings). This
               page edits RTK's detailed configuration only. */}
+          {saveFailed && (
+            <p
+              role="alert"
+              className="mb-3 flex items-center gap-1 text-xs font-medium text-red-500"
+            >
+              <span className="material-symbols-outlined text-[14px]">error</span>
+              {tSettings("saveFailed")}
+            </p>
+          )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <label className="flex flex-col gap-1 text-sm text-text-main">
-              {t("maxLines")}
-              <input
-                type="number"
-                min={0}
-                value={config.maxLinesPerResult}
-                onChange={(event) =>
-                  saveConfig({ maxLinesPerResult: Number(event.target.value) || 0 })
-                }
-                className="rounded border border-border bg-bg px-2 py-1 text-sm"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm text-text-main">
-              {t("maxChars")}
-              <input
-                type="number"
-                min={0}
-                value={config.maxCharsPerResult}
-                onChange={(event) =>
-                  saveConfig({ maxCharsPerResult: Number(event.target.value) || 0 })
-                }
-                className="rounded border border-border bg-bg px-2 py-1 text-sm"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm text-text-main">
-              {t("deduplicateThreshold")}
-              <input
-                type="number"
-                min={2}
-                max={100}
-                value={config.deduplicateThreshold}
-                onChange={(event) =>
-                  saveConfig({ deduplicateThreshold: Number(event.target.value) || 2 })
-                }
-                className="rounded border border-border bg-bg px-2 py-1 text-sm"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm text-text-main">
-              {t("rawOutputMaxBytes")}
-              <input
-                type="number"
-                min={1024}
-                value={config.rawOutputMaxBytes}
-                onChange={(event) =>
-                  saveConfig({ rawOutputMaxBytes: Number(event.target.value) || 1024 })
-                }
-                className="rounded border border-border bg-bg px-2 py-1 text-sm"
-              />
-            </label>
+            <NumberSetting
+              label={t("maxLines")}
+              value={config.maxLinesPerResult}
+              min={0}
+              fallback={0}
+              onCommit={(value) => saveConfig({ maxLinesPerResult: value })}
+            />
+            <NumberSetting
+              label={t("maxChars")}
+              value={config.maxCharsPerResult}
+              min={0}
+              fallback={0}
+              onCommit={(value) => saveConfig({ maxCharsPerResult: value })}
+            />
+            <NumberSetting
+              label={t("deduplicateThreshold")}
+              value={config.deduplicateThreshold}
+              min={2}
+              max={100}
+              fallback={2}
+              onCommit={(value) => saveConfig({ deduplicateThreshold: value })}
+            />
+            <NumberSetting
+              label={t("rawOutputMaxBytes")}
+              value={config.rawOutputMaxBytes}
+              min={1024}
+              fallback={1024}
+              onCommit={(value) => saveConfig({ rawOutputMaxBytes: value })}
+            />
           </div>
           <div className="mt-4 flex flex-wrap gap-4 text-sm text-text-main">
             {[
@@ -257,7 +309,6 @@ export default function RtkContextPageClient() {
                 <input
                   type="checkbox"
                   checked={Boolean(config[key as keyof RtkConfig])}
-                  disabled={saving}
                   onChange={(event) =>
                     saveConfig({ [key]: event.target.checked } as Partial<RtkConfig>)
                   }
@@ -271,7 +322,6 @@ export default function RtkContextPageClient() {
               {t("rawOutputRetention")}
               <select
                 value={config.rawOutputRetention}
-                disabled={saving}
                 onChange={(event) =>
                   saveConfig({
                     rawOutputRetention: event.target.value as RtkConfig["rawOutputRetention"],
@@ -353,7 +403,7 @@ export default function RtkContextPageClient() {
                         <input
                           type="checkbox"
                           checked={enabled}
-                          disabled={!config || saving}
+                          disabled={!config}
                           onChange={(event) => toggleFilter(filter.id, event.target.checked)}
                           className="mt-0.5"
                         />

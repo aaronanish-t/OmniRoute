@@ -34,6 +34,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`POST /api/v1/audio/transcriptions`](references/endpoints.md#post-apiv1audiotranscriptions)
 - [`POST /api/v1/moderations`](references/endpoints.md#post-apiv1moderations)
 - [`POST /api/v1/rerank`](references/endpoints.md#post-apiv1rerank)
+- [`POST /api/v1/systemone`](references/endpoints.md#post-apiv1systemone)
 - [`GET /api/v1`](references/endpoints.md#get-apiv1)
 - [`GET /api/v1/providers/{provider}/models`](references/endpoints.md#get-apiv1providersprovidermodels)
 - [`GET /api/v1/management/proxy-subscriptions`](references/endpoints.md#get-apiv1managementproxy-subscriptions)

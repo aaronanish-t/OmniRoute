@@ -57,6 +57,16 @@ committed_spend + active_reservations <= team_budget
 
 Retries, fallbacks, duplicate callbacks, streaming cancellation, and final-cost adjustment must be covered before exposing such a mode.
 
+## Dashboard
+
+Open **Costs → Teams** at `/dashboard/costs/teams`. Management administrators can create and edit a Team, configure its optional soft budget, assign or transfer API keys, and archive a Team. Transfers show the current and destination owners before confirmation; archived Teams remain available as read-only reports. Only key names and internal identifiers are needed, not key secrets.
+
+The selected Team is retained in the `team` URL parameter. Desktop uses a searchable Team list; narrow screens use a compact selector. Reports offer 7-day, 30-day, or all-time ranges over complete UTC dates. Their all-attempt catalog estimate is separate from the successful-use amount in the current rolling budget window.
+
+The budget card shows its reset time, known spend, limit, and remaining allowance. Unknown prices or legacy summaries without exact token shapes remain conservative as described above. `GET /api/teams/{id}` also exposes `budgetStatus.hasPartialRetainedUsage` when retained daily buckets overlap a window boundary. In that case the page highlights incomplete coverage and withholds a numerical remaining allowance; it does not change the existing soft-enforcement policy or invent time-level detail from daily summaries.
+
+For management selectors, `GET /api/teams?includeKeyOptions=true` adds an all-key metadata projection with `id`, `name`, `teamId`, and `teamName`. Assignment accepts optional `expectedTeamId` (including `null` for an unassigned key); a changed owner returns 409 before any history is changed. Existing clients that omit it retain their prior behavior.
+
 ## Management API
 
 All Team endpoints use OmniRoute management authentication.

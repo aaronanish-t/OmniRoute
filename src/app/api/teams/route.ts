@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
-import { createTeam, listTeams } from "@/lib/db/teams";
+import { createTeam, listTeams, listTeamKeyOptions } from "@/lib/db/teams";
 import { TeamCreateSchema } from "@/shared/validation/schemas";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance";
@@ -12,7 +12,11 @@ export async function GET(request: Request): Promise<Response> {
   if (authError) return authError;
   try {
     const includeArchived = new URL(request.url).searchParams.get("includeArchived") === "true";
-    return NextResponse.json({ teams: listTeams({ includeArchived }) });
+    const includeKeyOptions = new URL(request.url).searchParams.get("includeKeyOptions") === "true";
+    return NextResponse.json({
+      teams: listTeams({ includeArchived }),
+      ...(includeKeyOptions ? { keyOptions: listTeamKeyOptions() } : {}),
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to list teams";
     return NextResponse.json(buildErrorBody(500, message), { status: 500 });

@@ -279,7 +279,8 @@ export function archiveTeam(id: string, archivedAt?: string): Team | null {
 export function assignApiKeyBillingTeam(
   apiKeyId: string,
   teamId: string,
-  effectiveAt?: string
+  effectiveAt?: string,
+  expectedTeamId?: string | null
 ): ApiKeyBillingTeamHistory {
   const db = getDbInstance();
   let when = normalizeIso(effectiveAt);
@@ -298,6 +299,9 @@ export function assignApiKeyBillingTeam(
         "SELECT * FROM api_key_billing_team_history WHERE api_key_id = ? AND valid_to IS NULL"
       )
       .get(apiKeyId) as BillingRow | undefined;
+    if (expectedTeamId !== undefined && (current?.team_id ?? null) !== expectedTeamId) {
+      throw new Error(CONCURRENT_ASSIGNMENT_ERROR);
+    }
     if (current?.team_id === teamId) {
       result = rowToBillingHistory(current);
       return;
@@ -435,6 +439,43 @@ export function listTeamMembers(teamId: string): TeamMember[] {
        ORDER BY api_keys.name COLLATE NOCASE ASC`
     )
     .all(teamId) as TeamMember[];
+}
+
+export interface TeamKeyOption {
+  id: string;
+  name: string | null;
+  teamId: string | null;
+  teamName: string | null;
+}
+
+/** Management projection: never select credential columns. */
+export function listTeamKeyOptions(): TeamKeyOption[] {
+  return getDbInstance()
+    .prepare(
+      `
+    SELECT k.id, k.name, t.id AS teamId, t.name AS teamName
+    FROM api_keys k
+    LEFT JOIN api_key_billing_team_history b ON b.api_key_id = k.id AND b.valid_to IS NULL
+    LEFT JOIN teams t ON t.id = b.team_id AND t.status = 'active'
+    ORDER BY k.name COLLATE NOCASE, k.id
+  `
+    )
+    .all() as TeamKeyOption[];
+}
+
+/** Whether retained UTC-day buckets overlap a non-midnight budget boundary.
+ * The existing soft policy excludes those buckets; the dashboard must not imply
+ * that the displayed subtotal or remaining allowance is complete. */
+export function hasPartialRetainedTeamUsage(teamId: string, start: string, reset: string): boolean {
+  const startDate = start.slice(0, 10);
+  const endDate = reset.slice(0, 10);
+  const dates = new Set<string>();
+  if (start !== `${startDate}T00:00:00.000Z`) dates.add(startDate);
+  if (reset !== `${endDate}T00:00:00.000Z`) dates.add(endDate);
+  const statement = getDbInstance().prepare(
+    "SELECT 1 FROM daily_team_usage_summary WHERE team_id = ? AND date = ? AND successful_requests > 0 LIMIT 1"
+  );
+  return [...dates].some((date) => Boolean(statement.get(teamId, date)));
 }
 
 export function advanceTeamBudgetWindow(team: Team, nowMs = Date.now()): Team {

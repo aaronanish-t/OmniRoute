@@ -2,6 +2,7 @@ import { getDbInstance } from "@/lib/db/core";
 import {
   advanceTeamBudgetWindow,
   getActiveBillingTeamForApiKey,
+  getTeam,
   getTeamBudgetWindowStart,
 } from "@/lib/db/teams";
 import { calculateCostDetailed } from "./costCalculator";
@@ -165,7 +166,16 @@ export async function getTeamUsageLimitStatusForApiKey(
   apiKeyId: string,
   nowMs = Date.now()
 ): Promise<TeamUsageLimitStatus | null> {
-  let team = getActiveBillingTeamForApiKey(apiKeyId);
+  const team = getActiveBillingTeamForApiKey(apiKeyId);
+  return team ? getTeamUsageLimitStatusForTeam(team.id, nowMs) : null;
+}
+
+export async function getTeamUsageLimitStatusForTeam(
+  teamId: string,
+  nowMs = Date.now()
+): Promise<TeamUsageLimitStatus | null> {
+  let team = getTeam(teamId);
+  if (team?.status !== "active") return null;
   if (!team?.maxBudgetUsd || !team.budgetDuration || !team.budgetResetAt) return null;
   team = advanceTeamBudgetWindow(team, nowMs);
   const windowStartIso = getTeamBudgetWindowStart(team);

@@ -43,7 +43,12 @@ export async function PUT(request: Request, { params }: RouteParams): Promise<Re
     if (!parsed.success) {
       return NextResponse.json(buildErrorBody(400, parsed.error.message), { status: 400 });
     }
-    const assignment = assignApiKeyBillingTeam(parsed.data.apiKeyId, id);
+    const assignment = assignApiKeyBillingTeam(
+      parsed.data.apiKeyId,
+      id,
+      undefined,
+      parsed.data.expectedTeamId
+    );
     const ctx = getAuditRequestContext(request);
     logAuditEvent({
       action: "team.key.assign",

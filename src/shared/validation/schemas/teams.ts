@@ -58,4 +58,5 @@ export const TeamUpdateSchema = z
 
 export const TeamMemberAssignmentSchema = z.object({
   apiKeyId: z.string().uuid(),
+  expectedTeamId: z.string().uuid().nullable().optional(),
 });

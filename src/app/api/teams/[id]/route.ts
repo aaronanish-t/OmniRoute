@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
+import { getTeamUsageLimitStatusForTeam } from "@/lib/usage/teamUsageLimits";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
-import { archiveTeam, getTeam, listTeamMembers, updateTeam } from "@/lib/db/teams";
+import {
+  archiveTeam,
+  getTeam,
+  listTeamMembers,
+  updateTeam,
+  hasPartialRetainedTeamUsage,
+} from "@/lib/db/teams";
 import { TeamUpdateSchema } from "@/shared/validation/schemas";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance";
@@ -15,7 +22,18 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Re
     const { id } = await params;
     const team = getTeam(id);
     if (!team) return NextResponse.json(buildErrorBody(404, "Team not found"), { status: 404 });
-    return NextResponse.json({ team, members: listTeamMembers(id) });
+    const status = await getTeamUsageLimitStatusForTeam(id);
+    const budgetStatus = status
+      ? {
+          ...status,
+          hasPartialRetainedUsage: hasPartialRetainedTeamUsage(
+            id,
+            status.windowStartIso,
+            status.resetAtIso
+          ),
+        }
+      : null;
+    return NextResponse.json({ team, members: listTeamMembers(id), budgetStatus });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to get team";
     return NextResponse.json(buildErrorBody(500, message), { status: 500 });

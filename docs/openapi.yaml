@@ -13458,8 +13458,28 @@ paths:
         - in: query
           name: includeArchived
           schema: { type: boolean, default: false }
+        - in: query
+          name: includeKeyOptions
+          description: Include all existing API-key id/name choices and active billing team id/name; no credential fields.
+          schema: { type: boolean, default: false }
       responses:
-        "200": { description: Team list }
+        "200":
+          description: Team list; keyOptions is omitted unless requested.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teams: { type: array, items: { type: object } }
+                  keyOptions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        name: { type: string, nullable: true }
+                        teamId: { type: string, nullable: true }
+                        teamName: { type: string, nullable: true }
         "401": { description: Unauthorized }
     post:
       tags: [Teams]
@@ -13490,7 +13510,17 @@ paths:
       security:
         - ManagementSessionAuth: []
       responses:
-        "200": { description: Team details }
+        "200":
+          description: Team and members plus authoritative current successful-usage budgetStatus; null for unlimited or archived teams. Backend errors return 500.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  team: { type: object }
+                  members: { type: array, items: { type: object } }
+                  budgetStatus:
+                    $ref: "#/components/schemas/TeamBudgetStatus"
         "401": { description: Unauthorized }
         "404": { description: Team not found }
     patch:
@@ -13729,6 +13759,32 @@ components:
       required: [apiKeyId]
       properties:
         apiKeyId: { type: string, format: uuid }
+        expectedTeamId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optional expected current billing team, or null for unassigned. A mismatch returns 409 without changing history. Omission retains legacy behavior.
+
+    TeamBudgetStatus:
+      type: object
+      nullable: true
+      properties:
+        teamId: { type: string }
+        teamName: { type: string }
+        enforcementMode: { type: string, enum: [soft_committed_usage] }
+        maxBudgetUsd: { type: number }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d] }
+        windowStartIso: { type: string, format: date-time }
+        resetAtIso: { type: string, format: date-time }
+        estimatedListCostUsd: { type: number }
+        hasUnpricedUsage: { type: boolean }
+        hasPartialRetainedUsage:
+          type: boolean
+          description: Retained daily buckets overlap a rolling-window boundary. Displayed spend is incomplete; the existing soft-budget enforcement policy is unchanged.
+        exceeded: { type: boolean }
+        actualProviderCostUsd: { nullable: true }
+        subscriptionQuotaUsed: { nullable: true }
+        compressionSavingsUsd: { nullable: true }
 
     ExclusiveConnectionLeaseLifecycle:
       type: object

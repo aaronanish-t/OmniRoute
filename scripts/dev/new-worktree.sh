@@ -79,7 +79,9 @@ else
 fi
 
 # Verificação: o hook precisa estar REALMENTE ativo, não apenas presente.
-HOOKS_PATH=$(git -C "$DIR" config --get core.hooksPath || echo ".git/hooks")
+# Sem core.hooksPath o git usa <git-common-dir>/hooks; numa worktree `.git` é só um ponteiro.
+HOOKS_PATH=$(git -C "$DIR" config --get core.hooksPath \
+  || echo "$(git -C "$DIR" rev-parse --path-format=absolute --git-common-dir)/hooks")
 # Como o git ao rodar o hook: caminho absoluto vale como está; relativo parte da worktree.
 case "$HOOKS_PATH" in
   /*) HOOKS_DIR="$HOOKS_PATH" ;;

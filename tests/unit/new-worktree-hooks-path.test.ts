@@ -46,9 +46,9 @@ function writeExecutableHook(dir: string) {
  * Builds the layout the script copies from, then runs it: a main checkout whose `origin`
  * carries BASE with a tracked `.husky/`, plus husky's untracked shim dir `.husky/_` holding
  * an executable pre-commit. `hooksPath` receives the main checkout and returns the
- * core.hooksPath value to configure.
+ * core.hooksPath value to configure, or undefined to leave it unset.
  */
-function runWithHooksPath(hooksPath: (main: string) => string) {
+function runWithHooksPath(hooksPath: (main: string) => string | undefined) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), "new-worktree-")));
   sandboxes.push(root);
   const main = join(root, "main");
@@ -61,7 +61,8 @@ function runWithHooksPath(hooksPath: (main: string) => string) {
   git(main, "remote", "add", "origin", join(root, "origin.git"));
   git(main, "push", "--quiet", "origin", `HEAD:refs/heads/${BASE}`);
   writeExecutableHook(join(main, ".husky", "_"));
-  git(main, "config", "core.hooksPath", hooksPath(main));
+  const value = hooksPath(main);
+  if (value !== undefined) git(main, "config", "core.hooksPath", value);
   return spawnSync("sh", [SCRIPT_PATH, "fix/probe", BASE], {
     cwd: main,
     env: ENV,
@@ -96,4 +97,15 @@ test("rejects a relative core.hooksPath that exists only in the main checkout", 
   });
   assert.equal(r.status, 1);
   assert.match(r.stderr, /pre-commit NÃO está ativo/);
+});
+
+test("checks the common git dir's hooks/ when core.hooksPath is unset", () => {
+  // Git then runs hooks from <git-common-dir>/hooks; inside a worktree `.git` is only a
+  // pointer file, so `<worktree>/.git/hooks` never exists.
+  const r = runWithHooksPath((main) => {
+    writeExecutableHook(join(main, ".git", "hooks"));
+    return undefined;
+  });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /hooks: ativos/);
 });

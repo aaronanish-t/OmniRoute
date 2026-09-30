@@ -612,4 +612,40 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     apiHint:
       "Iranian-hosted OpenAI-compatible gateway at https://wqai.morvism.ir/v1. Keys are issued by the service operator (no public self-service signup documented); tokens expire and must be renewed.",
   },
+  // Ashna (https://www.ashna.ai) — OpenAI-compatible multi-model gateway with a
+  // native Ashna-X1 model plus a ~88-id foundation catalog (OpenAI, Anthropic,
+  // Google, DeepSeek, GLM, Kimi, Mistral, NVIDIA, xAI). One host also speaks
+  // Anthropic Messages and OpenAI Responses. Keys are created at Account → API.
+  ashna: {
+    id: "ashna",
+    serviceKinds: ["llm"],
+    alias: "ashna",
+    name: "Ashna",
+    icon: "hub",
+    color: "#6D28D9",
+    textIcon: "AS",
+    passthroughModels: true,
+    website: "https://www.ashna.ai",
+    apiHint:
+      "Create an API key at https://app.ashna.ai (Account → API), then use https://api.ashna.ai/v1/api as the OpenAI-compatible base URL.",
+  },
+  // Atria (https://atria-asi.ai) — official API of the Atria Dawn agentic family
+  // from the Shanghai AI Laboratory. Atria Dawn Preview: 744B MoE on the GLM-5.2
+  // foundation, 256K context, always-on reasoning, text-only. Per-account RPM cap
+  // shared across all keys; an announced 100M free-token grant.
+  atria: {
+    id: "atria",
+    serviceKinds: ["llm"],
+    alias: "atria",
+    name: "Atria",
+    icon: "wb_twilight",
+    color: "#F97316",
+    textIcon: "AT",
+    website: "https://atria-asi.ai",
+    hasFree: true,
+    freeNote:
+      "Announced as 100 million free tokens per account; the reset period is not published, and a per-account RPM cap applies (x-rpm-limit headers). Free access is a preview benefit and not promised indefinitely.",
+    apiHint:
+      "Create an atr_ API key at https://api.atria-asi.ai/console/keys, then use https://api.atria-asi.ai/v1 as the OpenAI-compatible base URL. Model ids are case-sensitive.",
+  },
 };

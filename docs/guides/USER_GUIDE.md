@@ -909,6 +909,65 @@ Chain: production-fallback
 
 ---
 
+### Common Provider Combinations & Routing Patterns
+
+Here are tested, real-world examples of combining multiple providers and routing between them in OmniRoute:
+
+#### 1. Coding Agent Combo: High-End Reasoning with Cost/Speed Fallback
+
+Ideal for coding agents (OpenCode, Claude Code, Cursor, Cline). Routes initially to frontier reasoning models, falling back to fast coding models on quota exhaustion or errors.
+
+- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
+- **Models**:
+  1. `claude/claude-3-7-sonnet-20250219` (Primary coding agent)
+  2. `openai/gpt-4o` (Secondary high-capacity fallback)
+  3. `deepseek/deepseek-chat` (High-efficiency, cost-effective fallback)
+
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-3-7-sonnet-20250219" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-chat" }
+    ]
+  }'
+```
+
+#### 2. Free-Tier Auto Failover Combo
+
+Chains multiple free-tier and keyless providers to maximize uptime without API costs.
+
+- **Strategy**: `Least Used` or `Round Robin` (distributes load across quotas)
+- **Models**:
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/llama3.1-70b`
+
+```bash
+# Example via CLI
+omniroute combos create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/llama3.1-70b" \
+  --strategy round-robin
+```
+
+#### 3. Multimodal / Vision & Text Pipeline
+
+Pairing specialized vision models with high-speed text generation for workflows involving image understanding and code generation.
+
+- **Pattern**: Route image-bearing requests to vision-capable models, with text queries falling back to high-throughput providers.
+- **Models**:
+  1. `gemini/gemini-2.5-pro` (Strong image/multimodal comprehension)
+  2. `openai/gpt-4o` (Balanced vision and tool usage)
+  3. `qwen/qwen-2.5-coder-32b` (Text/code generation)
+
+---
+
 ### Resilience & Circuit Breakers
 
 Configure via **Dashboard → Settings → Resilience**.

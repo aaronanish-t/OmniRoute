@@ -68,20 +68,18 @@ function NumberSetting({
   value,
   min,
   max,
-  fallback,
   onCommit,
 }: {
   label: string;
   value: number;
   min: number;
   max?: number;
-  fallback: number;
   onCommit: (value: number) => void;
 }) {
   const [draft, setDraft] = useState<string | null>(null);
   const commit = () => {
     if (draft === null) return;
-    const next = Number(draft) || fallback;
+    const next = Number(draft) || min;
     setDraft(null);
     if (next !== value) onCommit(next);
   };
@@ -267,35 +265,23 @@ export default function RtkContextPageClient() {
             </p>
           )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <NumberSetting
-              label={t("maxLines")}
-              value={config.maxLinesPerResult}
-              min={0}
-              fallback={0}
-              onCommit={(value) => saveConfig({ maxLinesPerResult: value })}
-            />
-            <NumberSetting
-              label={t("maxChars")}
-              value={config.maxCharsPerResult}
-              min={0}
-              fallback={0}
-              onCommit={(value) => saveConfig({ maxCharsPerResult: value })}
-            />
-            <NumberSetting
-              label={t("deduplicateThreshold")}
-              value={config.deduplicateThreshold}
-              min={2}
-              max={100}
-              fallback={2}
-              onCommit={(value) => saveConfig({ deduplicateThreshold: value })}
-            />
-            <NumberSetting
-              label={t("rawOutputMaxBytes")}
-              value={config.rawOutputMaxBytes}
-              min={1024}
-              fallback={1024}
-              onCommit={(value) => saveConfig({ rawOutputMaxBytes: value })}
-            />
+            {(
+              [
+                ["maxLinesPerResult", t("maxLines"), 0, undefined],
+                ["maxCharsPerResult", t("maxChars"), 0, undefined],
+                ["deduplicateThreshold", t("deduplicateThreshold"), 2, 100],
+                ["rawOutputMaxBytes", t("rawOutputMaxBytes"), 1024, undefined],
+              ] as const
+            ).map(([key, label, min, max]) => (
+              <NumberSetting
+                key={key}
+                label={label}
+                value={config[key]}
+                min={min}
+                max={max}
+                onCommit={(value) => saveConfig({ [key]: value } as Partial<RtkConfig>)}
+              />
+            ))}
           </div>
           <div className="mt-4 flex flex-wrap gap-4 text-sm text-text-main">
             {[

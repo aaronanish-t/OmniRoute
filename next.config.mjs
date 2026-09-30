@@ -242,6 +242,8 @@ const nextConfig = {
     webpackMemoryOptimizations: true,
     // Run webpack in a separate Node worker, lowering main-process memory.
     webpackBuildWorker: true,
+    // Cap page-data/export workers on memory-constrained machines (default: ncpu-1).
+    cpus: process.env.NEXT_BUILD_CPUS ? Number(process.env.NEXT_BUILD_CPUS) : undefined,
     // Next.js proxy (middleware) has a default 10MB body clone limit. File
     // uploads (OpenAI-compatible /v1/files) routinely exceed this. Match the
     // 512 MB server-side cap; tune via env if needed.
@@ -479,7 +481,10 @@ const nextConfig = {
       // does the importing.
       const replacements = [
         [/^@\/mitm\/cert\/install$/, join(projectRoot, "src/mitm/cert/install.stub.ts")],
-        [/^@\/lib\/zed-oauth\/keychain-reader$/, join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts")],
+        [
+          /^@\/lib\/zed-oauth\/keychain-reader$/,
+          join(projectRoot, "src/lib/zed-oauth/keychain-reader.stub.ts"),
+        ],
         [/^@\/lib\/cloudSync$/, join(projectRoot, "src/lib/cloudSync.stub.ts")],
         [
           /^@\/lib\/services\/installers\/ninerouter$/,

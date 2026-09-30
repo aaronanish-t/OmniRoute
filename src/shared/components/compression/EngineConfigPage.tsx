@@ -203,13 +203,12 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       setSaveError(null);
       return;
     }
-    const edited = configState;
     // Lite sends its two fields as they are; its server write merges with the stored row.
     let detail: Record<string, unknown> | null = null;
     if (engineId === "lite") {
-      const raw = edited.maxToolLength;
-      const compressToolResults = edited.compressToolResults !== false;
-      if (!Object.prototype.hasOwnProperty.call(edited, "maxToolLength")) {
+      const raw = configState.maxToolLength;
+      const compressToolResults = configState.compressToolResults !== false;
+      if (!Object.prototype.hasOwnProperty.call(configState, "maxToolLength")) {
         detail = { compressToolResults };
       } else if (typeof raw === "number" && Number.isFinite(raw)) {
         const n = Math.floor(raw);
@@ -236,7 +235,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
           setSaveError(t("saveFailed"));
           return;
         }
-        detail = buildEngineDetailUpdate(savedConfig, edited, current[subKey]);
+        detail = buildEngineDetailUpdate(savedConfig, configState, current[subKey]);
       }
       const res = await fetch("/api/settings/compression", {
         method: "PUT",
@@ -244,7 +243,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
         body: JSON.stringify({ [subKey]: detail }),
       });
       if (res.ok) {
-        setSavedConfig(edited);
+        setSavedConfig(configState);
       } else {
         setSaveError(t("saveFailed"));
       }

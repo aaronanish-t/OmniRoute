@@ -18,10 +18,7 @@ export function seedEngineForm(
   stored: unknown
 ): FormValues {
   const current = asRecord(stored);
-  const defaults: FormValues = {};
-  for (const field of schema) {
-    defaults[field.key] = field.defaultValue;
-  }
+  const defaults: FormValues = Object.fromEntries(schema.map((f) => [f.key, f.defaultValue]));
   // Do not seed lite.maxToolLength from the schema default. Persisting 2000
   // would freeze the cap in settings and hide OMNIROUTE_LITE_MAX_TOOL_LENGTH.
   // The form still shows 2000 via field.defaultValue until the operator edits it.

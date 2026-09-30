@@ -1,12 +1,9 @@
+import { getCodexProPlanLabel } from "@/shared/utils/codexPlan";
+
 /**
- * Codex subscription plan label (e.g. "Plus", "Pro", "Team"), persisted on the
- * connection's providerSpecificData.chatgptPlanType at OAuth import time (see
- * src/lib/oauth/services/codexImport.ts). Returns "" when the connection is
- * not Codex or the value is missing/blank — callers gate rendering on that.
- *
- * Kept in its own module (not providerPageHelpers.ts) because that file is
- * frozen at its file-size ratchet cap (config/quality/file-size-baseline.json)
- * and this helper is fully self-contained.
+ * Codex subscription label from OAuth workspace metadata or imported auth data.
+ * Unknown plans retain their raw spelling. Missing plans and non-Codex connections
+ * return "" so callers can omit the badge.
  */
 export function getCodexPlanLabel(isCodex: boolean, providerSpecificData: unknown): string {
   if (!isCodex) return "";
@@ -14,6 +11,9 @@ export function getCodexPlanLabel(isCodex: boolean, providerSpecificData: unknow
     providerSpecificData && typeof providerSpecificData === "object"
       ? (providerSpecificData as Record<string, unknown>)
       : {};
-  const raw = record.chatgptPlanType;
-  return typeof raw === "string" ? raw.trim() : "";
+  for (const value of [record.workspacePlanType, record.chatgptPlanType]) {
+    const raw = typeof value === "string" ? value.trim() : "";
+    if (raw) return getCodexProPlanLabel(raw) ?? raw;
+  }
+  return "";
 }

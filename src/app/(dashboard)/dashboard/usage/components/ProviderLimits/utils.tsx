@@ -1,3 +1,4 @@
+import { getCodexProPlanLabel } from "@/shared/utils/codexPlan";
 export { parseQuotaData } from "./quotaParsing";
 import { hasFixedQuotaOrder, hasCanonicalWindowOrder, sortQuotasByWindow } from "./quotaParsing";
 
@@ -204,7 +205,7 @@ export function resolvePlanValue(plan, providerSpecificData, providerId) {
     psd.chatgptPlanType,
   ];
 
-  if (livePlan && normalizePlanTier(livePlan).key !== "free") {
+  if (livePlan && normalizePlanTier(livePlan, providerId).key !== "free") {
     return livePlan;
   }
 
@@ -309,9 +310,17 @@ function matchFreePlanTier(raw: string, upper: string) {
  * Normalize provider-specific plan labels into a shared tier taxonomy.
  * Supported tiers: enterprise, business, team, ultra, pro, plus, lite, free, unknown.
  */
-export function normalizePlanTier(plan) {
+export function normalizePlanTier(plan: unknown, providerId?: unknown) {
   const raw = typeof plan === "string" ? plan.trim() : "";
   if (!raw) return unknownPlanTier(null);
+
+  // Exact Codex plan values only: other providers' Pro and business variants
+  // retain the shared taxonomy below.
+  const codexLabel =
+    typeof providerId === "string" && providerId.trim().toLowerCase() === "codex"
+      ? getCodexProPlanLabel(raw)
+      : null;
+  if (codexLabel) return { key: "pro", label: codexLabel, variant: "success", rank: 3, raw };
 
   const upper = raw.toUpperCase();
 

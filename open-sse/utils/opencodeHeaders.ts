@@ -256,11 +256,12 @@ function applyCliDefaults(
  * x-opencode-session header", UA "Bun fetch"; hard errors announced from
  * 2026-09-06).
  *
- * Background traffic has no conversation, so the session id is a stable,
- * deterministic fingerprint seeded by the calling connection/workspace — the
- * same hash family the chat path derives via generateSessionId() (#10571) —
- * so each connection's background traffic groups under one identity across
- * daemon restarts instead of looking like a new anonymous client per call.
+ * Background traffic has no conversation, so the caller passes the raw
+ * connection/workspace seed and applyCliDefaults() canonicalizes it into the
+ * deterministic `ses_…` shape — the same id contract the chat path enforces
+ * (#10571 follow-up) — so each connection's background traffic groups under
+ * one identity across daemon restarts instead of looking like a new anonymous
+ * client per call.
  * The User-Agent is synthesized to the OpenCode CLI identity for the same
  * reason applyCliDefaults() does it on the chat path (#5997): generic runtime
  * UAs from non-CLI callers get flagged upstream.
@@ -272,15 +273,16 @@ export function buildOpencodeBackgroundHeaders(options?: {
   userAgent?: string;
 }): Record<string, string> {
   const headers: Record<string, string> = {};
+  // Seed the session BEFORE applyCliDefaults so its canonicalizer derives the
+  // deterministic `ses_…` id from the raw seed (sha256 over the workspace /
+  // connection) — the header then carries the same canonical shape as the chat
+  // path while the identity stays stable across daemon restarts.
+  const seed = options?.seed?.trim();
+  if (seed && seed.length > 0) headers["x-opencode-session"] = seed;
   applyCliDefaults(headers, {
     userAgent: options?.userAgent?.trim() || process.env.OPENCODE_USER_AGENT?.trim() || "opencode",
     client: process.env.OPENCODE_CLIENT?.trim() || "desktop",
     project: process.env.OPENCODE_PROJECT?.trim() || "global",
   });
-  if (options?.seed && options.seed.trim().length > 0) {
-    headers["x-opencode-session"] =
-      generateSessionId({ model: "background" }, { connectionId: options.seed.trim() }) ||
-      headers["x-opencode-session"];
-  }
   return headers;
 }

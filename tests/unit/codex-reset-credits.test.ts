@@ -516,3 +516,33 @@ test("#12951 consumeCodexResetCredit incomplete usage refresh keeps nested child
     parked.sparkUntil
   );
 });
+
+test("#15174 consumeCodexResetCredit clears codexScopeRateLimitedUntil on successful redemption", async () => {
+  const connection = (await createCodexConnection()) as { id: string };
+  await providersDb.updateProviderConnection(connection.id, {
+    providerSpecificData: {
+      codexScopeRateLimitedUntil: {
+        codex: "2026-10-07T00:00:00Z",
+        spark: "2026-10-07T00:00:00Z",
+      },
+      codexScopeRateLimitSource: {
+        codex: "quota_reset",
+        spark: "quota_reset",
+      },
+    },
+  });
+
+  mockResetThenUsage({ consumeBody: { code: "reset" } });
+
+  const result = await resetCredits.consumeCodexResetCredit(connection.id, "redeem-clear-scope");
+  assert.equal(result.outcome, "reset");
+
+  const after = (await readConnection(connection.id)) as {
+    providerSpecificData?: Record<string, unknown>;
+  };
+  const afterPsd = after.providerSpecificData || {};
+  const scopeRateLimitedUntil =
+    (afterPsd.codexScopeRateLimitedUntil as Record<string, unknown>) || {};
+  assert.equal(scopeRateLimitedUntil.codex, undefined);
+  assert.equal(scopeRateLimitedUntil.spark, "2026-10-07T00:00:00Z");
+});

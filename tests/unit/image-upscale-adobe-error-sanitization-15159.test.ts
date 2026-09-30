@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { handleAdobeFireflyImageUpscale } from "../../open-sse/handlers/imageUpscale/adobeFirefly.ts";
-
 // Regression guard for audit #15159 / Hard Rule #12 — E-15 (adobe-firefly upscale).
 //
 // `open-sse/handlers/imageUpscale/adobeFirefly.ts:132-140` passed `AdobeFireflyError.message`
@@ -26,8 +24,8 @@ test("E-15: adobe-firefly upscale never surfaces raw upstream error text", async
   const raw = "adobe upscale failed at /srv/app/client.ts:44:15 api_key=sk-1234567890abcdef";
   
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (url: string | URL, opts?: RequestInit) => {
-    const urlStr = String(url);
+  globalThis.fetch = async (_url: string | URL, _opts?: RequestInit) => {
+    const urlStr = String(_url);
     if (urlStr.includes("/auth/token")) {
       return new Response(JSON.stringify({ access_token: "mock-token" }), {
         status: 200,

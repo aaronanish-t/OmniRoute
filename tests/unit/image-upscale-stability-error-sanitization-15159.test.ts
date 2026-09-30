@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { handleStabilityImageUpscale } from "../../open-sse/handlers/imageUpscale/stability.ts";
-
 // Regression guard for audit #15159 / Hard Rule #12 — E-15 (stability upscale).
 //
 // `open-sse/handlers/imageUpscale/stability.ts` has two live leak sites:
@@ -28,7 +26,7 @@ test("E-15: stability upscale never surfaces raw upstream response.text() in 502
   
   // Mock fetch to return a non-ok response with hostile body
   const original = globalThis.fetch;
-  globalThis.fetch = async (url: string | URL, opts?: RequestInit) => {
+  globalThis.fetch = async (_url: string | URL, _opts?: RequestInit) => {
     return new Response(raw, {
       status: 502,
       headers: { "Content-Type": "application/json" },
@@ -55,9 +53,8 @@ test("E-15: stability upscale never surfaces raw upstream error from pollStabili
   
   const original = globalThis.fetch;
   let callCount = 0;
-  globalThis.fetch = async (url: string | URL, opts?: RequestInit) => {
+  globalThis.fetch = async (_url: string | URL, _opts?: RequestInit) => {
     callCount++;
-    const urlStr = String(url);
     if (callCount === 1) {
       // First call - POST /upscale/conservative
       return new Response(JSON.stringify({ id: "job-123" }), {

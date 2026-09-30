@@ -117,3 +117,14 @@ test("migration 175 creates provider GROUP BY indexes used by search stats", () 
   );
   assert.ok(!plan.includes("SCAN TABLE"), `must not table-scan, got: ${plan}`);
 });
+
+test("grouped success totals default to zero in SQL", () => {
+  assert.ok(
+    stats.PROVIDER_METRICS_SQL.includes("COALESCE(SUM"),
+    "PROVIDER_METRICS_SQL must default grouped success totals to zero"
+  );
+  assert.ok(
+    stats.getProviderUsageSince.toString().includes("COALESCE(SUM"),
+    "getProviderUsageSince must default grouped success totals to zero"
+  );
+});

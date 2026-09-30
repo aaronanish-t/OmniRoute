@@ -1,0 +1,1 @@
+- **fix(db):** default grouped provider success totals to zero so empty groups never surface null aggregates ([#15223](https://github.com/diegosouzapw/OmniRoute/pull/15223)) — thanks @maxmad64bis

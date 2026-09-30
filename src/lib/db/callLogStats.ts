@@ -86,7 +86,7 @@ export interface SearchProviderCountRow {
 export const PROVIDER_METRICS_SQL = `SELECT
       c.provider,
       COUNT(*) as totalRequests,
-      SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) as totalSuccesses,
+      COALESCE(SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END), 0) as totalSuccesses,
       ROUND(AVG(duration)) as avgLatencyMs,
       COUNT(duration) as latencySamples,
       MAX(timestamp) as lastRequestAt,
@@ -149,7 +149,7 @@ export function getProviderUsageSince(since: string): ProviderUsageRow[] {
       `SELECT
           c.provider,
           COUNT(*) as requests,
-          SUM(CASE WHEN c.status >= 200 AND c.status < 400 THEN 1 ELSE 0 END) as successes,
+          COALESCE(SUM(CASE WHEN c.status >= 200 AND c.status < 400 THEN 1 ELSE 0 END), 0) as successes,
           ROUND(AVG(c.duration)) as avgLatencyMs,
           COUNT(c.duration) as latencySamples,
           MAX(c.timestamp) as lastRequestAt

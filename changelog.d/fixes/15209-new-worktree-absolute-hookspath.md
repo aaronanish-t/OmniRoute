@@ -1,0 +1,1 @@
+- **fix(ci):** `scripts/dev/new-worktree.sh` tests an absolute `core.hooksPath` as-is and resolves a relative one against the new worktree, so a checkout whose hooks path is absolute no longer fails the closing pre-commit check while its hooks are active ([#15209](https://github.com/diegosouzapw/OmniRoute/pull/15209)) — thanks @woodsonl

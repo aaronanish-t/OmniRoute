@@ -23,7 +23,24 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+import type Database from "better-sqlite3";
+import {
+  betterSqlite3Available,
+  BETTER_SQLITE3_SKIP_REASON,
+} from "../_helpers/betterSqlite3Availability.ts";
+
+const canUseBetterSqlite3 = betterSqlite3Available();
+const skipReason = canUseBetterSqlite3 ? false : BETTER_SQLITE3_SKIP_REASON;
+
+function openBetterSqlite3(
+  filename: string,
+  options?: Database.Options
+): Database.Database {
+  const require = createRequire(import.meta.url);
+  const BetterSqlite3 = require("better-sqlite3") as typeof Database;
+  return new BetterSqlite3(filename, options);
+}
 
 const { getOmpCredentials, saveOmpCredentials, deleteOmpCredentials } =
   await import("../../../src/lib/db/omp.ts");
@@ -41,7 +58,7 @@ function getOmpDbPath() {
 function seedOmpDb() {
   const dbPath = getOmpDbPath();
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-  const db = new Database(dbPath);
+  const db = openBetterSqlite3(dbPath);
   db.exec(`
     CREATE TABLE IF NOT EXISTS auth_credentials (
       provider TEXT NOT NULL,
@@ -67,7 +84,7 @@ afterEach(() => {
   fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-describe("db/omp.ts — getOmpCredentials", () => {
+describe("db/omp.ts — getOmpCredentials", { skip: skipReason }, () => {
   it("returns hasOmniRoute:false without throwing when the omp DB file does not exist", () => {
     assert.ok(!fs.existsSync(getOmpDbPath()), "precondition: no DB file yet");
     const creds = getOmpCredentials(PROVIDER_ID);
@@ -84,7 +101,7 @@ describe("db/omp.ts — getOmpCredentials", () => {
     const dbPath = getOmpDbPath();
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     // Valid sqlite file, but no auth_credentials table at all.
-    const db = new Database(dbPath);
+    const db = openBetterSqlite3(dbPath);
     db.exec("CREATE TABLE unrelated (id INTEGER)");
     db.close();
 
@@ -93,7 +110,7 @@ describe("db/omp.ts — getOmpCredentials", () => {
   });
 });
 
-describe("db/omp.ts — saveOmpCredentials + getOmpCredentials round trip", () => {
+describe("db/omp.ts — saveOmpCredentials + getOmpCredentials round trip", { skip: skipReason }, () => {
   it("persists apiKey/baseUrl so a subsequent read sees them", () => {
     seedOmpDb();
 
@@ -112,7 +129,7 @@ describe("db/omp.ts — saveOmpCredentials + getOmpCredentials round trip", () =
     saveOmpCredentials(PROVIDER_ID, "sk-new-key", "http://localhost:20129/v1");
 
     const dbPath = getOmpDbPath();
-    const db = new Database(dbPath, { readonly: true });
+    const db = openBetterSqlite3(dbPath, { readonly: true });
     const rows = db
       .prepare("SELECT data FROM auth_credentials WHERE provider = ?")
       .all(PROVIDER_ID) as { data: string }[];
@@ -125,7 +142,7 @@ describe("db/omp.ts — saveOmpCredentials + getOmpCredentials round trip", () =
   });
 });
 
-describe("db/omp.ts — deleteOmpCredentials", () => {
+describe("db/omp.ts — deleteOmpCredentials", { skip: skipReason }, () => {
   it("removes the row so a subsequent get reports hasOmniRoute:false", () => {
     seedOmpDb();
     saveOmpCredentials(PROVIDER_ID, "sk-test-omp-key", "http://localhost:20128/v1");

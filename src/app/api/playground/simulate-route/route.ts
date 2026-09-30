@@ -10,7 +10,7 @@ import { z } from "zod";
 import { getCombos } from "@/lib/db/combos";
 import { getProviderConnections } from "@/lib/db/providers";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
-import { sanitizeErrorMessage } from "@/shared/utils/errorSanitization";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
 interface SimulateRequest {
   /** Combo ID to simulate */

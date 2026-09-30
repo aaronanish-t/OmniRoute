@@ -471,7 +471,49 @@ function findExistingCookieConnection(
   return null;
 }
 
-export async function createProviderConnection(data: JsonRecord) {
+/**
+ * #15070 — a typed name that matches an existing connection holding a
+ * different credential. Raised only when the caller opts in with
+ * `rejectNameConflict`; routes map it to HTTP 409.
+ */
+export class ProviderConnectionNameConflictError extends Error {
+  readonly status = 409;
+  readonly code = "PROVIDER_CONNECTION_NAME_CONFLICT";
+
+  constructor(name: string) {
+    super(
+      `A connection named "${name}" already exists for this provider with a different credential`
+    );
+    this.name = "ProviderConnectionNameConflictError";
+  }
+}
+
+/**
+ * #15070 — true when `row` and the incoming data both carry a comparable
+ * credential and no comparable pair agrees. A pair (decrypted apiKey, web-session
+ * credential key) only counts when BOTH sides carry it, so rows stored before a
+ * field existed keep updating in place.
+ */
+function holdsDifferentCredential(
+  row: JsonRecord,
+  incomingApiKey: unknown,
+  incomingProviderSpecificData: unknown
+): boolean {
+  const stored = decryptConnectionFields(toRecord(rowToCamel(row)));
+  const pairs: Array<[string | null, string | null]> = [
+    [toStringOrNull(incomingApiKey)?.trim() || null, toStringOrNull(stored.apiKey)?.trim() || null],
+    [
+      webSessionCredentialKey(incomingProviderSpecificData),
+      webSessionCredentialKey(parseProviderSpecificData(row.provider_specific_data)),
+    ],
+  ];
+  const comparable = pairs.filter(([incoming, existing]) => incoming && existing);
+  return comparable.length > 0 && comparable.every(([incoming, existing]) => incoming !== existing);
+}
+
+export async function createProviderConnection(input: JsonRecord) {
+  // #15070 — opt-in guard for web-session routes; stripped so it never reaches the row.
+  const { rejectNameConflict, ...data } = input;
   await assertApiKeyIsNotManagementPassword(data.apiKey);
   const db = getDbInstance() as unknown as DbLike;
   const now = new Date().toISOString();
@@ -612,6 +654,20 @@ export async function createProviderConnection(data: JsonRecord) {
     // and no stable long-lived identity to safely dedup against — matching
     // on email alone here would risk silently overwriting an existing full
     // oauth connection for the same account.
+  }
+
+  // #15070 — the name-based upsert above would replace another account's
+  // credential. A row found by credential value holds the same credential, so
+  // only a name match can trip this; it throws before any write.
+  if (
+    rejectNameConflict === true &&
+    existing &&
+    (data.authType === "apikey" || data.authType === "cookie") &&
+    data.name &&
+    existing.name === data.name &&
+    holdsDifferentCredential(existing, data.apiKey, normalizedProviderSpecificData)
+  ) {
+    throw new ProviderConnectionNameConflictError(String(data.name));
   }
 
   if (existing) {

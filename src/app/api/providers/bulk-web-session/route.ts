@@ -87,6 +87,8 @@ export async function POST(request: Request) {
         providerSpecificData,
         isActive: true,
         testStatus: "unknown",
+        // #15070 — name match with a different credential is a conflict, not a silent overwrite.
+        rejectNameConflict: true,
       });
 
       const safe: Record<string, unknown> = { ...newConnection };

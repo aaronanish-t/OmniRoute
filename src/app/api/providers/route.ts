@@ -67,6 +67,8 @@ import {
 } from "@omniroute/open-sse/utils/chatgptWebExecutorAdapter.ts";
 import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
+import { requiresWebSessionCredential } from "@/shared/providers/webSessionCredentials";
+import { ProviderConnectionNameConflictError } from "@/lib/db/providers";
 
 function projectCodexAccountPoolWithRoutingQuota(
   connection: Parameters<typeof projectCodexAccountPool>[0],
@@ -331,6 +333,9 @@ export async function POST(request: Request) {
       // operator fixes the credential and re-tests it manually.
       isActive: false,
       testStatus: testStatus || "unknown",
+      // #15070 — for web-cookie providers, a name match with a different
+      // credential is a conflict (HTTP 409), not a silent overwrite.
+      rejectNameConflict: requiresWebSessionCredential(provider),
     });
 
     // Auto-trigger model discovery only for an explicit autoFetchModels opt-in.
@@ -452,6 +457,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ connection: result }, { status: 201 });
   } catch (error) {
+    if (error instanceof ProviderConnectionNameConflictError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
     console.log("Error creating provider:", error);
     return NextResponse.json({ error: "Failed to create provider" }, { status: 500 });
   }

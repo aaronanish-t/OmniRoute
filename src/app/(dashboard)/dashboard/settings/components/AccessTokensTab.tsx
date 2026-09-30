@@ -138,8 +138,13 @@ export default function AccessTokensTab() {
     }
   };
 
-  const fmt = (iso: string | null) =>
-    iso ? format.dateTime(new Date(iso), { dateStyle: "medium", timeStyle: "short" }) : "—";
+  const fmt = (iso: string | null) => {
+    if (!iso) return "—";
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime())
+      ? "—"
+      : format.dateTime(date, { dateStyle: "medium", timeStyle: "short" });
+  };
 
   return (
     <div className="space-y-6">

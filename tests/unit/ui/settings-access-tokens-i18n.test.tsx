@@ -79,6 +79,16 @@ describe("access-token settings with real Chinese catalogs", () => {
     expect(within(table).queryByText("read")).toBeNull();
   });
 
+  it("keeps malformed dates from breaking the translated token table", async () => {
+    fetchMock.mockResolvedValueOnce(
+      reply({ tokens: [{ ...token, lastUsedAt: "not-a-date", expiresAt: "invalid" }] })
+    );
+    mount();
+    const table = await screen.findByRole("table");
+    expect(within(table).getByText("Laptop")).toBeTruthy();
+    expect(within(table).getAllByText("—")).toHaveLength(2);
+  });
+
   it("creates, copies and dismisses a token without translating its secret or scope payload", async () => {
     mount();
     await screen.findByRole("table");

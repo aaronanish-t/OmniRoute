@@ -5,11 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
-import Input from "@/shared/components/Input";
+import SearchableSelect from "@/shared/components/SearchableSelect";
 import Select from "@/shared/components/Select";
 import { CardSkeleton } from "@/shared/components/Loading";
 import { ConfirmModal } from "@/shared/components/Modal";
-import { matchesSearch } from "@/shared/utils/turkishText";
+
 import { useTeamCosts, useTeamList } from "./teams/useTeamCosts";
 import { readJson, errorKey, type Team, type Period, type TeamKeyOption } from "./teams/helpers";
 import TeamBudgetCard from "./teams/TeamBudgetCard";
@@ -39,7 +39,7 @@ export default function TeamCostsPage() {
   const params = useSearchParams();
   const requestedId = params.get("team") ?? "";
   const [period, setPeriod] = useState<Period>("30d");
-  const [query, setQuery] = useState("");
+
   const [filter, setFilter] = useState("active");
   const [pending, setPending] = useState(false);
   const [form, setForm] = useState<{ team: Team | null } | null>(null);
@@ -54,8 +54,7 @@ export default function TeamCostsPage() {
       team.id !== missingId &&
       (filter === "all" ||
         team.status === filter ||
-        (requestedId === team.id && team.status === "archived" && filter === "active" && !query)) &&
-      matchesSearch(team.name, query)
+        (requestedId === team.id && team.status === "archived" && filter === "active"))
   );
   const selectedId = visible.some((team) => team.id === requestedId)
     ? requestedId
@@ -210,30 +209,18 @@ export default function TeamCostsPage() {
           <Card padding="sm">
             <fieldset
               disabled={blocked}
-              className="grid grid-cols-2 items-end gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_12rem]"
+              className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]"
             >
-              <Select
+              <SearchableSelect
+                key={filter}
                 label={t("selectTeam")}
-                aria-label={t("selectTeam")}
-                className="col-span-2 min-w-0 lg:col-span-1"
+                searchLabel={t("searchTeams")}
+                emptyLabel={t("noTeams")}
+                options={visible.map((team) => ({ value: team.id, label: team.name }))}
                 value={selectedId}
-                onChange={(e) => select(e.target.value)}
-              >
-                {!visible.length && <option value="">{t("noTeams")}</option>}
-                {visible.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </Select>
-              <div className="min-w-0">
-                <Input
-                  label={t("searchTeams")}
-                  icon="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-              </div>
+                disabled={blocked}
+                onChange={(id) => select(id)}
+              />
               <Select
                 label={t("statusFilter")}
                 aria-label={t("statusFilter")}

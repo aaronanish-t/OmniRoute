@@ -210,7 +210,8 @@ describe("real team costs components", () => {
     expect(
       selector.compareDocumentPosition(content) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
-    await change(en.teamCosts.selectTeam, "b");
+    await act(async () => control(en.teamCosts.selectTeam).click());
+    await click("Beta");
     expect(nav.query).toBe("?team=b");
     expect(container.querySelector("main h2")?.textContent).toBe("Beta");
   });
@@ -409,14 +410,85 @@ describe("real team costs components", () => {
     await click("刷新");
     expect(container.textContent).toContain(zh.teamCosts.forbidden);
   });
-  it("normalizes invalid URL IDs and removes filtered invisible panels", async () => {
+  it("searches inside the dropdown without changing the current report until selection", async () => {
     nav.query = "?team=missing";
     await render();
     expect(nav.query).toBe("?team=a");
+    expect(container.querySelector('[aria-label="Search teams"]')).toBeNull();
+    await act(async () => control(en.teamCosts.selectTeam).click());
+    const input = control("Search teams");
+    expect(input.getAttribute("role")).toBe("combobox");
+    expect(document.activeElement).toBe(input);
     await change("Search teams", "Beta");
-    expect(container.querySelector("main h2")?.textContent).toBe("Beta");
+    expect(container.querySelectorAll('[role="option"]')).toHaveLength(1);
+    expect(container.querySelector("main h2")?.textContent).toBe("Alpha");
+    expect(nav.query).toBe("?team=a");
     await change("Search teams", "no result");
-    expect(container.querySelector("main h2")).toBeNull();
-    expect(nav.query).toBe("");
+    expect(container.querySelectorAll('[role="option"]')).toHaveLength(0);
+    expect(container.querySelector("main h2")?.textContent).toBe("Alpha");
+    expect(nav.query).toBe("?team=a");
+    await change("Search teams", "Beta");
+    await act(async () =>
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+    );
+    await flush();
+    expect(nav.query).toBe("?team=b");
+    expect(container.querySelector("main h2")?.textContent).toBe("Beta");
+    expect(container.querySelector('[role="listbox"]')).toBeNull();
+    expect(document.activeElement).toBe(control(en.teamCosts.selectTeam));
+  });
+  it("supports keyboard dismissal, resets search, and disables team selection while editing", async () => {
+    await render();
+    const trigger = control(en.teamCosts.selectTeam);
+    await act(async () =>
+      trigger.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }))
+    );
+    await change("Search teams", "Beta");
+    await act(async () =>
+      control("Search teams").dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+      )
+    );
+    expect(container.querySelector('[role="listbox"]')).toBeNull();
+    expect(nav.query).toBe("?team=a");
+    expect(document.activeElement).toBe(trigger);
+    await act(async () => trigger.click());
+    expect(control("Search teams").value).toBe("");
+    expect(container.querySelectorAll('[role="option"]')).toHaveLength(2);
+    await act(async () => document.body.dispatchEvent(new Event("pointerdown", { bubbles: true })));
+    expect(container.querySelector('[role="listbox"]')).toBeNull();
+    await click("Edit team");
+    expect(trigger.matches(":disabled")).toBe(true);
+    await act(async () => trigger.click());
+    expect(container.querySelector('[role="listbox"]')).toBeNull();
+  });
+  it("navigates options by keyboard, ignores IME confirmation and preserves selection on Tab", async () => {
+    await render();
+    await act(async () => control(en.teamCosts.selectTeam).click());
+    const input = control("Search teams");
+    await act(async () =>
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }))
+    );
+    const activeId = input.getAttribute("aria-activedescendant")!;
+    expect(document.getElementById(activeId)?.textContent).toBe("Beta");
+    await act(async () =>
+      input.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", isComposing: true, bubbles: true })
+      )
+    );
+    expect(nav.query).toBe("?team=a");
+    await act(async () => control(en.teamCosts.statusFilter).focus());
+    expect(container.querySelector('[role="listbox"]')).toBeNull();
+    expect(nav.query).toBe("?team=a");
+  });
+  it("keeps status filtering independent from dropdown search", async () => {
+    teams[1].status = "archived";
+    details.b.team.status = "archived";
+    await render();
+    await change(en.teamCosts.statusFilter, "archived");
+    expect(nav.query).toBe("?team=b");
+    expect(container.querySelector("main h2")?.textContent).toBe("Beta");
+    await change(en.teamCosts.statusFilter, "active");
+    expect(nav.query).toBe("?team=a");
   });
 });

@@ -200,7 +200,8 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // Reconciled 2026-09-23: #14468 (suno retirement) landed on the tip first, which already
   // measured 413 there; with gemini-business also retired on top of it the live set is 412
   // (413 -> 412). Measured, not hand-derived: RESERVED_PROVIDER_PREFIXES.size on this head.
-  assert.equal(RESERVED_PREFIX_COUNT, 412);
+  // #14821 registers Apmix (id == alias): +1 REGISTRY member (412 -> 413).
+  assert.equal(RESERVED_PREFIX_COUNT, 413);
 });
 
 test("isReservedProviderPrefix rejects non-string input", () => {

@@ -250,7 +250,6 @@ test("team shared budget uses committed estimated list cost and is explicit abou
     model: "gpt-team-budget",
     apiKeyId: key.id,
     apiKeyName: key.name,
-    billingTeamId: team.id,
     tokens: { input: 1_000_000, output: 0 },
     timestamp: now.toISOString(),
   });
@@ -500,7 +499,6 @@ test("JSON export/import preserves teams, temporal billing bindings, and usage s
     model: "gpt-json",
     apiKeyId: key.id,
     apiKeyName: key.name,
-    billingTeamId: team.id,
     serviceTier: "priority",
     tokens: { input: 3, output: 2 },
     timestamp: "2026-08-11T00:00:00.000Z",
@@ -595,7 +593,6 @@ test("archiving a team closes active assignments but preserves historical usage"
     provider: "openai",
     model: "gpt-test",
     apiKeyId: key.id,
-    billingTeamId: team.id,
     tokens: { input: 1 },
     timestamp: "2026-08-14T14:30:00.000Z",
   });

@@ -207,3 +207,65 @@ test("backdated assignments cannot overlap a closed billing interval", async () 
   assert.equal(teams.resolveBillingTeamIdForApiKeyAt(a.id, "2026-01-01T23:59:59.999Z"), team.id);
   assert.equal(teams.resolveBillingTeamIdForApiKeyAt(a.id, assignment.validFrom), beta.id);
 });
+
+test("terminal writer ignores a supplied Team override and null escape", async () => {
+  const { team, a } = await setup();
+  const other = teams.createTeam({ name: "Other Team" });
+  for (const [index, billingTeamId] of [other.id, null].entries()) {
+    const entry = {
+      provider: "openai",
+      model: "review-shapes",
+      apiKeyId: a.id,
+      billingTeamId,
+      tokens: { input: 100 + index },
+      timestamp: `2026-01-02T12:00:0${index}.000Z`,
+    };
+    await usage.saveRequestUsage(entry);
+  }
+  const rows = core
+    .getDbInstance()
+    .prepare("SELECT billing_team_id FROM usage_history ORDER BY timestamp")
+    .all();
+  assert.deepEqual(rows, [{ billing_team_id: team.id }, { billing_team_id: team.id }]);
+});
+
+test("actual current pricing is homogeneous for identical token shapes", async () => {
+  const { computeCostFromPricing } = await import("../../src/lib/usage/costCalculator.ts");
+  const price = { input: 2, output: 3, cached: 0.2, cache_creation: 2.5, reasoning: 4 };
+  for (const shape of [
+    { input: 0, output: 10, cacheRead: 100, cacheCreation: 0, reasoning: 2 },
+    { input: 100, output: 10, cacheRead: 30, cacheCreation: 40, reasoning: 2 },
+    { input: 100, output: 10, cacheRead: 130, cacheCreation: 40, reasoning: 2 },
+  ]) {
+    for (const count of [1, 2, 7]) {
+      const multiplied = Object.fromEntries(Object.entries(shape).map(([k, v]) => [k, v * count]));
+      const options = { provider: "codex", model: "gpt-6-sol", serviceTier: "priority" };
+      const separate = computeCostFromPricing(price, shape, options) * count;
+      assert.ok(Math.abs(computeCostFromPricing(price, multiplied, options) - separate) < 1e-12);
+    }
+  }
+});
+
+test("identical real requests at distinct timestamps agree before and after retention", async () => {
+  const { team, a } = await setup();
+  for (const hour of [10, 11]) {
+    await usage.saveRequestUsage({
+      provider: "openai",
+      model: "review-shapes",
+      apiKeyId: a.id,
+      tokens: { input: 100, cacheRead: 30 },
+      timestamp: `2026-01-02T${hour}:00:00.000Z`,
+    });
+  }
+  const raw = await analytics.getTeamUsageReport(team.id);
+  const budget = await limits.getTeamUsageLimitStatusForApiKey(a.id, at);
+  assert.equal(raw.summary.requests, 2);
+  assert.equal(raw.summary.estimatedListCostUsd, 0.00014);
+  await retain();
+  const retained = await analytics.getTeamUsageReport(team.id);
+  assert.equal(retained.summary.estimatedListCostUsd, raw.summary.estimatedListCostUsd);
+  assert.equal(
+    (await limits.getTeamUsageLimitStatusForApiKey(a.id, at))?.estimatedListCostUsd,
+    budget?.estimatedListCostUsd
+  );
+});

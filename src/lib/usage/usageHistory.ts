@@ -740,8 +740,6 @@ export interface UsageEntry {
   connectionId?: string | null;
   apiKeyId?: string | null;
   apiKeyName?: string | null;
-  /** Billing owner resolved at the effective `timestamp` when this row is persisted. */
-  billingTeamId?: string | null;
   serviceTier?: string | null;
   /** @deprecated legacy snake_case fallback, read only if `serviceTier` is unset. */
   service_tier?: string | null;
@@ -763,10 +761,9 @@ export async function saveRequestUsage(entry: UsageEntry) {
     const db = getDbInstance();
     const timestamp = entry.timestamp || new Date().toISOString();
     const serviceTier = normalizeServiceTier(entry.serviceTier ?? entry.service_tier);
-    const billingTeamId =
-      entry.billingTeamId !== undefined
-        ? entry.billingTeamId || null
-        : resolveBillingTeamIdForApiKeyAt(entry.apiKeyId, timestamp);
+    // Ordinary terminal writes always resolve ownership from effective history.
+    // Historical snapshot restoration belongs to the authenticated JSON importer.
+    const billingTeamId = resolveBillingTeamIdForApiKeyAt(entry.apiKeyId, timestamp);
 
     const tokensInput = getLoggedInputTokens(entry.tokens);
     const tokensOutput = getLoggedOutputTokens(entry.tokens);

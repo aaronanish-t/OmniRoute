@@ -70,6 +70,10 @@ All Team endpoints use OmniRoute management authentication.
 
 `DELETE /api/teams/{id}` archives rather than physically deleting the Team. It closes active key assignments while preserving usage attribution.
 
+## Backup and emergency recovery
+
+SQLite backups and JSON exports with history include retained Team summaries. The database emergency critical-state salvage is best-effort configuration recovery, not a complete usage backup: it can preserve Teams and bindings without restoring retained usage. After that recovery path, restore a full backup before relying on historical reports or budget totals.
+
 ## Deliberate phase-1 limits
 
 Phase 1 does not add Organization, User, Role, Membership, delegated Team Admin, SSO, or SCIM objects. The existing global Management Admin manages Team configuration. It also does not reuse Quota Share as a strict USD ledger: Quota Share remains suited to provider capacity and fairness, while Team financial enforcement remains explicitly soft until reservation accounting exists.

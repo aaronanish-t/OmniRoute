@@ -76,6 +76,11 @@ test("Codex OAuth workspace metadata takes precedence, with a valid import fallb
     getCodexPlanLabel(true, { workspacePlanType: "promax", chatgptPlanType: "pro" }),
     "Pro Max"
   );
+  assert.equal(
+    getCodexPlanLabel(true, { workspacePlanType: " UNKNOWN ", chatgptPlanType: "promax" }),
+    "Pro Max"
+  );
+  assert.equal(getCodexPlanLabel(true, { workspacePlanType: "unknown" }), "unknown");
   for (const invalid of [undefined, null, "", "  ", 42, false, {}, []]) {
     assert.equal(
       getCodexPlanLabel(true, { workspacePlanType: invalid, chatgptPlanType: "prolite" }),

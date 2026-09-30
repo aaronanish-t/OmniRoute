@@ -11,9 +11,9 @@ export function getCodexPlanLabel(isCodex: boolean, providerSpecificData: unknow
     providerSpecificData && typeof providerSpecificData === "object"
       ? (providerSpecificData as Record<string, unknown>)
       : {};
-  for (const value of [record.workspacePlanType, record.chatgptPlanType]) {
-    const raw = typeof value === "string" ? value.trim() : "";
-    if (raw) return getCodexProPlanLabel(raw) ?? raw;
-  }
-  return "";
+  const candidates = [record.workspacePlanType, record.chatgptPlanType]
+    .map((value) => (typeof value === "string" ? value.trim() : ""))
+    .filter(Boolean);
+  const raw = candidates.find((value) => value.toLowerCase() !== "unknown") ?? candidates[0];
+  return raw ? (getCodexProPlanLabel(raw) ?? raw) : "";
 }

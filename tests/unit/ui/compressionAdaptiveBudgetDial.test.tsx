@@ -295,7 +295,7 @@ describe("CompressionPanel adaptive context-budget dial", () => {
     expect(budget.absoluteBudget).toBe(DEFAULT_CONTEXT_BUDGET.absoluteBudget);
   });
 
-  it("does not let a failed earlier PUT roll back a later save queued behind it", async () => {
+  it("does not let an older failed PUT roll back a newer successful save", async () => {
     const puts: CapturedPut[] = [];
     const pending: Array<{
       resolve: (r: Response) => void;
@@ -355,7 +355,7 @@ describe("CompressionPanel adaptive context-budget dial", () => {
     ) as HTMLSelectElement | null;
     expect(policy).toBeFalsy();
 
-    // The policy save waits behind the mode save, which 500s.
+    // Two PUTs from the same render: older one will 500 after the newer one 200s.
     await act(async () => {
       mode.value = "floor";
       mode.dispatchEvent(new Event("change", { bubbles: true }));
@@ -370,20 +370,14 @@ describe("CompressionPanel adaptive context-budget dial", () => {
       policyAfter.value = "percentage";
       policyAfter.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    expect(pending, "the policy PUT waits for the mode PUT to settle").toHaveLength(1);
+    expect(pending).toHaveLength(2);
 
     await act(async () => {
-      pending[0].resolve(json({ ...initial, ...pending[0].body }, 500));
+      pending[1].resolve(json({ ...initial, ...pending[1].body }, 200));
     });
     await flush();
-    expect(pending).toHaveLength(2);
-    // The failed mode save must not roll back the policy save still queued behind it.
-    const queuedPolicy = container.querySelector(
-      `[data-testid="context-budget-policy-select"]`
-    ) as HTMLSelectElement;
-    expect(queuedPolicy.value).toBe("percentage");
     await act(async () => {
-      pending[1].resolve(json({ ...initial, ...pending[1].body }, 200));
+      pending[0].resolve(json({ ...initial, ...pending[0].body }, 500));
     });
     await flush();
 
@@ -397,7 +391,7 @@ describe("CompressionPanel adaptive context-budget dial", () => {
     expect(afterPolicy.value).toBe("percentage");
   });
 
-  it("keeps an earlier successful save when the later queued PUT fails", async () => {
+  it("keeps an older successful PUT as lastConfirmed when a newer overlapping PUT fails", async () => {
     const puts: CapturedPut[] = [];
     const pending: Array<{
       resolve: (r: Response) => void;
@@ -465,14 +459,13 @@ describe("CompressionPanel adaptive context-budget dial", () => {
       policyAfter.value = "percentage";
       policyAfter.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    expect(pending, "the policy PUT waits for the mode PUT to settle").toHaveLength(1);
+    expect(pending).toHaveLength(2);
 
-    // The mode save succeeds, then the policy save queued behind it 500s.
+    // Older save A acks first (stale gen). Newer save B then 500s.
     await act(async () => {
       pending[0].resolve(json({ ...initial, ...pending[0].body }, 200));
     });
     await flush();
-    expect(pending).toHaveLength(2);
     await act(async () => {
       pending[1].resolve(json({ ...initial, ...pending[1].body }, 500));
     });
@@ -487,12 +480,12 @@ describe("CompressionPanel adaptive context-budget dial", () => {
     expect(afterMode.value).toBe("floor");
     expect(
       afterPolicy,
-      "policy select stays: the saved config holds the mode save's floor, not the GET's off"
+      "policy select stays — lastConfirmed is A's floor, not GET off"
     ).toBeTruthy();
     expect(afterPolicy.value).toBe("reserve-output");
   });
 
-  it("rolls two failed queued PUTs back to the last GET snapshot, not the first optimistic state", async () => {
+  it("rolls both overlapping failed PUTs back to the last GET snapshot, not the first optimistic state", async () => {
     const puts: CapturedPut[] = [];
     const pending: Array<{
       resolve: (r: Response) => void;
@@ -560,15 +553,14 @@ describe("CompressionPanel adaptive context-budget dial", () => {
       policyAfter.value = "percentage";
       policyAfter.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    expect(pending, "the policy PUT waits for the mode PUT to settle").toHaveLength(1);
+    expect(pending).toHaveLength(2);
 
     await act(async () => {
-      pending[0].resolve(json({ ...initial, ...pending[0].body }, 500));
+      pending[1].resolve(json({ ...initial, ...pending[1].body }, 500));
     });
     await flush();
-    expect(pending).toHaveLength(2);
     await act(async () => {
-      pending[1].resolve(json({ ...initial, ...pending[1].body }, 500));
+      pending[0].resolve(json({ ...initial, ...pending[0].body }, 500));
     });
     await flush();
 

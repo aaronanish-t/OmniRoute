@@ -226,8 +226,29 @@ describe("CompressionPanel", () => {
     return container;
   }
 
+  // Settings PUTs wait until the test answers them, so several saves stay in flight together
+  // and can answer in any order.
+  function holdSettingsPuts() {
+    setupFetchMock();
+    const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
+    const puts: Array<Record<string, unknown>> = [];
+    const answers: Array<(status: number) => void> = [];
+    vi.mocked(globalThis.fetch).mockImplementation((input, init) => {
+      if (init?.method !== "PUT") return respond(input, init);
+      puts.push(JSON.parse(String(init.body)));
+      return new Promise<Response>((resolve) => {
+        answers.push((status) => resolve(new Response("{}", { status })));
+      });
+    });
+    const answer = async (index: number, status: number) => {
+      await act(async () => answers[index](status));
+      await flush();
+    };
+    return { puts, answer };
+  }
+
   // The ultra-engine select is disabled while a save is in flight, but the auto-trigger input
-  // never is, so a change there queues behind the ultra-engine save still waiting on the server.
+  // never is, so a change there goes out while the ultra-engine save still waits on the server.
   async function changeUltraEngineThenAutoTrigger(failPutKey: string) {
     const { puts } = setupFetchMock(failPutKey);
     const container = await renderPanel();
@@ -264,36 +285,27 @@ describe("CompressionPanel", () => {
     expect(container.textContent).toContain("saveFailed");
   });
 
-  it("skips a queued save that a later queued save replaces", async () => {
-    const { puts } = setupFetchMock();
-    const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
-    let release!: () => void;
-    const held = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    // Hold the first settings PUT so the next keystrokes queue behind it.
-    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
-      const res = await respond(input, init);
-      if (init?.method === "PUT" && puts.length === 1) await held;
-      return res;
-    });
+  it("keeps the newest value when an older save of the same field answers last", async () => {
+    const { puts, answer } = holdSettingsPuts();
     const container = await renderPanel();
 
     const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
-    for (const value of ["1", "10", "100"]) {
+    for (const value of ["1", "100"]) {
       await act(async () => {
         fireEvent.change(autoTrigger, { target: { value } });
       });
     }
-    await act(async () => release());
-    for (let i = 0; i < 5; i++) await flush();
+    // Each save goes out while the earlier one is still in flight.
+    expect(puts).toEqual([{ autoTriggerTokens: 1 }, { autoTriggerTokens: 100 }]);
 
-    // The held PUT plus one for the final value; the queued "10" never goes out.
-    expect(puts.map((p) => p.body)).toEqual([{ autoTriggerTokens: 1 }, { autoTriggerTokens: 100 }]);
+    await answer(1, 200);
+    expect(autoTrigger.value, "the confirmed newer value shows over the older save").toBe("100");
+    await answer(0, 200);
     expect(autoTrigger.value).toBe("100");
+    expect(container.textContent).toContain("saved");
   });
 
-  it("fails a PUT that outlives the save timeout and sends the save queued behind it", async () => {
+  it("fails a PUT that outlives the save timeout", async () => {
     const { puts } = setupFetchMock();
     const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
     const timeouts: AbortController[] = [];
@@ -305,7 +317,7 @@ describe("CompressionPanel", () => {
     // The first settings PUT never answers on its own; only its timeout signal ends it.
     let stalled: AbortSignal | null | undefined;
     vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
-      const res = await respond(input, init);
+      const res = respond(input, init);
       if (init?.method === "PUT" && puts.length === 1) {
         stalled = init.signal;
         await new Promise((_, reject) =>
@@ -324,63 +336,20 @@ describe("CompressionPanel", () => {
       fireEvent.change(ultraEngine, { target: { value: "slm" } });
       fireEvent.change(autoTrigger, { target: { value: "500" } });
     });
-    await flush();
-    expect(puts, "the auto-trigger save waits behind the stalled PUT").toHaveLength(1);
+    for (let i = 0; i < 5; i++) await flush();
+    expect(
+      puts.map((p) => p.body),
+      "the auto-trigger save does not wait"
+    ).toEqual([{ ultraEngine: "slm" }, { autoTriggerTokens: 500 }]);
+    expect(ultraEngine.disabled, "controls stay disabled while a PUT is in flight").toBe(true);
 
-    // Fire the stalled PUT's own timeout; the settings load used an earlier signal.
     await act(async () => timeouts.find((c) => c.signal === stalled)?.abort());
     for (let i = 0; i < 5; i++) await flush();
 
     expect(timeoutSpy).toHaveBeenCalledWith(15_000);
-    expect(puts.map((p) => p.body)).toEqual([{ ultraEngine: "slm" }, { autoTriggerTokens: 500 }]);
+    expect(ultraEngine.disabled).toBe(false);
     expect(ultraEngine.value).toBe("heuristic");
     expect(autoTrigger.value).toBe("500");
     expect(container.textContent).toContain("saveFailed");
-  });
-
-  it("loads a remounted panel only after the saves an unmounted panel still had queued", async () => {
-    // A server that keeps what each PUT stores, so a GET shows the saves that have landed.
-    const stored: Record<string, unknown> = { enabled: true, autoTriggerTokens: 0, engines: {} };
-    const puts: Array<Record<string, unknown>> = [];
-    let release!: () => void;
-    const held = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    const json = (body: unknown) =>
-      new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json" } });
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
-      if (!input.toString().endsWith("/api/settings/compression")) return json({});
-      if (init?.method !== "PUT") return json(stored);
-      const body = JSON.parse(String(init.body)) as Record<string, unknown>;
-      puts.push(body);
-      Object.assign(stored, body);
-      // The server has stored the first save, but its response is slow.
-      if (puts.length === 1) await held;
-      return json(stored);
-    });
-
-    const first = await renderPanel();
-    const firstInput = first.querySelector(`input[type="number"]`) as HTMLInputElement;
-    for (const value of ["1", "100"]) {
-      await act(async () => {
-        fireEvent.change(firstInput, { target: { value } });
-      });
-    }
-    // Navigate away while "100" is still queued, then open the panel again.
-    await act(async () => {
-      roots.pop()?.unmount();
-    });
-    const second = await renderPanel();
-    expect(
-      second.querySelector(`input[type="number"]`),
-      "the new panel waits for the queued saves before it loads"
-    ).toBeNull();
-
-    await act(async () => release());
-    for (let i = 0; i < 5; i++) await flush();
-
-    expect(puts).toEqual([{ autoTriggerTokens: 1 }, { autoTriggerTokens: 100 }]);
-    const secondInput = second.querySelector(`input[type="number"]`) as HTMLInputElement;
-    expect(secondInput.value).toBe("100");
   });
 });

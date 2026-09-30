@@ -1,0 +1,272 @@
+import { createHash } from "crypto";
+import { getDbInstance } from "@/lib/db/core";
+
+const NAMESPACE = "muse_session_ownership";
+const digest = (value: string) => createHash("sha256").update(value).digest("hex");
+type Owner = { connectionId: string; generation?: string; account?: string };
+type Connection = { id: string };
+
+export class MuseOwnershipError extends Error {
+  constructor(
+    message: string,
+    readonly status = 409
+  ) {
+    super(message);
+  }
+}
+
+function load(key: string): string | undefined {
+  return (
+    getDbInstance()
+      .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+      .get(NAMESPACE, key) as { value: string } | undefined
+  )?.value;
+}
+function save(key: string, value: string): void {
+  getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(NAMESPACE, key, value);
+}
+
+/** Never derive cryptographic ownership from prompt text or a caller-selected connection. */
+export function museSessionScope(
+  body: Record<string, unknown>,
+  headers: unknown,
+  apiKeyId: string | null
+): string {
+  const metadata = body.metadata as Record<string, unknown> | undefined;
+  const get =
+    typeof (headers as { get?: unknown })?.get === "function"
+      ? (name: string) => (headers as { get: (name: string) => string | null }).get(name)
+      : (name: string) => {
+          const record = headers as Record<string, unknown> | null | undefined;
+          const value = record?.[name] ?? record?.[name.toLowerCase()];
+          return typeof value === "string" ? value : null;
+        };
+  const session =
+    get("x-omniroute-session-id") ||
+    get("x-omniroute-session") ||
+    get("x-session-id") ||
+    get("x-codex-session-id") ||
+    body.prompt_cache_key ||
+    body.session_id ||
+    body.conversation_id ||
+    metadata?.session_id;
+  if (typeof session !== "string" || !session.trim()) {
+    throw new MuseOwnershipError(
+      "Muse requires an explicit session ID or prompt_cache_key for safe account rotation.",
+      400
+    );
+  }
+  return digest(JSON.stringify([apiKeyId, session]));
+}
+
+function opaqueHashes(value: unknown, hashes = new Set<string>()): Set<string> {
+  if (Array.isArray(value)) {
+    for (const item of value) opaqueHashes(item, hashes);
+  } else if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(value)) {
+      if (key === "encrypted_content" && typeof item === "string" && item) hashes.add(digest(item));
+      else opaqueHashes(item, hashes);
+    }
+  }
+  return hashes;
+}
+
+function continuationIds(value: unknown, ids = new Set<string>()): Set<string> {
+  if (Array.isArray(value)) {
+    for (const item of value) continuationIds(item, ids);
+  } else if (value && typeof value === "object") {
+    const item = value as Record<string, unknown>;
+    if (
+      ["function_call", "function_call_output"].includes(String(item.type)) &&
+      typeof item.call_id === "string"
+    )
+      ids.add(`call:${item.call_id}`);
+    if (item.type === "item_reference" && typeof item.id === "string") ids.add(`item:${item.id}`);
+    for (const nested of Object.values(item))
+      if (nested && typeof nested === "object") continuationIds(nested, ids);
+  }
+  return ids;
+}
+
+/** Atomic session assignment; pins never expire or move when an account is removed. */
+export function claimMuseSession(
+  scope: string,
+  body: Record<string, unknown>,
+  candidates: Connection[],
+  forcedId?: string | null
+): Owner {
+  let owner!: Owner;
+  getDbInstance().immediate(() => {
+    const stored = load(`session:${scope}`);
+    if (stored) {
+      owner = JSON.parse(stored);
+      if (!candidates.some((candidate) => candidate.id === owner.connectionId)) {
+        throw new MuseOwnershipError(
+          "Muse session owner is unavailable; cross-account continuation is forbidden.",
+          503
+        );
+      }
+      if (forcedId && forcedId !== owner.connectionId) {
+        throw new MuseOwnershipError("Requested Muse account differs from the session owner.");
+      }
+    } else {
+      if (
+        opaqueHashes(body).size ||
+        body.previous_response_id ||
+        body._omniroutePreviousResponseResumed ||
+        (Array.isArray(body.input) &&
+          body.input.some(
+            (item) =>
+              item &&
+              typeof item === "object" &&
+              ["reasoning", "function_call", "function_call_output", "item_reference"].includes(
+                String(item.type)
+              )
+          ))
+      ) {
+        throw new MuseOwnershipError(
+          "Muse continuation has no recorded owner; start an independent session without imported opaque history."
+        );
+      }
+      const ordered = [...candidates].sort((a, b) => a.id.localeCompare(b.id));
+      if (!ordered.length)
+        throw new MuseOwnershipError("No native OAuth Muse account is available.", 503);
+      const cursor = Number(load("cursor") || "0");
+      const connection = forcedId
+        ? ordered.find((candidate) => candidate.id === forcedId)
+        : ordered[cursor % ordered.length];
+      if (!connection)
+        throw new MuseOwnershipError("Requested Muse OAuth account is unavailable.", 503);
+      owner = { connectionId: connection.id };
+      save(`session:${scope}`, JSON.stringify(owner));
+      if (!forcedId) save("cursor", String(cursor + 1));
+    }
+    for (const hash of opaqueHashes(body)) {
+      if (!owner.generation || load(`opaque:${scope}:${hash}`) !== owner.generation) {
+        throw new MuseOwnershipError(
+          "Muse encrypted reasoning was not issued to this session and caller generation."
+        );
+      }
+    }
+    for (const id of continuationIds(body)) {
+      if (!owner.generation || load(`reference:${scope}:${digest(id)}`) !== owner.generation) {
+        throw new MuseOwnershipError(
+          "Muse tool continuation was not issued to this session and caller generation."
+        );
+      }
+    }
+  });
+  return owner;
+}
+
+/** Fail closed only when replayable history exists; a reminted same-account key is adopted otherwise. */
+function scopeHasRecordedItems(scope: string): boolean {
+  for (const prefix of [`opaque:${scope}:`, `reference:${scope}:`]) {
+    const hit = getDbInstance()
+      .prepare("SELECT 1 AS hit FROM key_value WHERE namespace = ? AND key LIKE ? LIMIT 1")
+      .get(NAMESPACE, `${prefix}%`) as { hit?: number } | undefined;
+    if (hit) return true;
+  }
+  return false;
+}
+
+/** Hash the actual inference credential, not timestamps or mutable account labels. Never persist secrets. */
+export function bindMuseGeneration(
+  scope: string,
+  connectionId: string,
+  credential: string,
+  accountIdentity: string
+): string {
+  if (!credential)
+    throw new MuseOwnershipError("Muse session owner has no inference credential.", 503);
+  const generation = digest(credential);
+  const account = digest(accountIdentity);
+  getDbInstance().immediate(() => {
+    const owner = JSON.parse(load(`session:${scope}`) || "null") as Owner | null;
+    if (
+      !owner ||
+      owner.connectionId !== connectionId ||
+      (owner.account && owner.account !== account)
+    ) {
+      throw new MuseOwnershipError(
+        "Muse session owner changed; existing session reasoning cannot be replayed under the new caller."
+      );
+    }
+    if (owner.generation && owner.generation !== generation && scopeHasRecordedItems(scope)) {
+      throw new MuseOwnershipError(
+        "Muse caller generation changed; existing session reasoning cannot be replayed under the new credential."
+      );
+    }
+    save(`session:${scope}`, JSON.stringify({ connectionId, generation, account }));
+  });
+  return generation;
+}
+
+/** Observe the exact downstream output without altering events, tools, opaque reasoning, or terminal errors. */
+export function recordMuseOutput(response: Response, scope: string, generation: string): Response {
+  if (!response.body || !response.ok) return response;
+  const record = (value: unknown) => {
+    for (const hash of opaqueHashes(value)) save(`opaque:${scope}:${hash}`, generation);
+    for (const id of continuationIds(value)) save(`reference:${scope}:${digest(id)}`, generation);
+    const output = value as {
+      item?: { id?: unknown };
+      output?: unknown[];
+      response?: { output?: unknown[] };
+    } | null;
+    const items = output?.item ? [output.item] : output?.output || output?.response?.output || [];
+    for (const item of items) {
+      if (item && typeof item === "object" && "id" in item && typeof item.id === "string") {
+        save(`reference:${scope}:${digest(`item:${item.id}`)}`, generation);
+      }
+    }
+  };
+  const decoder = new TextDecoder();
+  let buffer = "";
+  const sse = response.headers.get("content-type")?.includes("text/event-stream");
+  const body = response.body.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        buffer += decoder.decode(chunk, { stream: true });
+        if (sse) {
+          // Responses events can cross arbitrary transport chunk boundaries.
+          let end: number;
+          while ((end = buffer.search(/\r?\n\r?\n/)) >= 0) {
+            const event = buffer.slice(0, end);
+            const separator = buffer.slice(end).match(/^\r?\n\r?\n/)![0];
+            buffer = buffer.slice(end + separator.length);
+            const data = event
+              .split(/\r?\n/)
+              .filter((line) => line.startsWith("data:"))
+              .map((line) => line.slice(5).trimStart())
+              .join("\n");
+            if (data && data !== "[DONE]") {
+              try {
+                record(JSON.parse(data));
+              } catch (error) {
+                if (!(error instanceof SyntaxError)) throw error;
+              }
+            }
+          }
+        }
+        controller.enqueue(chunk);
+      },
+      flush() {
+        buffer += decoder.decode();
+        if (!sse && buffer) {
+          try {
+            record(JSON.parse(buffer));
+          } catch (error) {
+            if (!(error instanceof SyntaxError)) throw error;
+          }
+        }
+      },
+    })
+  );
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}

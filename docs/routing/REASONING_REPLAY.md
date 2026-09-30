@@ -163,6 +163,15 @@ The cache exposes two endpoints under `src/app/api/cache/reasoning/route.ts`. Bo
 - **Write is gated too:** both call sites in `chatCore.ts` (non-streaming and streaming) only call `cacheReasoningFromAssistantMessage()` when `requiresReasoningReplay(provider, model)` is `true` — the same predicate the read side checks. Installs that never touch a replay provider stop paying for the write, the index update, and the try/catch on every reasoning-bearing response.
 - **Non-strict providers:** When `requiresReasoningReplay` is `false` and the target format is OpenAI, the translator **strips** any `reasoning_content` field from outgoing messages — OpenAI Chat Completions does not accept it.
 
+## Muse Opaque-Reasoning Ownership
+
+Muse (`muse-code`) returns caller-bound opaque reasoning (`encrypted_content`). Replaying it under a different account or reminted credential fails upstream, so Muse requests use session-level ownership instead of per-request rotation (`src/sse/services/museSessionOwnership.ts`, enforced in `src/sse/handlers/chat.ts`):
+
+- Fresh sessions (distinct `prompt_cache_key` / session header per API key) round-robin across the active native OAuth accounts.
+- Every continuation and tool-result turn stays pinned to the session owner: connection, account identity, and inference-credential generation. Ownership records hold hashes only, never secrets.
+- Unknown or foreign opaque reasoning, a missing owner, an unavailable owner account, or a generation change with recorded history fails closed with an explicit 4xx/503 — never silent cross-account failover and never dropped reasoning.
+- A reminted same-account key is adopted only when the session recorded no replayable history; recorded sessions keep failing closed until started fresh.
+
 ## See Also
 
 - [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — circuit breakers, cooldowns, model lockouts

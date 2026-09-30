@@ -80,6 +80,14 @@ import {
 } from "@/lib/db/sessionAccountAffinity";
 import { dispatchChatWithAffinityEviction } from "./chatDispatch";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
+import { getProviderConnections } from "@/lib/db/providers";
+import {
+  MuseOwnershipError,
+  museSessionScope,
+  claimMuseSession,
+  bindMuseGeneration,
+  recordMuseOutput,
+} from "../services/museSessionOwnership";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
 import { comboTargetPassesKeyModelPolicy } from "./chat/comboTargetKeyPolicy.ts";
@@ -1682,6 +1690,23 @@ async function handleSingleModelChat(
   // ANTIGRAVITY_ACCOUNT_LEASE_ENABLED (#10011 re-land): off ⇒ every `agy.*` branch is inert
   // and selection/dispatch behave exactly as before. `attempted` survives a loop restart.
   const agy = agyLease.startAntigravityLeaseRequest(provider, runtimeOptions.correlationId);
+  let museOwner: { scope: string; connectionId: string; generation?: string } | null = null;
+  if (provider === "muse-code") {
+    try {
+      const scope = museSessionScope(body, request?.headers, apiKeyInfo?.id ?? null);
+      const candidates = (
+        await getProviderConnections({ provider: "muse-code", isActive: true, authType: "oauth" })
+      ).filter(
+        (candidate) =>
+          !effectiveAllowedConnections || effectiveAllowedConnections.includes(candidate.id)
+      );
+      const owner = claimMuseSession(scope, body, candidates, forcedConnectionId);
+      museOwner = { scope, ...owner };
+    } catch (error) {
+      if (error instanceof MuseOwnershipError) return errorResponse(error.status, error.message);
+      throw error;
+    }
+  }
 
   requestAttemptLoop: while (true) {
     const excludedConnectionIds = new Set<string>(agy.on ? agy.attempted : []);
@@ -1693,15 +1718,15 @@ async function handleSingleModelChat(
 
     while (true) {
       const credentials =
-        preselectedCredentials && excludedConnectionIds.size === 0 && !agy.on
+        preselectedCredentials && excludedConnectionIds.size === 0 && !agy.on && !museOwner
           ? preselectedCredentials
           : await getProviderCredentialsWithQuotaPreflight(
               provider,
               null,
-              effectiveAllowedConnections,
+              museOwner ? [museOwner.connectionId] : effectiveAllowedConnections,
               model,
               {
-                sessionKey: occupancySessionKey,
+                sessionKey: museOwner ? null : occupancySessionKey,
                 reserveOAuthSession: true,
                 excludeConnectionIds: Array.from(excludedConnectionIds),
                 ...(agy.on
@@ -1733,11 +1758,27 @@ async function handleSingleModelChat(
                     isQuotaExhausted: () => false,
                     isQuotaPolicyBlocked: () => false,
                   });
-                  return effectiveForcedId ? { forcedConnectionId: effectiveForcedId } : {};
+                  return museOwner
+                    ? { forcedConnectionId: museOwner.connectionId }
+                    : effectiveForcedId
+                      ? { forcedConnectionId: effectiveForcedId }
+                      : {};
                 })(),
               }
             );
       preselectedCredentials = null;
+      if (
+        museOwner &&
+        (!credentials?.connectionId ||
+          credentials.connectionId !== museOwner.connectionId ||
+          "allRateLimited" in credentials ||
+          "allExpired" in credentials)
+      ) {
+        return errorResponse(
+          503,
+          "Muse session owner is unavailable; cross-account continuation is forbidden."
+        );
+      }
 
       if (credentials && "leaseUnavailable" in credentials && credentials.leaseUnavailable) {
         excludedConnectionIds.add(agyLease.trackAntigravityLeaseBusy(agy, credentials));
@@ -1941,6 +1982,28 @@ async function handleSingleModelChat(
         releaseOAuthSession();
         throw error;
       }
+      if (museOwner) {
+        try {
+          museOwner.generation = bindMuseGeneration(
+            museOwner.scope,
+            credentials.connectionId,
+            refreshedCredentials?.accessToken ||
+              credentials.accessToken ||
+              refreshedCredentials?.apiKey ||
+              credentials.apiKey,
+            credentials.providerSpecificData?.accountId ||
+              credentials.email ||
+              credentials.refreshToken ||
+              credentials.connectionId
+          );
+        } catch (error) {
+          releaseOAuthSession();
+          agyLease.release(leaseId);
+          if (error instanceof MuseOwnershipError)
+            return errorResponse(error.status, error.message);
+          throw error;
+        }
+      }
       const storeEnabled = isOpenAIResponsesStoreEnabled(
         refreshedCredentials?.providerSpecificData ?? credentials?.providerSpecificData
       );
@@ -2108,7 +2171,9 @@ async function handleSingleModelChat(
         if (telemetry) telemetry.startPhase("finalize");
         if (telemetry) telemetry.endPhase();
         const successResponse = withSelectedConnectionHeader(
-          result.response,
+          museOwner
+            ? recordMuseOutput(result.response, museOwner.scope, museOwner.generation!)
+            : result.response,
           credentials?.connectionId
         );
         if (requestBody.stream === true) {
@@ -2117,6 +2182,8 @@ async function handleSingleModelChat(
         releaseOAuthSession();
         return successResponse;
       }
+      // Never let generic account fallback or affinity eviction move a Muse caller.
+      if (museOwner) return withSelectedConnectionHeader(result.response, museOwner.connectionId);
 
       // A final hard-lease fence rejection is authoritative. It must never mutate
       // connection health/cooldown state or fall through to ordinary account/model

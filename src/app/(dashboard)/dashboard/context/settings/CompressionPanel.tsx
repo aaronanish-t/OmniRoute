@@ -80,7 +80,8 @@ const CONTEXT_BUDGET_POLICIES = new Set<ContextBudgetConfig["policy"]>([
 ]);
 const CAVEMAN_OUTPUT_LEVELS: CavemanIntensity[] = ["lite", "full", "ultra"];
 // A settings PUT that has not answered by then counts as failed, so one stalled save cannot hold
-// the controls disabled indefinitely.
+// the controls disabled indefinitely. The server can still commit a PUT the panel gave up on; the
+// panel then shows the old value until the page reloads.
 const SAVE_TIMEOUT_MS = 15_000;
 
 const DEFAULT_CONFIG: CompressionConfig = {
@@ -225,8 +226,8 @@ export default function CompressionPanel() {
   const [status, setStatus] = useState<"" | "saved" | "error">("");
   const saveGenRef = useRef(0);
   // The last config the server confirmed, and per field the save that confirmed it.
-  const savedRef = useRef(config);
-  const savedGenRef = useRef<Record<string, number>>({});
+  const lastConfirmedRef = useRef(config);
+  const confirmedGenRef = useRef<Record<string, number>>({});
   // Saves still waiting on the server, oldest first.
   const pendingRef = useRef<Array<{ gen: number; updates: Partial<CompressionConfig> }>>([]);
   const batchFailedRef = useRef(false);
@@ -244,7 +245,7 @@ export default function CompressionPanel() {
             outputStyles: data.outputStyles ?? DEFAULT_CONFIG.outputStyles,
             contextBudget: { ...DEFAULT_CONTEXT_BUDGET, ...(data.contextBudget ?? {}) },
           };
-          savedRef.current = hydrated;
+          lastConfirmedRef.current = hydrated;
           setConfig(hydrated);
         }
       })
@@ -275,7 +276,7 @@ export default function CompressionPanel() {
     updates: Partial<CompressionConfig>
   ): Partial<CompressionConfig> =>
     Object.fromEntries(
-      Object.entries(updates).filter(([key]) => gen > (savedGenRef.current[key] ?? 0))
+      Object.entries(updates).filter(([key]) => gen > (confirmedGenRef.current[key] ?? 0))
     );
 
   // Each field shows its newest save that has not failed, or the loaded value.
@@ -283,7 +284,7 @@ export default function CompressionPanel() {
     setConfig(
       pendingRef.current.reduce<CompressionConfig>(
         (shown, pending) => ({ ...shown, ...unconfirmedFields(pending.gen, pending.updates) }),
-        savedRef.current
+        lastConfirmedRef.current
       )
     );
 
@@ -309,14 +310,15 @@ export default function CompressionPanel() {
         signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
       });
       ok = res.ok;
-    } catch {
+    } catch (error) {
       // A network error or the timeout counts as a failed save.
+      console.error("Failed to save compression settings:", error);
     }
     pendingRef.current = pendingRef.current.filter((pending) => pending.gen !== gen);
     if (ok) {
       const confirmed = unconfirmedFields(gen, updates);
-      savedRef.current = { ...savedRef.current, ...confirmed };
-      for (const key of Object.keys(confirmed)) savedGenRef.current[key] = gen;
+      lastConfirmedRef.current = { ...lastConfirmedRef.current, ...confirmed };
+      for (const key of Object.keys(confirmed)) confirmedGenRef.current[key] = gen;
     } else {
       batchFailedRef.current = true;
     }

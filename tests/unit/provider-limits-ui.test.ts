@@ -43,6 +43,23 @@ test("paid individual tiers use non-gray badge variants", () => {
   assert.equal(providerLimitUtils.normalizePlanTier("Free").variant, "default");
 });
 
+test("Codex Pro plan variants (prolite, pro, promax) normalize to Pro tier (#15161)", () => {
+  const prolite = providerLimitUtils.normalizePlanTier("prolite");
+  assert.equal(prolite.key, "pro");
+  assert.equal(prolite.label, "Pro Standard");
+  assert.equal(prolite.variant, "success");
+
+  const pro = providerLimitUtils.normalizePlanTier("pro");
+  assert.equal(pro.key, "pro");
+  assert.equal(pro.label, "Pro Extra");
+  assert.equal(pro.variant, "success");
+
+  const promax = providerLimitUtils.normalizePlanTier("promax");
+  assert.equal(promax.key, "pro");
+  assert.equal(promax.label, "Pro Max");
+  assert.equal(promax.variant, "success");
+});
+
 test("Codex workspacePlanType is used when live plan is missing or unknown", () => {
   const resolvedPlan = providerLimitUtils.resolvePlanValue("unknown", {
     workspacePlanType: "plus",

@@ -251,6 +251,19 @@ function formatUnknownPlanLabel(raw: string) {
     .join(" ");
 }
 
+function matchCodexPlanTier(raw: string, upper: string) {
+  if (upper === "PROLITE") {
+    return { key: "pro", label: "Pro Standard", variant: "success", rank: 3, raw };
+  }
+  if (upper === "PRO" || upper === "PROEXTRA" || upper === "PRO_EXTRA") {
+    return { key: "pro", label: "Pro Extra", variant: "success", rank: 3, raw };
+  }
+  if (upper === "PROMAX" || upper === "PRO_MAX") {
+    return { key: "pro", label: "Pro Max", variant: "success", rank: 3, raw };
+  }
+  return null;
+}
+
 function matchClaudePlanTier(raw: string, upper: string) {
   const match = upper.match(/(?:DEFAULT_)?CLAUDE_(MAX|PRO|TEAM|ENTERPRISE|FREE)(?:_(\d+X))?/);
   if (!match) return null;
@@ -321,6 +334,7 @@ export function normalizePlanTier(plan) {
   // Match Anthropic bootstrap strings (claude_max, default_claude_max_20x, etc.)
   // before the generic PRO/TEAM checks so underscored values don't fall through.
   const matched =
+    matchCodexPlanTier(raw, upper) ||
     matchClaudePlanTier(raw, upper) ||
     matchKeywordPlanTier(raw, upper) ||
     matchTokenPlanTier(raw, upper) ||

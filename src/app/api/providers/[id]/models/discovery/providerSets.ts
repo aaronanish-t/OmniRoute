@@ -4,6 +4,11 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // case-sensitive id). Live fetch keeps them fresh; the seed stays as fallback.
   "ashna",
   "atria",
+  // gapgpt / hooshyar (2026-09-21): Iranian regional gateways — same class:
+  // live upstream /models catalogs (gapgpt ~129 ids, hooshyar 10 ids), live
+  // fetch keeps them fresh, the small seed stays as offline fallback.
+  "gapgpt",
+  "hooshyar",
   "modal",
   "reka",
   "empower",

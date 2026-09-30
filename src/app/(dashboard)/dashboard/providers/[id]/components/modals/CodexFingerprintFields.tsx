@@ -12,16 +12,7 @@ import {
 
 type Translator = Parameters<typeof getCodexFingerprintModeLabel>[0];
 
-export function CodexConnectionFields({
-  t,
-  reasoningEffort,
-  serviceTier,
-  fingerprintMode,
-  openaiStoreEnabled,
-  allowPaidCredits,
-  showFingerprintMode,
-  onChange,
-}: {
+type CodexConnectionFieldsProps = {
   t: Translator;
   reasoningEffort: string;
   serviceTier: CodexServiceTier;
@@ -36,7 +27,18 @@ export function CodexConnectionFields({
     codexOpenaiStoreEnabled?: boolean;
     allowPaidCredits?: boolean;
   }) => void;
-}) {
+};
+
+export function CodexConnectionFields({
+  t,
+  reasoningEffort,
+  serviceTier,
+  fingerprintMode,
+  openaiStoreEnabled,
+  allowPaidCredits,
+  showFingerprintMode,
+  onChange,
+}: CodexConnectionFieldsProps) {
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
       <Select

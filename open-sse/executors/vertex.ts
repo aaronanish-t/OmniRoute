@@ -191,6 +191,11 @@ function buildExpressGeminiUrl(
   return `https://aiplatform.googleapis.com/v1/publishers/google/models/${canonicalModel}:${op}key=${expressKey}`;
 }
 
+function getVertexHost(region: string): string {
+  if (region === "eu") return "aiplatform.eu.rep.googleapis.com";
+  return "aiplatform.googleapis.com";
+}
+
 function buildProjectScopedVertexUrl(
   canonicalModel: string,
   stream: boolean,
@@ -198,24 +203,25 @@ function buildProjectScopedVertexUrl(
   region: string,
   opaqueApiKey: string | null
 ): string {
+  const host = getVertexHost(region);
   const apiKeySuffix = opaqueApiKey ? `?key=${opaqueApiKey}` : "";
   if (isClaudeModel(canonicalModel)) {
     // streamRawPredict?alt=sse was verified to return a single plain JSON body (not real SSE
     // framing) rather than actual chunked events, which breaks the SSE parser upstream
     // ("stream ended before producing a non-ping SSE event"). rawPredict is confirmed reliable
     // for both streaming and non-streaming requests; always use it here.
-    return `https://aiplatform.googleapis.com/v1/projects/${project}/locations/${region}/publishers/anthropic/models/${canonicalModel}:rawPredict${apiKeySuffix}`;
+    return `https://${host}/v1/projects/${project}/locations/${region}/publishers/anthropic/models/${canonicalModel}:rawPredict${apiKeySuffix}`;
   }
   if (isMistralModel(canonicalModel)) {
     const operation = stream ? "streamRawPredict" : "rawPredict";
-    return `https://aiplatform.googleapis.com/v1/projects/${project}/locations/${region}/publishers/mistralai/models/${canonicalModel}:${operation}${apiKeySuffix}`;
+    return `https://${host}/v1/projects/${project}/locations/${region}/publishers/mistralai/models/${canonicalModel}:${operation}${apiKeySuffix}`;
   }
   if (isPartnerModel(canonicalModel)) {
-    return `https://aiplatform.googleapis.com/v1/projects/${project}/locations/global/endpoints/openapi/chat/completions${apiKeySuffix}`;
+    return `https://${host}/v1/projects/${project}/locations/global/endpoints/openapi/chat/completions${apiKeySuffix}`;
   }
   const operation = stream ? "streamGenerateContent?alt=sse" : "generateContent";
   const querySeparator = opaqueApiKey ? (stream ? "&" : "?") : "";
-  return `https://aiplatform.googleapis.com/v1/projects/${project}/locations/${region}/publishers/google/models/${canonicalModel}:${operation}${querySeparator}${opaqueApiKey ? `key=${opaqueApiKey}` : ""}`;
+  return `https://${host}/v1/projects/${project}/locations/${region}/publishers/google/models/${canonicalModel}:${operation}${querySeparator}${opaqueApiKey ? `key=${opaqueApiKey}` : ""}`;
 }
 
 // Vertex does not support Anthropic's optional one-hour prompt-cache TTL on these

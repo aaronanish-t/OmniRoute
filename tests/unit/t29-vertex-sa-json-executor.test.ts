@@ -20,6 +20,29 @@ test("T29: Vertex executor builds regional Gemini URL from Service Account proje
   );
 });
 
+test("T29: Vertex executor routes EU multi-region to aiplatform.eu.rep.googleapis.com", () => {
+  const executor = new VertexExecutor();
+  const claudeUrl = executor.buildUrl("claude-sonnet-5", false, 0, {
+    apiKey: MIN_SA_JSON,
+    providerSpecificData: { region: "eu" },
+  });
+
+  assert.equal(
+    claudeUrl,
+    "https://aiplatform.eu.rep.googleapis.com/v1/projects/vertex-project-123/locations/eu/publishers/anthropic/models/claude-sonnet-5:rawPredict"
+  );
+
+  const geminiUrl = executor.buildUrl("gemini-2.5-flash", false, 0, {
+    apiKey: MIN_SA_JSON,
+    providerSpecificData: { region: "eu" },
+  });
+
+  assert.equal(
+    geminiUrl,
+    "https://aiplatform.eu.rep.googleapis.com/v1/projects/vertex-project-123/locations/eu/publishers/google/models/gemini-2.5-flash:generateContent"
+  );
+});
+
 test("T29: Vertex executor routes partner models to global openapi endpoint", () => {
   const executor = new VertexExecutor();
   const url = executor.buildUrl("deepseek-ai/deepseek-v3.2-maas", false, 0, {

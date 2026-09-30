@@ -39,6 +39,11 @@ const FALLBACK_SETTINGS: CompressionSettings = {
   contextEditing: { enabled: false },
 };
 
+// Every mounted Hub shares one save queue. A Hub that unmounts with saves still queued keeps
+// sending them, and a Hub mounted afterwards loads and saves behind them, so it shows what the
+// server stored and an older value never lands after a newer one.
+let saveQueue: Promise<void> = Promise.resolve();
+
 // ── Sub-components ──────────────────────────────────────────────────────────────
 
 function Toggle({
@@ -84,13 +89,13 @@ export default function CompressionHub() {
   // queued, so a failed save rolls back only its own fields and never undoes a newer save.
   const savedRef = useRef(FALLBACK_SETTINGS);
   const queuedRef = useRef<Partial<CompressionSettings>[]>([]);
-  const saveQueueRef = useRef(Promise.resolve());
 
   // ── Initial load (parallel) ──────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
+      await saveQueue;
       const asJson = (r: Response) => (r.ok ? r.json() : null);
       const [settingsData, combosData] = await Promise.all([
         fetch("/api/settings/compression")
@@ -127,7 +132,7 @@ export default function CompressionHub() {
       queuedRef.current.push(patch);
       showQueued();
       setError(null);
-      saveQueueRef.current = saveQueueRef.current.then(async () => {
+      saveQueue = saveQueue.then(async () => {
         // A later queued save that carries every key of this one replaces it on the server.
         const replaced = queuedRef.current
           .slice(1)

@@ -190,6 +190,9 @@ describe("cache settings with real Chinese catalogs", () => {
     expect(fetchMock).toHaveBeenLastCalledWith("/api/cache", { method: "DELETE" });
     fetchMock.mockResolvedValueOnce(reply({}, 500));
     fireEvent.click(screen.getByRole("button", { name: "清空缓存" }));
+    await screen.findByText("无法清空缓存。 HTTP 500");
+    fetchMock.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    fireEvent.click(screen.getByRole("button", { name: "清空缓存" }));
     await screen.findByText("无法清空缓存。");
   });
 

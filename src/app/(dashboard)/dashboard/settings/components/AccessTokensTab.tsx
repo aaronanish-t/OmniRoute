@@ -93,7 +93,12 @@ export default function AccessTokensTab() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data?.error?.message || data?.error || `HTTP ${res.status}`);
+        // API diagnostics are server data; localize the UI context, not the diagnostic.
+        const detail = data?.error?.message || data?.error;
+        setError(
+          `${t("accessTokensCreateError")} ${typeof detail === "string" ? detail : `HTTP ${res.status}`}`
+        );
+        return;
       }
       setNewSecret(data.token);
       setCopied(false);

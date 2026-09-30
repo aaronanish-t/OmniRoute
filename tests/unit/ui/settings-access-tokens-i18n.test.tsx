@@ -130,6 +130,27 @@ describe("access-token settings with real Chinese catalogs", () => {
     expect(screen.queryByText("Failed to fetch")).toBeNull();
   });
 
+  it.each([
+    [
+      { error: { message: "expiresInDays must not exceed 3650" } },
+      "expiresInDays must not exceed 3650",
+    ],
+    [{ error: "Permission denied by policy" }, "Permission denied by policy"],
+    [{ error: {} }, "HTTP 400"],
+  ])(
+    "retains server diagnostics with a localized create error prefix (%j)",
+    async (body, detail) => {
+      mount();
+      await screen.findByRole("table");
+      fireEvent.change(screen.getByPlaceholderText("名称（例如：笔记本电脑）"), {
+        target: { value: "demo" },
+      });
+      fetchMock.mockResolvedValueOnce(reply(body, 400));
+      fireEvent.click(screen.getByRole("button", { name: "创建" }));
+      await screen.findByText(`无法创建令牌。 ${detail}`);
+    }
+  );
+
   it("localizes revoke confirmation, cancel and errors, retaining the encoded token id", async () => {
     mount();
     await screen.findByRole("table");

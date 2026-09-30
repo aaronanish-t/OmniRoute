@@ -330,7 +330,10 @@ export default function CacheSettingsTab() {
 
     try {
       const res = await fetch("/api/cache", { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to clear cache");
+      if (!res.ok) {
+        setClearMessage(`${t("semanticCacheClearFailed")} HTTP ${res.status}`);
+        return;
+      }
       setClearMessage(t("semanticCacheClearSuccess"));
     } catch {
       setClearMessage(t("semanticCacheClearFailed"));

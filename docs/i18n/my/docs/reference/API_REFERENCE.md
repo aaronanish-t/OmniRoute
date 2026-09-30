@@ -86,11 +86,11 @@ Content-Type: application/json
 
 > **Cache-hit ကုန်ကျစရိတ် အဓိပ္ပာယ်သတ်မှတ်ချက်:** semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`) ဖြစ်သည့်အခါ upstream ခေါ်ဆိုမှု မပြုလုပ်သောကြောင့် `X-OmniRoute-Response-Cost` သည် `0.0000000000` ဖြစ်သည် (hit ကို ဝန်ဆောင်မှုပေးရန် ကုန်ကျသည့် **ထပ်တိုး** ကုန်ကျစရိတ်)။ မူလကုန်ကျစရိတ်/ဖြစ်လာနိုင်ခဲ့သည့် ကုန်ကျစရိတ်ကို `X-OmniRoute-Cost-Saved` တွင် သီးခြားဖော်ပြသည်။ ငွေတောင်းခံမှုကို အသုံးပြုသည့်စနစ်များသည် `X-OmniRoute-Response-Cost` ကို စုစုပေါင်းတွက်ချက်သင့်သည် (hit များအတွက် ကုန်ကျစရိတ်မရှိပါ)။ cache ခွဲခြမ်းစိတ်ဖြာမှုများတွင် `X-OmniRoute-Cost-Saved` ကို စုစည်းတွက်ချက်နိုင်သည်။
 
-## သီးသန့် စီမံခန့်ခွဲထားသော Session Lease များ
+## သီးသန့်စီမံခန့်ခွဲထားသော Session Leases များ
 
-သီးသန့် စီမံခန့်ခွဲထားသော session leasing သည် ရွေးချယ်အသုံးပြုနိုင်ပြီး client နှင့် မသက်ဆိုင်သည့် routing contract တစ်ခုဖြစ်သည်။ လက်ရှိ owner တစ်ဦးသည် သတ်မှတ်ချက်နှင့် ကိုက်ညီသော OmniRoute connection တစ်ခုကို ထိန်းသိမ်းထားသည်။ ၎င်းသည် model တစ်ခုကို lease လုပ်ခြင်းမဟုတ်သကဲ့သို့ OAuth ကိုလည်း မလိုအပ်ပါ၊ သီးခြား client တစ်ခုကိုလည်း ဖော်ထုတ်သတ်မှတ်ခြင်းမရှိသလို သီးခြား provider တစ်ခုကိုလည်း မလိုအပ်ပါ။
+သီးသန့်စီမံခန့်ခွဲထားသော session leasing သည် ရွေးချယ်နိုင်သော၊ client-ကြားနေ routing စာချုပ်တစ်ခုဖြစ်သည်- တက်ကြွသောပိုင်ရှင်တစ်ဦးသည် အရည်အချင်းပြည့်မီသော OmniRoute ချိတ်ဆက်မှုတစ်ခုကို ပိုင်ဆိုင်သည်။ ၎င်းသည် မော်ဒယ်တစ်ခုကို ငှားရမ်းခြင်း၊ OAuth လိုအပ်ခြင်း၊ သီးခြား client တစ်ခုကို ခွဲခြားသတ်မှတ်ခြင်း သို့မဟုတ် သီးခြား provider တစ်ခုကို လိုအပ်ခြင်း မရှိပါ။
 
-အထောက်အထားစိစစ်ရန် အသုံးပြုသော API key တွင် scope `lease:exclusive` နှင့် အလွတ်မဟုတ်ကြောင်း အတိအလင်း သတ်မှတ်ထားသော `allowedConnections` စာရင်း ရှိရမည်။ Database mutation boundary သည် key ဖန်တီးမှုနှင့် တစ်စိတ်တစ်ပိုင်း update များတွင် field နှစ်ခုစလုံးကို တွဲဖက်၍ မဖြစ်မနေ သတ်မှတ်ထားစေသည်။
+စစ်မှန်ကြောင်းအထောက်အထားပြ API key တွင် `lease:exclusive` scope နှင့် ရှင်းလင်းသော အချည်းနှီးမဟုတ်သော `allowedConnections` စာရင်းရှိရမည်။ ဒေတာဘေ့စ်ပြောင်းလဲမှု နယ်နိမိတ်သည် key ဖန်တီးမှုနှင့် တစ်စိတ်တစ်ပိုင်း အပ်ဒိတ်များတွင် အကွက်နှစ်ခုလုံးကို အတူတကွ အကောင်အထည်ဖော်သည်။
 
 ```http
 POST /api/v1/session-leases
@@ -101,7 +101,7 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-အောင်မြင်သော acquire၊ renew နှင့် release response များသည် timestamp များ၊ `state` နှင့် အတိအကျ အပေါင်းတန်ဖိုးရှိသော `generation` ကို ဖော်ပြပေးသော်လည်း ရွေးချယ်ထားသည့် connection သို့မဟုတ် credential များကို မည်သည့်အခါမျှ မဖော်ပြပါ။ Renew နှင့် release တို့သည် generation ကို JSON body ထဲတွင် ပေးပို့သည်-
+အောင်မြင်စွာ ရယူခြင်း၊ သက်တမ်းတိုးခြင်းနှင့် ထုတ်ပြန်ခြင်း တုံ့ပြန်မှုများသည် အချိန်တံဆိပ်များ၊ `state` နှင့် တိကျသော အပြုသဘောဆောင်သော `generation` ကို ဖော်ပြသော်လည်း ရွေးချယ်ထားသော ချိတ်ဆက်မှု သို့မဟုတ် အထောက်အထားများကို မည်သည့်အခါမျှ မဖော်ပြပါ။ သက်တမ်းတိုးခြင်းနှင့် ထုတ်ပြန်ခြင်းတို့သည် JSON body တွင် generation ကို ပံ့ပိုးပေးသည်-
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -111,7 +111,7 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-လက်ရှိ lease owner သည် ၎င်း၏ လက်ရှိ binding အတွက် privacy-safe display metadata ကို အတိအလင်း တောင်းဆိုနိုင်သည်-
+တက်ကြွသော lease ပိုင်ရှင်တစ်ဦးသည် ၎င်း၏လက်ရှိ binding အတွက် privacy-safe display metadata ကို ရှင်းလင်းစွာ တောင်းဆိုနိုင်သည်။
 
 ```json
 { "action": "status", "generation": 1 }
@@ -131,22 +131,22 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 }
 ```
 
-ဤရွေးချယ်အသုံးပြုရသော status action ကို database transaction တစ်ခုတည်းအတွင်း opaque owner၊ အထောက်အထားစိစစ်ပြီးသော managed API key နှင့် အတိအကျ လက်ရှိအသုံးပြုနေသော generation တို့ဖြင့် fence လုပ်ထားသည်။ `displayName` သည် အစနှင့်အဆုံး whitespace များကို ဖြတ်တောက်ထားသော configured connection name သာဖြစ်ပြီး လုံခြုံစွာ အသုံးပြုနိုင်သည့် configured name မရှိသောအခါ `null` ဖြစ်သည်။ OmniRoute သည် email သို့မဟုတ် ထုတ်လုပ်ဖန်တီးထားသော account identity ကို မည်သည့်အခါမျှ အစားထိုးအသုံးမပြုပါ။ Provider value သည် sensitive မဖြစ်သော display label တစ်ခုဖြစ်ပြီး ထုတ်လုပ်ဖန်တီးထားသော compatible-provider identifier မဟုတ်ပါ။ Credential များ၊ token များ၊ cookie များ၊ မူရင်း connection သို့မဟုတ် API key id များ၊ owner hash များ၊ fencing secret များနှင့် internal routing data များကို ထည့်သွင်းမထားပါ။
+ဤရွေးချယ်နိုင်သော status လုပ်ဆောင်ချက်ကို ပိုင်ရှင်၊ စစ်မှန်ကြောင်းအထောက်အထားပြထားသော စီမံခန့်ခွဲထားသော API key နှင့် ဒေတာဘေ့စ် transaction တစ်ခုတည်းရှိ တိကျသော တက်ကြွသော generation တို့ဖြင့် ကာရံထားသည်။ `displayName` သည် ဖြတ်တောက်ထားသော စီစဉ်သတ်မှတ်ထားသော ချိတ်ဆက်မှုအမည်သာဖြစ်သည်။ ဘေးကင်းသော စီစဉ်သတ်မှတ်ထားသော အမည်မရှိပါက ၎င်းသည် `null` ဖြစ်သည်။ OmniRoute သည် အီးမေးလ် သို့မဟုတ် ထုတ်လုပ်ထားသော အကောင့်အထောက်အထားကို မည်သည့်အခါမျှ အစားထိုးခြင်းမရှိပါ။ provider တန်ဖိုးသည် အထိခိုက်မခံသော display label ဖြစ်ပြီး ထုတ်လုပ်ထားသော တွဲဖက်သုံးနိုင်သော-provider identifier မဟုတ်ပါ။ အထောက်အထားများ၊ တိုကင်များ၊ ကွတ်ကီးများ၊ ကုန်ကြမ်းချိတ်ဆက်မှု သို့မဟုတ် API key id များ၊ ပိုင်ရှင် hashes များ၊ fencing secrets များနှင့် အတွင်းပိုင်း routing ဒေတာများကို ချန်လှပ်ထားသည်။
 
-မှားယွင်းသော key၊ မှားယွင်းသော owner၊ သက်တမ်းနောက်ကျနေသော generation၊ မရှိတော့သော၊ သက်တမ်းကုန်ဆုံးသော၊ release လုပ်ထားသောနှင့် invalidate လုပ်ထားသော lookup များအားလုံးသည် connection metadata မပါဘဲ တူညီသော `409 LEASE_FENCE_STALE` error ကို ပြန်ပေးသည်။ Capacity-wait response ကို ရရှိထားသော client တွင် စစ်ဆေးကြည့်ရှုနိုင်သည့် လက်ရှိ binding မရှိပါ။ Routing က လက်ရှိ lease တစ်ခုကို ပြောင်းလဲသောအခါ တူညီသော generation သည် ဆက်လက်အကျုံးဝင်ပြီး status က binding အသစ်ကို atomically ပြန်ပေးကာ အဟောင်းကို မည်သည့်အခါမျှ ပြန်မပေးပါ။ Acquire၊ renew၊ release နှင့် waiting response များသည် ၎င်းတို့၏ ယခင်ပုံစံများကို ဆက်လက်ထိန်းသိမ်းထားသောကြောင့် ရှိပြီးသား client များမှာ မပြောင်းလဲပါ။
+မှားယွင်းသော key၊ မှားယွင်းသော ပိုင်ရှင်၊ ခေတ်နောက်ကျနေသော generation၊ ပျောက်ဆုံးနေသော၊ သက်တမ်းကုန်ဆုံးနေသော၊ ထုတ်ပြန်ထားသော၊ နှင့် အတည်မပြုနိုင်သော ရှာဖွေမှုများအားလုံးသည် ချိတ်ဆက်မှု metadata မပါဘဲ တူညီသော `409 LEASE_FENCE_STALE` အမှားကို ပြန်ပေးသည်။ capacity-wait တုံ့ပြန်မှုကို လက်ခံရရှိသော client တွင် စစ်ဆေးရန် တက်ကြွသော binding မရှိပါ။ routing သည် တက်ကြွသော lease ကို ပြောင်းလဲသောအခါ၊ တူညီသော generation သည် ဆက်လက်မှန်ကန်နေပြီး status သည် အသစ်သော binding ကို အလိုအလျောက် ပြန်ပေးသည်၊ အဟောင်းကို မည်သည့်အခါမျှ မပြန်ပေးပါ။ ရှိပြီးသား client များသည် မပြောင်းလဲဘဲ ရှိနေသည်၊ အဘယ်ကြောင့်ဆိုသော် ရယူခြင်း၊ သက်တမ်းတိုးခြင်း၊ ထုတ်ပြန်ခြင်းနှင့် စောင့်ဆိုင်းနေသော တုံ့ပြန်မှုများသည် ၎င်းတို့၏ ယခင်ပုံစံများကို ထိန်းသိမ်းထားသောကြောင့်ဖြစ်သည်။
 
-ဤ server contract သည် မူရင်း OpenAI Codex `/status` ကို မပြောင်းလဲပါ။ လက်ရှိ မူရင်း Codex သည် ၎င်း၏ model provider နှင့် ထည့်သွင်းပေးထားသော authentication/account state ကို အစီရင်ခံသော်လည်း မည်သည့် arbitrary custom provider account metadata ကိုမဆို ပြသပေးခြင်းမရှိပါ။ နောင် client integration တစ်ခုသည် ဤ action ကို ခေါ်ယူပြီး `connection.displayName` ကို မည်သို့ပြသရမည်ကို ဆုံးဖြတ်ရမည်။
+ဤဆာဗာစာချုပ်သည် စတော့ခ် OpenAI Codex `/status` ကို မပြောင်းလဲပါ။ စတော့ခ် Codex သည် ၎င်း၏မော်ဒယ် provider နှင့် built-in authentication/account state ကို လက်ရှိတွင် အစီရင်ခံသော်လည်း မည်သည့်စိတ်ကြိုက် provider account metadata ကိုမျှ မဖော်ပြပါ။ နောက်ပိုင်း client ပေါင်းစည်းမှုတစ်ခုသည် ဤလုပ်ဆောင်ချက်ကို ခေါ်ဆိုပြီး `connection.displayName` ကို မည်သို့ပြသရမည်ကို ဆုံးဖြတ်ရမည်ဖြစ်သည်။
 
-ထို့နောက် managed inference request တိုင်းသည် control header နှစ်ခုလုံးကို ပေးပို့သည်-
+စီမံခန့်ခွဲထားသော inference တောင်းဆိုမှုတိုင်းသည် ထိန်းချုပ်မှုခေါင်းစီးနှစ်ခုလုံးကို ပံ့ပိုးပေးသည်-
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-အတိအကျ owner၊ generation၊ လက်ရှိ connection နှင့် အထောက်အထားစိစစ်ပြီးသော API key တို့ကို ပံ့ပိုးထားသည့် upstream attempt တစ်ခုစီမတိုင်မီ ချက်ချင်း fence လုပ်သည်။ အခြား key က တူညီသော connection ကို ခွင့်ပြုထားသည့်တိုင် ထို key ဖြင့် owner နှင့် generation ကို ပြန်လည်အသုံးပြုခြင်းသည် မအောင်မြင်ပါ။ မူရင်း owner များကို အမြဲတမ်းသိမ်းဆည်းခြင်း၊ log မှတ်တမ်းတင်ခြင်း၊ request snapshot တွင် ထိန်းသိမ်းထားခြင်း သို့မဟုတ် upstream သို့ လွှဲပို့ခြင်း မပြုပါ။
+တိကျသောပိုင်ရှင်၊ generation၊ တက်ကြွသောချိတ်ဆက်မှုနှင့် စစ်မှန်ကြောင်းအထောက်အထားပြထားသော API key တို့ကို ပံ့ပိုးထားသော upstream ကြိုးပမ်းမှုတစ်ခုစီမတိုင်မီ ချက်ချင်းကာရံထားသည်။ အခြား key တစ်ခုဖြင့် ပိုင်ရှင်နှင့် generation ကို ပြန်လည်ဖွင့်ခြင်းသည် ထို key သည် တူညီသောချိတ်ဆက်မှုကို ခွင့်ပြုသည့်တိုင် မအောင်မြင်ပါ။ ကုန်ကြမ်းပိုင်ရှင်များကို မသိမ်းဆည်းထားပါ၊ မှတ်တမ်းတင်ထားခြင်းမရှိပါ၊ တောင်းဆိုမှု snapshot တွင် ထိန်းသိမ်းထားခြင်းမရှိပါ သို့မဟုတ် upstream သို့ ပေးပို့ခြင်းမရှိပါ။
 
-ယာယီ အပြိုင်အသုံးပြုမှု ပဋိပက္ခဖြစ်ခြင်းအတွက် HTTP `429` ကို `Retry-After` နှင့်အတူ ပြန်ပေးသည်-
+ယာယီပြိုင်ဆိုင်မှုသည် HTTP `429` ကို `Retry-After` နှင့်အတူ ပြန်ပေးသည်-
 
 ```json
 {
@@ -157,33 +157,35 @@ X-OmniRoute-Lease-Generation: 1
 }
 ```
 
-ဤ response သည် ပုံမှန် သတ်မှတ်ချက်နှင့်ကိုက်ညီသော set သည် အလွတ်မဟုတ်ခဲ့ပြီး လွတ်နေသော candidate တိုင်းကို အခြား active lease တစ်ခုက ထိန်းသိမ်းထားသည်ဟုသာ ဆိုလိုသည်။ ပံ့ပိုးမထားသော model/provider များ၊ policy မကိုက်ညီမှု၊ cooldown၊ quota၊ health နှင့် အခြားပုံမှန် eligibility failure များသည် ၎င်းတို့၏ ရှိပြီးသား OmniRoute response များကို ဆက်လက်ထိန်းသိမ်းထားသည်။
+ဤတုံ့ပြန်မှုသည် သာမန်အရည်အချင်းပြည့်မီသော အစုံသည် အချည်းနှီးမဟုတ်ဘဲ လွတ်လပ်သော ကိုယ်စားလှယ်လောင်းတိုင်းကို ပြင်ပတက်ကြွသော lease တစ်ခုက ပိုင်ဆိုင်ထားကြောင်းသာ ဆိုလိုသည်။ ပံ့ပိုးမထားသော မော်ဒယ်များ/ပံ့ပိုးသူများ၊ မူဝါဒမကိုက်ညီမှု၊ cooldown၊ quota၊ ကျန်းမာရေးနှင့် အခြားသာမန်အရည်အချင်းပြည့်မီမှု ပျက်ကွက်မှုများသည် ၎င်းတို့၏ရှိပြီးသား OmniRoute တုံ့ပြန်မှုများကို ထိန်းသိမ်းထားသည်။
 
 ### `x-omniroute-compression`
 
-Request တစ်ခုချင်းစီအလိုက် compression plan ကို override လုပ်ခြင်းဖြစ်သည်။ ဦးစားပေးမှု အမြင့်ဆုံးဖြစ်ပြီး routing-combo override၊ active profile၊ auto-trigger နှင့် panel Default တို့ထက် ဦးစားပေးသည်။ Value များ-
+compression plan ကို တောင်းဆိုမှုတစ်ခုစီအတွက် ပြန်လည်ပြင်ဆင်ခြင်း။ အမြင့်ဆုံးဦးစားပေး — routing-combo override၊ active profile၊ auto-trigger နှင့် panel Default တို့ကို ကျော်လွန်သည်။ တန်ဖိုးများ-
 
-| Value         | အကျိုးသက်ရောက်မှု                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `off`         | ဤ request အတွက် compression မပြုပါ။                                                                                            |
-| `default`     | Panel မှ ဆင်းသက်လာသော Default profile ဖြစ်သည် (active profile ကို လျစ်လျူရှုသည်)။                                              |
-| `engine:<id>` | ဖွင့်ထားသောအခါ engine တစ်ခုတည်း၊ ဥပမာ `engine:rtk`။                                                                            |
-| `<combo>`     | အမည်ပေးထားသော combo တစ်ခုဖြစ်ပြီး ပထမဦးစွာ name ဖြင့် (စာလုံးအကြီးအသေးမခွဲဘဲ) တိုက်ဆိုင်စစ်ဆေးကာ ထို့နောက် id ဖြင့် စစ်ဆေးသည်။ |
+| တန်ဖိုး       | အကျိုးသက်ရောက်မှု                                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `off`         | ဤတောင်းဆိုမှုအတွက် compression မရှိပါ။                                                                           |
+| `default`     | panel-derived Default profile (active profile ကို လျစ်လျူရှုသည်)။ Lossy engines များကို ပိတ်ထားသည်။              |
+| `safe`        | Dedup နှင့် whitespace folding သာ။                                                                               |
+| `allow-lossy` | ဤတောင်းဆိုမှုအတွက် operator plan ကို ထိန်းသိမ်းထားပါ၊ အကျဉ်းချုပ်များနှင့် style rewrites များအပါအဝင်။           |
+| `engine:<id>` | ဖွင့်ထားသည့်အခါ engine တစ်ခုတည်း၊ ဥပမာ `engine:rtk`။ ထို engine အတွက် တောင်းဆိုမှုတစ်ခုစီအတွက် ရွေးချယ်နိုင်သော။ |
+| `<combo>`     | အမည်ဖြင့် ကိုက်ညီသော combo တစ်ခု (case-insensitive) ဦးစွာ၊ ထို့နောက် id ဖြင့်။                                   |
 
-မှတ်ချက်များ-
+မှတ်စုများ-
 
-- မသိသော value များကို လျစ်လျူရှုသည် (request ကို မည်သည့်အခါမျှ ပယ်ချမည်မဟုတ်ပါ)။ Resolution သည် ပုံမှန် operator precedence သို့ ဆက်လက်ကျသွားသည်။
-- Combo အများအပြားသည် တူညီသော name ကို မျှဝေထားပါက တိကျသေချာစွာ တိုက်ဆိုင်မှုရရှိရန် combo **id** ကို ပေးပို့ပါ။
-- Name က `off` သို့မဟုတ် `default` ဖြစ်သော combo ကို name ဖြင့် ရွေးချယ်၍မရပါ (ထို keyword များကို ပထမဦးစွာ အဓိပ္ပာယ်ဖော်သည်)။ ထိုသို့သော combo ကို ၎င်း၏ id ဖြင့် ကိုးကားပါ။
-- Master compression switch သည် မဖြစ်မနေဖြတ်သန်းရသော gate ဖြစ်သည်။ Compression ကို global အဆင့်တွင် ပိတ်ထားပါက ဤ header က ၎င်းကို ဖွင့်၍မရပါ။
+- မသိသောတန်ဖိုးများကို လျစ်လျူရှုသည် (တောင်းဆိုမှုကို မည်သည့်အခါမျှ ပယ်ချခြင်းမရှိပါ)။ ဖြေရှင်းချက်သည် ပုံမှန် operator ဦးစားပေးသို့ ကျရောက်သည်။
+- combo များစွာသည် အမည်တစ်ခုကို မျှဝေပါက၊ တိကျသော ကိုက်ညီမှုအတွက် combo **id** ကို ပေးပါ။
+- အမည် `off` သို့မဟုတ် `default` ဖြစ်သော combo တစ်ခုကို အမည်ဖြင့် ရွေးချယ်၍မရပါ (ထိုသော့ချက်စာလုံးများကို ဦးစွာ အဓိပ္ပာယ်ဖွင့်ဆိုသည်)။ ထိုကဲ့သို့သော combo ကို ၎င်း၏ id ဖြင့် ရည်ညွှန်းပါ။
+- master compression switch သည် ခက်ခဲသော gate တစ်ခုဖြစ်သည်- compression ကို ကမ္ဘာလုံးဆိုင်ရာ ပိတ်ထားသောအခါ၊ ဤခေါင်းစီးသည် ၎င်းကို ဖွင့်၍မရပါ။
 
-အသုံးပြုထားသော plan ကို response header တွင် ပြန်လည်ဖော်ပြသည်-
+အသုံးပြုထားသော plan ကို တုံ့ပြန်မှုခေါင်းစီးတွင် ပြန်လည်ဖော်ပြသည်-
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-ဤနေရာတွင် `<source>` သည် `request-header`၊ `routing-override`၊ `active-profile`၊ `auto-trigger`၊ `default` သို့မဟုတ် `off` တို့ထဲမှ တစ်ခုဖြစ်သည်။
+`<source>` သည် `request-header`၊ `routing-override`၊ `active-profile`၊ `auto-trigger`၊ `default` သို့မဟုတ် `off` တို့မှ တစ်ခုဖြစ်သည်။
 
 ---
 
@@ -417,86 +419,90 @@ Sidecar တစ်ခုသည် out-of-process အနေဖြင့် လည�
 
 ## ကိုက်ညီမှုရှိသော Endpoint များ
 
-| နည်းလမ်း | လမ်းကြောင်း                               | ဖော်မတ်                               |
-| -------- | ----------------------------------------- | ------------------------------------- |
-| POST     | `/v1/chat/completions`                    | OpenAI                                |
-| POST     | `/v1/messages`                            | Anthropic                             |
-| POST     | `/v1/responses`                           | OpenAI Responses                      |
-| POST     | `/v1/embeddings`                          | OpenAI                                |
-| POST     | `/v1/images/generations`                  | OpenAI Images                         |
-| POST     | `/v1/images/edits`                        | OpenAI Images (တည်းဖြတ်ခြင်း/inpaint) |
-| POST     | `/v1/videos/generations`                  | OpenAI ပုံစံ ဗီဒီယိုထုတ်လုပ်ခြင်း     |
-| POST     | `/v1/music/generations`                   | OpenAI ပုံစံ တေးဂီတထုတ်လုပ်ခြင်း      |
-| POST     | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST     | `/v1/audio/speech`                        | OpenAI TTS (အသံ body ကို ပြန်ပေးသည်)  |
-| POST     | `/v1/rerank`                              | Cohere/Voyage ပုံစံ rerank            |
-| POST     | `/v1/classify`                            | Jina classify (`api.jina.ai`)         |
-| POST     | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)    |
-| POST     | `/v1/moderations`                         | OpenAI Moderations                    |
-| GET      | `/v1/models`                              | OpenAI                                |
-| POST     | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET      | `/v1beta/models`                          | Gemini                                |
-| POST     | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST     | `/v1/api/chat`                            | Ollama                                |
-| GET      | `/api/v1/vscode/{token}/`                 | OpenAI catalog alias                  |
-| GET      | `/api/v1/vscode/{token}/models`           | OpenAI models alias                   |
-| POST     | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenized alias                |
-| POST     | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenized alias      |
-| POST     | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenized alias                |
-| GET      | `/api/v1/vscode/{token}/api/tags`         | Ollama tags tokenized alias           |
+| နည်းလမ်း | လမ်းကြောင်း                               | ဖော်မတ်                                     |
+| -------- | ----------------------------------------- | ------------------------------------------- |
+| POST     | `/v1/chat/completions`                    | OpenAI                                      |
+| POST     | `/v1/messages`                            | Anthropic                                   |
+| POST     | `/v1/responses`                           | OpenAI Responses                            |
+| POST     | `/v1/embeddings`                          | OpenAI                                      |
+| POST     | `/v1/images/generations`                  | OpenAI Images                               |
+| POST     | `/v1/images/edits`                        | OpenAI Images (တည်းဖြတ်ခြင်း/inpaint)       |
+| POST     | `/v1/videos/generations`                  | OpenAI ပုံစံ ဗီဒီယိုဖန်တီးခြင်း             |
+| POST     | `/v1/music/generations`                   | OpenAI ပုံစံ တေးဂီတဖန်တီးခြင်း              |
+| POST     | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                          |
+| POST     | `/v1/audio/speech`                        | OpenAI TTS (အသံ body ကို ပြန်ပေးသည်)        |
+| POST     | `/v1/rerank`                              | Cohere/Voyage ပုံစံ အဆင့်ပြန်စီခြင်း        |
+| POST     | `/v1/classify`                            | Jina အမျိုးအစားခွဲခြားခြင်း (`api.jina.ai`) |
+| POST     | `/v1/segment`                             | Jina အပိုင်းခွဲစနစ် (`segment.jina.ai`)     |
+| POST     | `/v1/moderations`                         | OpenAI Moderations                          |
+| GET      | `/v1/models`                              | OpenAI                                      |
+| POST     | `/v1/messages/count_tokens`               | Anthropic                                   |
+| GET      | `/v1beta/models`                          | Gemini                                      |
+| POST     | `/v1beta/models/{...path}`                | Gemini generateContent                      |
+| POST     | `/v1/api/chat`                            | Ollama                                      |
+| GET      | `/api/v1/vscode/{token}/`                 | OpenAI catalog alias                        |
+| GET      | `/api/v1/vscode/{token}/models`           | OpenAI models alias                         |
+| POST     | `/api/v1/vscode/{token}/chat/completions` | OpenAI token ပါသော alias                    |
+| POST     | `/api/v1/vscode/{token}/responses`        | OpenAI Responses token ပါသော alias          |
+| POST     | `/api/v1/vscode/{token}/api/chat`         | Ollama token ပါသော alias                    |
+| GET      | `/api/v1/vscode/{token}/api/tags`         | Ollama tags token ပါသော alias               |
 
-POST လမ်းကြောင်းအားလုံးသည် တူညီသောပုံစံကို လိုက်နာသည်- `Bearer your-api-key` + Zod ဖြင့် အတည်ပြုထားသော JSON body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` စသည်တို့၊ `src/shared/validation/schemas.ts` ကို ကြည့်ပါ)။ Schema အတည်ပြုမှု မအောင်မြင်ပါက 4xx ကို ပြန်ပေးသည်။
+POST route အားလုံးသည် တူညီသောပုံစံကို လိုက်နာသည်- `Bearer your-api-key` + Zod ဖြင့် အတည်ပြုထားသော JSON body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` စသည်တို့၊ `src/shared/validation/schemas.ts` ကိုကြည့်ပါ)။ Schema အတည်ပြုမှု မအောင်မြင်ပါက 4xx ကို ပြန်ပေးသည်။
 
-`Authorization: Bearer ...` ကို ထည့်သွင်းမပေးပို့နိုင်သော client များအတွက် OmniRoute သည် query-string ကိုက်ညီမှု (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) သို့မဟုတ် အောက်တွင် မှတ်တမ်းတင်ထားသော သီးသန့် `/api/v1/vscode/{token}/...` endpoint များမှတစ်ဆင့် URL အတွင်း API key များကိုလည်း လက်ခံသည်။
+`Authorization: Bearer ...` ကို ထည့်သွင်း၍မရသော client များအတွက် OmniRoute သည် query-string ကိုက်ညီမှုပုံစံ (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) သို့မဟုတ် အောက်တွင် မှတ်တမ်းတင်ထားသော သီးသန့် `/api/v1/vscode/{token}/...` endpoint များမှတစ်ဆင့် URL ထဲရှိ API key များကိုလည်း လက်ခံသည်။
 
 ```bash
-# Rerank (cloud registry provider သို့မဟုတ် "<prefix>/<model>" အဖြစ် OpenAI နှင့် ကိုက်ညီသော provider node)
+# အဆင့်ပြန်စီခြင်း (cloud registry provider သို့မဟုတ် "<prefix>/<model>" ပုံစံဖြင့် OpenAI-compatible provider node)
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (Foundation API အထောက်အထားများ)
+# Jina အမျိုးအစားခွဲခြားခြင်း (Foundation API အထောက်အထားများ)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina segmenter
+# Jina အပိုင်းခွဲစနစ်
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina search (s.jina.ai; provider alias များ- jina-search, jina-ai, jina)
+# Jina ရှာဖွေမှု (s.jina.ai; provider alias များ- jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderations
+# အကြောင်းအရာစိစစ်ခြင်း
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
 # TTS — audio/mpeg (သို့မဟုတ် တောင်းဆိုထားသော ဖော်မတ်) body ကို ပြန်ပေးသည်
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
+# Soniox TTS အတွက် ဘာသာစကားနှင့် အသံတစ်ခု လိုအပ်သည်- `language` သည် မူလအတိုင်း "en" ဖြစ်သည်။ အသံမပါရှိပါက
+# သို့မဟုတ် OpenAI ၏ ပုံသေ အသံအမည် (alloy, nova, …) ဖြစ်ပါက "Adrian" အဖြစ် ပြောင်းလဲသတ်မှတ်သည်
+POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
+
 # ပုံတည်းဖြတ်ခြင်း (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# ဗီဒီယို / တေးဂီတ ထုတ်လုပ်ခြင်း (provider prefix ပါသော model id)
+# ဗီဒီယို / တေးဂီတ ဖန်တီးခြင်း (provider prefix ပါသော model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
-POST /v1/music/generations  { "model": "suno/v3.5",   "prompt": "..." }
+POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Rerank provider node များ:** `POST /v1/rerank` သည် `<node-prefix>/<model>` အဖြစ် လိပ်စာသတ်မှတ်ထားသော OpenAI နှင့် ကိုက်ညီသည့် provider node များ
-> (oMLX, vLLM, Infinity, gateway နောက်ကွယ်ရှိ TEI၊ …) သို့လည်း route လုပ်ပေးသည်။ Loopback
+> **အဆင့်ပြန်စီသည့် provider node များ:** `POST /v1/rerank` သည် `<node-prefix>/<model>` ဖြင့် လိပ်စာသတ်မှတ်ထားသော
+> OpenAI-compatible provider node များ (oMLX, vLLM, Infinity၊ gateway နောက်ကွယ်ရှိ TEI၊ …) သို့လည်း route လုပ်ပေးသည်။ Loopback
 > node များ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ကို အမြဲတမ်း အသုံးပြုနိုင်သည်။ အခြား
 > host တစ်ခုခုရှိ node များ — LAN စက်တစ်လုံး သို့မဟုတ် Tailscale peer — ကို operator က
 > `RERANK_REMOTE_PROVIDER_NODES` feature flag ကို ဖွင့်ထားပြီး node ၏ base URL သည် provider
 > outbound URL policy (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) ကို ဖြတ်သန်းနိုင်မှသာ အသုံးပြုနိုင်သည်။
-> cloud-metadata host များသို့မူ မည်သည့်အခါမျှ route မလုပ်ပါ။ Memory engine ၏ rerank အဆင့်သည် ဤ route ကို
-> loopback မှတစ်ဆင့် ခေါ်ဆိုသောကြောင့် Memory ဆက်တင်များရှိ `rerankProviderModel` ကိုလည်း တူညီသောစည်းမျဉ်းက ထိန်းချုပ်သည်။
+> cloud-metadata host များသို့ မည်သည့်အခါမျှ route မလုပ်ပါ။ Memory engine ၏ အဆင့်ပြန်စီသည့်အဆင့်သည် ဤ route ကို
+> loopback မှတစ်ဆင့် ခေါ်ဆိုသောကြောင့် Memory ဆက်တင်များရှိ `rerankProviderModel` ကိုလည်း အလားတူစည်းမျဉ်းဖြင့် ထိန်းချုပ်သည်။
 >
-> **Local server ပုံစံများ:** node ကို `<base>/v1/rerank` တွင် ခေါ်ဆိုပြီး 404 ဖြစ်ပါက `<base>/rerank`
-> (Infinity, TEI) တွင် ခေါ်ဆိုသည်။ Upstream body သည် Cohere/OpenAI စာလုံးပေါင်း (`documents`,
-> `return_documents`) နှင့် TEI စာလုံးပေါင်း (`texts`, `return_text`) နှစ်မျိုးလုံးကို သယ်ဆောင်ပြီး upstream response ကို
-> Cohere envelope သို့ စံညှိပေးသည်- TEI ၏ ရိုးရိုး `[{index, score, text}]`၊ ပါးလွှာသော gateway များမှ
-> `{results: [{index, score}]}` နှင့် Voyage ပုံစံ `{data: [...]}` အားလုံးသည် client ထံသို့
-> `{results: [{index, relevance_score, document?}]}` အဖြစ် ပြန်ရောက်လာပြီး score အလိုက် စီထားကာ `top_n` ဖြင့် အရေအတွက်ကန့်သတ်ထားသည်။
+> **Local server ပုံစံများ:** node ကို `<base>/v1/rerank` တွင် ခေါ်ဆိုပြီး 404 ရရှိပါက `<base>/rerank`
+> (Infinity, TEI) တွင် ခေါ်ဆိုသည်။ Upstream body တွင် Cohere/OpenAI စာလုံးပေါင်းပုံစံ (`documents`,
+> `return_documents`) နှင့် TEI စာလုံးပေါင်းပုံစံ (`texts`, `return_text`) နှစ်မျိုးစလုံး ပါဝင်ပြီး upstream response ကို
+> Cohere envelope အဖြစ် စံပြုသည်- TEI ၏ ရိုးရိုး `[{index, score, text}]`၊ ပေါ့ပါးသော gateway များမှ `{results: [{index, score}]}`
+> နှင့် Voyage ပုံစံ `{data: [...]}` အားလုံးကို client ထံ
+> `{results: [{index, relevance_score, document?}]}` ပုံစံဖြင့် ပြန်ပေးပြီး score အလိုက် စီကာ `top_n` ဖြင့် အရေအတွက်ကန့်သတ်သည်။
 
-> **Provider-node ရှာဖွေတွေ့ရှိမှု:** OpenAI နှင့် ကိုက်ညီသော provider node ပေါ်ရှိ model များသည် `GET /v1/models`
-> တွင် node prefix အောက်၌ ပေါ်လာသည်။ Endpoint metadata မပါဝင်သော row များ (local `/v1/models` စာရင်းများတွင် တွေ့ရလေ့ရှိသည်)
-> သည် node ၏ `apiType` ကို ဆက်ခံသောကြောင့် `embeddings` node တစ်ခု၏ model များသည် `type: "embedding"` ဖြစ်ပြီး
-> `rerank` node တစ်ခု၏ model များသည် chat အဖြစ် ပုံသေသတ်မှတ်ခံရမည့်အစား `type: "rerank"` ဖြစ်သည်။ Sync လုပ်ထားသော သို့မဟုတ် ကိုယ်တိုင်ထည့်ထားသော row တစ်ခုရှိ
-> အတိအလင်းသတ်မှတ်ထားသည့် `supportedEndpoints` သည် ဆက်လက်၍ ဦးစားပေးခံရသည်။
+> **Provider-node ရှာဖွေခြင်း:** OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော provider node တစ်ခုပေါ်ရှိ model များသည် `GET /v1/models`
+> တွင် node prefix အောက်၌ ပေါ်လာသည်။ Endpoint metadata မပါရှိသော row များ (local `/v1/models` စာရင်းများတွင် အများအားဖြင့် တွေ့ရသည်)
+> သည် node ၏ `apiType` ကို ဆက်ခံသဖြင့် `embeddings` node ၏ model များသည် မူလသတ်မှတ်ချက်အရ chat ဖြစ်သွားမည့်အစား `type: "embedding"` ဖြစ်ပြီး
+> `rerank` node ၏ model များသည် `type: "rerank"` ဖြစ်သည်။ Sync လုပ်ထားသော သို့မဟုတ် ကိုယ်တိုင်ထည့်သွင်းထားသော row တစ်ခုရှိ အတိအလင်းသတ်မှတ်ထားသည့်
+> `supportedEndpoints` သည် ဦးစားပေးအဖြစ် ဆက်လက်သက်ရောက်သည်။
 
 ### သီးသန့် Provider Route များ
 
@@ -506,7 +512,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Provider prefix မပါရှိပါက အလိုအလျောက် ထည့်သွင်းပေးသည်။ မကိုက်ညီသော model များအတွက် `400` ကို ပြန်ပေးသည်။
+Provider prefix မပါရှိပါက အလိုအလျောက် ထည့်သွင်းပေးသည်။ ကိုက်ညီမှုမရှိသော model များသည် `400` ကို ပြန်ပေးသည်။
 
 ---
 
@@ -1437,20 +1443,20 @@ GET /.well-known/agent.json
 
 ## Cloud၊ Evals နှင့် Assess
 
-| Method | Path | ဖော်ပြချက် |
+| နည်းလမ်း | လမ်းကြောင်း | ဖော်ပြချက် |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | Bearer key တစ်ခုကို အတည်ပြုပြီး cloud sync client များအတွက် ဖုံးကွယ်ထားသော provider connection များ + model alias များကို ပြန်ပေးသည် |
-| POST | `/api/cloud/credentials/update` | cloud နှင့် sync လုပ်ထားသော provider တစ်ခုအတွက် ကုဒ်ဝှက်ထားသည့် credential များကို အပ်ဒိတ်လုပ်သည် |
-| POST | `/api/cloud/model/resolve` | local routing table ကို အသုံးပြု၍ logical model id တစ်ခုကို တိကျသော provider/model အဖြစ် ဖြေရှင်းသတ်မှတ်သည် |
-| GET | `/api/cloud/models/alias` | cloud sync သို့ ဖော်ထုတ်ထားသည့် model alias များကို စာရင်းပြုစုသည် |
-| GET | `/api/assess` | နောက်ဆုံး assessment အမျိုးအစားခွဲခြားမှုများကို ဖတ်ရှုသည် (provider/model တစ်ခုချင်းစီအလိုက်) |
-| POST | `/api/assess` | assessment တစ်ခုကို လုပ်ဆောင်သည် — body: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | အသင့်ပါရှိသော eval suite များ + နောက်ဆုံး run များကို စာရင်းပြုစုသည် |
-| POST | `/api/evals` | eval run တစ်ခုကို စတင်စေသည် |
+| POST | `/api/cloud/auth` | Bearer key ကို အတည်ပြုပြီး cloud sync client များအတွက် ဖုံးကွယ်ထားသော provider connection များနှင့် model alias များကို ပြန်ပေးသည် |
+| POST | `/api/cloud/credentials/update` | Cloud နှင့် sync လုပ်ထားသော provider တစ်ခုအတွက် ကုဒ်ဝှက်ထားသည့် credential များကို အပ်ဒိတ်လုပ်သည် |
+| POST | `/api/cloud/model/resolve` | Local routing table ကို အသုံးပြု၍ logical model id တစ်ခုကို တိကျသော provider/model တစ်ခုအဖြစ် ဖြေရှင်းပေးသည် |
+| GET | `/api/cloud/models/alias` | Cloud sync သို့ ဖော်ပြထားသည့် model alias များကို စာရင်းပြုစုသည် |
+| GET | `/api/assess` | နောက်ဆုံး assessment အမျိုးအစားခွဲခြားမှုများကို ဖတ်ရှုသည် (provider/model တစ်ခုချင်းအလိုက်) |
+| POST | `/api/assess` | Assessment တစ်ခုကို လုပ်ဆောင်သည် — body: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
+| GET | `/api/evals` | Built-in eval suite များနှင့် နောက်ဆုံးလုပ်ဆောင်ထားသည့် run များကို စာရင်းပြုစုသည် |
+| POST | `/api/evals` | Eval run တစ်ခုကို စတင်လုပ်ဆောင်သည် |
 | POST | `/api/evals/suites` | စိတ်ကြိုက် eval suite တစ်ခုကို ဖန်တီးသည် — body ကို `evalSuiteSaveSchema` ဖြင့် အတည်ပြုသည် |
 | GET | `/api/evals/suites/[id]` | စိတ်ကြိုက် eval suite တစ်ခုကို ရယူသည် |
 
-**Auth:** `/api/cloud/auth` သည် Bearer key တစ်ခုကို တိုက်ရိုက်အတည်ပြုသည်; အခြား `/api/cloud/*`, `/api/evals/*` နှင့် `/api/assess` route များတွင် management session/API key လိုအပ်သည်။ `/api/assess` POST သည် discriminated-union scope schema ပါသော `validateBody` ကို အသုံးပြုသည်။
+**Auth:** `/api/cloud/auth` သည် Bearer key တစ်ခုကို တိုက်ရိုက်အတည်ပြုပြီး `manage` / `admin` scope ပါရှိသော key အတွက်သာ connection တစ်ခုစီ၏ ဖုံးကွယ်ထားသော key နှင့် `projectId` ကို ပြန်ပေးသည်။ အခြား `/api/cloud/*`၊ `/api/evals/*` နှင့် `/api/assess` route များသည် management session/API key လိုအပ်သည်။ `/api/assess` POST သည် discriminated-union scope schema နှင့်အတူ `validateBody` ကို အသုံးပြုသည်။
 
 ---
 

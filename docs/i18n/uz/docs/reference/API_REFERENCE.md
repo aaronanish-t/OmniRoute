@@ -86,15 +86,11 @@ Content-Type: application/json
 
 > **Keshga tegish xarajati semantikasi:** semantik keshga TEGISH yuz berganda (`X-OmniRoute-Cache-Hit: true`) yuqori oqimga hech qanday chaqiruv amalga oshirilmaydi, shuning uchun `X-OmniRoute-Response-Cost` qiymati `0.0000000000` boʻladi (keshdagi natijani taqdim etishning **qoʻshimcha** xarajati). Dastlabki/yuzaga kelishi mumkin boʻlgan xarajat `X-OmniRoute-Cost-Saved` orqali alohida koʻrsatiladi. Hisob-kitob isteʼmolchilari `X-OmniRoute-Response-Cost` qiymatlarini jamlashi kerak (keshga tegishlar hech qanday xarajat qilmaydi); kesh tahlillari esa `X-OmniRoute-Cost-Saved` qiymatlarini umumlashtirishi mumkin.
 
-## Eksklyuziv boshqariladigan seans ijaralari
+## Eksklyuziv boshqariladigan sessiya ijaralari
 
-Eksklyuziv boshqariladigan seans ijarasi ixtiyoriy, mijozga bogʻliq boʻlmagan marshrutlash kelishuvidir: bitta faol egasi
-bitta mos OmniRoute ulanishini egallaydi. U modelni ijaraga bermaydi, OAuth talab qilmaydi, muayyan
-mijozni aniqlamaydi va muayyan provayderni talab qilmaydi.
+Eksklyuziv boshqariladigan sessiya ijarasi ixtiyoriy, mijozdan mustaqil marshrutlash shartnomasidir: bitta faol egasi bitta mos OmniRoute ulanishiga ega boʻladi. U modelni ijaraga olmaydi, OAuth talab qilmaydi, maʼlum bir mijozni aniqlamaydi yoki maʼlum bir provayderni talab qilmaydi.
 
-Autentifikatsiya qiluvchi API kaliti `lease:exclusive` doirasiga va aniq koʻrsatilgan, boʻsh boʻlmagan
-`allowedConnections` roʻyxatiga ega boʻlishi kerak. Maʼlumotlar bazasidagi oʻzgartirish chegarasi kalit
-yaratilganda va qisman yangilanganda ikkala maydonning birgalikda mavjud boʻlishini taʼminlaydi.
+Autentifikatsiya qiluvchi API kaliti `lease:exclusive` doirasiga va aniq boʻsh boʻlmagan `allowedConnections` roʻyxatiga ega boʻlishi kerak. Maʼlumotlar bazasini oʻzgartirish chegarasi kalit yaratish va qisman yangilashda ikkala maydonni birgalikda qoʻllaydi.
 
 ```http
 POST /api/v1/session-leases
@@ -105,9 +101,7 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-Muvaffaqiyatli egallash, yangilash va boʻshatish javoblarida vaqt belgilari, `state` va aniq musbat
-`generation` koʻrsatiladi, ammo tanlangan ulanish yoki hisob maʼlumotlari hech qachon oshkor qilinmaydi. Yangilash va boʻshatishda
-avlod JSON tanasida beriladi:
+Muvaffaqiyatli olish, yangilash va chiqarish javoblari vaqt tamgʻalarini, `state`ni va aniq musbat `generation`ni koʻrsatadi, ammo hech qachon tanlangan ulanish yoki hisobga olish maʼlumotlarini koʻrsatmaydi. Yangilash va chiqarish JSON tanasida generationni taqdim etadi:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -117,7 +111,7 @@ avlod JSON tanasida beriladi:
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-Faol ijara egasi oʻzining joriy bogʻlanishi uchun maxfiylikni saqlovchi koʻrsatish metamaʼlumotlarini aniq soʻrashi mumkin:
+Faol ijara egasi joriy bogʻlanishi uchun maxfiylikni saqlovchi koʻrsatish metamaʼlumotlarini aniq soʻrashi mumkin:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -137,37 +131,22 @@ Faol ijara egasi oʻzining joriy bogʻlanishi uchun maxfiylikni saqlovchi koʻrs
 }
 ```
 
-Bu ixtiyoriy holat amali bitta maʼlumotlar bazasi tranzaksiyasi ichida shaffof boʻlmagan egasi, autentifikatsiya qilingan boshqariladigan API kaliti va aniq
-faol avlod bilan himoyalanadi. `displayName` faqat sozlangan ulanish nomining chetlari kesilgan
-koʻrinishidir; xavfsiz sozlangan nom mavjud boʻlmaganda u `null` boʻladi. OmniRoute hech qachon uning oʻrniga
-elektron pochta manzili yoki yaratilgan hisob identifikatorini qoʻymaydi. Provayder qiymati maxfiy boʻlmagan koʻrsatish yorligʻi boʻlib, hech qachon
-yaratilgan mos provayder identifikatori boʻlmaydi. Hisob maʼlumotlari, tokenlar, cookie fayllari, xom ulanish yoki API
-kaliti identifikatorlari, egasi xeshlari, himoyalash sirlari va ichki marshrutlash maʼlumotlari chiqarib tashlanadi.
+Ushbu ixtiyoriy status harakati shaffof egasi, autentifikatsiya qilingan boshqariladigan API kaliti va bitta maʼlumotlar bazasi tranzaksiyasidagi aniq faol generation bilan himoyalangan. `displayName` faqat qisqartirilgan konfiguratsiya qilingan ulanish nomi; xavfsiz konfiguratsiya qilingan nom mavjud boʻlmaganda u `null` boʻladi. OmniRoute hech qachon elektron pochta yoki yaratilgan hisob identifikatorini almashtirmaydi. Provayder qiymati sezgir boʻlmagan koʻrsatish yorligʻi boʻlib, hech qachon yaratilgan mos keluvchi provayder identifikatori emas. Hisobga olish maʼlumotlari, tokenlar, cookie-fayllar, xom ulanish yoki API kalit identifikatorlari, egalik xeshlari, himoya sirlari va ichki marshrutlash maʼlumotlari chiqarib tashlanadi.
 
-Notoʻgʻri kalit, notoʻgʻri egasi, eskirgan avlod, mavjud boʻlmagan, muddati tugagan, boʻshatilgan va bekor qilingan qidiruvlarning barchasi
-ulanish metamaʼlumotlarisiz bir xil `409 LEASE_FENCE_STALE` xatosini qaytaradi. Sigʻimni kutish javobini olgan mijozda tekshirish uchun faol bogʻlanish boʻlmaydi. Marshrutlash faol ijarani boshqa ulanishga oʻtkazganda,
-oʻsha avlod haqiqiyligicha qoladi va holat atomar tarzda eski bogʻlanishni emas, yangi bogʻlanishni qaytaradi.
-Mavjud mijozlar oʻzgarishsiz qoladi, chunki egallash, yangilash, boʻshatish va kutish javoblari
-avvalgi shakllarini saqlab qoladi.
+Notoʻgʻri kalit, notoʻgʻri egalik, eskirgan generation, yoʻqolgan, muddati oʻtgan, chiqarilgan va bekor qilingan qidiruvlarning barchasi ulanish metamaʼlumotlarisiz bir xil `409 LEASE_FENCE_STALE` xatosini qaytaradi. Imkoniyatni kutish javobini olgan mijozda tekshirish uchun faol bogʻlanish mavjud emas. Marshrutlash faol ijarani oʻzgartirganda, bir xil generation haqiqiy boʻlib qoladi va status atomik tarzda yangi bogʻlanishni qaytaradi, hech qachon eskisini emas. Mavjud mijozlar oʻzgarishsiz qoladi, chunki olish, yangilash, chiqarish va kutish javoblari oʻzlarining oldingi shakllarini saqlab qoladi.
 
-Bu server kelishuvi standart OpenAI Codex `/status` xatti-harakatini oʻzgartirmaydi. Standart Codex hozirda oʻzining
-model provayderi va ichki autentifikatsiya/hisob holatini bildiradi, ammo ixtiyoriy maxsus
-provayder hisobi metamaʼlumotlarini koʻrsatmaydi; keyingi mijoz integratsiyasi ushbu amalni chaqirishi va
-`connection.displayName` qanday koʻrsatilishini hal qilishi kerak.
+Ushbu server shartnomasi standart OpenAI Codex `/status`ni oʻzgartirmaydi. Standart Codex hozirda oʻzining model provayderini va oʻrnatilgan autentifikatsiya/hisob holatini xabar qiladi, ammo ixtiyoriy maxsus provayder hisob metamaʼlumotlarini koʻrsatmaydi; keyingi mijoz integratsiyasi ushbu harakatni chaqirishi va `connection.displayName`ni qanday koʻrsatishni hal qilishi kerak.
 
-Shundan soʻng har bir boshqariladigan inferensiya soʻrovi ikkala boshqaruv sarlavhasini ham yuboradi:
+Har bir boshqariladigan xulosa soʻrovi keyin ikkala boshqaruv sarlavhasini taqdim etadi:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-Aniq egasi, avlod, faol ulanish va autentifikatsiya qilingan API kaliti har bir qoʻllab-quvvatlanadigan yuqori oqim urinishidan
-bevosita oldin himoyalanadi. Egasi va avlodni boshqa kalit bilan takroran ishlatish, hatto ushbu kalit ayni ulanishga ruxsat bersa ham,
-muvaffaqiyatsiz tugaydi. Xom egalar saqlanmaydi, jurnalga yozilmaydi, soʻrov oniy nusxasida saqlab qolinmaydi va
-yuqori oqimga uzatilmaydi.
+Aniq egasi, generation, faol ulanish va autentifikatsiya qilingan API kaliti har bir qoʻllab-quvvatlanadigan yuqori oqim urinishidan oldin darhol himoyalanadi. Egasi va generationni boshqa kalit bilan qayta ijro etish, hatto bu kalit bir xil ulanishga ruxsat bersa ham, muvaffaqiyatsiz tugaydi. Xom egalar saqlanmaydi, qayd etilmaydi, soʻrov snapshotida saqlanmaydi yoki yuqori oqimga yuborilmaydi.
 
-Vaqtinchalik toʻqnashuv HTTP `429` javobini `Retry-After` bilan va quyidagicha qaytaradi:
+Vaqtinchalik tortishuv HTTP `429`ni `Retry-After` bilan va quyidagilarni qaytaradi:
 
 ```json
 {
@@ -178,36 +157,35 @@ Vaqtinchalik toʻqnashuv HTTP `429` javobini `Retry-After` bilan va quyidagicha 
 }
 ```
 
-Bu javob faqat oddiy mos ulanishlar toʻplami boʻsh boʻlmaganini va har bir boʻsh nomzod
-boshqa egaga tegishli faol ijara tomonidan egallanganini anglatadi. Qoʻllab-quvvatlanmaydigan modellar/provayderlar, siyosat nomuvofiqligi, kutish davri, kvota,
-sogʻliq holati va boshqa odatiy moslik xatolari mavjud OmniRoute javoblarini saqlab qoladi.
+Ushbu javob faqat oddiy mos keluvchi toʻplam boʻsh emasligini va har bir boʻsh nomzod chet el faol ijarasi tomonidan ushlab turilganligini anglatadi. Qoʻllab-quvvatlanmaydigan modellar/provayderlar, siyosat mos kelmasligi, sovutish, kvota, sogʻliq va boshqa oddiy moslik xatolari oʻzlarining mavjud OmniRoute javoblarini saqlab qoladi.
 
 ### `x-omniroute-compression`
 
-Har bir soʻrov uchun siqish rejasini qayta belgilash. Eng yuqori ustuvorlikka ega — marshrutlash kombinatsiyasi
-qayta belgilashidan, faol profildan, avtomatik ishga tushirishdan va paneldagi Default qiymatidan ustun turadi. Qiymatlar:
+Siqish rejasini har bir soʻrov boʻyicha bekor qilish. Eng yuqori ustuvorlik — marshrutlash-kombinatsiyasini bekor qilish, faol profil, avtomatik trigger va panelning Standartini bekor qiladi. Qiymatlar:
 
-| Qiymat        | Taʼsiri                                                                                                                        |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `off`         | Ushbu soʻrov uchun siqish qoʻllanmaydi.                                                                                        |
-| `default`     | Paneldan olingan Default profil (faol profilni eʼtiborsiz qoldiradi).                                                          |
-| `engine:<id>` | Yoqilganida bitta mexanizm, masalan, `engine:rtk`.                                                                             |
-| `<combo>`     | Avval nomi (harf registriga bogʻliq boʻlmagan holda), soʻng identifikatori boʻyicha moslashtiriladigan nomlangan kombinatsiya. |
+| Qiymat        | Effekt                                                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `off`         | Ushbu soʻrov uchun siqish yoʻq.                                                                                                      |
+| `default`     | Panel tomonidan olingan Standart profil (faol profilni eʼtiborsiz qoldiradi). Yoʻqotishli dvigatellar oʻchirilgan holda qoldiriladi. |
+| `safe`        | Faqat takrorlash va boʻsh joyni yigʻish.                                                                                             |
+| `allow-lossy` | Ushbu soʻrov uchun operator rejasini saqlab qolish, shu jumladan xulosalar va uslubni qayta yozish.                                  |
+| `engine:<id>` | Yoqilganda bitta dvigatel, masalan, `engine:rtk`. Ushbu dvigatel uchun har bir soʻrov boʻyicha ixtiyoriy qoʻshilish.                 |
+| `<combo>`     | Nomlangan kombinatsiya, avval nomi boʻyicha (katta-kichik harflarga sezgir emas), keyin identifikatori boʻyicha mos keladi.          |
 
-Izohlar:
+Eslatmalar:
 
-- Nomaʼlum qiymatlar eʼtiborsiz qoldiriladi (soʻrov hech qachon rad etilmaydi); aniqlash odatiy operator ustuvorligi boʻyicha davom etadi.
-- Agar bir nechta kombinatsiya bir xil nomga ega boʻlsa, deterministik moslik uchun kombinatsiya **id** qiymatini yuboring.
-- Nomi `off` yoki `default` boʻlgan kombinatsiyani nomi orqali tanlab boʻlmaydi (bu kalit soʻzlar avval talqin qilinadi); bunday kombinatsiyaga uning identifikatori orqali murojaat qiling.
-- Asosiy siqish kaliti qatʼiy toʻsiqdir: siqish global miqyosda oʻchirilgan boʻlsa, bu sarlavha uni yoqa olmaydi.
+- Nomaʼlum qiymatlar eʼtiborsiz qoldiriladi (soʻrov hech qachon rad etilmaydi); yechim oddiy operator ustuvorligiga tushadi.
+- Agar bir nechta kombinatsiyalar bir xil nomga ega boʻlsa, aniq moslik uchun kombinatsiya **id**sini kiriting.
+- Nomi `off` yoki `default` boʻlgan kombinatsiya nomi boʻyicha tanlanishi mumkin emas (bu kalit soʻzlar birinchi navbatda talqin qilinadi); bunday kombinatsiyaga uning identifikatori boʻyicha murojaat qiling.
+- Asosiy siqish tugmasi qattiq darvoza: siqish global ravishda oʻchirilgan boʻlsa, bu sarlavha uni yoqa olmaydi.
 
-Qoʻllangan reja javob sarlavhasida qaytariladi:
+Qoʻllanilgan reja javob sarlavhasida aks ettiriladi:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-bu yerda `<source>` quyidagilardan biri: `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` yoki `off`.
+bu yerda `<source>` `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` yoki `off` dan biri.
 
 ---
 
@@ -456,12 +434,12 @@ Sidecar jarayondan tashqarida ishlaganda va `open-sse/config/providerPluginManif
 | POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenlashtirilgan taxallusi             |
 | GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama teglarining tokenlashtirilgan taxallusi |
 
-Barcha POST yoʻnalishlari bir xil shaklga amal qiladi: `Bearer your-api-key` + Zod yordamida tekshiriladigan JSON tanasi (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` va boshqalar, `src/shared/validation/schemas.ts` fayliga qarang). Sxema tekshiruvi muvaffaqiyatsiz boʻlsa, 4xx qaytariladi.
+Barcha POST marshrutlari bir xil tuzilishga amal qiladi: `Bearer your-api-key` + Zod orqali tekshirilgan JSON tanasi (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` va boshqalar, `src/shared/validation/schemas.ts` fayliga qarang). Sxema tekshiruvi muvaffaqiyatsiz boʻlsa, 4xx qaytariladi.
 
-`Authorization: Bearer ...` sarlavhasini biriktira olmaydigan mijozlar uchun OmniRoute API kalitlarini URL ichida ham qabul qiladi: soʻrov satri mosligi (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) yoki quyida hujjatlashtirilgan maxsus `/api/v1/vscode/{token}/...` endpointlari orqali.
+`Authorization: Bearer ...` sarlavhasini biriktira olmaydigan mijozlar uchun OmniRoute URL ichidagi API kalitlarini ham qabul qiladi: soʻrov qatori mosligi (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) yoki quyida hujjatlashtirilgan maxsus `/api/v1/vscode/{token}/...` endpointlari orqali.
 
 ```bash
-# Qayta saralash (bulut registri provayderi yoki "<prefix>/<model>" shaklidagi OpenAI-mos provayder tuguni)
+# Qayta saralash (bulut registri provayderi yoki "<prefix>/<model>" koʻrinishidagi OpenAI-mos provayder tuguni)
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Jina tasniflash (Foundation API hisob maʼlumotlari)
@@ -479,42 +457,44 @@ POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 # TTS — audio/mpeg (yoki soʻralgan format) tanasini qaytaradi
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Tasvirni tahrirlash (multipart)
+# Soniox TTS til va ovozni talab qiladi: `language` standart qiymati "en"; koʻrsatilmagan
+# ovoz yoki OpenAI standart ovoz nomi (alloy, nova, …) "Adrian"ga aylantiriladi
+POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
+
+# Rasmni tahrirlash (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
 # Video / musiqa yaratish (provayder prefiksli model identifikatori)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
-POST /v1/music/generations  { "model": "suno/v3.5",   "prompt": "..." }
+POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Qayta saralash provayderi tugunlari:** `POST /v1/rerank` soʻrovlarni `<node-prefix>/<model>`
-> shaklida manzillangan OpenAI-mos provayder tugunlariga (oMLX, vLLM, Infinity, shlyuz ortidagi
-> TEI, …) ham yoʻnaltiradi. Loopback tugunlari (`localhost`, `127.0.0.1`, `172.16.0.0/12`) har
-> doim foydalanish uchun mos hisoblanadi. Boshqa har qanday hostdagi tugunlar — LAN qurilmasi
-> yoki Tailscale peeri — faqat operator `RERANK_REMOTE_PROVIDER_NODES` funksiya bayrogʻini yoqsa
-> **va** tugunning asosiy URL manzili provayderning chiquvchi URL siyosatidan
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) oʻtsa,
-> foydalanish uchun mos hisoblanadi; bulut metamaʼlumotlari hostlariga hech qachon soʻrov
-> yoʻnaltirilmaydi. Xotira mexanizmining qayta saralash bosqichi ushbu yoʻnalishni loopback orqali
-> chaqiradi, shuning uchun ayni qoida Xotira sozlamalaridagi `rerankProviderModel` uchun ham amal qiladi.
+> **Qayta saralash provayder tugunlari:** `POST /v1/rerank` soʻrovlarni `<node-prefix>/<model>` orqali
+> manzillangan OpenAI-mos provayder tugunlariga (oMLX, vLLM, Infinity, shlyuz ortidagi TEI, …) ham
+> yoʻnaltiradi. Loopback tugunlaridan (`localhost`, `127.0.0.1`, `172.16.0.0/12`) har doim foydalanish
+> mumkin. Boshqa xostdagi tugunlardan — LAN qurilmasi yoki Tailscale hamkori — faqat operator
+> `RERANK_REMOTE_PROVIDER_NODES` funksiya bayrogʻini yoqqanida **va** tugunning asosiy URL manzili
+> provayderning chiquvchi URL siyosatidan (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` /
+> `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) oʻtganida foydalanish mumkin; bulut metamaʼlumotlari
+> xostlariga hech qachon marshrut yoʻnaltirilmaydi. Xotira mexanizmining qayta saralash bosqichi ushbu
+> marshrutni loopback orqali chaqiradi, shu sababli Xotira sozlamalaridagi `rerankProviderModel` uchun
+> ham xuddi shu qoida amal qiladi.
 >
-> **Mahalliy server shakllari:** tugun `<base>/v1/rerank` manzilida, 404 holatida esa
-> `<base>/rerank` manzilida chaqiriladi (Infinity, TEI). Yuqori oqim tanasi Cohere/OpenAI
+> **Mahalliy server tuzilmalari:** tugun `<base>/v1/rerank` manzilida, 404 holatida esa
+> `<base>/rerank` manzilida (Infinity, TEI) chaqiriladi. Yuqori oqim tanasi Cohere/OpenAI
 > yozilishini (`documents`, `return_documents`) ham, TEI yozilishini (`texts`, `return_text`) ham
-> oʻz ichiga oladi va yuqori oqim javobi Cohere konvertiga meʼyorlashtiriladi: TEI’ning oddiy
-> `[{index, score, text}]`, yupqa shlyuzlardan keladigan `{results: [{index, score}]}` va
-> Voyage uslubidagi `{data: [...]}` javoblarining barchasi mijozga
-> `{results: [{index, relevance_score, document?}]}` shaklida, ball boʻyicha saralangan va
-> `top_n` bilan cheklangan holda qaytariladi.
+> oʻz ichiga oladi va yuqori oqim javobi Cohere konvertiga meʼyorlashtiriladi: TEI'ning oddiy
+> `[{index, score, text}]`, yupqa shlyuzlardan keladigan `{results: [{index, score}]}` va Voyage
+> uslubidagi `{data: [...]}` javoblarining barchasi mijozga ball boʻyicha saralangan va `top_n`
+> bilan cheklangan `{results: [{index, relevance_score, document?}]}` koʻrinishida qaytariladi.
 
-> **Provayder tugunlarini aniqlash:** OpenAI-mos provayder tugunidagi modellar `GET /v1/models`
-> natijasida tugun prefiksi ostida koʻrinadi. Endpoint metamaʼlumotlariga ega boʻlmagan qatorlar
-> (mahalliy `/v1/models` roʻyxatlari uchun odatiy holat) tugunning `apiType` qiymatini meros qilib
-> oladi, shu sababli `embeddings` tugunining modellari standart ravishda chatga tegishli deb
-> belgilanmasdan `type: "embedding"`, `rerank` tugunining modellari esa `type: "rerank"` boʻladi;
-> sinxronlangan yoki qoʻlda qoʻshilgan qatordagi aniq `supportedEndpoints` qiymati baribir ustuvorlikka ega.
+> **Provayder tugunini aniqlash:** OpenAI bilan mos provayder tugunidagi modellar `GET /v1/models`
+> natijasida tugun prefiksi ostida ko‘rinadi. Endpoint metama’lumotlariga ega bo‘lmagan qatorlar (odatda mahalliy `/v1/models` ro‘yxatlarida)
+> tugunning `apiType` qiymatini meros qilib oladi, shuning uchun `embeddings` tugunidagi modellar sukut bo‘yicha chat turiga o‘tish o‘rniga `type: "embedding"`,
+> `rerank` tugunidagi modellar esa `type: "rerank"` bo‘ladi; sinxronlangan yoki qo‘lda qo‘shilgan qatorda aniq ko‘rsatilgan
+> `supportedEndpoints` hali ham ustuvor hisoblanadi.
 
-### Maxsus provayder yoʻnalishlari
+### Maxsus provayder marshrutlari
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -522,7 +502,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Agar provayder prefiksi mavjud bo‘lmasa, u avtomatik ravishda qo‘shiladi. Mos kelmaydigan modellar `400` kodini qaytaradi.
+Agar provayder prefiksi mavjud bo‘lmasa, u avtomatik ravishda qo‘shiladi. Mos kelmaydigan modellar `400` qaytaradi.
 
 ---
 
@@ -1435,22 +1415,22 @@ Ommaviy A2A agent kartasini (nomi, tavsifi, imkoniyatlari, ko‘nikmalar katalog
 
 ---
 
-## Bulut, baholashlar va tahlil
+## Bulut, sinovlar va baholash
 
-| Metod | Yo‘l | Tavsif |
+| Usul | Yo‘l | Tavsif |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | Bearer kalitini tekshirish va bulut bilan sinxronlash mijozlari uchun niqoblangan provayder ulanishlari + model taxalluslarini qaytarish |
+| POST | `/api/cloud/auth` | Bearer kalitini tekshirish va bulutli sinxronlash mijozlari uchun niqoblangan provayder ulanishlari hamda model taxalluslarini qaytarish |
 | POST | `/api/cloud/credentials/update` | Bulut bilan sinxronlangan provayderning shifrlangan hisob ma’lumotlarini yangilash |
-| POST | `/api/cloud/model/resolve` | Mahalliy marshrutlash jadvali yordamida mantiqiy model identifikatorini aniq provayder/modelga moslashtirish |
-| GET | `/api/cloud/models/alias` | Bulut bilan sinxronlashga taqdim etilgan model taxalluslari ro‘yxati |
-| GET | `/api/assess` | Eng so‘nggi tahlil toifalarini o‘qish (har bir provayder/model bo‘yicha) |
-| POST | `/api/assess` | Tahlilni ishga tushirish — tana: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | Ichki baholash to‘plamlari + eng so‘nggi ishga tushirishlar ro‘yxati |
-| POST | `/api/evals` | Baholashni ishga tushirish |
-| POST | `/api/evals/suites` | Maxsus baholash to‘plamini yaratish — tana `evalSuiteSaveSchema` orqali tekshiriladi |
-| GET | `/api/evals/suites/[id]` | Maxsus baholash to‘plamini olish |
+| POST | `/api/cloud/model/resolve` | Mahalliy marshrutlash jadvali yordamida mantiqiy model identifikatorini muayyan provayder/modelga moslashtirish |
+| GET | `/api/cloud/models/alias` | Bulutli sinxronlashga taqdim etilgan model taxalluslarini ro‘yxatlash |
+| GET | `/api/assess` | Eng so‘nggi baholash toifalarini o‘qish (har bir provayder/model bo‘yicha) |
+| POST | `/api/assess` | Baholashni ishga tushirish — so‘rov tanasi: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
+| GET | `/api/evals` | Ichki sinov to‘plamlari va eng so‘nggi ishga tushirishlarni ro‘yxatlash |
+| POST | `/api/evals` | Sinovni ishga tushirish |
+| POST | `/api/evals/suites` | Maxsus sinov to‘plamini yaratish — so‘rov tanasi `evalSuiteSaveSchema` orqali tekshiriladi |
+| GET | `/api/evals/suites/[id]` | Maxsus sinov to‘plamini olish |
 
-**Autentifikatsiya:** `/api/cloud/auth` Bearer kalitini bevosita tekshiradi; boshqa `/api/cloud/*`, `/api/evals/*` va `/api/assess` marshrutlari boshqaruv seansi/API kalitini talab qiladi. `/api/assess` POST diskriminatsiyalangan birlashma doirasi sxemasi bilan `validateBody` dan foydalanadi.
+**Autentifikatsiya:** `/api/cloud/auth` Bearer kalitini bevosita tekshiradi va faqat `manage` / `admin` doirasiga ega kalit uchun har bir ulanishning niqoblangan kaliti hamda `projectId` qiymatini qaytaradi; boshqa `/api/cloud/*`, `/api/evals/*` va `/api/assess` marshrutlari boshqaruv seansi/API kalitini talab qiladi. `/api/assess` POST diskriminatsiyalangan birlashma doirasi sxemasi bilan `validateBody` funksiyasidan foydalanadi.
 
 ---
 

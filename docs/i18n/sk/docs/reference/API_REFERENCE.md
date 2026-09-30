@@ -88,13 +88,13 @@ Content-Type: application/json
 
 ## Exkluzívne spravované prenájmy relácií
 
-Exkluzívny prenájom spravovanej relácie je voliteľná zmluva smerovania nezávislá od klienta: jeden aktívny vlastník
+Exkluzívne spravované prenájmy relácií sú voliteľnou, klient-neutrálnou smerovacou zmluvou: jeden aktívny vlastník
 drží jedno oprávnené pripojenie OmniRoute. Neprenajíma model, nevyžaduje OAuth, neidentifikuje
 konkrétneho klienta ani nevyžaduje konkrétneho poskytovateľa.
 
-Overovací API kľúč musí mať rozsah `lease:exclusive` a explicitný neprázdny
-zoznam `allowedConnections`. Hranica databázovej mutácie vynucuje obe polia spoločne pri
-vytváraní kľúča aj pri čiastočných aktualizáciách.
+Autentifikačný API kľúč musí mať rozsah `lease:exclusive` a explicitný neprázdny
+zoznam `allowedConnections`. Hranica mutácie databázy vynucuje obe polia spoločne pri vytváraní kľúča
+a čiastočných aktualizáciách.
 
 ```http
 POST /api/v1/session-leases
@@ -105,9 +105,9 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-Úspešné odpovede na získanie, obnovenie a uvoľnenie uvádzajú časové pečiatky, `state` a presnú kladnú
-hodnotu `generation`, nikdy však nie vybrané pripojenie ani prihlasovacie údaje. Pri obnovení a uvoľnení sa
-generácia uvádza v tele JSON:
+Úspešné odpovede na získanie, obnovenie a uvoľnenie zobrazujú časové pečiatky, `state` a presnú kladnú
+`generation`, ale nikdy vybrané pripojenie alebo poverenia. Obnovenie a uvoľnenie dodávajú
+generáciu v tele JSON:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -117,7 +117,7 @@ generácia uvádza v tele JSON:
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-Vlastník aktívneho prenájmu môže explicitne požiadať o zobrazované metadáta svojho aktuálneho naviazania, ktoré neohrozujú súkromie:
+Aktívny vlastník prenájmu môže explicitne požiadať o metadáta zobrazenia chrániace súkromie pre svoje aktuálne viazanie:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -137,37 +137,38 @@ Vlastník aktívneho prenájmu môže explicitne požiadať o zobrazované metad
 }
 ```
 
-Táto voliteľná stavová akcia je v rámci jednej databázovej transakcie chránená nepriehľadným vlastníkom, overeným spravovaným API kľúčom a presnou
-aktívnou generáciou. `displayName` je iba orezaný nakonfigurovaný
-názov pripojenia; keď neexistuje bezpečný nakonfigurovaný názov, má hodnotu `null`. OmniRoute ho nikdy nenahrádza
-e-mailom ani vygenerovanou identitou účtu. Hodnota poskytovateľa je necitlivý zobrazovaný štítok a nikdy
-nejde o vygenerovaný identifikátor kompatibilného poskytovateľa. Prihlasovacie údaje, tokeny, súbory cookie, nespracované identifikátory pripojení alebo API
-kľúčov, haše vlastníkov, tajné hodnoty ohraničenia a interné údaje smerovania sú vylúčené.
+Táto voliteľná akcia stavu je ohraničená nepriehľadným vlastníkom, autentifikovaným spravovaným API kľúčom a presnou
+aktívnou generáciou v jednej databázovej transakcii. `displayName` je iba orezaný nakonfigurovaný
+názov pripojenia; je `null`, ak neexistuje bezpečný nakonfigurovaný názov. OmniRoute nikdy nenahrádza
+e-mail ani vygenerovanú identitu účtu. Hodnota poskytovateľa je nesenzitívny zobrazovací štítok a nikdy
+vygenerovaný kompatibilný identifikátor poskytovateľa. Poverenia, tokeny, súbory cookie, surové ID pripojenia alebo API kľúča,
+hashy vlastníkov, tajomstvá ohradenia a interné smerovacie údaje sú vylúčené.
 
-Vyhľadávania s nesprávnym kľúčom, nesprávnym vlastníkom, zastaranou generáciou, chýbajúce, exspirované, uvoľnené aj zneplatnené vyhľadávania
-vracajú rovnakú chybu `409 LEASE_FENCE_STALE` bez metadát pripojenia. Klient, ktorý dostal odpoveď o čakaní na kapacitu, nemá žiadne aktívne naviazanie, ktoré by mohol skontrolovať. Keď smerovanie zmení pripojenie aktívneho prenájmu,
-rovnaká generácia zostáva platná a stav atomicky vráti nové naviazanie, nikdy nie staré.
+Nesprávny kľúč, nesprávny vlastník, zastaraná generácia, chýbajúce, expirované, uvoľnené a neplatné vyhľadávania
+všetky vracajú rovnakú chybu `409 LEASE_FENCE_STALE` bez metadát pripojenia. Klient, ktorý prijal
+odpoveď na čakanie na kapacitu, nemá žiadne aktívne viazanie na kontrolu. Keď smerovanie prechádza aktívny prenájom,
+rovnaká generácia zostáva platná a stav atomicky vráti nové viazanie, nikdy nie staré.
 Existujúci klienti zostávajú nezmenení, pretože odpovede na získanie, obnovenie, uvoľnenie a čakanie si zachovávajú
-svoje predchádzajúce štruktúry.
+svoje predchádzajúce tvary.
 
-Táto serverová zmluva nemení štandardné `/status` služby OpenAI Codex. Štandardný Codex v súčasnosti uvádza svojho
-poskytovateľa modelu a vstavaný stav overenia/účtu, ale nezobrazuje ľubovoľné vlastné
-metadáta účtu poskytovateľa; budúca integrácia klienta musí zavolať túto akciu a rozhodnúť, ako
+Táto serverová zmluva nemení štandardný OpenAI Codex `/status`. Štandardný Codex v súčasnosti hlási svojho
+poskytovateľa modelu a vstavaný stav autentifikácie/účtu, ale nezobrazuje ľubovoľné vlastné
+metadáta účtu poskytovateľa; neskoršia integrácia klienta musí zavolať túto akciu a rozhodnúť sa, ako
 zobraziť `connection.displayName`.
 
-Každá spravovaná inferenčná požiadavka potom uvádza obe riadiace hlavičky:
+Každá spravovaná požiadavka na inferenciu potom dodáva obe riadiace hlavičky:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-Presný vlastník, generácia, aktívne pripojenie a overený API kľúč sú ohraničené bezprostredne
-pred každým podporovaným pokusom o prístup k upstreamu. Opätovné použitie vlastníka a generácie s iným kľúčom zlyhá, aj
-keď tento kľúč povoľuje rovnaké pripojenie. Nespracované hodnoty vlastníkov sa neuchovávajú, nezaznamenávajú do protokolov, neponechávajú v
-snímke požiadavky ani neposielajú upstreamu.
+Presný vlastník, generácia, aktívne pripojenie a autentifikovaný API kľúč sú ohradené
+bezprostredne pred každým podporovaným pokusom o upstream. Opakované prehrávanie vlastníka a generácie s iným kľúčom zlyhá,
+aj keď tento kľúč povoľuje rovnaké pripojenie. Surové vlastníctvo sa neuchováva, neloguje, neuchováva v snímke požiadavky
+ani neposiela upstream.
 
-Dočasný konflikt vracia HTTP `429` s hlavičkou `Retry-After` a:
+Dočasná kolízia vráti HTTP `429` s `Retry-After` a:
 
 ```json
 {
@@ -178,36 +179,38 @@ Dočasný konflikt vracia HTTP `429` s hlavičkou `Retry-After` a:
 }
 ```
 
-Táto odpoveď znamená iba to, že bežná množina oprávnených pripojení nebola prázdna a každý voľný kandidát bol
-držaný cudzím aktívnym prenájmom. Nepodporované modely/poskytovatelia, nesúlad so zásadami, doba čakania, kvóta,
-stav a ďalšie bežné zlyhania oprávnenosti si zachovávajú svoje existujúce odpovede OmniRoute.
+Táto odpoveď znamená iba to, že bežná oprávnená sada nebola prázdna a každý voľný kandidát bol
+držaný cudzím aktívnym prenájmom. Nepodporované modely/poskytovatelia, nesúlad politiky, cooldown, kvóta,
+zdravie a iné bežné zlyhania oprávnenosti si zachovávajú svoje existujúce odpovede OmniRoute.
 
 ### `x-omniroute-compression`
 
-Prepísanie plánu kompresie pre jednotlivú požiadavku. Má najvyššiu prioritu — prevažuje nad prepísaním kombinácie smerovania,
-aktívnym profilom, automatickým spúšťačom aj predvoleným nastavením panela. Hodnoty:
+Prepísanie plánu kompresie pre každú požiadavku. Najvyššia priorita – prekonáva prepísanie smerovacej kombinácie,
+aktívny profil, automatické spustenie a predvolené nastavenie panela. Hodnoty:
 
-| Hodnota       | Účinok                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Bez kompresie pre túto požiadavku.                                                                                  |
-| `default`     | Predvolený profil odvodený z panela (ignoruje aktívny profil).                                                      |
-| `engine:<id>` | Jeden mechanizmus, ak je povolený, napr. `engine:rtk`.                                                              |
-| `<combo>`     | Pomenovaná kombinácia, najprv porovnaná podľa názvu (bez rozlišovania veľkosti písmen), potom podľa identifikátora. |
+| Hodnota       | Účinok                                                                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| `off`         | Žiadna kompresia pre túto požiadavku.                                                                |
+| `default`     | Predvolený profil odvodený z panela (ignoruje aktívny profil). Stratové enginy sú vypnuté.           |
+| `safe`        | Iba deduplikácia a skladanie medzier.                                                                |
+| `allow-lossy` | Zachovať plán operátora pre túto požiadavku, vrátane súhrnov a prepisov štýlov.                      |
+| `engine:<id>` | Jeden engine, ak je povolený, napr. `engine:rtk`. Voliteľné pre každú požiadavku pre tento engine.   |
+| `<combo>`     | Pomenovaná kombinácia, najprv zhodná podľa názvu (nerozlišuje veľké a malé písmená), potom podľa ID. |
 
 Poznámky:
 
-- Neznáme hodnoty sa ignorujú (požiadavka sa nikdy neodmietne); vyhodnocovanie pokračuje podľa bežného poradia priorít operátora.
-- Ak má viacero kombinácií rovnaký názov, na deterministické priradenie zadajte **id** kombinácie.
-- Kombináciu s názvom `off` alebo `default` nemožno vybrať podľa názvu (tieto kľúčové slová sa interpretujú ako prvé); na takúto kombináciu odkazujte pomocou jej identifikátora.
-- Hlavný prepínač kompresie je neprekročiteľná podmienka: keď je kompresia globálne zakázaná, táto hlavička ju nemôže povoliť.
+- Neznáme hodnoty sú ignorované (požiadavka nikdy nie je zamietnutá); rozlíšenie prechádza na normálnu prioritu operátora.
+- Ak viaceré kombinácie zdieľajú názov, pre deterministickú zhodu odovzdajte **ID** kombinácie.
+- Kombinácia, ktorej názov je `off` alebo `default`, nemôže byť vybraná podľa názvu (tieto kľúčové slová sú interpretované ako prvé); odkazujte na takúto kombináciu podľa jej ID.
+- Hlavný prepínač kompresie je tvrdá brána: keď je kompresia globálne zakázaná, táto hlavička ju nemôže povoliť.
 
-Použitý plán sa odošle späť v hlavičke odpovede:
+Použitý plán je zopakovaný v hlavičke odpovede:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-kde `<source>` je jedna z hodnôt `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` alebo `off`.
+kde `<source>` je jedna z `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` alebo `off`.
 
 ---
 
@@ -443,40 +446,40 @@ Tento koncový bod použite, keď sidecar beží mimo procesu a nemôže priamo 
 
 ## Koncové body kompatibility
 
-| Metóda | Cesta                                     | Formát                               |
-| ------ | ----------------------------------------- | ------------------------------------ |
-| POST   | `/v1/chat/completions`                    | OpenAI                               |
-| POST   | `/v1/messages`                            | Anthropic                            |
-| POST   | `/v1/responses`                           | OpenAI Responses                     |
-| POST   | `/v1/embeddings`                          | OpenAI                               |
-| POST   | `/v1/images/generations`                  | OpenAI Images                        |
-| POST   | `/v1/images/edits`                        | OpenAI Images (úprava/inpainting)    |
-| POST   | `/v1/videos/generations`                  | Generovanie videa v štýle OpenAI     |
-| POST   | `/v1/music/generations`                   | Generovanie hudby v štýle OpenAI     |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                   |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (vracia telo so zvukom)   |
-| POST   | `/v1/rerank`                              | Preraďovanie v štýle Cohere/Voyage   |
-| POST   | `/v1/classify`                            | Klasifikácia Jina (`api.jina.ai`)    |
-| POST   | `/v1/segment`                             | Segmentátor Jina (`segment.jina.ai`) |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                   |
-| GET    | `/v1/models`                              | OpenAI                               |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                            |
-| GET    | `/v1beta/models`                          | Gemini                               |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent               |
-| POST   | `/v1/api/chat`                            | Ollama                               |
-| GET    | `/api/v1/vscode/{token}/`                 | Alias katalógu OpenAI                |
-| GET    | `/api/v1/vscode/{token}/models`           | Alias modelov OpenAI                 |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | Tokenizovaný alias OpenAI            |
-| POST   | `/api/v1/vscode/{token}/responses`        | Tokenizovaný alias OpenAI Responses  |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Tokenizovaný alias Ollama            |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Tokenizovaný alias značiek Ollama    |
+| Metóda | Cesta                                     | Formát                                |
+| ------ | ----------------------------------------- | ------------------------------------- |
+| POST   | `/v1/chat/completions`                    | OpenAI                                |
+| POST   | `/v1/messages`                            | Anthropic                             |
+| POST   | `/v1/responses`                           | OpenAI Responses                      |
+| POST   | `/v1/embeddings`                          | OpenAI                                |
+| POST   | `/v1/images/generations`                  | OpenAI Images                         |
+| POST   | `/v1/images/edits`                        | OpenAI Images (úprava/inpainting)     |
+| POST   | `/v1/videos/generations`                  | Generovanie videa v štýle OpenAI      |
+| POST   | `/v1/music/generations`                   | Generovanie hudby v štýle OpenAI      |
+| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (vracia telo so zvukom)    |
+| POST   | `/v1/rerank`                              | Preusporiadanie v štýle Cohere/Voyage |
+| POST   | `/v1/classify`                            | Klasifikácia Jina (`api.jina.ai`)     |
+| POST   | `/v1/segment`                             | Segmentátor Jina (`segment.jina.ai`)  |
+| POST   | `/v1/moderations`                         | OpenAI Moderations                    |
+| GET    | `/v1/models`                              | OpenAI                                |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
+| GET    | `/v1beta/models`                          | Gemini                                |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
+| POST   | `/v1/api/chat`                            | Ollama                                |
+| GET    | `/api/v1/vscode/{token}/`                 | Alias katalógu OpenAI                 |
+| GET    | `/api/v1/vscode/{token}/models`           | Alias modelov OpenAI                  |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | Tokenizovaný alias OpenAI             |
+| POST   | `/api/v1/vscode/{token}/responses`        | Tokenizovaný alias OpenAI Responses   |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Tokenizovaný alias Ollama             |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Tokenizovaný alias značiek Ollama     |
 
-Všetky trasy POST majú rovnakú štruktúru: `Bearer your-api-key` + telo JSON validované pomocou Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` atď.; pozrite si `src/shared/validation/schemas.ts`). Pri zlyhaní validácie schémy sa vráti 4xx.
+Všetky trasy POST majú rovnakú štruktúru: `Bearer your-api-key` + telo JSON validované pomocou Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` atď.; pozrite si `src/shared/validation/schemas.ts`). Pri zlyhaní validácie schémy sa vráti stav 4xx.
 
-Pre klientov, ktorí nemôžu pripojiť `Authorization: Bearer ...`, OmniRoute prijíma kľúče API aj v adrese URL, a to buď prostredníctvom kompatibilných parametrov reťazca dopytu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), alebo prostredníctvom vyhradených koncových bodov `/api/v1/vscode/{token}/...` zdokumentovaných nižšie.
+Pre klientov, ktorí nemôžu pripojiť hlavičku `Authorization: Bearer ...`, OmniRoute prijíma kľúče API aj v adrese URL, a to buď prostredníctvom kompatibilného reťazca dopytu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), alebo cez vyhradené koncové body `/api/v1/vscode/{token}/...` zdokumentované nižšie.
 
 ```bash
-# Preraďovanie (poskytovateľ z cloudového registra alebo uzol poskytovateľa kompatibilný s OpenAI ako "<prefix>/<model>")
+# Preusporiadanie (poskytovateľ z cloudového registra alebo uzol poskytovateľa kompatibilný s OpenAI ako "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Klasifikácia Jina (prihlasovacie údaje Foundation API)
@@ -494,39 +497,39 @@ POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 # TTS — vracia telo audio/mpeg (alebo požadovaný formát)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
+# Soniox TTS vyžaduje jazyk a hlas: predvolená hodnota `language` je "en"; chýbajúci
+# hlas alebo názov štandardného hlasu OpenAI (alloy, nova, …) sa zmení na "Adrian"
+POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
+
 # Úprava obrázka (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Generovanie videa/hudby (identifikátor modelu s predponou poskytovateľa)
+# Generovanie videa/hudby (ID modelu s predponou poskytovateľa)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
-POST /v1/music/generations  { "model": "suno/v3.5",   "prompt": "..." }
+POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Uzly poskytovateľov pre preraďovanie:** `POST /v1/rerank` smeruje požiadavky aj na uzly poskytovateľov
-> kompatibilné s OpenAI (oMLX, vLLM, Infinity, TEI za bránou, …), ktoré sú adresované ako
-> `<node-prefix>/<model>`. Uzly spätnej slučky (`localhost`, `127.0.0.1`, `172.16.0.0/12`) sú
-> vždy oprávnené. Uzly na akomkoľvek inom hostiteľovi — zariadení v sieti LAN alebo partnerskom
-> uzle Tailscale — sú oprávnené iba vtedy, keď prevádzkovateľ povolí príznak funkcie
-> `RERANK_REMOTE_PROVIDER_NODES` **a** základná adresa URL uzla spĺňa pravidlá poskytovateľa pre
-> odchádzajúce adresy URL (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`);
-> požiadavky sa nikdy nesmerujú na hostiteľov cloudových metadát. Krok preraďovania pamäťového
-> mechanizmu volá túto trasu cez spätnú slučku, takže rovnaké pravidlo sa vzťahuje na
-> `rerankProviderModel` v nastaveniach pamäte.
+> **Uzly poskytovateľov pre preusporiadanie:** `POST /v1/rerank` smeruje požiadavky aj na uzly poskytovateľov kompatibilné s OpenAI
+> (oMLX, vLLM, Infinity, TEI za bránou, …), ktoré sa adresujú ako `<node-prefix>/<model>`. Uzly spätnej slučky
+> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) sú vždy oprávnené. Uzly na akomkoľvek inom
+> hostiteľovi — zariadení v sieti LAN alebo partnerskom uzle Tailscale — sú oprávnené iba vtedy, keď prevádzkovateľ povolí
+> príznak funkcie `RERANK_REMOTE_PROVIDER_NODES` **a zároveň** základná adresa URL uzla vyhovuje pravidlám poskytovateľa
+> pre odchádzajúce adresy URL (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`);
+> na hostiteľov cloudových metaúdajov sa požiadavky nikdy nesmerujú. Krok preusporiadania pamäťového mechanizmu volá túto trasu cez
+> spätnú slučku, takže rovnaké pravidlo sa vzťahuje na `rerankProviderModel` v nastaveniach pamäte.
 >
-> **Formáty lokálneho servera:** uzol sa volá na `<base>/v1/rerank` a pri odpovedi 404 na
-> `<base>/rerank` (Infinity, TEI). Telo odosielané nadradenému serveru obsahuje pomenovania
-> Cohere/OpenAI (`documents`, `return_documents`) aj pomenovania TEI (`texts`, `return_text`)
-> a odpoveď nadradeného servera sa normalizuje do obálky Cohere: samostatné pole TEI
-> `[{index, score, text}]`, `{results: [{index, score}]}` z jednoduchých brán a formát Voyage
-> `{data: [...]}` sa klientovi vrátia ako `{results: [{index, relevance_score, document?}]}`,
-> zoradené podľa skóre a obmedzené hodnotou `top_n`.
+> **Formáty lokálneho servera:** uzol sa volá na adrese `<base>/v1/rerank` a pri odpovedi 404 na adrese `<base>/rerank`
+> (Infinity, TEI). Telo odosielané nadradenému serveru obsahuje zápis Cohere/OpenAI (`documents`,
+> `return_documents`) aj zápis TEI (`texts`, `return_text`) a odpoveď nadradeného servera sa
+> normalizuje do obálky Cohere: samostatné pole TEI `[{index, score, text}]`, `{results: [{index, score}]}`
+> z jednoduchých brán aj formát Voyage `{data: [...]}` sa klientovi vrátia ako
+> `{results: [{index, relevance_score, document?}]}`, zoradené podľa skóre a obmedzené hodnotou `top_n`.
 
-> **Zisťovanie uzlov poskytovateľov:** modely v uzle poskytovateľa kompatibilnom s OpenAI sa zobrazia
-> v `GET /v1/models` pod predponou uzla. Riadky, ktoré neobsahujú žiadne metadáta koncového bodu
-> (typické pre lokálne zoznamy `/v1/models`), zdedia `apiType` daného uzla, takže modely uzla
-> `embeddings` majú `type: "embedding"` a modely uzla `rerank` majú `type: "rerank"` namiesto
-> predvoleného typu chatu; explicitné `supportedEndpoints` v synchronizovanom alebo manuálne
-> pridanom riadku má naďalej prednosť.
+> **Vyhľadávanie uzlov poskytovateľov:** modely v uzle poskytovateľa kompatibilnom s OpenAI sa zobrazujú v `GET /v1/models`
+> pod prefixom uzla. Riadky, ktoré neobsahujú metadáta koncového bodu (typické pre lokálne zoznamy `/v1/models`),
+> dedia `apiType` uzla, takže modely uzla `embeddings` majú `type: "embedding"` a modely
+> uzla `rerank` majú `type: "rerank"` namiesto predvoleného typu chat; explicitné
+> `supportedEndpoints` v synchronizovanom alebo manuálne pridanom riadku má naďalej prednosť.
 
 ### Vyhradené trasy poskytovateľov
 
@@ -536,7 +539,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Prefix poskytovateľa sa automaticky pridá, ak chýba. Nekompatibilné modely vrátia `400`.
+Ak prefix poskytovateľa chýba, pridá sa automaticky. Modely, ktoré sa nezhodujú, vrátia stav `400`.
 
 ---
 
@@ -1464,22 +1467,22 @@ Vráti verejnú kartu agenta A2A (názov, popis, funkcie, katalóg zručností, 
 
 ---
 
-## Cloud, vyhodnotenia a posúdenie
+## Cloud, evaluácie a posudzovanie
 
 | Metóda | Cesta | Popis |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
 | POST | `/api/cloud/auth` | Overí kľúč Bearer a vráti maskované pripojenia poskytovateľov + aliasy modelov pre klientov cloudovej synchronizácie |
-| POST | `/api/cloud/credentials/update` | Aktualizuje šifrované prihlasovacie údaje poskytovateľa synchronizovaného s cloudom |
+| POST | `/api/cloud/credentials/update` | Aktualizuje šifrované prihlasovacie údaje pre poskytovateľa synchronizovaného s cloudom |
 | POST | `/api/cloud/model/resolve` | Preloží logické ID modelu na konkrétneho poskytovateľa/model pomocou lokálnej smerovacej tabuľky |
-| GET | `/api/cloud/models/alias` | Zobrazí aliasy modelov sprístupnené cloudovej synchronizácii |
-| GET | `/api/assess` | Načíta najnovšie kategorizácie posúdenia (podľa poskytovateľa/modelu) |
+| GET | `/api/cloud/models/alias` | Zobrazí zoznam aliasov modelov sprístupnených cloudovej synchronizácii |
+| GET | `/api/assess` | Načíta najnovšie kategorizácie posúdení (podľa poskytovateľa/modelu) |
 | POST | `/api/assess` | Spustí posúdenie — telo: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | Zobrazí vstavané sady vyhodnotení + najnovšie spustenia |
-| POST | `/api/evals` | Spustí vyhodnotenie |
-| POST | `/api/evals/suites` | Vytvorí vlastnú sadu vyhodnotení — telo overené schémou `evalSuiteSaveSchema` |
-| GET | `/api/evals/suites/[id]` | Načíta vlastnú sadu vyhodnotení |
+| GET | `/api/evals` | Zobrazí zoznam vstavaných evaluačných súprav + najnovších spustení |
+| POST | `/api/evals` | Spustí evaluáciu |
+| POST | `/api/evals/suites` | Vytvorí vlastnú evaluačnú súpravu — telo overené pomocou `evalSuiteSaveSchema` |
+| GET | `/api/evals/suites/[id]` | Načíta vlastnú evaluačnú súpravu |
 
-**Autentifikácia:** `/api/cloud/auth` overuje kľúč Bearer priamo; ostatné trasy `/api/cloud/*`, `/api/evals/*` a `/api/assess` vyžadujú reláciu na správu/kľúč API. Požiadavka POST na `/api/assess` používa `validateBody` so schémou rozsahu typu discriminated union.
+**Autentifikácia:** `/api/cloud/auth` priamo overuje kľúč Bearer a vracia maskovaný kľúč a `projectId` každého pripojenia iba pre kľúč s rozsahom `manage` / `admin`; ostatné trasy `/api/cloud/*`, `/api/evals/*` a `/api/assess` vyžadujú reláciu správy/kľúč API. POST na `/api/assess` používa `validateBody` so schémou rozsahu s diskriminovanou úniou.
 
 ---
 

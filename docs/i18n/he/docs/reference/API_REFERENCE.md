@@ -86,28 +86,22 @@ Content-Type: application/json
 
 > **סמנטיקת עלויות בפגיעה במטמון:** במקרה של פגיעה במטמון סמנטי (`X-OmniRoute-Cache-Hit: true`), לא מתבצעת קריאה לספק חיצוני, ולכן הערך של `X-OmniRoute-Response-Cost` הוא `0.0000000000` (העלות **התוספתית** של הגשת התוצאה מהמטמון). העלות המקורית/העלות שהייתה צפויה מדווחת בנפרד ב-`X-OmniRoute-Cost-Saved`. מערכות צרכניות לחיוב צריכות לסכם את `X-OmniRoute-Response-Cost` (פגיעות במטמון אינן עולות דבר); מערכות ניתוח של המטמון יכולות לצבור את `X-OmniRoute-Cost-Saved`.
 
-## חכירות בלעדיות של הפעלות מנוהלות
+## חכירות סשן מנוהלות בלעדיות
 
-חכירה בלעדית של הפעלות מנוהלות היא חוזה ניתוב אופציונלי וניטרלי ביחס ללקוח: בעלים פעיל אחד
-מחזיק בחיבור OmniRoute כשיר אחד. היא אינה מחכירה מודל, אינה דורשת OAuth, אינה מזהה
-לקוח מסוים ואינה דורשת ספק מסוים.
+חכירת סשן מנוהלת בלעדית היא חוזה ניתוב אופציונלי, ניטרלי ללקוח: בעלים פעיל אחד מחזיק חיבור OmniRoute כשיר אחד. היא אינה חוכרת מודל, דורשת OAuth, מזהה לקוח מסוים, או דורשת ספק מסוים.
 
-מפתח ה-API המאמת חייב להיות בעל ההרשאה `lease:exclusive` ורשימת
-`allowedConnections` מפורשת שאינה ריקה. גבול המוטציה של מסד הנתונים אוכף את שני השדות יחד בעת
-יצירת מפתח ובעדכונים חלקיים.
+מפתח ה-API המאמת חייב להיות בעל היקף `lease:exclusive` ורשימת `allowedConnections` מפורשת שאינה ריקה. גבול שינוי מסד הנתונים אוכף את שני השדות יחד ביצירת מפתח ובעדכונים חלקיים.
 
 ```http
 POST /api/v1/session-leases
 Authorization: Bearer <managed-api-key>
 Content-Type: application/json
-X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
+X-OmniRoute-Lease-Owner: vlo_<43-base664url-characters>
 
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-תגובות מוצלחות לרכישה, לחידוש ולשחרור חושפות חותמות זמן, את `state` ואת ערך
-`generation` החיובי והמדויק, אך לעולם לא את החיבור שנבחר או את פרטי הגישה. חידוש ושחרור מספקים את
-הדור בגוף ה-JSON:
+תגובות מוצלחות של רכישה, חידוש ושחרור חושפות חותמות זמן, `state`, ו-`generation` חיובי מדויק, אך לעולם לא את החיבור או האישורים שנבחרו. חידוש ושחרור מספקים את ה-generation בגוף ה-JSON:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -117,7 +111,7 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-בעלים של חכירה פעילה יכול לבקש במפורש מטא-נתוני תצוגה בטוחים לפרטיות עבור השיוך הנוכחי שלו:
+בעל חכירה פעיל יכול לבקש במפורש מטא-נתונים תצוגתיים בטוחים לפרטיות עבור הקישור הנוכחי שלו:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -137,37 +131,22 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 }
 ```
 
-פעולת סטטוס אופציונלית זו מגודרת באמצעות הבעלים האטום, מפתח ה-API המנוהל והמאומת והדור
-הפעיל המדויק, במסגרת טרנזקציה אחת במסד הנתונים. `displayName` הוא רק שם החיבור המוגדר
-לאחר הסרת רווחים מיותרים; ערכו `null` כאשר לא קיים שם מוגדר ובטוח. OmniRoute לעולם אינו מחליף אותו
-בכתובת דוא"ל או בזהות חשבון שנוצרה. ערך הספק הוא תווית תצוגה שאינה רגישה ולעולם אינו
-מזהה שנוצר עבור ספק תואם. פרטי גישה, אסימונים, קובצי Cookie, מזהים גולמיים של חיבורים או מפתחות
-API, גיבובי בעלים, סודות גידור ונתוני ניתוב פנימיים אינם נכללים.
+פעולת סטטוס אופציונלית זו מגודרת על ידי הבעלים האוטם, מפתח ה-API המנוהל המאומת, וה-generation הפעיל המדויק בעסקת מסד נתונים אחת. `displayName` הוא רק שם החיבור המוגדר המקוצר; הוא `null` כאשר אין שם מוגדר בטוח. OmniRoute לעולם אינו מחליף כתובת אימייל או זהות חשבון שנוצרה. ערך הספק הוא תווית תצוגה לא רגישה ולעולם אינו מזהה ספק תואם שנוצר. אישורים, אסימונים, קובצי Cookie, מזהי חיבור גולמיים או מזהי מפתח API, גיבובי בעלים, סודות גידור ונתוני ניתוב פנימיים אינם נכללים.
 
-חיפושים עם מפתח שגוי, בעלים שגוי, דור מיושן, חכירה חסרה, שפג תוקפה, ששוחררה או שבוטלה
-מחזירים כולם את אותה שגיאת `409 LEASE_FENCE_STALE` ללא מטא-נתוני חיבור. ללקוח שקיבל את תגובת ההמתנה לקיבולת אין שיוך פעיל שאפשר לבדוק. כאשר הניתוב מעביר חכירה פעילה,
-אותו דור נשאר תקף ופעולת הסטטוס מחזירה באופן אטומי את השיוך החדש, ולעולם לא את הישן.
-לקוחות קיימים אינם משתנים, משום שתגובות הרכישה, החידוש, השחרור וההמתנה שומרות
-על המבנים הקודמים שלהן.
+חיפושים עם מפתח שגוי, בעלים שגוי, generation מיושן, חסר, פג תוקף, משוחרר ולא חוקי, כולם מחזירים את אותה שגיאת `409 LEASE_FENCE_STALE` ללא מטא-נתונים של חיבור. לקוח שקיבל את תגובת ההמתנה לקיבולת אינו בעל קישור פעיל לבדיקה. כאשר הניתוב מעביר חכירה פעילה, אותו generation נשאר תקף והסטטוס מחזיר באופן אטומי את הקישור החדש, לעולם לא את הישן. לקוחות קיימים נשארים ללא שינוי מכיוון שתגובות רכישה, חידוש, שחרור והמתנה שומרות על צורותיהן הקודמות.
 
-חוזה שרת זה אינו משנה את `/status` של OpenAI Codex המקורי. נכון לעכשיו, Codex המקורי מדווח על
-ספק המודל שלו ועל מצב האימות/החשבון המובנה, אך אינו מציג מטא-נתוני חשבון שרירותיים של
-ספק מותאם אישית; שילוב עתידי בצד הלקוח יצטרך לקרוא לפעולה זו ולהחליט כיצד
-להציג את `connection.displayName`.
+חוזה שרת זה אינו משנה את `/status` הסטנדרטי של OpenAI Codex. Codex הסטנדרטי מדווח כעת על ספק המודל שלו ומצב האימות/חשבון המובנה אך אינו מציג מטא-נתונים שרירותיים של חשבון ספק מותאם אישית; אינטגרציה מאוחרת יותר של הלקוח חייבת לקרוא לפעולה זו ולהחליט כיצד להציג את `connection.displayName`.
 
-לאחר מכן, כל בקשת הסקה מנוהלת מספקת את שתי כותרות הבקרה:
+כל בקשת הסקה מנוהלת מספקת אז את שני כותרות הבקרה:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-הבעלים המדויק, הדור, החיבור הפעיל ומפתח ה-API המאומת מגודרים מיד
-לפני כל ניסיון נתמך מול שירות upstream. הפעלה חוזרת של הבעלים והדור עם מפתח אחר נכשלת גם
-כאשר אותו מפתח מתיר את אותו חיבור. בעלים גולמיים אינם נשמרים, נרשמים ביומן, נשמרים
-בתמונת המצב של הבקשה או מועברים ל-upstream.
+הבעלים המדויק, ה-generation, החיבור הפעיל ומפתח ה-API המאומת מגודרים מיד לפני כל ניסיון במעלה הזרם הנתמך. הפעלה חוזרת של בעלים ו-generation עם מפתח אחר נכשלת גם כאשר מפתח זה מאפשר את אותו חיבור. בעלים גולמיים אינם נשמרים, נרשמים, נשמרים בתמונת המצב של הבקשה, או מועברים במעלה הזרם.
 
-תחרות זמנית על משאבים מחזירה HTTP `429` עם `Retry-After` ועם:
+תחרות זמנית מחזירה HTTP `429` עם `Retry-After` ו:
 
 ```json
 {
@@ -178,36 +157,35 @@ X-OmniRoute-Lease-Generation: 1
 }
 ```
 
-משמעות תגובה זו היא רק שהקבוצה הכשירה הרגילה לא הייתה ריקה ושכל מועמד פנוי היה
-מוחזק בידי חכירה פעילה זרה. מודלים/ספקים שאינם נתמכים, אי-התאמה למדיניות, תקופת צינון, מכסה,
-תקינות וכשלים רגילים אחרים של כשירות שומרים על תגובות OmniRoute הקיימות שלהם.
+תגובה זו פירושה רק שקבוצת הזכאים הרגילה לא הייתה ריקה וכל מועמד פנוי הוחזק על ידי חכירה פעילה זרה. מודלים/ספקים לא נתמכים, אי התאמה במדיניות, צינון, מכסה, תקינות וכשלים אחרים של זכאות רגילה שומרים על תגובות OmniRoute הקיימות שלהם.
 
 ### `x-omniroute-compression`
 
-עקיפה לפי בקשה של תוכנית הדחיסה. בעלת הקדימות הגבוהה ביותר — גוברת על עקיפת צירוף הניתוב,
-הפרופיל הפעיל, ההפעלה האוטומטית וברירת המחדל של הלוח. ערכים:
+עקיפה לכל בקשה של תוכנית הדחיסה. בעדיפות הגבוהה ביותר — גוברת על עקיפת שילוב הניתוב, הפרופיל הפעיל, ההפעלה האוטומטית והברירת מחדל של הפאנל. ערכים:
 
-| ערך           | השפעה                                                                    |
-| ------------- | ------------------------------------------------------------------------ |
-| `off`         | ללא דחיסה עבור בקשה זו.                                                  |
-| `default`     | פרופיל ברירת המחדל הנגזר מהלוח (מתעלם מהפרופיל הפעיל).                   |
-| `engine:<id>` | מנוע יחיד כאשר הוא מופעל, לדוגמה `engine:rtk`.                           |
-| `<combo>`     | צירוף בעל שם, המותאם תחילה לפי שם (ללא תלות ברישיות) ולאחר מכן לפי מזהה. |
+| ערך           | השפעה                                                                                  |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `off`         | אין דחיסה עבור בקשה זו.                                                                |
+| `default`     | פרופיל ברירת המחדל הנגזר מהפאנל (מתעלם מהפרופיל הפעיל). מנועים עם אובדן נשארים כבויים. |
+| `safe`        | הסרת כפילויות וקיפול רווחים בלבד.                                                      |
+| `allow-lossy` | שמור את תוכנית המפעיל עבור בקשה זו, כולל סיכומים ושכתובים של סגנון.                    |
+| `engine:<id>` | מנוע יחיד כאשר מופעל, לדוגמה `engine:rtk`. הצטרפות לכל בקשה עבור מנוע זה.              |
+| `<combo>`     | שילוב בעל שם, מתאים לפי שם (לא תלוי רישיות) תחילה, ואז לפי מזהה.                       |
 
 הערות:
 
-- המערכת מתעלמת מערכים לא מוכרים (הבקשה לעולם אינה נדחית); הפתרון ממשיך לפי סדר הקדימויות הרגיל של המפעילים.
-- אם למספר צירופים יש אותו שם, העבירו את ה-**id** של הצירוף כדי לקבל התאמה דטרמיניסטית.
-- אי אפשר לבחור לפי שם צירוף ששמו `off` או `default` (מילות מפתח אלה מפורשות תחילה); הפנו לצירוף כזה באמצעות המזהה שלו.
-- מתג הדחיסה הראשי הוא שער קשיח: כאשר הדחיסה מושבתת באופן גלובלי, כותרת זו אינה יכולה להפעיל אותה.
+- ערכים לא ידועים מתעלמים (הבקשה לעולם אינה נדחית); הרזולוציה עוברת לעדיפות המפעיל הרגילה.
+- אם מספר שילובים חולקים שם, העבר את **מזהה** השילוב להתאמה דטרמיניסטית.
+- שילוב ששמו הוא `off` או `default` לא ניתן לבחור לפי שם (מילות מפתח אלו מתפרשות תחילה); הפנה לשילוב כזה לפי מזההו.
+- מתג הדחיסה הראשי הוא שער קשיח: כאשר הדחיסה מושבתת גלובלית, כותרת זו אינה יכולה להפעיל אותה.
 
-התוכנית שהוחלה מוחזרת בכותרת התגובה:
+התוכנית המיושמת מוחזרת בכותרת התגובה:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-כאשר `<source>` הוא אחד מבין `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` או `off`.
+כאשר `<source>` הוא אחד מ-`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default`, או `off`.
 
 ---
 
@@ -447,40 +425,40 @@ GET /api/v1/provider-plugin-manifest
 
 ## נקודות קצה לתאימות
 
-| שיטה | נתיב                                      | פורמט                               |
-| ---- | ----------------------------------------- | ----------------------------------- |
-| POST | `/v1/chat/completions`                    | OpenAI                              |
-| POST | `/v1/messages`                            | Anthropic                           |
-| POST | `/v1/responses`                           | OpenAI Responses                    |
-| POST | `/v1/embeddings`                          | OpenAI                              |
-| POST | `/v1/images/generations`                  | OpenAI Images                       |
-| POST | `/v1/images/edits`                        | OpenAI Images (עריכה/השלמת תמונה)   |
-| POST | `/v1/videos/generations`                  | יצירת וידאו בסגנון OpenAI           |
-| POST | `/v1/music/generations`                   | יצירת מוזיקה בסגנון OpenAI          |
-| POST | `/v1/audio/transcriptions`                | OpenAI Audio (המרת דיבור לטקסט)     |
-| POST | `/v1/audio/speech`                        | OpenAI TTS (מחזיר גוף שמע)          |
-| POST | `/v1/rerank`                              | דירוג מחדש בסגנון Cohere/Voyage     |
-| POST | `/v1/classify`                            | סיווג Jina (`api.jina.ai`)          |
-| POST | `/v1/segment`                             | מפלח Jina (`segment.jina.ai`)       |
-| POST | `/v1/moderations`                         | OpenAI Moderations                  |
-| GET  | `/v1/models`                              | OpenAI                              |
-| POST | `/v1/messages/count_tokens`               | Anthropic                           |
-| GET  | `/v1beta/models`                          | Gemini                              |
-| POST | `/v1beta/models/{...path}`                | Gemini generateContent              |
-| POST | `/v1/api/chat`                            | Ollama                              |
-| GET  | `/api/v1/vscode/{token}/`                 | כינוי לקטלוג OpenAI                 |
-| GET  | `/api/v1/vscode/{token}/models`           | כינוי למודלים של OpenAI             |
-| POST | `/api/v1/vscode/{token}/chat/completions` | כינוי OpenAI מבוסס אסימון           |
-| POST | `/api/v1/vscode/{token}/responses`        | כינוי OpenAI Responses מבוסס אסימון |
-| POST | `/api/v1/vscode/{token}/api/chat`         | כינוי Ollama מבוסס אסימון           |
-| GET  | `/api/v1/vscode/{token}/api/tags`         | כינוי תגיות Ollama מבוסס אסימון     |
+| שיטה | נתיב                                      | פורמט                            |
+| ---- | ----------------------------------------- | -------------------------------- |
+| POST | `/v1/chat/completions`                    | OpenAI                           |
+| POST | `/v1/messages`                            | Anthropic                        |
+| POST | `/v1/responses`                           | OpenAI Responses                 |
+| POST | `/v1/embeddings`                          | OpenAI                           |
+| POST | `/v1/images/generations`                  | OpenAI Images                    |
+| POST | `/v1/images/edits`                        | OpenAI Images (עריכה/השלמה)      |
+| POST | `/v1/videos/generations`                  | יצירת וידאו בסגנון OpenAI        |
+| POST | `/v1/music/generations`                   | יצירת מוזיקה בסגנון OpenAI       |
+| POST | `/v1/audio/transcriptions`                | OpenAI Audio (המרת דיבור לטקסט)  |
+| POST | `/v1/audio/speech`                        | OpenAI TTS (מחזיר גוף שמע)       |
+| POST | `/v1/rerank`                              | דירוג מחדש בסגנון Cohere/Voyage  |
+| POST | `/v1/classify`                            | סיווג Jina (`api.jina.ai`)       |
+| POST | `/v1/segment`                             | מפלח Jina (`segment.jina.ai`)    |
+| POST | `/v1/moderations`                         | OpenAI Moderations               |
+| GET  | `/v1/models`                              | OpenAI                           |
+| POST | `/v1/messages/count_tokens`               | Anthropic                        |
+| GET  | `/v1beta/models`                          | Gemini                           |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent           |
+| POST | `/v1/api/chat`                            | Ollama                           |
+| GET  | `/api/v1/vscode/{token}/`                 | כינוי לקטלוג OpenAI              |
+| GET  | `/api/v1/vscode/{token}/models`           | כינוי למודלים של OpenAI          |
+| POST | `/api/v1/vscode/{token}/chat/completions` | כינוי OpenAI עם אסימון           |
+| POST | `/api/v1/vscode/{token}/responses`        | כינוי OpenAI Responses עם אסימון |
+| POST | `/api/v1/vscode/{token}/api/chat`         | כינוי Ollama עם אסימון           |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | כינוי לתגיות Ollama עם אסימון    |
 
-כל נתיבי POST משתמשים באותו מבנה: `Bearer your-api-key` + גוף JSON המאומת באמצעות Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` וכו', ראו `src/shared/validation/schemas.ts`). במקרה של כשל בסכימה מוחזר 4xx.
+כל נתיבי POST משתמשים באותו מבנה: `Bearer your-api-key` + גוף JSON שעבר אימות באמצעות Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` וכו'; ראו `src/shared/validation/schemas.ts`). במקרה של כשל באימות הסכימה מוחזר 4xx.
 
-עבור לקוחות שאינם יכולים לצרף `Authorization: Bearer ...`,‏ OmniRoute מקבל גם מפתחות API בכתובת ה-URL, באמצעות תאימות למחרוזת שאילתה (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) או באמצעות נקודות הקצה הייעודיות `/api/v1/vscode/{token}/...` המתועדות להלן.
+עבור לקוחות שאינם יכולים לצרף `Authorization: Bearer ...`, OmniRoute מקבל גם מפתחות API בכתובת ה-URL, באמצעות תאימות למחרוזת שאילתה (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) או באמצעות נקודות הקצה הייעודיות `/api/v1/vscode/{token}/...` המתועדות להלן.
 
 ```bash
-# דירוג מחדש (ספק ממרשם ענן, או צומת ספק תואם OpenAI בתור "<prefix>/<model>")
+# דירוג מחדש (ספק ממרשם הענן, או צומת ספק תואם OpenAI בתור "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # סיווג Jina (פרטי גישה ל-Foundation API)
@@ -492,43 +470,47 @@ POST /v1/segment     { "content": "...", "return_chunks": true }
 # חיפוש Jina (s.jina.ai; כינויי ספק: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# בקרת תוכן
+# ניהול תוכן
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
 # TTS — מחזיר גוף audio/mpeg (או בפורמט המבוקש)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
+
+# Soniox TTS דורש שפה וקול: ברירת המחדל של `language` היא "en"; קול חסר
+# או שם של קול מובנה ב-OpenAI (alloy, nova, …) מוחלף ב-"Adrian"
+POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # עריכת תמונה (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
 # יצירת וידאו / מוזיקה (מזהה מודל עם קידומת ספק)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
-POST /v1/music/generations  { "model": "suno/v3.5",   "prompt": "..." }
+POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **צומתי ספק לדירוג מחדש:** `POST /v1/rerank` מנתב גם לצומתי ספק התואמים ל-OpenAI
-> (oMLX,‏ vLLM,‏ Infinity,‏ TEI מאחורי שער, …), שאליהם פונים בתור `<node-prefix>/<model>`. צומתי
-> loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) תמיד כשירים. צמתים בכל מארח אחר
+> **צומתי ספק לדירוג מחדש:** `POST /v1/rerank` מנתב גם לצומתי ספק תואמי OpenAI
+> (oMLX, vLLM, Infinity, TEI מאחורי שער, …) שאליהם פונים בתור `<node-prefix>/<model>`. צומתי loopback
+> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) תמיד כשירים. צמתים בכל מארח אחר
 > — מחשב ברשת LAN או עמית Tailscale — כשירים רק כאשר המפעיל מפעיל את דגל התכונה
-> `RERANK_REMOTE_PROVIDER_NODES` **וגם** כתובת ה-URL הבסיסית של הצומת עוברת את מדיניות כתובות ה-URL
+> `RERANK_REMOTE_PROVIDER_NODES` **וגם** כתובת ה-URL הבסיסית של הצומת עומדת במדיניות כתובות ה-URL
 > היוצאות של הספק (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`);
-> לעולם לא מתבצע ניתוב למארחי מטא-נתונים בענן. שלב הדירוג מחדש של מנוע הזיכרון קורא לנתיב זה דרך
+> לעולם לא מתבצע ניתוב למארחי מטא-נתונים בענן. שלב הדירוג מחדש של מנוע הזיכרון קורא לנתיב הזה דרך
 > loopback, ולכן אותו כלל חל על `rerankProviderModel` בהגדרות הזיכרון.
 >
 > **מבני שרת מקומי:** הקריאה לצומת מתבצעת ב-`<base>/v1/rerank`, ובמקרה של 404, ב-`<base>/rerank`
-> (Infinity,‏ TEI). הגוף הנשלח לשירות במעלה הזרם כולל הן את האיות של Cohere/OpenAI (`documents`,
+> (Infinity, TEI). הגוף הנשלח לשירות במעלה הזרם כולל הן את האיות של Cohere/OpenAI (`documents`,
 > `return_documents`) והן את האיות של TEI (`texts`, `return_text`), והתגובה משירות זה
-> מנורמלת למעטפת של Cohere: המערך החשוף של TEI,‏ `[{index, score, text}]`, המבנה `{results: [{index, score}]}`
-> משערים דקים והמבנה בסגנון Voyage‏ `{data: [...]}` — כולם מוחזרים ללקוח בתור
-> `{results: [{index, relevance_score, document?}]}`, כשהם ממוינים לפי ציון ומוגבלים ל-`top_n`.
+> מנורמלת למעטפת Cohere: המערך החשוף של TEI מסוג `[{index, score, text}]`, המבנה `{results: [{index, score}]}`
+> משערים דקים, והמבנה בסגנון Voyage מסוג `{data: [...]}` — כולם מוחזרים ללקוח בתור
+> `{results: [{index, relevance_score, document?}]}`, ממוינים לפי ציון ומוגבלים ל-`top_n`.
 
-> **גילוי צומתי ספקים:** מודלים בצומת ספק תואם OpenAI מופיעים ב-`GET /v1/models`
-> תחת קידומת הצומת. שורות שאינן מכילות מטא-נתונים של נקודות קצה (כמקובל ברשימות `/v1/models` מקומיות)
-> יורשות את ה-`apiType` של הצומת, כך שהמודלים של צומת `embeddings` הם מסוג `type: "embedding"` והמודלים של
-> צומת `rerank` הם מסוג `type: "rerank"`, במקום לקבל כברירת מחדל את הסוג chat; ערך `supportedEndpoints` מפורש
-> בשורה שסונכרנה או נוספה ידנית עדיין מקבל עדיפות.
+> **גילוי צומתי ספק:** מודלים בצומת ספק תואם OpenAI מופיעים ב־`GET /v1/models`
+> תחת קידומת הצומת. שורות שאינן כוללות מטא־נתונים של נקודת קצה (כמקובל ברשימות `/v1/models` מקומיות)
+> יורשות את ה־`apiType` של הצומת, כך שהמודלים של צומת `embeddings` הם `type: "embedding"` והמודלים של
+> צומת `rerank` הם `type: "rerank"` במקום שברירת המחדל שלהם תהיה צ'אט; ערך מפורש של
+> `supportedEndpoints` בשורה שסונכרנה או נוספה ידנית עדיין מקבל עדיפות.
 
-### נתיבים ייעודיים לספקים
+### נתיבים ייעודיים לספק
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -1466,20 +1448,20 @@ GET /.well-known/agent.json
 
 ## ענן, הערכות ובחינה
 
-| שיטה | נתיב | תיאור |
+| מתודה | נתיב | תיאור |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | אימות מפתח Bearer והחזרת חיבורי ספקים מוסווים + כינויי מודלים עבור לקוחות סנכרון ענן |
+| POST | `/api/cloud/auth` | אימות מפתח Bearer והחזרת חיבורי ספקים מוסווים וכינויי מודלים עבור לקוחות סנכרון ענן |
 | POST | `/api/cloud/credentials/update` | עדכון פרטי גישה מוצפנים עבור ספק המסונכרן עם הענן |
 | POST | `/api/cloud/model/resolve` | פתרון מזהה מודל לוגי לספק/מודל קונקרטי באמצעות טבלת הניתוב המקומית |
-| GET | `/api/cloud/models/alias` | הצגת כינויי מודלים כפי שהם נחשפים לסנכרון ענן |
+| GET | `/api/cloud/models/alias` | הצגת רשימת כינויי המודלים כפי שהם נחשפים לסנכרון ענן |
 | GET | `/api/assess` | קריאת סיווגי ההערכה העדכניים ביותר (לפי ספק/מודל) |
-| POST | `/api/assess` | הרצת הערכה — גוף: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | הצגת חבילות הערכה מובנות + ההרצות האחרונות |
+| POST | `/api/assess` | הפעלת הערכה — גוף: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
+| GET | `/api/evals` | הצגת רשימת חבילות ההערכה המובנות + ההרצות האחרונות |
 | POST | `/api/evals` | הפעלת הרצת הערכה |
 | POST | `/api/evals/suites` | יצירת חבילת הערכה מותאמת אישית — הגוף מאומת באמצעות `evalSuiteSaveSchema` |
 | GET | `/api/evals/suites/[id]` | אחזור חבילת הערכה מותאמת אישית |
 
-**אימות:** `/api/cloud/auth` מאמת מפתח Bearer ישירות; הנתיבים האחרים תחת `/api/cloud/*`,‏ `/api/evals/*` ו־`/api/assess` דורשים הפעלת ניהול/מפתח API. בקשות POST אל `/api/assess` משתמשות ב־`validateBody` עם סכמת תחום מסוג discriminated union.
+**אימות:** `/api/cloud/auth` מאמת מפתח Bearer ישירות ומחזיר את המפתח המוסווה ואת `projectId` של כל חיבור, רק עבור מפתח בעל ההרשאה `manage` / `admin`; הנתיבים האחרים תחת `/api/cloud/*`,‏ `/api/evals/*` ו-`/api/assess` דורשים הפעלת ניהול/מפתח API. בקשת POST אל `/api/assess` משתמשת ב-`validateBody` עם סכמת תחום מסוג איחוד מובחן.
 
 ---
 

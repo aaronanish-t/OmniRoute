@@ -201,8 +201,15 @@ afterEach(async () => {
 });
 
 describe("real team costs components", () => {
-  it("compact team selector follows the same URL and data state", async () => {
+  it("top team dropdown replaces the secondary rail and keeps URL/data selection", async () => {
     await render();
+    const selector = control(en.teamCosts.selectTeam);
+    const content = container.querySelector("main")!;
+    expect(container.querySelectorAll("button[aria-pressed]")).toHaveLength(0);
+    expect(selector.className).not.toContain("lg:hidden");
+    expect(
+      selector.compareDocumentPosition(content) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     await change(en.teamCosts.selectTeam, "b");
     expect(nav.query).toBe("?team=b");
     expect(container.querySelector("main h2")?.textContent).toBe("Beta");

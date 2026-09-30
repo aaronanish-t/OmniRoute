@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import { CardSkeleton } from "@/shared/components/Loading";
 import { ConfirmModal } from "@/shared/components/Modal";
 import { matchesSearch } from "@/shared/utils/turkishText";
@@ -205,31 +206,16 @@ export default function TeamCostsPage() {
       {!preliminary.list && !preliminary.listError ? (
         <Loading label={t("loading")} />
       ) : (
-        <div className="grid items-start gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <Card padding="sm" title={t("selectTeam")} icon="groups">
-            <fieldset disabled={blocked} className="space-y-3">
-              <Input
-                label={t("searchTeams")}
-                icon="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <select
-                aria-label={t("statusFilter")}
-                className="w-full rounded-control border border-border bg-bg p-2 text-sm"
-                value={filter}
-                onChange={(e) => {
-                  setFilter(e.target.value);
-                  select("", true);
-                }}
-              >
-                <option value="active">{t("active")}</option>
-                <option value="archived">{t("archived")}</option>
-                <option value="all">{t("allTeams")}</option>
-              </select>
-              <select
+        <div className="space-y-5">
+          <Card padding="sm">
+            <fieldset
+              disabled={blocked}
+              className="grid grid-cols-2 items-end gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_12rem]"
+            >
+              <Select
+                label={t("selectTeam")}
                 aria-label={t("selectTeam")}
-                className="w-full min-w-0 rounded-control border border-border bg-bg p-2 text-sm lg:hidden"
+                className="col-span-2 min-w-0 lg:col-span-1"
                 value={selectedId}
                 onChange={(e) => select(e.target.value)}
               >
@@ -239,21 +225,29 @@ export default function TeamCostsPage() {
                     {team.name}
                   </option>
                 ))}
-              </select>
-              <div className="hidden lg:block max-h-80 overflow-y-auto space-y-1">
-                {visible.map((team) => (
-                  <button
-                    key={team.id}
-                    disabled={blocked}
-                    aria-pressed={team.id === selectedId}
-                    onClick={() => select(team.id)}
-                    className={`w-full rounded-control p-3 text-left text-sm break-words motion-safe:transition-colors ${team.id === selectedId ? "bg-primary/10 text-primary" : "hover:bg-bg"}`}
-                  >
-                    {team.name}
-                    <span className="block mt-1 text-xs text-text-muted">{t(team.status)}</span>
-                  </button>
-                ))}
+              </Select>
+              <div className="min-w-0">
+                <Input
+                  label={t("searchTeams")}
+                  icon="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
               </div>
+              <Select
+                label={t("statusFilter")}
+                aria-label={t("statusFilter")}
+                className="min-w-0"
+                value={filter}
+                onChange={(e) => {
+                  setFilter(e.target.value);
+                  select("", true);
+                }}
+              >
+                <option value="active">{t("active")}</option>
+                <option value="archived">{t("archived")}</option>
+                <option value="all">{t("allTeams")}</option>
+              </Select>
             </fieldset>
             {!visible.length && <p className="mt-3 text-sm text-text-muted">{t("noTeams")}</p>}
           </Card>

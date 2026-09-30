@@ -6369,7 +6369,7 @@
       "codex": "පවතින OAuth ප්රවාහය සමඟ OpenAI Codex සම්බන්ධ කරන්න.",
       "qwen": "පවතින OAuth ප්රවාහය සමඟ Qwen Code සම්බන්ධ කරන්න.",
       "github-models": "github.com/settings/tokens හි 'models: read' scope එක සහිත GitHub PAT එකක් සාදන්න",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "apmix.ai/dashboard වෙතින් API යතුරක් සමඟ Apmix සම්බන්ධ කරන්න — එක් දායකත්වයක්, බොහෝ ආකෘති."
     },
     "passthroughModelsDescription": "{provider} සපයන්නා provider-native model IDs පිළිගනී. /models වෙතින් ආයාත කරන්න හෝ මාර්ගගත කිරීම සඳහා අභිරුචි IDs එක් කරන්න.",
     "bedrockModelsDescription": "Amazon Bedrock models AWS කලාපය අනුව සීමා වේ. /models වෙතින් ආයාත කරන්න හෝ තෝරාගත් කලාපයේ සක්රීය කර ඇති Bedrock model IDs එක් කරන්න.",

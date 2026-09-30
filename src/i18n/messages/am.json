@@ -6369,7 +6369,7 @@
       "codex": "OpenAI Codexን በነባሩ OAuth ፍሰት ያገናኙ።",
       "qwen": "Qwen Codeን በነባሩ OAuth ፍሰት ያገናኙ።",
       "github-models": "በgithub.com/settings/tokens ላይ 'models: read' ወሰን ያለው GitHub PAT ይፍጠሩ",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Apmixን በapmix.ai/dashboard የሚገኝ የAPI ቁልፍ ያገናኙ — አንድ ደረሳ ብዙ ሞዴሎች።"
     },
     "passthroughModelsDescription": "{provider} የአቅራቢውን ቤተኛ የሞዴል መለያዎች ይቀበላል። ከ/models ያስመጡ ወይም ለማስተላለፍ ብጁ መለያዎችን ያክሉ።",
     "bedrockModelsDescription": "የAmazon Bedrock ሞዴሎች በAWS ክልል የተገደቡ ናቸው። ከ/models ያስመጡ ወይም በተመረጠው ክልል የነቁ የBedrock ሞዴል መለያዎችን ያክሉ።",

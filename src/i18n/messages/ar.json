@@ -6369,7 +6369,7 @@
       "codex": "ربط OpenAI Codex باستخدام تدفق OAuth الحالي.",
       "qwen": "ربط Qwen Code باستخدام تدفق OAuth الحالي.",
       "github-models": "أنشئ رمز وصول شخصي (PAT) لـ GitHub بنطاق 'models: read' على github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "اربط Apmix بمفتاح API من apmix.ai/dashboard — اشتراك واحد، نماذج كثيرة."
     },
     "passthroughModelsDescription": "{provider} يقبل معرفات النماذج الأصلية للموفر. قم بالاستيراد من /models أو قم بإضافة معرفات مخصصة للتوجيه.",
     "bedrockModelsDescription": "يتم تحديد نطاق نماذج Amazon Bedrock حسب منطقة AWS. قم بالاستيراد من /models أو قم بإضافة معرفات نماذج Bedrock الممكنة في المنطقة المحددة.",

@@ -6369,7 +6369,7 @@
       "codex": "Unganisha OpenAI Codex na mtiririko uliopo wa OAuth.",
       "qwen": "Unganisha Qwen Code na mtiririko uliopo wa OAuth.",
       "github-models": "Unda PAT ya GitHub yenye upeo wa 'models: read' kwenye github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Unganisha Apmix kwa funguo ya API kutoka apmix.ai/dashboard — usajili mmoja, modeli nyingi."
     },
     "passthroughModelsDescription": "{provider} inakubali vitambulisho vya asili vya mtoa huduma. Ingiza kutoka /miundo au ongeza vitambulisho maalum vya kuelekeza.",
     "bedrockModelsDescription": "Mitindo ya Amazon Bedrock inatolewa na eneo la AWS. Ingiza kutoka /miundo au ongeza vitambulisho vya muundo wa Bedrock vilivyowezeshwa katika eneo lililochaguliwa.",

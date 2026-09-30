@@ -6369,7 +6369,7 @@
       "codex": "დააკავშირეთ OpenAI Codex არსებული OAuth პროცესით.",
       "qwen": "დააკავშირეთ Qwen Code არსებული OAuth პროცესით.",
       "github-models": "შექმენით GitHub PAT 'models: read' წვდომის სფეროთი მისამართზე github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "დააკავშირეთ Apmix API გასაღებით apmix.ai/dashboard-დან — ერთი გამოწერა, მრავალი მოდელი."
     },
     "passthroughModelsDescription": "{provider} იღებს პროვაიდერის ნატიურ მოდელის ID-ებს. შემოიტანეთ ისინი /models განყოფილებიდან ან მარშრუტიზაციისთვის დაამატეთ მორგებული ID-ები.",
     "bedrockModelsDescription": "Amazon Bedrock-ის მოდელები შეზღუდულია AWS-ის რეგიონის მიხედვით. შემოიტანეთ ისინი /models განყოფილებიდან ან დაამატეთ არჩეულ რეგიონში ჩართული Bedrock მოდელების ID-ები.",

@@ -6369,7 +6369,7 @@
       "codex": "Sambungkan OpenAI Codex dengan aliran OAuth sedia ada.",
       "qwen": "Sambungkan Qwen Code dengan aliran OAuth sedia ada.",
       "github-models": "Cipta PAT GitHub dengan skop 'models: read' di github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Sambungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model."
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli pembekal. Import daripada /models atau tambahkan ID tersuai untuk penghalaan.",
     "bedrockModelsDescription": "Model Amazon Bedrock diliputi oleh rantau AWS. Import daripada /models atau tambah ID model Bedrock yang didayakan di rantau yang dipilih.",

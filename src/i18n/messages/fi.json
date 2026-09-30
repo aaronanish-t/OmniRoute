@@ -6369,7 +6369,7 @@
       "codex": "Yhdistä OpenAI Codex olemassa olevalla OAuth-työnkululla.",
       "qwen": "Yhdistä Qwen Code olemassa olevalla OAuth-työnkululla.",
       "github-models": "Luo GitHub PAT -tunniste 'models: read' -käyttöoikeudella osoitteessa github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Yhdistä Apmix API-avaimella osoitteesta apmix.ai/dashboard — yksi tilaus, monta mallia."
     },
     "passthroughModelsDescription": "{provider} hyväksyy palveluntarjoajan alkuperäiset mallitunnukset. Tuo /modelsista tai lisää mukautettuja tunnuksia reititystä varten.",
     "bedrockModelsDescription": "Amazon Bedrock -mallit on luokiteltu AWS-alueen mukaan. Tuo osoitteesta /models tai lisää valitulla alueella käytössä olevat kallioperän mallitunnukset.",

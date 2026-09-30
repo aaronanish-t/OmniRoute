@@ -6369,7 +6369,7 @@
       "codex": "Povežite OpenAI Codex z obstoječim postopkom OAuth.",
       "qwen": "Povežite Qwen Code z obstoječim postopkom OAuth.",
       "github-models": "Ustvarite GitHub PAT z obsegom »models: read« na github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Povežite Apmix z API ključem iz apmix.ai/dashboard — ena naročnina, veliko modelov."
     },
     "passthroughModelsDescription": "{provider} sprejema izvorne ID-je modelov ponudnika. Uvozite jih iz /models ali dodajte ID-je po meri za usmerjanje.",
     "bedrockModelsDescription": "Modeli Amazon Bedrock so omejeni na regijo AWS. Uvozite jih iz /models ali dodajte ID-je modelov Bedrock, omogočene v izbrani regiji.",

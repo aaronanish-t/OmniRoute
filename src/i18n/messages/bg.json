@@ -6369,7 +6369,7 @@
       "codex": "Свързване на OpenAI Codex със съществуващия OAuth поток.",
       "qwen": "Свързване на Qwen Code със съществуващия OAuth поток.",
       "github-models": "Създайте GitHub PAT с обхват 'models: read' на github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Свържете Apmix с API ключ от apmix.ai/dashboard — един абонамент, много модели."
     },
     "passthroughModelsDescription": "{provider} приема собствени идентификатори на модела на доставчика. Импортирайте от /models или добавете персонализирани идентификатори за маршрутизиране.",
     "bedrockModelsDescription": "Моделите на Amazon Bedrock са обхванати от регион на AWS. Импортирайте от /models или добавете идентификатори на модел Bedrock, активирани в избрания регион.",

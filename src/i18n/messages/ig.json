@@ -6369,7 +6369,7 @@
       "codex": "Jikọọ OpenAI Codex site na usoro OAuth dị ugbu a.",
       "qwen": "Jikọọ Qwen Code site na usoro OAuth dị ugbu a.",
       "github-models": "Mepụta GitHub PAT nwere scope 'models: read' na github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Jikọọ Apmix na site na akara API si apmix.ai/dashboard — otu ndenye aha, ọtụtụ ụdị."
     },
     "passthroughModelsDescription": "{provider} na-anabata ID ụdị nke provider n’onwe ya. Bubata ha site na /models ma ọ bụ tinye ID ahaziri iche maka routing.",
     "bedrockModelsDescription": "A na-ekewa ụdị Amazon Bedrock dịka mpaghara AWS si dị. Bubata ha site na /models ma ọ bụ tinye ID ụdị Bedrock enyere ikike na mpaghara ahọpụtara.",

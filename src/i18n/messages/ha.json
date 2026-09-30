@@ -6369,7 +6369,7 @@
       "codex": "Haɗa OpenAI Codex ta amfani da tsarin OAuth na yanzu.",
       "qwen": "Haɗa Qwen Code ta amfani da tsarin OAuth na yanzu.",
       "github-models": "Ƙirƙiri GitHub PAT mai scope na 'models: read' a github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Haɗa Apmix da maɓallin API daga apmix.ai/dashboard — biyan kuɗi ɗaya, samfura da yawa."
     },
     "passthroughModelsDescription": "{provider} yana karɓar ID na samfuri na asali daga provider. Shigo da su daga /models ko ƙara ID na musamman don routing.",
     "bedrockModelsDescription": "Ana iyakance samfuran Amazon Bedrock bisa yankin AWS. Shigo da su daga /models ko ƙara ID na samfuran Bedrock da aka kunna a yankin da aka zaɓa.",

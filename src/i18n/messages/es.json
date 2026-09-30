@@ -6369,7 +6369,7 @@
       "codex": "Conecta OpenAI Codex con el flujo de OAuth existente.",
       "qwen": "Conecta Qwen Code con el flujo de OAuth existente.",
       "github-models": "Crea un PAT de GitHub con el permiso 'models: read' en github.com/settings/tokens",
-      "apmix": "Connect Apmix with an API key from apmix.ai/dashboard — one subscription, many models."
+      "apmix": "Conecta Apmix con una clave API de apmix.ai/dashboard — una suscripción, muchos modelos."
     },
     "passthroughModelsDescription": "{provider} acepta ID de modelo nativo del proveedor. Importe desde /models o agregue ID personalizados para enrutamiento.",
     "bedrockModelsDescription": "Los modelos de Amazon Bedrock tienen como alcance la región de AWS. Importe desde /models o agregue ID de modelo Bedrock habilitados en la región seleccionada.",

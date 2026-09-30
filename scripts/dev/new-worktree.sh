@@ -80,10 +80,15 @@ fi
 
 # Verificação: o hook precisa estar REALMENTE ativo, não apenas presente.
 HOOKS_PATH=$(git -C "$DIR" config --get core.hooksPath || echo ".git/hooks")
-if [ -x "$DIR/$HOOKS_PATH/pre-commit" ]; then
+# Como o git ao rodar o hook: caminho absoluto vale como está; relativo parte da worktree.
+case "$HOOKS_PATH" in
+  /*) HOOKS_DIR="$HOOKS_PATH" ;;
+  *) HOOKS_DIR="$DIR/$HOOKS_PATH" ;;
+esac
+if [ -x "$HOOKS_DIR/pre-commit" ]; then
   echo "hooks: ativos ($HOOKS_PATH/pre-commit)"
 else
-  echo "AVISO: pre-commit NÃO está ativo em $DIR/$HOOKS_PATH — os gates locais não vão rodar" >&2
+  echo "AVISO: pre-commit NÃO está ativo em $HOOKS_DIR — os gates locais não vão rodar" >&2
   exit 1
 fi
 

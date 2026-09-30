@@ -303,9 +303,11 @@ describe("CompressionPanel", () => {
       return controller.signal;
     });
     // The first settings PUT never answers on its own; only its timeout signal ends it.
+    let stalled: AbortSignal | null | undefined;
     vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
       const res = await respond(input, init);
       if (init?.method === "PUT" && puts.length === 1) {
+        stalled = init.signal;
         await new Promise((_, reject) =>
           init.signal?.addEventListener("abort", () => reject(init.signal?.reason))
         );
@@ -325,7 +327,8 @@ describe("CompressionPanel", () => {
     await flush();
     expect(puts, "the auto-trigger save waits behind the stalled PUT").toHaveLength(1);
 
-    await act(async () => timeouts[0].abort());
+    // Fire the stalled PUT's own timeout; the settings load used an earlier signal.
+    await act(async () => timeouts.find((c) => c.signal === stalled)?.abort());
     for (let i = 0; i < 5; i++) await flush();
 
     expect(timeoutSpy).toHaveBeenCalledWith(15_000);
@@ -335,18 +338,25 @@ describe("CompressionPanel", () => {
     expect(container.textContent).toContain("saveFailed");
   });
 
-  it("sends a remounted panel's save after the saves an unmounted panel still had queued", async () => {
-    const { puts } = setupFetchMock();
-    const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
+  it("loads a remounted panel only after the saves an unmounted panel still had queued", async () => {
+    // A server that keeps what each PUT stores, so a GET shows the saves that have landed.
+    const stored: Record<string, unknown> = { enabled: true, autoTriggerTokens: 0, engines: {} };
+    const puts: Array<Record<string, unknown>> = [];
     let release!: () => void;
     const held = new Promise<void>((resolve) => {
       release = resolve;
     });
-    // Hold the first settings PUT, as a slow response would.
-    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
-      const res = await respond(input, init);
-      if (init?.method === "PUT" && puts.length === 1) await held;
-      return res;
+    const json = (body: unknown) =>
+      new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json" } });
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      if (!input.toString().endsWith("/api/settings/compression")) return json({});
+      if (init?.method !== "PUT") return json(stored);
+      const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+      puts.push(body);
+      Object.assign(stored, body);
+      // The server has stored the first save, but its response is slow.
+      if (puts.length === 1) await held;
+      return json(stored);
     });
 
     const first = await renderPanel();
@@ -356,20 +366,21 @@ describe("CompressionPanel", () => {
         fireEvent.change(firstInput, { target: { value } });
       });
     }
-    // Navigate away while "100" is still queued, then open the panel again and save.
+    // Navigate away while "100" is still queued, then open the panel again.
     await act(async () => {
       roots.pop()?.unmount();
     });
     const second = await renderPanel();
-    const secondInput = second.querySelector(`input[type="number"]`) as HTMLInputElement;
-    await act(async () => {
-      fireEvent.change(secondInput, { target: { value: "1000" } });
-    });
+    expect(
+      second.querySelector(`input[type="number"]`),
+      "the new panel waits for the queued saves before it loads"
+    ).toBeNull();
+
     await act(async () => release());
     for (let i = 0; i < 5; i++) await flush();
 
-    // Saves land in the order they were made, so the newest value is the last one written.
-    expect(puts.map((p) => p.body.autoTriggerTokens)).toEqual([1, 100, 1000]);
-    expect(secondInput.value).toBe("1000");
+    expect(puts).toEqual([{ autoTriggerTokens: 1 }, { autoTriggerTokens: 100 }]);
+    const secondInput = second.querySelector(`input[type="number"]`) as HTMLInputElement;
+    expect(secondInput.value).toBe("100");
   });
 });

@@ -79,15 +79,16 @@ const CONTEXT_BUDGET_POLICIES = new Set<ContextBudgetConfig["policy"]>([
   "absolute",
 ]);
 const CAVEMAN_OUTPUT_LEVELS: CavemanIntensity[] = ["lite", "full", "ultra"];
-// A settings PUT that has not answered by then counts as failed, so one stalled request
-// cannot hold the save queue, and the controls it disables, indefinitely.
+// A settings request that has not answered by then counts as failed, so one stalled request
+// cannot hold the settings queue, and the controls it disables, indefinitely.
 const SAVE_TIMEOUT_MS = 15_000;
-// Every mounted panel shares one save queue. A panel that unmounts with saves still queued
-// keeps sending them, and a panel mounted afterwards queues behind them, so an older value
-// never lands after a newer one.
-let saveQueue: Promise<void> = Promise.resolve();
-function enqueueSave(send: () => Promise<void>) {
-  saveQueue = saveQueue.then(send);
+// Every mounted panel sends its settings load and saves through one shared queue. A panel
+// that unmounts with saves still queued keeps sending them, and a panel mounted afterwards
+// loads and saves behind them, so it never shows or writes a value older than one already
+// on its way to the server.
+let settingsQueue: Promise<void> = Promise.resolve();
+function queueSettingsRequest(send: () => Promise<void>) {
+  settingsQueue = settingsQueue.then(send);
 }
 
 const DEFAULT_CONFIG: CompressionConfig = {
@@ -236,24 +237,26 @@ export default function CompressionPanel() {
   const batchFailedRef = useRef(false);
 
   useEffect(() => {
-    fetch("/api/settings/compression")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: Partial<CompressionConfig> | null) => {
-        if (data) {
-          const hydrated: CompressionConfig = {
-            ...DEFAULT_CONFIG,
-            ...data,
-            engines: normalizeEngines(data.engines),
-            cavemanOutputMode: data.cavemanOutputMode ?? DEFAULT_CONFIG.cavemanOutputMode,
-            outputStyles: data.outputStyles ?? DEFAULT_CONFIG.outputStyles,
-            contextBudget: { ...DEFAULT_CONTEXT_BUDGET, ...(data.contextBudget ?? {}) },
-          };
-          savedRef.current = hydrated;
-          setConfig(hydrated);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    queueSettingsRequest(() =>
+      fetch("/api/settings/compression", { signal: AbortSignal.timeout(SAVE_TIMEOUT_MS) })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: Partial<CompressionConfig> | null) => {
+          if (data) {
+            const hydrated: CompressionConfig = {
+              ...DEFAULT_CONFIG,
+              ...data,
+              engines: normalizeEngines(data.engines),
+              cavemanOutputMode: data.cavemanOutputMode ?? DEFAULT_CONFIG.cavemanOutputMode,
+              outputStyles: data.outputStyles ?? DEFAULT_CONFIG.outputStyles,
+              contextBudget: { ...DEFAULT_CONTEXT_BUDGET, ...(data.contextBudget ?? {}) },
+            };
+            savedRef.current = hydrated;
+            setConfig(hydrated);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false))
+    );
 
     fetch("/api/settings/compression/mcp-accessibility")
       .then((r) => (r.ok ? r.json() : null))
@@ -283,11 +286,11 @@ export default function CompressionPanel() {
 
   // Persist a merge-patch. The server replaces each top-level key the PUT carries, so callers
   // that touch an engine pass the full engines map to avoid dropping the other engines.
-  // Saves go out one at a time through saveQueue, and the panel shows the last saved config plus
-  // the saves it still has queued, so a failed save rolls back only its own fields. A queued save
-  // whose keys a later queued save all carries is skipped, because that later PUT replaces those
-  // keys anyway. The status reads "error" when any save in the run that emptied the panel's
-  // queue failed.
+  // Saves go out one at a time through settingsQueue, and the panel shows the last saved config
+  // plus the saves it still has queued, so a failed save rolls back only its own fields. A queued
+  // save whose keys a later queued save all carries is skipped, because that later PUT replaces
+  // those keys anyway. The status reads "error" when any save in the run that emptied the
+  // panel's queue failed.
   const save = (updates: Partial<CompressionConfig>) => {
     const gen = ++saveGenRef.current;
     if (queuedRef.current.length === 0) batchFailedRef.current = false;
@@ -295,7 +298,7 @@ export default function CompressionPanel() {
     showQueued();
     setSaving(true);
     setStatus("");
-    enqueueSave(async () => {
+    queueSettingsRequest(async () => {
       const replaced = queuedRef.current
         .slice(1)
         .some((later) => Object.keys(updates).every((key) => key in later));

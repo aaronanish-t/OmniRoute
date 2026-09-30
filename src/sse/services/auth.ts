@@ -55,8 +55,7 @@ import {
   isQuotaExhaustedForRequest,
   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
 } from "@/domain/quotaCache";
-import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
-import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
+import { defersQuotaCutoff, hasCodexCreditOptIn } from "@/lib/providers/quotaCutoffOptIns";
 import {
   getQuotaScopeLabelForProvider,
   isAntigravityQuotaProvider,
@@ -392,13 +391,9 @@ export function evaluateQuotaLimitPolicy(
   connection: ProviderConnectionView,
   requestedModel: string | null = null
 ): { blocked: boolean; reasons: string[]; resetAt: string | null } {
-  // Extra-usage switch is opt-in billing, not a pre-dispatch skip. When the
-  // operator allows extra usage, 5h/weekly bars must not hide the account.
-  if (isClaudeExtraUsageAllowed(provider, connection.providerSpecificData)) {
-    return { blocked: false, reasons: [], resetAt: null };
-  }
-  if (isCodexPaidCreditsEnabled(provider, connection.providerSpecificData, requestedModel)) {
-    // Defer subscription-only snapshots to the mandatory credit-aware preflight.
+  // Extra usage and Codex paid credits are opt-in billing, not a pre-dispatch skip: 5h/weekly
+  // bars must not hide the account (Codex defers to its mandatory credit-aware preflight).
+  if (defersQuotaCutoff(provider, connection.providerSpecificData, requestedModel)) {
     return { blocked: false, reasons: [], resetAt: null };
   }
   const policy = resolveQuotaLimitPolicy(provider, connection.providerSpecificData);
@@ -2406,12 +2401,7 @@ export async function getProviderCredentialsWithQuotaPreflight(
     const legacyForceDisable =
       (credentials as { providerSpecificData?: Record<string, unknown> }).providerSpecificData
         ?.quotaPreflightEnabled === false;
-    const paidCreditsEnabled = isCodexPaidCreditsEnabled(
-      provider,
-      (credentials as { providerSpecificData?: unknown }).providerSpecificData,
-      requestedModel
-    );
-    if (legacyForceDisable && !paidCreditsEnabled) {
+    if (legacyForceDisable && !hasCodexCreditOptIn(provider, credentials, requestedModel)) {
       const committed = await commitLease();
       if (committed === null) continue;
       return committed;
@@ -2423,8 +2413,7 @@ export async function getProviderCredentialsWithQuotaPreflight(
     if (
       !hasConnectionOverrides &&
       !providerHasDefaults &&
-      !legacyForceEnable &&
-      !paidCreditsEnabled &&
+      !(legacyForceEnable || hasCodexCreditOptIn(provider, credentials, requestedModel)) &&
       !globalCutoffEnabled &&
       !globalDefaultIsRestrictive
     ) {

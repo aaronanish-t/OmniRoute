@@ -236,8 +236,9 @@ describe("CompressionPanel", () => {
     vi.mocked(globalThis.fetch).mockImplementation((input, init) => {
       if (init?.method !== "PUT") return respond(input, init);
       puts.push(JSON.parse(String(init.body)));
-      return new Promise<Response>((resolve) => {
+      return new Promise<Response>((resolve, reject) => {
         answers.push((status) => resolve(new Response("{}", { status })));
+        init.signal?.addEventListener("abort", () => reject(init.signal?.reason));
       });
     });
     const answer = async (index: number, status: number) => {
@@ -249,10 +250,7 @@ describe("CompressionPanel", () => {
 
   // The ultra-engine select is disabled while a save is in flight, but the auto-trigger input
   // never is, so a change there goes out while the ultra-engine save still waits on the server.
-  async function changeUltraEngineThenAutoTrigger(failPutKey: string) {
-    const { puts } = setupFetchMock(failPutKey);
-    const container = await renderPanel();
-
+  async function changeUltraEngineThenAutoTrigger(container: HTMLElement) {
     const ultraEngine = container.querySelector(
       `[data-testid="ultra-engine-select"]`
     ) as HTMLSelectElement;
@@ -262,12 +260,13 @@ describe("CompressionPanel", () => {
       fireEvent.change(autoTrigger, { target: { value: "500" } });
     });
     for (let i = 0; i < 5; i++) await flush();
-    return { container, puts, ultraEngine, autoTrigger };
+    return { ultraEngine, autoTrigger };
   }
 
   it("a failed save rolls back its own field and keeps a later save", async () => {
-    const { container, puts, ultraEngine, autoTrigger } =
-      await changeUltraEngineThenAutoTrigger("ultraEngine");
+    const { puts } = setupFetchMock("ultraEngine");
+    const container = await renderPanel();
+    const { ultraEngine, autoTrigger } = await changeUltraEngineThenAutoTrigger(container);
 
     // Each PUT carries only its own field, so the server never stored ultraEngine "slm".
     expect(puts.map((p) => p.body)).toEqual([{ ultraEngine: "slm" }, { autoTriggerTokens: 500 }]);
@@ -277,8 +276,9 @@ describe("CompressionPanel", () => {
   });
 
   it("a failed later save rolls back its own field and keeps the earlier save", async () => {
-    const { container, ultraEngine, autoTrigger } =
-      await changeUltraEngineThenAutoTrigger("autoTriggerTokens");
+    setupFetchMock("autoTriggerTokens");
+    const container = await renderPanel();
+    const { ultraEngine, autoTrigger } = await changeUltraEngineThenAutoTrigger(container);
 
     expect(ultraEngine.value).toBe("slm");
     expect(autoTrigger.value).toBe("0");
@@ -306,44 +306,24 @@ describe("CompressionPanel", () => {
   });
 
   it("fails a PUT that outlives the save timeout", async () => {
-    const { puts } = setupFetchMock();
-    const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
+    const { puts, answer } = holdSettingsPuts();
     const timeouts: AbortController[] = [];
     const timeoutSpy = vi.spyOn(AbortSignal, "timeout").mockImplementation(() => {
       const controller = new AbortController();
       timeouts.push(controller);
       return controller.signal;
     });
-    // The first settings PUT never answers on its own; only its timeout signal ends it.
-    let stalled: AbortSignal | null | undefined;
-    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
-      const res = respond(input, init);
-      if (init?.method === "PUT" && puts.length === 1) {
-        stalled = init.signal;
-        await new Promise((_, reject) =>
-          init.signal?.addEventListener("abort", () => reject(init.signal?.reason))
-        );
-      }
-      return res;
-    });
     const container = await renderPanel();
-
-    const ultraEngine = container.querySelector(
-      `[data-testid="ultra-engine-select"]`
-    ) as HTMLSelectElement;
-    const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
-    await act(async () => {
-      fireEvent.change(ultraEngine, { target: { value: "slm" } });
-      fireEvent.change(autoTrigger, { target: { value: "500" } });
-    });
-    for (let i = 0; i < 5; i++) await flush();
-    expect(
-      puts.map((p) => p.body),
-      "the auto-trigger save does not wait"
-    ).toEqual([{ ultraEngine: "slm" }, { autoTriggerTokens: 500 }]);
+    const { ultraEngine, autoTrigger } = await changeUltraEngineThenAutoTrigger(container);
+    expect(puts, "the auto-trigger save does not wait").toEqual([
+      { ultraEngine: "slm" },
+      { autoTriggerTokens: 500 },
+    ]);
+    await answer(1, 200);
     expect(ultraEngine.disabled, "controls stay disabled while a PUT is in flight").toBe(true);
 
-    await act(async () => timeouts.find((c) => c.signal === stalled)?.abort());
+    // The first PUT never answers; its timeout signal ends it.
+    await act(async () => timeouts[0].abort());
     for (let i = 0; i < 5; i++) await flush();
 
     expect(timeoutSpy).toHaveBeenCalledWith(15_000);

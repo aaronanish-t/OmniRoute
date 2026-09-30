@@ -2,7 +2,10 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EngineConfigPage } from "@/shared/components/compression/EngineConfigPage";
-import { compressionSettingsUpdateSchema } from "@/shared/validation/compressionConfigSchemas";
+import {
+  compressionPreviewConfigSchema,
+  compressionSettingsUpdateSchema,
+} from "@/shared/validation/compressionConfigSchemas";
 import {
   aggressiveEngine,
   ultraEngine,
@@ -30,12 +33,14 @@ const ENGINES = {
 
 // Stands in for /api/settings/compression. A PUT is checked against the real update schema,
 // and each key in its body replaces the stored sub-object whole, as updateCompressionSettings
-// does. `readsFail` makes later GETs fail.
+// does. `readsFail` makes later GETs fail. A preview's config is checked against the preview
+// route's schema.
 function startServer(initial: Settings) {
   let stored: Settings = JSON.parse(JSON.stringify(initial));
   const server = {
     readsFail: false,
     puts: [] as { body: Settings; status: number }[],
+    previews: [] as { config: unknown; status: number }[],
     get stored() {
       return stored;
     },
@@ -67,6 +72,19 @@ function startServer(initial: Settings) {
         if (!parsed.success) return respond({ error: "Invalid request" }, 400);
         stored = { ...stored, ...parsed.data };
         return respond(stored);
+      }
+      if (pathname === "/api/compression/preview") {
+        const { config } = JSON.parse(String(init?.body)) as { config?: unknown };
+        const parsed = compressionPreviewConfigSchema.optional().safeParse(config);
+        server.previews.push({ config, status: parsed.success ? 200 : 400 });
+        if (!parsed.success) return respond({ error: "Invalid request" }, 400);
+        return respond({
+          original: "original text",
+          compressed: "compressed text",
+          originalTokens: 4,
+          compressedTokens: 2,
+          savingsPct: 50,
+        });
       }
       return respond(null, 404);
     })
@@ -192,5 +210,17 @@ describe("EngineConfigPage saves only what the operator changed", () => {
       maxTokensPerMessage: 1024,
       minSavingsThreshold: 0.2,
     });
+  });
+
+  it("previews the Ultra engine on a default install that has no model path", async () => {
+    const server = startServer({ ultra: DEFAULT_ULTRA_CONFIG });
+    await renderPage("ultra");
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    await settle();
+
+    expect(server.previews.at(-1)?.status).toBe(200);
+    expect(screen.queryByText("Preview failed.")).toBeNull();
+    expect(screen.getByText("compressed text")).toBeTruthy();
   });
 });

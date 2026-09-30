@@ -11,11 +11,11 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../../src/lib/db/core.ts");
 const { getCompressionSettings, updateCompressionSettings } =
   await import("../../../src/lib/db/compression.ts");
-const { compressionSettingsUpdateSchema } =
+const { compressionPreviewConfigSchema, compressionSettingsUpdateSchema } =
   await import("../../../src/shared/validation/compressionConfigSchemas.ts");
 const { aggressiveEngine, ultraEngine } =
   await import("../../../open-sse/services/compression/engines/cavemanAdapter.ts");
-const { seedEngineForm, buildEngineDetailUpdate } =
+const { seedEngineForm, buildEngineDetailUpdate, withoutEmptyText } =
   await import("../../../src/shared/components/compression/engineConfigSave.ts");
 
 type Settings = Record<string, unknown>;
@@ -152,5 +152,15 @@ describe("engine config page save", () => {
       buildEngineDetailUpdate(loaded, loaded, settings.aggressive),
       settings.aggressive
     );
+  });
+
+  it("builds an ultra preview config that the preview schema accepts on a default install", async () => {
+    const settings = await readSettings();
+    const form = seedEngineForm(ultraEngine.id, ultraEngine.getConfigSchema(), settings.ultra);
+    assert.equal(form.modelPath, "");
+
+    const parsed = compressionPreviewConfigSchema.safeParse({ ultra: withoutEmptyText(form) });
+
+    assert.equal(parsed.success, true);
   });
 });

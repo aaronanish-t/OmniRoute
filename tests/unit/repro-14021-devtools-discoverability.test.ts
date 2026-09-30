@@ -15,7 +15,7 @@ const sidebarVisibility = await import("../../src/shared/constants/sidebarVisibi
 function visibleItemIdsWithDebug(showDebug: boolean): string[] {
   // This is exactly the predicate used in:
   //   src/shared/components/Sidebar.tsx:277
-  //   src/app/(dashboard)/dashboard/settings/components/SidebarTab.tsx:470
+  //   src/app/(dashboard)/dashboard/settings/components/SidebarTab.tsx:473
   const visibleSections = sidebarVisibility.SIDEBAR_SECTIONS.filter(
     (section) => section.visibility !== "debug" || showDebug
   );

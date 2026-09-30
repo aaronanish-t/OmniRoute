@@ -77,14 +77,19 @@ export function isClientAbortError(err) {
   const e = /** @type {NodeJS.ErrnoException} */ (err);
   // Node emits `Error: aborted` (no code) from http.Server#abortIncoming.
   if (e.message === "aborted" || e.message === "Aborted") return true;
-  // ANY AbortError/TimeoutError reaching the process level is a raced abort
-  // or timeout signal from OmniRoute's own orchestration: client disconnects
-  // (`request_signal_aborted`), per-model combo timeouts
-  // (`combo-per-model-timeout`), ProxyFetch retry signals, fetch/DOM
-  // cancellation. The operation has already failed; killing the process for
-  // it only converts one failed request into a full server outage (#12164).
-  if (e.name === "AbortError" || e.name === "TimeoutError") return true;
-  if (e.code === "DIRECT_RESPONSE_START_TIMEOUT") return true;
+  // An AbortError/TimeoutError reaching the process level is usually a raced
+  // abort or timeout signal from OmniRoute's own orchestration: client
+  // disconnects (`request_signal_aborted`), per-model combo timeouts
+  // (`combo-per-model-timeout`), fetch/DOM cancellation. The operation has
+  // already failed; killing the process for it only converts one failed
+  // request into a full server outage (#12164). TimeoutError stays broad
+  // (raced timers); an AbortError is only absorbed when its message is one of
+  // ours — an AbortError from an unknown subsystem must surface. The
+  // DIRECT_RESPONSE_START_TIMEOUT code is handled by
+  // isRecoverableUpstreamTimeoutError instead, keeping the two predicates
+  // disjoint (#12861).
+  if (e.name === "TimeoutError") return true;
+  if (e.name === "AbortError" && /abort/i.test(String(e.message))) return true;
   // Combo dispatch cancels a losing hedged target / a stalled target by
   // aborting with `new Error(reason)` for one of the reasons in
   // open-sse/services/combo/comboAbortReasons.ts (targetTimeoutRunner.ts).

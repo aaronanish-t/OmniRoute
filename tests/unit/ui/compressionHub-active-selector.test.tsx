@@ -7,7 +7,8 @@ import messages from "../../../src/i18n/messages/en.json";
 
 const containers: HTMLElement[] = [];
 const roots: Array<{ unmount: () => void }> = [];
-// Settings PUTs a test is holding. afterEach answers any it left, so none stalls a later test.
+// Settings PUTs a test is holding. Every mounted Hub shares one save queue, so a PUT a test
+// leaves unanswered would stall the next test's load.
 const heldPuts: Array<() => void> = [];
 
 function mount(ui: React.ReactElement): HTMLElement {
@@ -33,9 +34,11 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
+  // Answer every held PUT while the fetch mock is still in place, so the queue drains first.
+  await releaseInOrder(heldPuts);
+  heldPuts.length = 0;
   vi.restoreAllMocks();
   await act(async () => {
-    while (heldPuts.length > 0) heldPuts.shift()?.();
     while (roots.length > 0) roots.pop()?.unmount();
   });
   for (let i = 0; i < 10; i++) await Promise.resolve();
@@ -54,18 +57,20 @@ interface CapturedPut {
   body: Record<string, unknown>;
 }
 
-// failPutKeys: a settings PUT whose body carries one of these keys gets a 500, as when the server
-// rejects that save. hold: each settings PUT waits until the test calls its entry in `held`, so
-// the test decides the order in which saves answer.
+// A stand-in for the route: GET answers with the stored settings, and a PUT that succeeds
+// replaces each top-level key it carries, as updateCompressionSettings does. failPutKeys: a PUT
+// whose body carries one of these keys gets a 500 and stores nothing. hold: each PUT waits until
+// the test calls its entry in `held`, so the test decides the order in which saves answer.
 function setupFetchMock(opts: { failPutKeys?: string[]; hold?: boolean } = {}): {
   puts: CapturedPut[];
   held: Array<() => void>;
+  server: Record<string, unknown>;
 } {
   const puts: CapturedPut[] = [];
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
-  const initialConfig = {
+  const server: Record<string, unknown> = {
     enabled: true,
     defaultMode: "off",
     autoTriggerTokens: 0,
@@ -93,14 +98,15 @@ function setupFetchMock(opts: { failPutKeys?: string[]; hold?: boolean } = {}): 
           puts.push({ url, body });
           if (opts.hold) await new Promise<void>((release) => heldPuts.push(release));
           if (opts.failPutKeys?.some((key) => key in body)) return json({ error: "rejected" }, 500);
-          return json({ ...initialConfig, ...body });
+          Object.assign(server, body);
+          return json(server);
         }
-        return json(initialConfig);
+        return json(server);
       }
       return json({}, 404);
     }
   );
-  return { puts, held: heldPuts };
+  return { puts, held: heldPuts, server };
 }
 
 function setSelectValue(select: HTMLSelectElement, value: string) {
@@ -196,7 +202,7 @@ describe("CompressionHub overlapping saves", () => {
   // The select and the toggle stay enabled while a save is in flight, so a second save can start
   // before the first one answers.
   async function changeProfileThenToggle(failPutKeys: string[]) {
-    const { puts, held } = setupFetchMock({ failPutKeys, hold: true });
+    const { puts, held, server } = setupFetchMock({ failPutKeys, hold: true });
     const container = await render();
     await act(async () => {
       setSelectValue(activeProfileSelect(container), "c1");
@@ -205,16 +211,17 @@ describe("CompressionHub overlapping saves", () => {
       contextEditingToggle(container).click();
     });
     await releaseInOrder(held);
-    return { container, puts };
+    return { container, puts, server };
   }
 
   it("a failed save rolls back only its own field and keeps a later save the server stored", async () => {
-    const { container, puts } = await changeProfileThenToggle(["activeComboId"]);
+    const { container, puts, server } = await changeProfileThenToggle(["activeComboId"]);
 
     expect(puts.map((p) => p.body)).toEqual([
       { activeComboId: "c1" },
       { contextEditing: { enabled: true } },
     ]);
+    expect(server).toMatchObject({ activeComboId: null, contextEditing: { enabled: true } });
     expect(activeProfileSelect(container).value).toBe("");
     expect(contextEditingToggle(container).getAttribute("aria-checked")).toBe("true");
     // The later save's success leaves the earlier failure on screen.
@@ -222,23 +229,28 @@ describe("CompressionHub overlapping saves", () => {
   });
 
   it("a later failed save does not bring back an earlier value the server rejected", async () => {
-    const { container } = await changeProfileThenToggle(["activeComboId", "contextEditing"]);
+    const { container, server } = await changeProfileThenToggle([
+      "activeComboId",
+      "contextEditing",
+    ]);
 
+    expect(server).toMatchObject({ activeComboId: null, contextEditing: { enabled: false } });
     expect(activeProfileSelect(container).value).toBe("");
     expect(contextEditingToggle(container).getAttribute("aria-checked")).toBe("false");
     expect(container.textContent).toContain(saveFailed);
   });
 
   it("a later failed save keeps an earlier save the server stored", async () => {
-    const { container } = await changeProfileThenToggle(["contextEditing"]);
+    const { container, server } = await changeProfileThenToggle(["contextEditing"]);
 
+    expect(server).toMatchObject({ activeComboId: "c1", contextEditing: { enabled: false } });
     expect(activeProfileSelect(container).value).toBe("c1");
     expect(contextEditingToggle(container).getAttribute("aria-checked")).toBe("false");
     expect(container.textContent).toContain(saveFailed);
   });
 
   it("skips a queued save that a later queued save replaces", async () => {
-    const { puts, held } = setupFetchMock({ hold: true });
+    const { puts, held, server } = setupFetchMock({ hold: true });
     const container = await render();
     for (const value of ["c1", "c2", ""]) {
       await act(async () => {
@@ -249,11 +261,59 @@ describe("CompressionHub overlapping saves", () => {
 
     // "c1" went out at once; "c2" was still queued when "" replaced it.
     expect(puts.map((p) => p.body)).toEqual([{ activeComboId: "c1" }, { activeComboId: null }]);
+    expect(server.activeComboId).toBeNull();
     expect(activeProfileSelect(container).value).toBe("");
   });
 
+  it("a Hub mounted while another Hub still has saves queued shows what the server stored", async () => {
+    const { held, server } = setupFetchMock({ hold: true });
+    const first = await render();
+    await act(async () => {
+      setSelectValue(activeProfileSelect(first), "c1");
+    });
+    await act(async () => {
+      contextEditingToggle(first).click();
+    });
+    // Leave the page while the profile save is in flight and the toggle save is queued.
+    await act(async () => {
+      roots.pop()?.unmount();
+    });
+    const second = await render();
+    await releaseInOrder(held);
+
+    expect(server).toMatchObject({ activeComboId: "c1", contextEditing: { enabled: true } });
+    expect(activeProfileSelect(second).value).toBe("c1");
+    expect(contextEditingToggle(second).getAttribute("aria-checked")).toBe("true");
+  });
+
+  it("a save made in a new Hub lands after the saves an unmounted Hub still had queued", async () => {
+    const { held, server } = setupFetchMock({ hold: true });
+    const first = await render();
+    for (const value of ["c1", "c2"]) {
+      await act(async () => {
+        setSelectValue(activeProfileSelect(first), value);
+      });
+    }
+    await act(async () => {
+      roots.pop()?.unmount();
+    });
+    const second = await render();
+    // The new Hub loads only after the queued saves land, so no save of its own can go first.
+    expect(activeProfileSelect(second)).toBeNull();
+
+    await releaseInOrder(held);
+    expect(activeProfileSelect(second).value).toBe("c2");
+    await act(async () => {
+      setSelectValue(activeProfileSelect(second), "c1");
+    });
+    await releaseInOrder(held);
+
+    expect(server.activeComboId).toBe("c1");
+    expect(activeProfileSelect(second).value).toBe("c1");
+  });
+
   it("fails a PUT that outlives the save timeout and sends the save queued behind it", async () => {
-    const { puts } = setupFetchMock();
+    const { puts, server } = setupFetchMock();
     const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
     const timeouts: AbortController[] = [];
     const timeoutSpy = vi.spyOn(AbortSignal, "timeout").mockImplementation(() => {
@@ -261,15 +321,17 @@ describe("CompressionHub overlapping saves", () => {
       timeouts.push(controller);
       return controller.signal;
     });
-    // The first settings PUT never answers on its own; only its timeout signal ends it.
+    // The first settings PUT never reaches the route; only its timeout signal ends it. afterEach
+    // rejects it if the test stops before the abort.
+    let sent = 0;
     vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
-      const res = await respond(input, init);
-      if (init?.method === "PUT" && puts.length === 1) {
-        await new Promise((_, reject) =>
-          init.signal?.addEventListener("abort", () => reject(init.signal?.reason))
-        );
+      if (init?.method === "PUT" && ++sent === 1) {
+        await new Promise((_, reject) => {
+          heldPuts.push(() => reject(new Error("test ended")));
+          init.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+        });
       }
-      return res;
+      return respond(input, init);
     });
     const container = await render();
     await act(async () => {
@@ -279,16 +341,14 @@ describe("CompressionHub overlapping saves", () => {
       contextEditingToggle(container).click();
     });
     await flush();
-    expect(puts, "the toggle save waits behind the stalled PUT").toHaveLength(1);
+    expect(sent, "the toggle save waits behind the stalled PUT").toBe(1);
 
     await act(async () => timeouts[0].abort());
     for (let i = 0; i < 5; i++) await flush();
 
     expect(timeoutSpy).toHaveBeenCalledWith(15_000);
-    expect(puts.map((p) => p.body)).toEqual([
-      { activeComboId: "c1" },
-      { contextEditing: { enabled: true } },
-    ]);
+    expect(puts.map((p) => p.body)).toEqual([{ contextEditing: { enabled: true } }]);
+    expect(server).toMatchObject({ activeComboId: null, contextEditing: { enabled: true } });
     expect(activeProfileSelect(container).value).toBe("");
     expect(contextEditingToggle(container).getAttribute("aria-checked")).toBe("true");
     expect(container.textContent).toContain(saveFailed);

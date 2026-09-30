@@ -4,8 +4,6 @@ version: 3.8.40
 lastUpdated: 2026-06-28
 ---
 
-# Reasoning Replay Cache
-
 > **Source of truth:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 > **Last updated:** 2026-06-28 — v3.8.40
 

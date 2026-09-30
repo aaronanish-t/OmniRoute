@@ -79,17 +79,9 @@ const CONTEXT_BUDGET_POLICIES = new Set<ContextBudgetConfig["policy"]>([
   "absolute",
 ]);
 const CAVEMAN_OUTPUT_LEVELS: CavemanIntensity[] = ["lite", "full", "ultra"];
-// A settings request that has not answered by then counts as failed, so one stalled request
-// cannot hold the settings queue, and the controls it disables, indefinitely.
+// A settings PUT that has not answered by then counts as failed, so one stalled save cannot hold
+// the controls disabled indefinitely.
 const SAVE_TIMEOUT_MS = 15_000;
-// Every mounted panel sends its settings load and saves through one shared queue. A panel
-// that unmounts with saves still queued keeps sending them, and a panel mounted afterwards
-// loads and saves behind them, so it never shows or writes a value older than one already
-// on its way to the server.
-let settingsQueue: Promise<void> = Promise.resolve();
-function queueSettingsRequest(send: () => Promise<void>) {
-  settingsQueue = settingsQueue.then(send);
-}
 
 const DEFAULT_CONFIG: CompressionConfig = {
   enabled: false,
@@ -232,31 +224,32 @@ export default function CompressionPanel() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"" | "saved" | "error">("");
   const saveGenRef = useRef(0);
+  // The last config the server confirmed, and per field the save that confirmed it.
   const savedRef = useRef(config);
-  const queuedRef = useRef<Partial<CompressionConfig>[]>([]);
+  const savedGenRef = useRef<Record<string, number>>({});
+  // Saves still waiting on the server, oldest first.
+  const pendingRef = useRef<Array<{ gen: number; updates: Partial<CompressionConfig> }>>([]);
   const batchFailedRef = useRef(false);
 
   useEffect(() => {
-    queueSettingsRequest(() =>
-      fetch("/api/settings/compression", { signal: AbortSignal.timeout(SAVE_TIMEOUT_MS) })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((data: Partial<CompressionConfig> | null) => {
-          if (data) {
-            const hydrated: CompressionConfig = {
-              ...DEFAULT_CONFIG,
-              ...data,
-              engines: normalizeEngines(data.engines),
-              cavemanOutputMode: data.cavemanOutputMode ?? DEFAULT_CONFIG.cavemanOutputMode,
-              outputStyles: data.outputStyles ?? DEFAULT_CONFIG.outputStyles,
-              contextBudget: { ...DEFAULT_CONTEXT_BUDGET, ...(data.contextBudget ?? {}) },
-            };
-            savedRef.current = hydrated;
-            setConfig(hydrated);
-          }
-        })
-        .catch(() => {})
-        .finally(() => setLoading(false))
-    );
+    fetch("/api/settings/compression")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: Partial<CompressionConfig> | null) => {
+        if (data) {
+          const hydrated: CompressionConfig = {
+            ...DEFAULT_CONFIG,
+            ...data,
+            engines: normalizeEngines(data.engines),
+            cavemanOutputMode: data.cavemanOutputMode ?? DEFAULT_CONFIG.cavemanOutputMode,
+            outputStyles: data.outputStyles ?? DEFAULT_CONFIG.outputStyles,
+            contextBudget: { ...DEFAULT_CONTEXT_BUDGET, ...(data.contextBudget ?? {}) },
+          };
+          savedRef.current = hydrated;
+          setConfig(hydrated);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
 
     fetch("/api/settings/compression/mcp-accessibility")
       .then((r) => (r.ok ? r.json() : null))
@@ -276,66 +269,69 @@ export default function CompressionPanel() {
       .catch(() => {});
   }, []);
 
-  const showQueued = () => {
-    const shown = queuedRef.current.reduce<CompressionConfig>(
-      (acc, queued) => ({ ...acc, ...queued }),
-      savedRef.current
+  // The fields of a save that no newer confirmed save has set.
+  const unconfirmedFields = (
+    gen: number,
+    updates: Partial<CompressionConfig>
+  ): Partial<CompressionConfig> =>
+    Object.fromEntries(
+      Object.entries(updates).filter(([key]) => gen > (savedGenRef.current[key] ?? 0))
     );
-    setConfig(shown);
-  };
+
+  // Each field shows its newest save that has not failed, or the loaded value.
+  const showSaves = () =>
+    setConfig(
+      pendingRef.current.reduce<CompressionConfig>(
+        (shown, pending) => ({ ...shown, ...unconfirmedFields(pending.gen, pending.updates) }),
+        savedRef.current
+      )
+    );
 
   // Persist a merge-patch. The server replaces each top-level key the PUT carries, so callers
   // that touch an engine pass the full engines map to avoid dropping the other engines.
-  // Saves go out one at a time through settingsQueue, and the panel shows the last saved config
-  // plus the saves it still has queued, so a failed save rolls back only its own fields. A queued
-  // save whose keys a later queued save all carries is skipped, because that later PUT replaces
-  // those keys anyway. The status reads "error" when any save in the run that emptied the
-  // panel's queue failed.
-  const save = (updates: Partial<CompressionConfig>) => {
+  // Every save goes out at once. A confirmed save updates only the fields that no newer
+  // confirmed save has set, and a failed save drops out, so a failure rolls back only its own
+  // fields and never undoes a newer save. The status reads "error" when any save failed since
+  // the panel last had none in flight.
+  const save = async (updates: Partial<CompressionConfig>) => {
     const gen = ++saveGenRef.current;
-    if (queuedRef.current.length === 0) batchFailedRef.current = false;
-    queuedRef.current.push(updates);
-    showQueued();
+    if (pendingRef.current.length === 0) batchFailedRef.current = false;
+    pendingRef.current.push({ gen, updates });
+    showSaves();
     setSaving(true);
     setStatus("");
-    queueSettingsRequest(async () => {
-      const replaced = queuedRef.current
-        .slice(1)
-        .some((later) => Object.keys(updates).every((key) => key in later));
-      if (replaced) {
-        queuedRef.current.shift();
-        return;
-      }
-      // Any throw here would leave the queue rejected and the panel disabled, so every failure
-      // to send or save, the timeout included, lands as ok = false and the bookkeeping below
-      // always runs.
-      let ok = false;
-      try {
-        const res = await fetch("/api/settings/compression", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updates),
-          signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
-        });
-        ok = res.ok;
-      } catch {
-        // Counted as a failed save; its fields roll back below.
-      }
-      queuedRef.current.shift();
-      if (ok) savedRef.current = { ...savedRef.current, ...updates };
-      else batchFailedRef.current = true;
-      showQueued();
-      if (queuedRef.current.length > 0) return;
-      setSaving(false);
-      if (batchFailedRef.current) {
-        setStatus("error");
-        return;
-      }
-      setStatus("saved");
-      setTimeout(() => {
-        if (gen === saveGenRef.current) setStatus("");
-      }, 2000);
-    });
+    let ok = false;
+    try {
+      const res = await fetch("/api/settings/compression", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+        signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
+      });
+      ok = res.ok;
+    } catch {
+      // A network error or the timeout counts as a failed save.
+    }
+    pendingRef.current = pendingRef.current.filter((pending) => pending.gen !== gen);
+    if (ok) {
+      const confirmed = unconfirmedFields(gen, updates);
+      savedRef.current = { ...savedRef.current, ...confirmed };
+      for (const key of Object.keys(confirmed)) savedGenRef.current[key] = gen;
+    } else {
+      batchFailedRef.current = true;
+    }
+    showSaves();
+    if (pendingRef.current.length > 0) return;
+    setSaving(false);
+    if (batchFailedRef.current) {
+      setStatus("error");
+      return;
+    }
+    setStatus("saved");
+    const latestGen = saveGenRef.current;
+    setTimeout(() => {
+      if (latestGen === saveGenRef.current) setStatus("");
+    }, 2000);
   };
 
   const setEngine = (id: string, patch: Partial<EngineToggle>) => {

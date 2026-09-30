@@ -5360,6 +5360,7 @@
     "modelsImported": "{count} model diimport",
     "allModelsAlreadyImported": "Semua model sudah diimport",
     "noNewModelsToImport": "Tiada model baru untuk diimport — semua model sudah ada dalam registri atau senarai model tersuai",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Melangkau {count} model sedia ada",
     "autoSync": "Auto-Segerak",
     "autoSyncShort": "Segerak",

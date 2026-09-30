@@ -5360,6 +5360,7 @@
     "modelsImported": "已匯入 {count} 個模型",
     "allModelsAlreadyImported": "所有模型已匯入",
     "noNewModelsToImport": "沒有新模型可匯入 — 所有模型已在登錄檔或自定義模型列表中",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "跳過 {count} 個已有模型",
     "autoSync": "自動同步",
     "autoSyncShort": "同步",

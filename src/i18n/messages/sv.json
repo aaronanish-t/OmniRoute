@@ -5360,6 +5360,7 @@
     "modelsImported": "{count} modeller importerade",
     "allModelsAlreadyImported": "Alla modeller är redan importerade",
     "noNewModelsToImport": "Inga nya modeller att importera — alla modeller finns redan i registret eller listan över anpassade modeller",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Hoppar över {count} befintliga modeller",
     "autoSync": "Automatisk synkronisering",
     "autoSyncShort": "Synkronisera",

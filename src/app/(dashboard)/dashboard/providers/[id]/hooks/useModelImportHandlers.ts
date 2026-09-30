@@ -16,7 +16,7 @@
 import React, { useState } from "react";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
-import { extractImportWarning } from "./modelImportWarning";
+import { extractImportWarning, resolveNoNewModelsPhase } from "./modelImportWarning";
 
 interface NotifyStore {
   success: (message: string, title?: string) => number;
@@ -30,7 +30,7 @@ interface NotifyStore {
 export interface ImportProgress {
   current: number;
   total: number;
-  phase: "idle" | "fetching" | "importing" | "done" | "error";
+  phase: "idle" | "fetching" | "importing" | "done" | "warning" | "error";
   status: string;
   logs: string[];
   error: string;
@@ -174,14 +174,30 @@ export function useModelImportHandlers({
       );
 
       if (newModels.length === 0) {
+        // #15069: when the response came from the local catalog fallback (importWarning is set),
+        // the user should not see a success/done state — the remote endpoint was unreachable.
+        // resolveNoNewModelsPhase() returns "warning" when a fallback warning is present,
+        // "done" when the remote catalog was actually fetched.
+        const noNewModelsPhase = resolveNoNewModelsPhase(importWarning);
+        if (noNewModelsPhase === "warning") {
+          setImportProgress((prev) => ({
+            ...prev,
+            phase: "warning",
+            status:
+              t("localCatalogFallbackStatus") ||
+              "Couldn't reach the provider's model list — showing the built-in catalog",
+            logs: [importWarning!, t("noNewModelsToImport") || "No new models to import"],
+            importedCount: 0,
+            total: 0,
+            current: 0,
+          }));
+          return;
+        }
         setImportProgress((prev) => ({
           ...prev,
           phase: "done",
           status: t("allModelsAlreadyImported") || "All models already imported",
-          logs: [
-            ...(importWarning ? [importWarning] : []),
-            t("noNewModelsToImport") || "No new models to import",
-          ],
+          logs: [t("noNewModelsToImport") || "No new models to import"],
           importedCount: 0,
           total: 0,
           current: 0,

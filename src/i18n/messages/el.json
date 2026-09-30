@@ -5360,6 +5360,7 @@
     "modelsImported": "Έγινε εισαγωγή {count} μοντέλων",
     "allModelsAlreadyImported": "Όλα τα μοντέλα έχουν ήδη εισαχθεί",
     "noNewModelsToImport": "Δεν υπάρχουν νέα μοντέλα για εισαγωγή — όλα τα μοντέλα βρίσκονται ήδη στο μητρώο ή στη λίστα προσαρμοσμένων μοντέλων",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Παράλειψη {count} υφιστάμενων μοντέλων",
     "autoSync": "Αυτόματος Συγχρονισμός",
     "autoSyncShort": "Συγχρονισμός",

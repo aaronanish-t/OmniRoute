@@ -5360,6 +5360,7 @@
     "modelsImported": "Uvezeno {count} modela",
     "allModelsAlreadyImported": "Svi modeli su već uvezeni",
     "noNewModelsToImport": "Nema novih modela za uvoz — svi modeli su već u registru ili listi prilagođenih modela",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Preskaču se {count} postojećih modela",
     "autoSync": "Auto-sinkronizacija",
     "autoSyncShort": "Sinkronizuj",

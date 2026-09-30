@@ -15,3 +15,19 @@ export function extractImportWarning(data: unknown): string | null {
   }
   return null;
 }
+
+/**
+ * #15069 — pure phase resolver for the zero-new-models branch in handleImportModels.
+ *
+ * When all fetched models are already registered, what the user sees depends on whether
+ * the fetch came from the live upstream API or fell back to the local catalog:
+ *
+ *  - `importWarning` present → local-catalog fallback → phase "warning" (the remote API was
+ *    unreachable; a success indicator would be misleading).
+ *  - `importWarning` absent  → remote catalog actually fetched → phase "done" (genuine success).
+ *
+ * Extracted as a pure function so unit tests can cover this branch without a React renderer.
+ */
+export function resolveNoNewModelsPhase(importWarning: string | null): "warning" | "done" {
+  return importWarning ? "warning" : "done";
+}

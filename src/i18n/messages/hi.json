@@ -5360,6 +5360,7 @@
     "modelsImported": "{count} मॉडल आयात किए गए",
     "allModelsAlreadyImported": "सभी मॉडल पहले से ही आयातित हैं",
     "noNewModelsToImport": "आयात करने के लिए कोई नए मॉडल नहीं — सभी मॉडल पहले से ही रजिस्ट्री या कस्टम मॉडल सूची में हैं",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "{count} मौजूदा मॉडल छोड़े जा रहे हैं",
     "autoSync": "स्वतः-सिंक",
     "autoSyncShort": "सिंक करें",

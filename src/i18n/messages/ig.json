@@ -5360,6 +5360,7 @@
     "modelsImported": "E bubatara ụdị {count}",
     "allModelsAlreadyImported": "E bubatala ụdị niile",
     "noNewModelsToImport": "Enweghị ụdị ọhụrụ a ga-ebubata — ụdị niile adịlarị na ndekọ ma ọ bụ ndepụta ụdị ahaziri iche",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Na-amafe ụdị {count} dị adị",
     "autoSync": "Mmekọrịta akpaaka",
     "autoSyncShort": "Mekọrịta",

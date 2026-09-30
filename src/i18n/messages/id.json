@@ -5360,6 +5360,7 @@
     "modelsImported": "{count} model diimpor",
     "allModelsAlreadyImported": "Semua model sudah diimpor",
     "noNewModelsToImport": "Tidak ada model baru untuk diimpor — semua model sudah ada di registri atau daftar model kustom",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Melewatkan {count} model yang sudah ada",
     "autoSync": "Sinkronisasi Otomatis",
     "autoSyncShort": "Sinkronkan",

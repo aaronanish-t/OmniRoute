@@ -5360,6 +5360,7 @@
     "modelsImported": "นำเข้าโมเดลแล้ว {count} รายการ",
     "allModelsAlreadyImported": "นำเข้าโมเดลทั้งหมดแล้ว",
     "noNewModelsToImport": "ไม่มีโมเดลใหม่ที่จะนำเข้า — โมเดลทั้งหมดมีอยู่แล้วในรีจิสทรีหรือรายการโมเดลที่กำหนดเอง",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "ข้าม {count} โมเดลที่มีอยู่",
     "autoSync": "ซิงค์อัตโนมัติ",
     "autoSyncShort": "ซิงค์",

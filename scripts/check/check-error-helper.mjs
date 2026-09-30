@@ -89,6 +89,12 @@ const RAW_ERR_FIELD_INTERP = new RegExp(
   String.raw`\b(?:message|error)\s*:\s*[\`"'][^\n]*\$\{[^}]*` + RAW_ERR
 );
 
+// G-11 (#15159): the raw error may sit further right on the field line — a ternary
+// or cast separates it from the field name (`error: err instanceof Error ? err.message
+// : String(err)`). The relaxed form catches that alias-laundered/tool-result shape;
+// lines carrying a sanitize call are trusted (same policy as RAW_BODY_ERR).
+const RAW_ERR_FIELD_RELAXED = new RegExp(String.raw`\b(?:message|error)\s*:\s*[^,}\n;]*` + RAW_ERR);
+
 // A raw caught-error value interpolated anywhere on a line that also builds a Response.
 const RAW_ERR_INTERP = new RegExp(String.raw`\$\{[^}]*` + RAW_ERR);
 
@@ -99,6 +105,14 @@ const RAW_BODY_ERR = /\b(?:message|error)\s*:\s*[^,}\n]*\bbody\.error\.message\b
 // local variable (assigned from a raw error) passed here is a leak.
 const RESPONSE_BUILDER_CALL =
   /\b(?:errResp|makeErrorResponse|errorResponse)\s*\(|\bresponse\s*:\s*(?:errResp|makeErrorResponse|errorResponse|new\s+Response)\s*\(/;
+
+// G-11 (#15159): MCP tool results are `{ content: [{ type: "text", text }], isError: true }`
+// — the client-facing sink for MCP tools, NOT an HTTP Response builder. A raw error
+// (direct or via a tainted alias) interpolated into a result field of a returned MCP
+// tool result is a Hard Rule #12 leak just like a `new Response(` body. Scoped to
+// open-sse/mcp-server/ so the executors/handlers/API-route scan stays byte-identical
+// to its pre-G-11 behavior (their surfaces are covered by RESPONSE_LINE above).
+const MCP_RESULT_FIELD = /\b(?:message|error|text)\s*:/;
 
 // `const|let <id> = <expr containing a raw caught-error>` — a tainted local holding a
 // raw, unsanitized error string. Captures the variable name for downstream tracking.
@@ -115,11 +129,14 @@ const TAINT_DECL = new RegExp(
  * A line is a violation when, after skipping internal-sink lines, it either:
  *  - assigns/interpolates a raw caught-error into a `message:`/`error:` field, or
  *  - interpolates a raw caught-error AND is itself a Response/result-builder line, or
+ *  - interpolates a raw caught-error into a client-facing `text:`/`message:`/`error:`
+ *    field of a returned MCP tool result (G-11: `{ content: [...], isError: true }`), or
  *  - forwards upstream `body.error.message` into a field without sanitizing, or
  *  - passes a TAINTED local (a var assigned from a raw error, never sanitized) into a
- *    response-builder call (errResp / makeErrorResponse / errorResponse / new Response).
+ *    response-builder call (errResp / makeErrorResponse / errorResponse / new Response)
+ *    or into any client-facing result field (G-11).
  */
-function forwardsRawError(source) {
+function forwardsRawError(source, isMcpServer = false) {
   const lines = source.split("\n").map((l) => l.replace(/\/\/.*$/, ""));
 
   // Pass 1: collect tainted local variables (raw error, no sanitize on the line).
@@ -139,17 +156,26 @@ function forwardsRawError(source) {
     if (INTERNAL_SINK.test(line)) continue; // log / audit / throw / reject
     if (TAINT_DECL.test(line)) continue; // the assignment itself is not the leak
 
+    const isMcp = isMcpServer;
     const directLeak =
       RAW_ERR_FIELD.test(line) ||
+      (isMcp && RAW_ERR_FIELD_RELAXED.test(line) && !/sanitize/i.test(line)) ||
       RAW_ERR_FIELD_INTERP.test(line) ||
       (RAW_ERR_INTERP.test(line) && RESPONSE_LINE.test(line)) ||
+      // G-11: raw error interpolated directly into an MCP tool-result text field.
+      (isMcp && RAW_ERR_INTERP.test(line) && MCP_RESULT_FIELD.test(line)) ||
       // Multi-line OpenAI error envelope: a raw-error interpolation that sits inside
       // an enclosing `error: {` / `message:` field of a `new Response(` body.
       (RAW_ERR_INTERP.test(line) && enclosedByErrorResponseBody(lines, i)) ||
       (RAW_BODY_ERR.test(line) && !/sanitize/i.test(line));
 
+    // G-11: a tainted alias (`const msg = err.message`) used in an MCP tool-result
+    // field is a leak. A sanitize call on the use line clears the taint.
     const taintedLeak =
-      taintedUse !== null && RESPONSE_BUILDER_CALL.test(line) && taintedUse.test(line);
+      taintedUse !== null &&
+      taintedUse.test(line) &&
+      !/sanitize/i.test(line) &&
+      (RESPONSE_BUILDER_CALL.test(line) || (isMcp && MCP_RESULT_FIELD.test(line)));
 
     // The raw error reaches a client body unless it lives inside an internal-sink
     // call's argument object (saveCallLog / log / console / reqLogger).
@@ -217,7 +243,8 @@ export function findErrorHelperViolations(files, allowlist) {
   for (const { path: rel, source } of files) {
     if (allowlist.has(rel)) continue;
     if (ERROR_HELPER_IMPORT.test(source)) continue; // trusts the helper
-    if (forwardsRawError(source)) violations.push(rel);
+    const isMcpServer = rel.startsWith("open-sse/mcp-server/");
+    if (forwardsRawError(source, isMcpServer)) violations.push(rel);
   }
   return violations;
 }

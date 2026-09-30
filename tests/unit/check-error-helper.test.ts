@@ -307,6 +307,39 @@ test("G-11: does NOT flag a tainted alias sanitized at the interpolation site", 
   assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), []);
 });
 
+// --- G-11 false-positive guards (found by running the tightened gate on the repo) ---
+
+test("G-11: does NOT read a ternary `err.message : String(err)` as a field named message", () => {
+  // `err.message : String(err)` contains the text `message :`, which looks exactly
+  // like an object field named `message` to a naive field matcher. A member access
+  // is not a field: the leading `.` must disqualify it. Without this the tightened
+  // gate flags every internal helper that merely formats an error message.
+  const src = `export function describeError(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  return err instanceof Error ? err.message : String(err);
+}`;
+  const path = "open-sse/mcp-server/audit.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), []);
+});
+
+test("G-11: does NOT flag a raw error inside a logToolCall audit row", () => {
+  // logToolCall writes the MCP audit DB row — the same internal-sink class the gate
+  // already exempts for saveCallLog. The handler re-throws, so nothing client-facing
+  // is built from errorMessage here.
+  const src = `export async function handleThing(args: unknown) {
+  try {
+    return await doThing();
+  } catch (error) {
+    const duration = Date.now() - start;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    await logToolCall("omniroute_thing", args, { error: errorMessage }, duration, false, "ERROR");
+    throw error;
+  }
+}`;
+  const path = "open-sse/mcp-server/tools/compressionTools.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), []);
+});
+
 // --- 6A.8: stale-allowlist enforcement ---
 
 // @ts-expect-error — reportStaleEntries exported from the gate module

@@ -66,8 +66,10 @@ const INTERNAL_SINK =
 // argument object (e.g. `saveCallLog({ … error: err.message … })`), it is a DB audit
 // row / log entry, not a client response. Matched against the line that opens the
 // nearest still-unclosed call enclosing the flagged line.
+// `logToolCall` is the MCP server's audit-row writer — same class as saveCallLog: it
+// persists the value to the audit DB and returns nothing to the caller.
 const INTERNAL_SINK_CALL =
-  /\b(?:saveCallLog|log\??\.\w+|console\.\w+|reqLogger\.\w+)\s*\(\s*\{?\s*$/;
+  /\b(?:saveCallLog|logToolCall|log\??\.\w+|console\.\w+|reqLogger\.\w+)\s*\(\s*\{?\s*$/;
 
 // A line that is constructing a client-facing response/result body.
 const RESPONSE_LINE =
@@ -112,7 +114,11 @@ const RESPONSE_BUILDER_CALL =
 // tool result is a Hard Rule #12 leak just like a `new Response(` body. Scoped to
 // open-sse/mcp-server/ so the executors/handlers/API-route scan stays byte-identical
 // to its pre-G-11 behavior (their surfaces are covered by RESPONSE_LINE above).
-const MCP_RESULT_FIELD = /\b(?:message|error|text)\s*:/;
+//
+// The `(?<![.\w])` guard is load-bearing: without it the ternary tail
+// `err.message : String(err)` reads as an object field named `message`, and every
+// internal helper that merely formats an error message gets flagged.
+const MCP_RESULT_FIELD = /(?<![.\w])(?:message|error|text)\s*:/;
 
 // `const|let <id> = <expr containing a raw caught-error>` — a tainted local holding a
 // raw, unsanitized error string. Captures the variable name for downstream tracking.
@@ -178,10 +184,33 @@ function forwardsRawError(source, isMcpServer = false) {
       (RESPONSE_BUILDER_CALL.test(line) || (isMcp && MCP_RESULT_FIELD.test(line)));
 
     // The raw error reaches a client body unless it lives inside an internal-sink
-    // call's argument object (saveCallLog / log / console / reqLogger).
-    if ((directLeak || taintedLeak) && !enclosedByInternalSinkCall(lines, i)) return true;
+    // call's argument object (saveCallLog / logToolCall / log / console / reqLogger).
+    if (
+      (directLeak || taintedLeak) &&
+      !enclosedByInternalSinkCall(lines, i) &&
+      !onSameLineInternalSinkCall(line)
+    )
+      return true;
   }
   return false;
+}
+
+// An internal-sink call OPENER anywhere on a line. Used for the same-line case:
+// `logToolCall("x", args, { error: err.message })` opens and closes on one line, so
+// enclosedByInternalSinkCall()'s depth walk never returns to zero on that line.
+const INTERNAL_SINK_CALL_OPENER =
+  /\b(?:saveCallLog|logToolCall|log\??\.\w+|console\.\w+|reqLogger\.\w+)\s*\(/;
+
+/**
+ * Same-line counterpart to enclosedByInternalSinkCall: when the internal-sink call
+ * opens AND closes on the flagged line, the depth walk above cannot find its opener
+ * (the balanced pair never returns to depth 0). Detect that case by looking for an
+ * internal-sink opener before the flagged field on the same line.
+ */
+function onSameLineInternalSinkCall(line) {
+  const fieldIdx = line.search(MCP_RESULT_FIELD);
+  if (fieldIdx === -1) return false;
+  return INTERNAL_SINK_CALL_OPENER.test(line.slice(0, fieldIdx));
 }
 
 /**

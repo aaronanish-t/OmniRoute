@@ -24,6 +24,11 @@ const { handleSyncPricing, handleTestCombo } =
   await import("../../open-sse/mcp-server/tools/advancedTools.ts");
 const { handlePickFastestModel } =
   await import("../../open-sse/mcp-server/tools/pickFastestModel.ts");
+// The handlers call logToolCall(), which opens the MCP audit DB (and the app DB
+// singleton) under DATA_DIR. Both handles must be released before the temp dir can
+// be removed — on Windows an open handle makes rmSync fail with EPERM.
+const { closeAuditDb } = await import("../../open-sse/mcp-server/audit.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 const SECRET = "sk-live-SECRET123";
 const STACK_PATH = "/srv/app/dist/index.js";
@@ -49,6 +54,10 @@ function assertSanitized(result: ToolResult): void {
 
 test.after(() => {
   restoreFetch();
+  // Release the SQLite handles opened during the handlers' audit writes before
+  // removing the temp DATA_DIR (see AGENTS.md "Database Handles in Tests").
+  closeAuditDb();
+  resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 

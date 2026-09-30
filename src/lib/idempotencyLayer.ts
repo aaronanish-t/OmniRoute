@@ -11,6 +11,7 @@
  */
 
 import { getSettings } from "@/lib/db/settings";
+import { getCachedSettings } from "@/lib/db/readCache";
 
 const DEFAULT_WINDOW_MS = 5000;
 
@@ -62,20 +63,62 @@ export function checkIdempotency(key) {
 }
 
 /**
+ * Resolve effective idempotency window in milliseconds from cached settings or parameter.
+ * @param {Record<string, unknown>} [settings]
+ * @returns {number}
+ */
+export function resolveIdempotencyWindowMs(settings?: Record<string, unknown>): number {
+  if (
+    settings &&
+    typeof settings.idempotencyWindowMs === "number" &&
+    settings.idempotencyWindowMs > 0
+  ) {
+    return settings.idempotencyWindowMs;
+  }
+  return DEFAULT_WINDOW_MS;
+}
+
+/**
  * Save a response for idempotency dedup.
  * @param {string} key
  * @param {object} response - Response body to cache
  * @param {number} status - HTTP status code
  * @param {number} [windowMs=5000] - Dedup window in ms
  */
-export function saveIdempotency(key, response, status, windowMs = DEFAULT_WINDOW_MS) {
+export function saveIdempotency(key, response, status, windowMs?: number) {
   if (!key) return;
   ensureCleanup();
+  const effectiveWindowMs =
+    typeof windowMs === "number" && windowMs > 0 ? windowMs : DEFAULT_WINDOW_MS;
   idempotencyStore.set(key, {
     response,
     status,
-    expiresAt: Date.now() + windowMs,
+    expiresAt: Date.now() + effectiveWindowMs,
   });
+}
+
+/**
+ * Save a response for idempotency dedup using configured windowMs from cached settings.
+ * @param {string} key
+ * @param {object} response - Response body to cache
+ * @param {number} status - HTTP status code
+ * @param {Record<string, unknown>} [cachedSettings]
+ */
+export async function saveIdempotencyWithSettings(
+  key,
+  response,
+  status,
+  cachedSettings?: Record<string, unknown>
+) {
+  if (!key) return;
+  let windowMs = DEFAULT_WINDOW_MS;
+  try {
+    const settings = cachedSettings ?? (await getCachedSettings());
+    windowMs = resolveIdempotencyWindowMs(settings);
+  } catch {
+    // Fallback to default
+  }
+  saveIdempotency(key, response, status, windowMs);
 }
 
 /**

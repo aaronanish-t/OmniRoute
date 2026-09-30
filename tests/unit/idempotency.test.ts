@@ -4,6 +4,8 @@ import {
   getIdempotencyKey,
   checkIdempotency,
   saveIdempotency,
+  saveIdempotencyWithSettings,
+  resolveIdempotencyWindowMs,
   clearIdempotency,
   getIdempotencyStats,
 } from "../../src/lib/idempotencyLayer.ts";
@@ -78,6 +80,33 @@ describe("Idempotency Layer", () => {
       const stats = await getIdempotencyStats();
       assert.equal(stats.activeKeys, 2);
       assert.equal(stats.windowMs, 5000);
+    });
+  });
+
+  describe("resolveIdempotencyWindowMs / saveIdempotencyWithSettings (#15124)", () => {
+    it("resolves default window when settings are undefined or invalid", () => {
+      assert.equal(resolveIdempotencyWindowMs(undefined), 5000);
+      assert.equal(resolveIdempotencyWindowMs({}), 5000);
+      assert.equal(resolveIdempotencyWindowMs({ idempotencyWindowMs: 0 }), 5000);
+      assert.equal(resolveIdempotencyWindowMs({ idempotencyWindowMs: -100 }), 5000);
+      assert.equal(
+        resolveIdempotencyWindowMs({ idempotencyWindowMs: "invalid" as unknown as number }),
+        5000
+      );
+    });
+
+    it("resolves configured window from settings object", () => {
+      assert.equal(resolveIdempotencyWindowMs({ idempotencyWindowMs: 60000 }), 60000);
+      assert.equal(resolveIdempotencyWindowMs({ idempotencyWindowMs: 1500 }), 1500);
+    });
+
+    it("saves entry with custom window via saveIdempotencyWithSettings", async () => {
+      const response = { choices: [{ message: { content: "custom-window" } }] };
+      await saveIdempotencyWithSettings("key-custom", response, 200, { idempotencyWindowMs: 80 });
+      assert.deepEqual(checkIdempotency("key-custom"), { response, status: 200 });
+
+      await new Promise((r) => setTimeout(r, 120));
+      assert.equal(checkIdempotency("key-custom"), null);
     });
   });
 });

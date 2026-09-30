@@ -135,13 +135,15 @@ export function runJsonMigration(
       total_requests, successful_requests, total_input_tokens, total_output_tokens,
       total_cache_read_tokens, total_cache_creation_tokens, total_reasoning_tokens,
       successful_input_tokens, successful_output_tokens, successful_cache_read_tokens,
-      successful_cache_creation_tokens, successful_reasoning_tokens
+      successful_cache_creation_tokens, successful_reasoning_tokens,
+      token_shapes_json, successful_token_shapes_json
     ) VALUES (
       @team_id, @api_key_id, @api_key_name, @provider, @model, @service_tier, @date,
       @total_requests, @successful_requests, @total_input_tokens, @total_output_tokens,
       @total_cache_read_tokens, @total_cache_creation_tokens, @total_reasoning_tokens,
       @successful_input_tokens, @successful_output_tokens, @successful_cache_read_tokens,
-      @successful_cache_creation_tokens, @successful_reasoning_tokens
+      @successful_cache_creation_tokens, @successful_reasoning_tokens,
+      @token_shapes_json, @successful_token_shapes_json
     )
   `);
 
@@ -338,6 +340,9 @@ export function runJsonMigration(
           row.successful_cache_creation_tokens ?? row.successfulCacheCreationTokens ?? 0,
         successful_reasoning_tokens:
           row.successful_reasoning_tokens ?? row.successfulReasoningTokens ?? 0,
+        token_shapes_json: row.token_shapes_json ?? row.tokenShapesJson ?? null,
+        successful_token_shapes_json:
+          row.successful_token_shapes_json ?? row.successfulTokenShapesJson ?? null,
       });
     }
     // 8. Usage History

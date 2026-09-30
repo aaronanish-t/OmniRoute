@@ -7,6 +7,7 @@ import {
 import { calculateCostDetailed } from "./costCalculator";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { toNumber } from "@/shared/utils/numeric";
+import { parseShapeCounts } from "@/lib/usage/teamCostShapes";
 
 export interface TeamUsageLimitStatus {
   teamId: string;
@@ -33,6 +34,9 @@ type CostRow = {
   cacheReadTokens: number;
   cacheCreationTokens: number;
   reasoningTokens: number;
+  requests: number;
+  tokenShapesJson?: string | null;
+  retained?: number;
 };
 
 function roundUsd(value: number): number {
@@ -46,20 +50,37 @@ async function calculateRows(
   let hasUnpricedUsage = false;
   for (const row of rows) {
     if (!row.provider || !row.model) continue;
-    const result = await calculateCostDetailed(
-      row.provider,
-      row.model,
-      {
-        input: toNumber(row.inputTokens),
-        output: toNumber(row.outputTokens),
-        cacheRead: toNumber(row.cacheReadTokens),
-        cacheCreation: toNumber(row.cacheCreationTokens),
-        reasoning: toNumber(row.reasoningTokens),
-      },
-      { provider: row.provider, model: row.model, serviceTier: row.serviceTier || "standard" }
-    );
-    total += result.costUsd;
-    hasUnpricedUsage ||= !result.priced;
+    if (row.provider === "__unknown_provider__" || row.model === "__unknown_model__") {
+      hasUnpricedUsage = true;
+      continue;
+    }
+    const shapes = parseShapeCounts(row.tokenShapesJson, toNumber(row.requests));
+    if (!shapes.length) {
+      const result = await calculateCostDetailed(
+        row.provider,
+        row.model,
+        {
+          input: toNumber(row.inputTokens),
+          output: toNumber(row.outputTokens),
+          cacheRead: toNumber(row.cacheReadTokens),
+          cacheCreation: toNumber(row.cacheCreationTokens),
+          reasoning: toNumber(row.reasoningTokens),
+        },
+        { provider: row.provider, model: row.model, serviceTier: row.serviceTier || "standard" }
+      );
+      total += result.costUsd;
+      hasUnpricedUsage ||= !result.priced || Boolean(row.retained);
+    } else {
+      for (const { shape, count } of shapes) {
+        const result = await calculateCostDetailed(row.provider, row.model, shape, {
+          provider: row.provider,
+          model: row.model,
+          serviceTier: row.serviceTier || "standard",
+        });
+        total += result.costUsd * count;
+        hasUnpricedUsage ||= !result.priced;
+      }
+    }
   }
   return { estimatedListCostUsd: roundUsd(total), hasUnpricedUsage };
 }
@@ -73,20 +94,23 @@ async function getCommittedTeamEstimatedListCostUsd(
   const rawRows = db
     .prepare(
       `SELECT
-         LOWER(provider) as provider,
-         LOWER(model) as model,
+         COALESCE(NULLIF(LOWER(provider), ''), '__unknown_provider__') as provider,
+         COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__') as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
          COALESCE(SUM(tokens_input), 0) as inputTokens,
          COALESCE(SUM(tokens_output), 0) as outputTokens,
          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
          COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
-         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens
+         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
+         COUNT(*) as requests,
+         NULL as tokenShapesJson
        FROM usage_history
        WHERE billing_team_id = @teamId
          AND team_rollup_processed_at IS NULL
          AND timestamp >= @windowStartIso AND timestamp < @resetAtIso
          AND success = 1
-       GROUP BY LOWER(provider), LOWER(model), serviceTier`
+       GROUP BY LOWER(provider), LOWER(model), serviceTier,
+         tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning`
     )
     .all({ teamId, windowStartIso, resetAtIso }) as CostRow[];
 
@@ -100,20 +124,23 @@ async function getCommittedTeamEstimatedListCostUsd(
   const summaryRows = db
     .prepare(
       `SELECT
-         LOWER(provider) as provider,
-         LOWER(model) as model,
+         COALESCE(NULLIF(LOWER(provider), ''), '__unknown_provider__') as provider,
+         COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__') as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
          COALESCE(SUM(successful_input_tokens), 0) as inputTokens,
          COALESCE(SUM(successful_output_tokens), 0) as outputTokens,
          COALESCE(SUM(successful_cache_read_tokens), 0) as cacheReadTokens,
          COALESCE(SUM(successful_cache_creation_tokens), 0) as cacheCreationTokens,
-         COALESCE(SUM(successful_reasoning_tokens), 0) as reasoningTokens
+         COALESCE(SUM(successful_reasoning_tokens), 0) as reasoningTokens,
+         SUM(successful_requests) as requests,
+         MAX(successful_token_shapes_json) as tokenShapesJson,
+         1 as retained
        FROM daily_team_usage_summary
        WHERE team_id = @teamId
          AND date >= @completeSummaryStartDate
          AND date < @completeSummaryEndDateExclusive
          AND successful_requests > 0
-       GROUP BY LOWER(provider), LOWER(model), serviceTier`
+       GROUP BY api_key_id, LOWER(provider), LOWER(model), serviceTier, date`
     )
     .all({
       teamId,

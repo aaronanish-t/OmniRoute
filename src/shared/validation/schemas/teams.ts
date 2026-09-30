@@ -38,11 +38,21 @@ export const TeamUpdateSchema = z
   })
   .refine((value) => Object.keys(value).length > 0, "At least one update field is required")
   .superRefine((value, ctx) => {
-    if (
-      (value.maxBudgetUsd === null && value.budgetDuration !== null) ||
-      (value.budgetDuration === null && value.maxBudgetUsd !== null)
-    ) {
-      validateBudgetPair(value, ctx);
+    const hasAmountField = Object.prototype.hasOwnProperty.call(value, "maxBudgetUsd");
+    const hasDurationField = Object.prototype.hasOwnProperty.call(value, "budgetDuration");
+    const clearsOnlyOne =
+      (hasAmountField &&
+        value.maxBudgetUsd === null &&
+        (!hasDurationField || value.budgetDuration !== null)) ||
+      (hasDurationField &&
+        value.budgetDuration === null &&
+        (!hasAmountField || value.maxBudgetUsd !== null));
+    if (clearsOnlyOne) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "maxBudgetUsd and budgetDuration must be configured or cleared together",
+        path: hasAmountField ? ["budgetDuration"] : ["maxBudgetUsd"],
+      });
     }
   });
 

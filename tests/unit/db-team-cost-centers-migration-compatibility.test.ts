@@ -39,6 +39,10 @@ fs.copyFileSync(
   path.resolve("src/lib/db/migrations/197_team_cost_centers.sql"),
   path.join(migrationsDir, "197_team_cost_centers.sql")
 );
+fs.copyFileSync(
+  path.resolve("src/lib/db/migrations/198_team_cost_shapes.sql"),
+  path.join(migrationsDir, "198_team_cost_shapes.sql")
+);
 
 const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
 
@@ -110,7 +114,11 @@ for (const legacyVersion of historicalTeamVersions) {
         VALUES ('${legacyVersion}', 'team_cost_centers');
       `);
 
-      assert.equal(runMigrations(db), 6);
+      // Historical Team slot already created this table before the runner
+      // rehomes its version/name marker to 197.
+      db.exec(fs.readFileSync(path.join(migrationsDir, "197_team_cost_centers.sql"), "utf8"));
+
+      assert.equal(runMigrations(db), 7);
       assert.deepEqual(
         db.prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version").all(),
         [
@@ -121,6 +129,7 @@ for (const legacyVersion of historicalTeamVersions) {
           { version: "163", name: "radar_feed_cache_generated_at" },
           { version: "164", name: "retire_microsoft_designer_web" },
           { version: "197", name: "team_cost_centers" },
+          { version: "198", name: "team_cost_shapes" },
         ]
       );
       for (const table of [
@@ -174,7 +183,7 @@ test("an already-applied canonical live 163 row is untouched and Team runs at 19
       VALUES ('163', 'radar_feed_cache_generated_at', '2026-08-25 00:00:00');
     `);
 
-    assert.equal(runMigrations(db), 6);
+    assert.equal(runMigrations(db), 7);
     const rows = db
       .prepare(
         "SELECT version, name, applied_at FROM _omniroute_migrations WHERE version IN ('163', '197') ORDER BY version"
@@ -189,6 +198,39 @@ test("an already-applied canonical live 163 row is untouched and Team runs at 19
     );
     assert.equal(rows[0]?.applied_at, "2026-08-25 00:00:00");
     assert.match(rows[1]?.applied_at ?? "", /^\d{4}-\d{2}-\d{2}/);
+  } finally {
+    db.close();
+  }
+});
+
+test("an already-applied 197 Team schema gains shape columns without losing legacy rows", () => {
+  const db = new Database(":memory:");
+  try {
+    db.exec(`
+      CREATE TABLE _omniroute_migrations (version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now')));
+      CREATE TABLE api_keys (id TEXT PRIMARY KEY);
+      CREATE TABLE call_logs (id TEXT PRIMARY KEY);
+      CREATE TABLE usage_history (id INTEGER PRIMARY KEY, billing_team_id TEXT, team_rollup_processed_at TEXT, timestamp TEXT);
+      CREATE TABLE radar_feed_cache (id TEXT PRIMARY KEY);
+    `);
+    db.exec(fs.readFileSync(path.join(migrationsDir, "197_team_cost_centers.sql"), "utf8"));
+    db.exec(`INSERT INTO teams (id, name, created_at, updated_at) VALUES ('t', 'Legacy', '2026-01-01', '2026-01-01');
+      INSERT INTO daily_team_usage_summary (team_id, api_key_id, provider, model, date, total_requests, successful_requests)
+      VALUES ('t', 'k', 'openai', 'gpt-legacy', '2026-01-01', 1, 1);
+      INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES ('197', 'team_cost_centers', '2026-01-01');`);
+    runMigrations(db);
+    assert.deepEqual(
+      db
+        .prepare(
+          "SELECT total_requests, token_shapes_json, successful_token_shapes_json FROM daily_team_usage_summary"
+        )
+        .get(),
+      {
+        total_requests: 1,
+        token_shapes_json: null,
+        successful_token_shapes_json: null,
+      }
+    );
   } finally {
     db.close();
   }

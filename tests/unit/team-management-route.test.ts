@@ -27,6 +27,7 @@ const teamMembersRoute = await import("../../src/app/api/teams/[id]/members/rout
 const teamUsageRoute = await import("../../src/app/api/teams/[id]/usage/route.ts");
 const exportJsonRoute = await import("../../src/app/api/settings/export-json/route.ts");
 const importJsonRoute = await import("../../src/app/api/settings/import-json/route.ts");
+const { TeamUpdateSchema } = await import("../../src/shared/validation/schemas/teams.ts");
 
 async function resetStorage(): Promise<void> {
   core.resetDbInstance();
@@ -249,6 +250,59 @@ test("manage-scoped API keys can use Team and JSON backup handlers", async () =>
       .status,
     200
   );
+});
+
+test("authenticated Team PATCH rejects single-null and incomplete initial budgets", async () => {
+  await resetStorage();
+  const admin = await apiKeys.createApiKey("budget patch admin", "machine-budget-patch", [
+    "manage",
+  ]);
+  const team = teams.createTeam({ name: "Budget PATCH", maxBudgetUsd: 1, budgetDuration: "1d" });
+  const bare = teams.createTeam({ name: "Bare PATCH" });
+  for (const payload of [{ maxBudgetUsd: null }, { budgetDuration: null }]) {
+    assert.equal(TeamUpdateSchema.safeParse(payload).success, false);
+    const response = await teamDetailRoute.PATCH(
+      request(`/api/teams/${team.id}`, "PATCH", JSON.stringify(payload), admin.key),
+      params(team.id)
+    );
+    assert.equal(response.status, 400);
+  }
+  assert.equal(
+    (
+      await teamDetailRoute.PATCH(
+        request(`/api/teams/${bare.id}`, "PATCH", JSON.stringify({ maxBudgetUsd: 2 }), admin.key),
+        params(bare.id)
+      )
+    ).status,
+    400
+  );
+  for (const payload of [{ maxBudgetUsd: 2 }, { budgetDuration: "7d" }]) {
+    assert.equal(TeamUpdateSchema.safeParse(payload).success, true);
+    assert.equal(
+      (
+        await teamDetailRoute.PATCH(
+          request(`/api/teams/${team.id}`, "PATCH", JSON.stringify(payload), admin.key),
+          params(team.id)
+        )
+      ).status,
+      200
+    );
+  }
+  assert.equal(
+    (
+      await teamDetailRoute.PATCH(
+        request(
+          `/api/teams/${team.id}`,
+          "PATCH",
+          JSON.stringify({ maxBudgetUsd: null, budgetDuration: null }),
+          admin.key
+        ),
+        params(team.id)
+      )
+    ).status,
+    200
+  );
+  assert.equal(teams.getTeam(team.id)?.maxBudgetUsd, null);
 });
 
 test("JSON backup and restore guard before reading input and preserve Team data", () => {

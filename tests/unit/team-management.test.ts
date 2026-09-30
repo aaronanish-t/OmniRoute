@@ -612,3 +612,138 @@ test("archiving a team closes active assignments but preserves historical usage"
   const anotherKey = await apiKeys.createApiKey("agent-archived", "machine-team-archived");
   assert.throws(() => teams.assignApiKeyBillingTeam(anotherKey.id, team.id), /archived/i);
 });
+
+test("missing provider or model retains ownership and fails closed only for successful usage", async () => {
+  const key = await apiKeys.createApiKey("missing-identity", "machine-missing-identity");
+  const team = teams.createTeam({
+    name: "Missing identity",
+    maxBudgetUsd: 10,
+    budgetDuration: "7d",
+  });
+  const day = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  core
+    .getDbInstance()
+    .prepare("UPDATE teams SET budget_reset_at = ? WHERE id = ?")
+    .run(new Date(Date.parse(day + "T00:00:00.000Z") + 3 * 86_400_000).toISOString(), team.id);
+  teams.assignApiKeyBillingTeam(
+    key.id,
+    team.id,
+    new Date(Date.parse(day + "T00:00:00.000Z") - 1000).toISOString()
+  );
+  for (const [provider, model, success, hour] of [
+    [null, "gpt-missing", false, 1],
+    ["openai", null, true, 2],
+    [null, "gpt-missing", true, 3],
+  ] as const) {
+    await usageHistory.saveRequestUsage({
+      provider,
+      model,
+      success,
+      apiKeyId: key.id,
+      tokens: { input: 0, output: 0 },
+      timestamp: `${day}T0${hour}:00:00.000Z`,
+    });
+  }
+  const raw = await teamAnalytics.getTeamUsageReport(team.id);
+  assert.equal(raw.summary.requests, 3);
+  assert.equal(
+    (await teamBudgets.getTeamUsageLimitStatusForApiKey(key.id))?.hasUnpricedUsage,
+    true
+  );
+  assert.equal(
+    (await aggregateHistory.rollupUsageHistoryBeforeDate(new Date().toISOString().slice(0, 10)))
+      .errors,
+    0
+  );
+  const db = core.getDbInstance();
+  assert.equal(
+    (
+      db.prepare("SELECT SUM(total_requests) AS count FROM daily_team_usage_summary").get() as {
+        count: number;
+      }
+    ).count,
+    3
+  );
+  db.prepare("DELETE FROM usage_history WHERE billing_team_id = ?").run(team.id);
+  const retained = await teamAnalytics.getTeamUsageReport(team.id);
+  assert.equal(retained.summary.requests, 3);
+  assert.equal(retained.summary.hasUnpricedUsage, true);
+  assert.equal(
+    (await teamBudgets.getTeamUsageLimitStatusForApiKey(key.id))?.hasUnpricedUsage,
+    true
+  );
+});
+
+test("Team pricing retains per-request cache shapes through rollup, replay, and deletion", async () => {
+  await pricing.updatePricing({ openai: { "gpt-shapes": { input: 1, cached: 0, output: 0 } } });
+  const key = await apiKeys.createApiKey("shapes", "machine-shapes");
+  const team = teams.createTeam({
+    name: "Shape team",
+    maxBudgetUsd: 0.00005,
+    budgetDuration: "7d",
+  });
+  const day = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  core
+    .getDbInstance()
+    .prepare("UPDATE teams SET budget_reset_at = ? WHERE id = ?")
+    .run(new Date(Date.parse(day + "T00:00:00.000Z") + 3 * 86_400_000).toISOString(), team.id);
+  teams.assignApiKeyBillingTeam(
+    key.id,
+    team.id,
+    new Date(Date.parse(day + "T00:00:00.000Z") - 1000).toISOString()
+  );
+  for (const [hour, input, cacheRead] of [
+    [1, 0, 100],
+    [2, 100, 0],
+  ]) {
+    await usageHistory.saveRequestUsage({
+      provider: "openai",
+      model: "gpt-shapes",
+      apiKeyId: key.id,
+      tokens: { input, cacheRead, output: 0 },
+      timestamp: `${day}T0${hour}:00:00.000Z`,
+    });
+  }
+  assert.equal(
+    (await teamAnalytics.getTeamUsageReport(team.id)).summary.estimatedListCostUsd,
+    0.0001
+  );
+  assert.equal(
+    (await teamBudgets.getTeamUsageLimitStatusForApiKey(key.id))?.estimatedListCostUsd,
+    0.0001
+  );
+  const cutoff = new Date().toISOString().slice(0, 10);
+  assert.equal((await aggregateHistory.rollupUsageHistoryBeforeDate(cutoff)).errors, 0);
+  assert.equal((await aggregateHistory.rollupUsageHistoryBeforeDate(cutoff)).errors, 0);
+  await usageHistory.saveRequestUsage({
+    provider: "openai",
+    model: "gpt-shapes",
+    apiKeyId: key.id,
+    tokens: { input: 100, cacheRead: 0, output: 0 },
+    timestamp: `${day}T03:00:00.000Z`,
+  });
+  assert.equal((await aggregateHistory.rollupUsageHistoryBeforeDate(cutoff)).errors, 0);
+  core.getDbInstance().prepare("DELETE FROM usage_history WHERE billing_team_id = ?").run(team.id);
+  assert.equal(
+    (await teamAnalytics.getTeamUsageReport(team.id)).summary.estimatedListCostUsd,
+    0.0002
+  );
+  assert.equal(
+    (await teamBudgets.getTeamUsageLimitStatusForApiKey(key.id))?.estimatedListCostUsd,
+    0.0002
+  );
+});
+
+test("archive and reassign at one instant keeps historical intervals disjoint", async () => {
+  const key = await apiKeys.createApiKey("interval", "machine-interval");
+  const alpha = teams.createTeam({ name: "Interval alpha" });
+  const beta = teams.createTeam({ name: "Interval beta" });
+  const at = "2026-01-01T12:00:00.000Z";
+  teams.assignApiKeyBillingTeam(key.id, alpha.id, at);
+  teams.archiveTeam(alpha.id, at);
+  const assigned = teams.assignApiKeyBillingTeam(key.id, beta.id, at);
+  const history = teams.listApiKeyBillingHistory(key.id);
+  assert.ok(assigned.validFrom >= history[0].validTo!);
+  assert.equal(teams.resolveBillingTeamIdForApiKeyAt(key.id, at), alpha.id);
+  assert.equal(teams.resolveBillingTeamIdForApiKeyAt(key.id, assigned.validFrom), beta.id);
+});

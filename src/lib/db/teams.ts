@@ -282,7 +282,7 @@ export function assignApiKeyBillingTeam(
   effectiveAt?: string
 ): ApiKeyBillingTeamHistory {
   const db = getDbInstance();
-  const when = normalizeIso(effectiveAt);
+  let when = normalizeIso(effectiveAt);
   let result: ApiKeyBillingTeamHistory | null = null;
 
   const assign = db.transaction(() => {
@@ -301,6 +301,20 @@ export function assignApiKeyBillingTeam(
     if (current?.team_id === teamId) {
       result = rowToBillingHistory(current);
       return;
+    }
+    // A closed interval may end just after a same-instant archive. Reject
+    // genuinely backdated explicit assignments; advance an implicit wall-clock
+    // reassignment to the prior half-open end without changing stored history.
+    const latestClosed = db
+      .prepare(
+        "SELECT MAX(valid_to) AS valid_to FROM api_key_billing_team_history WHERE api_key_id = ? AND valid_to IS NOT NULL"
+      )
+      .get(apiKeyId) as { valid_to: string | null };
+    if (latestClosed.valid_to && when < latestClosed.valid_to) {
+      if (effectiveAt && Date.parse(latestClosed.valid_to) - Date.parse(when) > 1) {
+        throw new Error("Assignment time overlaps closed billing history");
+      }
+      when = latestClosed.valid_to;
     }
     if (current) {
       if (when <= current.valid_from) {

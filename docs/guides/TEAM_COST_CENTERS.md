@@ -24,11 +24,13 @@ Team APIs use distinct fields rather than treating every dollar-looking value as
 
 For subscription-backed providers, `estimatedListCostUsd` is useful for allocation and comparison but is not necessarily an invoiceable provider cost.
 
+Reports estimate all recorded attempts, including failed attempts with token usage, and show their request and token totals. An unknown price on a failed attempt therefore sets the report's `hasUnpricedUsage`. The shared budget evaluates successful requests only: a failed-only unknown price does not block the next request. Both values use current catalog prices and can change when prices change; neither is a historical invoice.
+
 ## Immutable attribution
 
 When the terminal usage row is written, OmniRoute resolves the API key's billing Team at the effective `UsageEntry.timestamp` and stores the resulting Team ID on the row. The timestamp defaults to the current wall clock only when the caller omits it; callers may supply it, so it is not an independent persistence-time clock. Reassigning a key never rewrites rows that are already stored. Operators should avoid transferring a key while it has in-flight requests: phase 1 does not persist a separate request-start ownership reservation, and attribution follows that effective usage-entry timestamp.
 
-Before raw usage retention cleanup, Team usage is rolled into `daily_team_usage_summary`, preserving Team, API key, provider, model, service tier, token classes, and successful-request counters. The retention rollup is one bucket per UTC day. For an arbitrary timestamp range that cuts through an already rolled-up day, phase 1 excludes that whole boundary bucket rather than attributing usage outside the requested range; complete UTC-day reports remain exact.
+Before raw usage retention cleanup, Team usage is rolled into `daily_team_usage_summary`, preserving Team, API key, provider, model, service tier, token classes, successful-request counters, and counts of distinct per-request token shapes. Missing provider or model is stored in an explicit unknown bucket and successful usage fails closed in the budget. Previously retained rows without token-shape counts cannot recover precise nonlinear prices: the report shows an aggregate estimate marked unpriced, while a successful legacy bucket makes the budget fail closed. The retention rollup is one bucket per UTC day. For an arbitrary timestamp range that cuts through an already rolled-up day, phase 1 excludes that whole boundary bucket rather than attributing usage outside the requested range; complete UTC-day reports remain exact when token-shape counts are available.
 
 ## Shared budget behavior
 

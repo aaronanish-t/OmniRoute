@@ -45,11 +45,13 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     return NextResponse.json({ team });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to update team";
-    const status = /unique constraint|already exists|archived teams cannot be updated/i.test(
+    const status = /maxBudgetUsd must be greater than zero|budgetDuration must be one of/i.test(
       message
     )
-      ? 409
-      : 500;
+      ? 400
+      : /unique constraint|already exists|archived teams cannot be updated/i.test(message)
+        ? 409
+        : 500;
     return NextResponse.json(buildErrorBody(status, message), { status });
   }
 }

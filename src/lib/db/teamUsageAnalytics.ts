@@ -1,6 +1,7 @@
 import { getDbInstance } from "./core";
 import { calculateCostDetailed } from "@/lib/usage/costCalculator";
 import { toNumber } from "@/shared/utils/numeric";
+import { parseShapeCounts } from "@/lib/usage/teamCostShapes";
 
 export interface TeamUsageReport {
   teamId: string;
@@ -41,6 +42,8 @@ type TeamUsageCostRow = {
   cacheReadTokens: number;
   cacheCreationTokens: number;
   reasoningTokens: number;
+  tokenShapesJson?: string | null;
+  retained?: number;
 };
 
 function roundUsd(value: number): number {
@@ -48,18 +51,37 @@ function roundUsd(value: number): number {
 }
 
 async function rowCost(row: TeamUsageCostRow): Promise<{ costUsd: number; priced: boolean }> {
-  return calculateCostDetailed(
-    row.provider,
-    row.model,
-    {
-      input: toNumber(row.inputTokens),
-      output: toNumber(row.outputTokens),
-      cacheRead: toNumber(row.cacheReadTokens),
-      cacheCreation: toNumber(row.cacheCreationTokens),
-      reasoning: toNumber(row.reasoningTokens),
-    },
-    { provider: row.provider, model: row.model, serviceTier: row.serviceTier }
-  );
+  if (row.provider === "__unknown_provider__" || row.model === "__unknown_model__") {
+    return { costUsd: 0, priced: false };
+  }
+  const shapes = parseShapeCounts(row.tokenShapesJson, toNumber(row.requests));
+  if (!shapes.length) {
+    const result = await calculateCostDetailed(
+      row.provider,
+      row.model,
+      {
+        input: toNumber(row.inputTokens),
+        output: toNumber(row.outputTokens),
+        cacheRead: toNumber(row.cacheReadTokens),
+        cacheCreation: toNumber(row.cacheCreationTokens),
+        reasoning: toNumber(row.reasoningTokens),
+      },
+      { provider: row.provider, model: row.model, serviceTier: row.serviceTier }
+    );
+    return { costUsd: result.costUsd, priced: result.priced && !row.retained };
+  }
+  let costUsd = 0;
+  let priced = true;
+  for (const { shape, count } of shapes) {
+    const result = await calculateCostDetailed(row.provider, row.model, shape, {
+      provider: row.provider,
+      model: row.model,
+      serviceTier: row.serviceTier,
+    });
+    costUsd += result.costUsd * count;
+    priced &&= result.priced;
+  }
+  return { costUsd, priced };
 }
 
 export async function getTeamUsageReport(
@@ -94,8 +116,8 @@ export async function getTeamUsageReport(
       `SELECT
          COALESCE(NULLIF(api_key_id, ''), 'unknown') as apiKeyId,
          MAX(NULLIF(api_key_name, '')) as apiKeyName,
-         LOWER(provider) as provider,
-         LOWER(model) as model,
+         COALESCE(NULLIF(LOWER(provider), ''), '__unknown_provider__') as provider,
+         COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__') as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
          COUNT(*) as requests,
          COALESCE(SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END), 0) as successfulRequests,
@@ -108,7 +130,8 @@ export async function getTeamUsageReport(
        WHERE billing_team_id = @teamId
          AND team_rollup_processed_at IS NULL
          AND timestamp >= @startIso AND timestamp <= @endIso
-       GROUP BY apiKeyId, LOWER(provider), LOWER(model), serviceTier`
+       GROUP BY apiKeyId, LOWER(provider), LOWER(model), serviceTier,
+         tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning`
     )
     .all(bind) as TeamUsageCostRow[];
 
@@ -117,8 +140,8 @@ export async function getTeamUsageReport(
       `SELECT
          api_key_id as apiKeyId,
          MAX(NULLIF(api_key_name, '')) as apiKeyName,
-         LOWER(provider) as provider,
-         LOWER(model) as model,
+         COALESCE(NULLIF(LOWER(provider), ''), '__unknown_provider__') as provider,
+         COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__') as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
          COALESCE(SUM(total_requests), 0) as requests,
          COALESCE(SUM(successful_requests), 0) as successfulRequests,
@@ -126,12 +149,14 @@ export async function getTeamUsageReport(
          COALESCE(SUM(total_output_tokens), 0) as outputTokens,
          COALESCE(SUM(total_cache_read_tokens), 0) as cacheReadTokens,
          COALESCE(SUM(total_cache_creation_tokens), 0) as cacheCreationTokens,
-         COALESCE(SUM(total_reasoning_tokens), 0) as reasoningTokens
+         COALESCE(SUM(total_reasoning_tokens), 0) as reasoningTokens,
+         MAX(token_shapes_json) as tokenShapesJson,
+         1 as retained
        FROM daily_team_usage_summary
        WHERE team_id = @teamId
          AND date >= @completeSummaryStartDate
          AND date < @completeSummaryEndDateExclusive
-       GROUP BY api_key_id, LOWER(provider), LOWER(model), serviceTier`
+       GROUP BY api_key_id, LOWER(provider), LOWER(model), serviceTier, date`
     )
     .all(bind) as TeamUsageCostRow[];
 

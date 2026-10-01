@@ -40,7 +40,10 @@ after(() => {
 describe("updateCompressionSettings engines partial writes", () => {
   it("keeps the other stored engines when a write carries one engine", async () => {
     await updateCompressionSettings({
-      engines: { rtk: { enabled: true }, caveman: { enabled: true, level: "full" } },
+      engines: {
+        rtk: { enabled: true, level: "standard" },
+        caveman: { enabled: true, level: "full" },
+      },
     });
     core.resetDbInstance();
 
@@ -48,7 +51,7 @@ describe("updateCompressionSettings engines partial writes", () => {
     core.resetDbInstance();
 
     const { engines, enginesExplicit } = await getCompressionSettings();
-    assert.deepEqual(engines.rtk, { enabled: true });
+    assert.deepEqual(engines.rtk, { enabled: true, level: "standard" });
     assert.deepEqual(engines.caveman, { enabled: true, level: "full" });
     assert.deepEqual(engines.omniglyph, { enabled: true });
     assert.equal(enginesExplicit, true);

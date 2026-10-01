@@ -266,8 +266,8 @@ export default function CompressionPanel() {
       .catch(() => {});
   }, []);
 
-  // Persist a merge-patch. The DB persists `engines` as one whole row, so callers that
-  // touch an engine pass the full engines map to avoid dropping the other engines.
+  // Persist a merge-patch. The server merges `engines` by engine id, so a caller that
+  // touches an engine passes only that engine, merged into the local map here.
   // Generation + configRef: a later in-flight save must not let an older failure
   // roll back a newer optimistic (or already-acked) state.
   const save = async (updates: Partial<CompressionConfig>) => {
@@ -276,6 +276,7 @@ export default function CompressionPanel() {
     const next: CompressionConfig = {
       ...previous,
       ...updates,
+      ...(updates.engines ? { engines: { ...previous.engines, ...updates.engines } } : {}),
       ...(updates.contextBudget
         ? {
             contextBudget: {
@@ -327,12 +328,7 @@ export default function CompressionPanel() {
   };
 
   const setEngine = (id: string, patch: Partial<EngineToggle>) => {
-    const engines = {
-      ...config.engines,
-      [id]: { ...(config.engines[id] ?? { enabled: false }), ...patch },
-    };
-    // Send the full engines map — the persistence layer stores it as one JSON row.
-    save({ engines });
+    save({ engines: { [id]: { ...(config.engines[id] ?? { enabled: false }), ...patch } } });
   };
 
   const toggleGuidance = (id: string) => {

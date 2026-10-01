@@ -531,6 +531,33 @@ function sanitizeEnginesForWrite(value: unknown): Record<string, EngineToggle> {
   return out;
 }
 
+// Partial engines writes replace the whole JSON row, and the read path turns every id missing
+// from a stored row off. Merge each written entry over the stored entry, field by field. While
+// no usable row exists, merge over `current`, the map the read path derives from legacy settings.
+function mergeEnginesForWrite(
+  db: ReturnType<typeof getDbInstance>,
+  value: unknown,
+  current: Record<string, EngineToggle>
+): Record<string, EngineToggle> {
+  const existingRow = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(NAMESPACE, "engines") as { value: unknown } | undefined;
+  // getCompressionSettings skips non-text (BLOB) rows, so treat them as absent here too.
+  const stored =
+    typeof existingRow?.value === "string"
+      ? parseStoredEnginesMap(parseJsonSafe(existingRow.value))
+      : null;
+  const base = stored ?? current;
+  const incoming = toRecord(value);
+  const merged: JsonRecord = {};
+  for (const id of ENGINE_IDS) {
+    merged[id] = Object.prototype.hasOwnProperty.call(incoming, id)
+      ? { ...base[id], ...toRecord(incoming[id]) }
+      : base[id];
+  }
+  return sanitizeEnginesForWrite(merged);
+}
+
 // Partial lite writes replace the whole JSON row. Keep a stored cap unless the
 // caller sends maxToolLength: null (clear) or a new in-range integer.
 function mergeLiteSettingsForWrite(
@@ -914,6 +941,10 @@ export async function updateCompressionSettings(
   const insert = db.prepare(
     "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
   );
+  // The engines map the read path returns now: the merge base for an engines write while no
+  // engines row exists yet.
+  const currentEngines: Record<string, EngineToggle> =
+    updates.engines === undefined ? {} : (await getCompressionSettings()).engines;
 
   const tx = db.transaction(() => {
     for (const [key, value] of Object.entries(updates)) {
@@ -921,7 +952,7 @@ export async function updateCompressionSettings(
       // Persist the engines map as ONE sanitized JSON row so the read path always gets
       // well-formed { enabled, level? } toggles for known engine ids.
       if (key === "engines") {
-        insert.run(NAMESPACE, key, JSON.stringify(sanitizeEnginesForWrite(value)));
+        insert.run(NAMESPACE, key, JSON.stringify(mergeEnginesForWrite(db, value, currentEngines)));
         continue;
       }
       if (key === "lite") {

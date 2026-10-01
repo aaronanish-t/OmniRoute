@@ -34,6 +34,7 @@ const {
   hasRequestRejectedStreak,
 } = await import("../../open-sse/services/requestRejectedStreak.ts");
 const { COOLDOWN_MS } = await import("../../open-sse/config/errorConfig.ts");
+const { updateSettings } = await import("../../src/lib/db/settings.ts");
 
 const originalFetch = globalThis.fetch;
 const MODEL = "claude/claude-sonnet-5";
@@ -232,10 +233,31 @@ test("a successful response resets the streak — sporadic refusals never accumu
 });
 
 test("any other claude 403 still bans on the first response (regression guard)", async () => {
+  // NEW behavior (#14853): a true ban records testStatus=banned but only flips
+  // is_active=0 when the gated auto-disable opt-in is on (+ scope). claude/oauth
+  // is subscription-style, covered by the default "all" scope.
+  await updateSettings({ autoDisableBannedAccounts: true });
   const connId = await createClaudeConnection();
   mockAnthropic403("Your organization has been disabled.");
   await sendOnce(connId);
   const row = readRow(connId);
   assert.equal(row?.test_status, "banned");
   assert.equal(row?.is_active, 0);
+});
+
+test("#14853: a real claude 403 ban records testStatus=banned but keeps is_active=1 when auto-disable is OFF", async () => {
+  // chatCore FORBIDDEN path, flag OFF (the default): a ban-looking flap must
+  // NOT ungated-flip is_active. Access recovers once the flap clears without a
+  // dashboard re-enable. Pairs with the flag-ON guard above.
+  await updateSettings({ autoDisableBannedAccounts: false });
+  const connId = await createClaudeConnection();
+  mockAnthropic403("Your organization has been disabled.");
+  await sendOnce(connId);
+  const row = readRow(connId);
+  assert.equal(
+    row?.test_status,
+    "banned",
+    "testStatus=banned still recorded for selection skip + alerts"
+  );
+  assert.equal(row?.is_active, 1, "ban-looking flap must NOT ungated-deactivate");
 });

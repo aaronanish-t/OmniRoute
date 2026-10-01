@@ -419,7 +419,7 @@ import { generateRequestId } from "@/shared/utils/requestId";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
-import { maybeAutoDisableBannedAccount } from "@/sse/services/autoDisableBannedAccount";
+import { recordGatedBanTerminalStatus } from "./chatCore/gatedTerminalBan.ts";
 import { extractFacts } from "@/lib/memory/extraction";
 import { handleToolCallExecution } from "@/lib/skills/interception";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
@@ -3852,37 +3852,17 @@ async function handleChatCoreInner({
     if (errorConnectionId && errorType) {
       try {
         if (errorType === PROVIDER_ERROR_TYPES.FORBIDDEN) {
-          const probeIsolated = await shouldIsolateProbeFailures();
-          // HARD: record terminal testStatus for selection skip / alerts, but do
-          // NOT ungated-flip isActive. Permanent deactivation is opt-in via
-          // autoDisableBannedAccounts (same gate as auth.ts).
-          await writeTerminalStatus(
-            errorConnectionId,
-            {
-              testStatus: "banned",
-              lastError: persistentMessage,
-              lastErrorType: errorType,
-              errorCode: String(statusCode),
-            },
-            probeIsolated ? "probe" : "production"
-          );
-          if (probeIsolated) {
-            console.warn(
-              `[provider] Node ${errorConnectionId} probe ${errorType} (${statusCode}) -- connection stays active`
-            );
-          } else {
-            await maybeAutoDisableBannedAccount({
-              connectionId: errorConnectionId,
-              provider,
-              authType: (credentials as { authType?: string | null } | null | undefined)?.authType,
-              connectionProvider: (credentials as { provider?: string | null } | null | undefined)
-                ?.provider,
-              permanent: true,
-            });
-            console.warn(
-              `[provider] Node ${errorConnectionId} banned (${statusCode}) -- testStatus=banned; isActive gated by autoDisableBannedAccounts`
-            );
-          }
+          await recordGatedBanTerminalStatus({
+            connectionId: errorConnectionId,
+            testStatus: "banned",
+            errorType,
+            statusCode,
+            persistentMessage,
+            provider,
+            authType: (credentials as { authType?: string | null } | null | undefined)?.authType,
+            connectionProvider: (credentials as { provider?: string | null } | null | undefined)
+              ?.provider,
+          });
         } else if (errorType === PROVIDER_ERROR_TYPES.ACCOUNT_DEACTIVATED) {
           if (
             connectionHasExtraKeys(
@@ -3900,37 +3880,17 @@ async function handleChatCoreInner({
               `[provider] Node ${errorConnectionId} account deactivated (${statusCode}) -- has extra keys, keeping connection active`
             );
           } else {
-            const probeIsolated2 = await shouldIsolateProbeFailures();
-            // HARD: stay is_active=1 through temporary unpaid/ban-looking flaps
-            // unless autoDisableBannedAccounts opts into permanent deactivation.
-            await writeTerminalStatus(
-              errorConnectionId,
-              {
-                testStatus: "deactivated",
-                lastError: persistentMessage,
-                lastErrorType: errorType,
-                errorCode: String(statusCode),
-              },
-              probeIsolated2 ? "probe" : "production"
-            );
-            if (probeIsolated2) {
-              console.warn(
-                `[provider] Node ${errorConnectionId} probe ${errorType} (${statusCode}) -- connection stays active`
-              );
-            } else {
-              await maybeAutoDisableBannedAccount({
-                connectionId: errorConnectionId,
-                provider,
-                authType: (credentials as { authType?: string | null } | null | undefined)
-                  ?.authType,
-                connectionProvider: (credentials as { provider?: string | null } | null | undefined)
-                  ?.provider,
-                permanent: true,
-              });
-              console.warn(
-                `[provider] Node ${errorConnectionId} account deactivated (${statusCode}) -- testStatus=deactivated; isActive gated by autoDisableBannedAccounts`
-              );
-            }
+            await recordGatedBanTerminalStatus({
+              connectionId: errorConnectionId,
+              testStatus: "deactivated",
+              errorType,
+              statusCode,
+              persistentMessage,
+              provider,
+              authType: (credentials as { authType?: string | null } | null | undefined)?.authType,
+              connectionProvider: (credentials as { provider?: string | null } | null | undefined)
+                ?.provider,
+            });
           }
         } else if (errorType === PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED) {
           const probeIsolated3 = await shouldIsolateProbeFailures();

@@ -155,7 +155,14 @@ test("queued (rate-limited) test-all failure stays isolated", async () => {
 
 test("RESTORE: probe with opt-in probeCanDisable=true deactivates like real traffic", async () => {
   const settingsDb = await import("../../src/lib/db/settings.ts");
-  await settingsDb.updateSettings({ probeCanDisable: true });
+  // probeCanDisable lets the probe take the real-traffic path; that path now
+  // also gates permanent deactivation behind autoDisableBannedAccounts
+  // (#14853). openai/apikey needs the "all" scope to be eligible.
+  await settingsDb.updateSettings({
+    probeCanDisable: true,
+    autoDisableBannedAccounts: true,
+    autoDisableBannedScope: "all",
+  });
   try {
     const connId = await createConnection();
     await warmUp(connId);
@@ -171,6 +178,9 @@ test("RESTORE: probe with opt-in probeCanDisable=true deactivates like real traf
     assert.equal(row?.is_active, 0, "opt-in restores historical behavior: probe deactivates");
     assert.equal(row?.test_status, "banned", "terminal banned status restored for probe");
   } finally {
-    await settingsDb.updateSettings({ probeCanDisable: false });
+    await settingsDb.updateSettings({
+      probeCanDisable: false,
+      autoDisableBannedAccounts: false,
+    });
   }
 });

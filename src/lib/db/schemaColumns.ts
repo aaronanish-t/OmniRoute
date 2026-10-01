@@ -9,6 +9,7 @@
  */
 
 import type { SqliteAdapter } from "./adapters/types";
+import { API_KEY_COLUMN_FALLBACKS } from "./apiKeyColumnFallbacks";
 
 type SqliteDatabase = SqliteAdapter;
 
@@ -386,6 +387,34 @@ export function ensureProxyLogsColumns(db: SqliteDatabase) {
 export function hasColumn(db: SqliteDatabase, tableName: string, columnName: string): boolean {
   const rows = db.prepare(`PRAGMA table_info(${tableName})`).all() as Array<{ name?: string }>;
   return rows.some((row) => row.name === columnName);
+}
+
+function ensureApiKeyMigrationColumns(db: SqliteDatabase): void {
+  const columns = db.prepare("PRAGMA table_info(api_keys)").all() as Array<{ name?: string }>;
+  const columnNames = new Set(columns.map((column) => String(column.name ?? "")));
+  const blockedModels = API_KEY_COLUMN_FALLBACKS.find((column) => column.name === "blocked_models");
+
+  // apiKeys.ts normally heals fallback columns lazily on its first domain read. The
+  // provider-consolidation migration reads blocked_models during startup, before that
+  // domain read can happen, so materialize this existing fallback at schema bootstrap.
+  if (blockedModels && !columnNames.has(blockedModels.name)) {
+    db.exec(`ALTER TABLE api_keys ADD COLUMN ${blockedModels.definition}`);
+    console.log(`[DB] Added api_keys.${blockedModels.name} column`);
+  }
+}
+
+export function ensureCoreSchemaColumns(db: SqliteDatabase): void {
+  ensureProviderConnectionsColumns(db);
+  ensureUsageHistoryColumns(db);
+  ensureCallLogsColumns(db);
+  ensureApiKeyMigrationColumns(db);
+}
+
+export function ensureMemoryCoreSchemaColumns(db: SqliteDatabase): void {
+  ensureUsageHistoryColumns(db);
+  ensureUsageHistoryAccountIndex(db);
+  ensureCallLogsColumns(db);
+  ensureProviderConnectionsColumns(db);
 }
 
 export function hasTable(db: SqliteDatabase, tableName: string): boolean {

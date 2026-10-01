@@ -936,8 +936,7 @@ test("provider models route retries Antigravity discovery endpoints before retur
     assert.equal(init.headers.Authorization, "Bearer ag-access");
     assert.match(init.headers["User-Agent"], /^antigravity\/cli\/1\.22\.2 /);
     assert.equal(init.headers["x-goog-api-client"], undefined);
-    // Use a model id that is in the current user-callable Antigravity allowlist, otherwise
-    // filterUserCallableAntigravityModels() drops it and discovery silently yields 0 models
+    // Discovery keeps callable aliases while filtering retired and internal model IDs.
     // → the route falls back to local_catalog instead of returning the remote (api) list.
     return Response.json({
       models: [

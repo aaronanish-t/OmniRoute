@@ -43,6 +43,11 @@ function hasCustomGoogleOAuthCredentials(
   return false;
 }
 
+/** Keep the retired Antigravity CLI provider slug working on OAuth routes. */
+export function resolveOAuthProviderName(providerName: string): string {
+  return providerName === "agy" ? "antigravity" : providerName;
+}
+
 function isLoopbackHostname(hostname: string): boolean {
   return /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/i.test(hostname);
 }
@@ -73,6 +78,8 @@ export function resolveBrowserOAuthRedirectUri(
   redirectUri: string,
   env: OAuthRedirectEnv | null | undefined = process.env
 ): string {
+  providerName = resolveOAuthProviderName(providerName);
+
   if (!GOOGLE_BROWSER_PROVIDERS.has(providerName)) {
     return redirectUri;
   }
@@ -115,7 +122,7 @@ export function resolveBrowserOAuthRedirectUri(
  * Get provider handler
  */
 export function getProvider(name) {
-  const provider = PROVIDERS[name];
+  const provider = PROVIDERS[resolveOAuthProviderName(name)];
   if (!provider) {
     throw new Error(`Unknown provider: ${name}`);
   }

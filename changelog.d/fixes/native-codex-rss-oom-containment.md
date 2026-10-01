@@ -1,0 +1,1 @@
+Fix Native Codex long-session OOM paths: release Antigravity abort bindings when SSE streams finish, measure stream backpressure in bytes, shed new requests on runaway process RSS, and isolate heuristic ultra compression in a bounded worker so a pathological large /v1/responses history fails open instead of driving the gateway into host OOM.

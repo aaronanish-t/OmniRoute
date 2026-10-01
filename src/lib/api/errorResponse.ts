@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 
 export type ApiErrorType = "invalid_request" | "not_found" | "conflict" | "server_error";
 
@@ -20,11 +21,12 @@ export function createErrorResponse(payload: ApiErrorPayload): Response {
         : payload.status === 409
           ? "conflict"
           : "invalid_request");
+  const safeMessage = sanitizeErrorMessage(payload.message);
 
   return Response.json(
     {
       error: {
-        message: payload.message,
+        message: safeMessage,
         type: resolvedType,
         details: payload.details,
       },

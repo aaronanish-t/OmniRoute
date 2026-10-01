@@ -1,0 +1,1 @@
+- **fix(security):** sanitize messages at the shared API error-response boundary so management, discovery, proxy, sync-token, and other callers cannot expose internal paths or credential-like values from thrown errors while preserving the existing response envelope (audit #15159, E-13).

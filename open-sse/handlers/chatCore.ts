@@ -1496,6 +1496,7 @@ async function handleChatCoreInner({
       } = await import("../services/compression/strategySelector.ts");
       const { resolveCompressionPlanWithJev } =
         await import("../services/compression/jevPlan.ts");
+      const { isDecisionModelRequest } = await import("../services/jev/index.ts");
       const { trackCompressionStats } = await import("../services/compression/stats.ts");
       let config: CompressionConfig = compressionSettings ?? createDisabledCompressionConfig();
       if (compressionExcluded || !apiKeyCompressionEnabled) {
@@ -1751,6 +1752,7 @@ async function handleChatCoreInner({
         provider,
         model: effectiveModel,
         log,
+        suppressDecisionLayer: isDecisionModelRequest(clientRawRequest?.headers),
       });
       let compressionPlan = compressionResolution.plan;
       config = compressionResolution.config;

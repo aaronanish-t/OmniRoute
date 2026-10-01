@@ -46,6 +46,18 @@ export function museClaimCandidates(
     }));
 }
 
+// Muse intermittently answers HTTP 200 with no output. A failed result has emitted nothing to
+// the caller, so retry it on the same owner (never another account) after these delays.
+export const MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS = [500, 1500];
+
+export function museEmptyResponseRetryDelayMs(
+  errorCode: unknown,
+  retriesSoFar: number
+): number | null {
+  if (errorCode !== "upstream_empty_response" && errorCode !== "empty_response") return null;
+  return MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS[retriesSoFar] ?? null;
+}
+
 export class MuseOwnershipError extends Error {
   readonly code = "MUSE_OWNERSHIP_REJECTED";
   constructor(

@@ -89,6 +89,8 @@ import {
   recordMuseOutput,
   usesMuseOAuthOwnership,
   museClaimCandidates,
+  museEmptyResponseRetryDelayMs,
+  MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS,
 } from "../services/museSessionOwnership";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
@@ -1685,6 +1687,8 @@ async function handleSingleModelChat(
   // STREAM_EARLY_EOF_SIBLING_FAILOVER_ENABLED: at most ONE sibling hop per request. Keeps the
   // original early-EOF 502 so an exhausted sibling pool surfaces it verbatim (combo detection).
   let earlyEofOriginal: Response | null = null;
+  let museEmptyResponseRetries = 0;
+  let museEmptyResponseOriginal: Response | null = null;
   const sameAccountTransportRetries = new Map<string, number>();
   const occupancySessionKey =
     runtimeOptions.sessionAffinityKey ?? runtimeOptions.sessionId ?? `request:${randomUUID()}`;
@@ -2209,6 +2213,25 @@ async function handleSingleModelChat(
       }
       // Never let generic account fallback or affinity eviction move a Muse caller.
       if (museOwner) {
+        const museRetryDelayMs = museEmptyResponseRetryDelayMs(
+          result.errorCode,
+          museEmptyResponseRetries
+        );
+        if (museRetryDelayMs !== null && requestSignal?.aborted !== true) {
+          museEmptyResponseOriginal ??= result.response;
+          museEmptyResponseRetries += 1;
+          log.warn(
+            "MUSE",
+            `${provider}/${model} returned an empty response on owner ${museOwner.connectionId.slice(
+              0,
+              8
+            )} — same-owner retry ${museEmptyResponseRetries}/${
+              MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS.length
+            } in ${museRetryDelayMs}ms`
+          );
+          await new Promise((resolve) => setTimeout(resolve, museRetryDelayMs));
+          continue;
+        }
         if (
           result.errorCode !== "MUSE_OWNERSHIP_REJECTED" &&
           result.errorType !== "stream_timeout" &&
@@ -2234,7 +2257,12 @@ async function handleSingleModelChat(
             breaker._onFailure();
           }
         }
-        return withSelectedConnectionHeader(result.response, museOwner.connectionId);
+        // Retries exhausted: surface the original empty-response 502.
+        const museFailure =
+          museEmptyResponseOriginal && museEmptyResponseRetryDelayMs(result.errorCode, 0) !== null
+            ? museEmptyResponseOriginal
+            : result.response;
+        return withSelectedConnectionHeader(museFailure, museOwner.connectionId);
       }
 
       // A final hard-lease fence rejection is authoritative. It must never mutate

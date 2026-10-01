@@ -1,10 +1,10 @@
 # API Reference (Magyar)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/API_REFERENCE.md) · 🇪🇹 [am](../../../am/docs/reference/API_REFERENCE.md) · 🇸🇦 [ar](../../../ar/docs/reference/API_REFERENCE.md) · 🇦🇿 [az](../../../az/docs/reference/API_REFERENCE.md) · 🇧🇬 [bg](../../../bg/docs/reference/API_REFERENCE.md) · 🇧🇩 [bn](../../../bn/docs/reference/API_REFERENCE.md) · 🇨🇿 [cs](../../../cs/docs/reference/API_REFERENCE.md) · 🇩🇰 [da](../../../da/docs/reference/API_REFERENCE.md) · 🇩🇪 [de](../../../de/docs/reference/API_REFERENCE.md) · 🇬🇷 [el](../../../el/docs/reference/API_REFERENCE.md) · 🇪🇸 [es](../../../es/docs/reference/API_REFERENCE.md) · 🇪🇪 [et](../../../et/docs/reference/API_REFERENCE.md) · 🇮🇷 [fa](../../../fa/docs/reference/API_REFERENCE.md) · 🇫🇮 [fi](../../../fi/docs/reference/API_REFERENCE.md) · 🇫🇷 [fr](../../../fr/docs/reference/API_REFERENCE.md) · 🇮🇪 [ga](../../../ga/docs/reference/API_REFERENCE.md) · 🇮🇳 [gu](../../../gu/docs/reference/API_REFERENCE.md) · 🇳🇬 [ha](../../../ha/docs/reference/API_REFERENCE.md) · 🇮🇱 [he](../../../he/docs/reference/API_REFERENCE.md) · 🇮🇳 [hi](../../../hi/docs/reference/API_REFERENCE.md) · 🇭🇷 [hr](../../../hr/docs/reference/API_REFERENCE.md) · 🇦🇲 [hy](../../../hy/docs/reference/API_REFERENCE.md) · 🇮🇩 [id](../../../id/docs/reference/API_REFERENCE.md) · 🇳🇬 [ig](../../../ig/docs/reference/API_REFERENCE.md) · 🇮🇹 [it](../../../it/docs/reference/API_REFERENCE.md) · 🇯🇵 [ja](../../../ja/docs/reference/API_REFERENCE.md) · 🇬🇪 [ka](../../../ka/docs/reference/API_REFERENCE.md) · 🇰🇭 [km](../../../km/docs/reference/API_REFERENCE.md) · 🇮🇳 [kn](../../../kn/docs/reference/API_REFERENCE.md) · 🇰🇷 [ko](../../../ko/docs/reference/API_REFERENCE.md) · 🇱🇹 [lt](../../../lt/docs/reference/API_REFERENCE.md) · 🇱🇻 [lv](../../../lv/docs/reference/API_REFERENCE.md) · 🇮🇳 [ml](../../../ml/docs/reference/API_REFERENCE.md) · 🇮🇳 [mr](../../../mr/docs/reference/API_REFERENCE.md) · 🇲🇾 [ms](../../../ms/docs/reference/API_REFERENCE.md) · 🇲🇹 [mt](../../../mt/docs/reference/API_REFERENCE.md) · 🇲🇲 [my](../../../my/docs/reference/API_REFERENCE.md) · 🇳🇵 [ne](../../../ne/docs/reference/API_REFERENCE.md) · 🇳🇱 [nl](../../../nl/docs/reference/API_REFERENCE.md) · 🇳🇴 [no](../../../no/docs/reference/API_REFERENCE.md) · 🇮🇳 [or](../../../or/docs/reference/API_REFERENCE.md) · 🇮🇳 [pa](../../../pa/docs/reference/API_REFERENCE.md) · 🇵🇭 [phi](../../../phi/docs/reference/API_REFERENCE.md) · 🇵🇱 [pl](../../../pl/docs/reference/API_REFERENCE.md) · 🇵🇹 [pt](../../../pt/docs/reference/API_REFERENCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/API_REFERENCE.md) · 🇷🇴 [ro](../../../ro/docs/reference/API_REFERENCE.md) · 🇷🇺 [ru](../../../ru/docs/reference/API_REFERENCE.md) · 🇱🇰 [si](../../../si/docs/reference/API_REFERENCE.md) · 🇸🇰 [sk](../../../sk/docs/reference/API_REFERENCE.md) · 🇸🇮 [sl](../../../sl/docs/reference/API_REFERENCE.md) · 🇷🇸 [sr](../../../sr/docs/reference/API_REFERENCE.md) · 🇸🇪 [sv](../../../sv/docs/reference/API_REFERENCE.md) · 🇰🇪 [sw](../../../sw/docs/reference/API_REFERENCE.md) · 🇮🇳 [ta](../../../ta/docs/reference/API_REFERENCE.md) · 🇮🇳 [te](../../../te/docs/reference/API_REFERENCE.md) · 🇹🇭 [th](../../../th/docs/reference/API_REFERENCE.md) · 🇹🇷 [tr](../../../tr/docs/reference/API_REFERENCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/API_REFERENCE.md) · 🇵🇰 [ur](../../../ur/docs/reference/API_REFERENCE.md) · 🇺🇿 [uz](../../../uz/docs/reference/API_REFERENCE.md) · 🇻🇳 [vi](../../../vi/docs/reference/API_REFERENCE.md) · 🇳🇬 [yo](../../../yo/docs/reference/API_REFERENCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/API_REFERENCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../reference/API_REFERENCE.md) · 🇪🇹 [am](../../../am/docs/reference/API_REFERENCE.md) · 🇸🇦 [ar](../../../ar/docs/reference/API_REFERENCE.md) · 🇦🇿 [az](../../../az/docs/reference/API_REFERENCE.md) · 🇧🇬 [bg](../../../bg/docs/reference/API_REFERENCE.md) · 🇧🇩 [bn](../../../bn/docs/reference/API_REFERENCE.md) · 🇧🇦 [bs](../../../bs/docs/reference/API_REFERENCE.md) · 🇨🇿 [cs](../../../cs/docs/reference/API_REFERENCE.md) · 🇩🇰 [da](../../../da/docs/reference/API_REFERENCE.md) · 🇩🇪 [de](../../../de/docs/reference/API_REFERENCE.md) · 🇬🇷 [el](../../../el/docs/reference/API_REFERENCE.md) · 🇪🇸 [es](../../../es/docs/reference/API_REFERENCE.md) · 🇪🇪 [et](../../../et/docs/reference/API_REFERENCE.md) · 🇮🇷 [fa](../../../fa/docs/reference/API_REFERENCE.md) · 🇫🇮 [fi](../../../fi/docs/reference/API_REFERENCE.md) · 🇫🇷 [fr](../../../fr/docs/reference/API_REFERENCE.md) · 🇮🇪 [ga](../../../ga/docs/reference/API_REFERENCE.md) · 🇮🇳 [gu](../../../gu/docs/reference/API_REFERENCE.md) · 🇳🇬 [ha](../../../ha/docs/reference/API_REFERENCE.md) · 🇮🇱 [he](../../../he/docs/reference/API_REFERENCE.md) · 🇮🇳 [hi](../../../hi/docs/reference/API_REFERENCE.md) · 🇭🇷 [hr](../../../hr/docs/reference/API_REFERENCE.md) · 🇦🇲 [hy](../../../hy/docs/reference/API_REFERENCE.md) · 🇮🇩 [id](../../../id/docs/reference/API_REFERENCE.md) · 🇳🇬 [ig](../../../ig/docs/reference/API_REFERENCE.md) · 🇮🇹 [it](../../../it/docs/reference/API_REFERENCE.md) · 🇯🇵 [ja](../../../ja/docs/reference/API_REFERENCE.md) · 🇬🇪 [ka](../../../ka/docs/reference/API_REFERENCE.md) · 🇰🇭 [km](../../../km/docs/reference/API_REFERENCE.md) · 🇮🇳 [kn](../../../kn/docs/reference/API_REFERENCE.md) · 🇰🇷 [ko](../../../ko/docs/reference/API_REFERENCE.md) · 🇱🇹 [lt](../../../lt/docs/reference/API_REFERENCE.md) · 🇱🇻 [lv](../../../lv/docs/reference/API_REFERENCE.md) · 🇮🇳 [ml](../../../ml/docs/reference/API_REFERENCE.md) · 🇮🇳 [mr](../../../mr/docs/reference/API_REFERENCE.md) · 🇲🇾 [ms](../../../ms/docs/reference/API_REFERENCE.md) · 🇲🇹 [mt](../../../mt/docs/reference/API_REFERENCE.md) · 🇲🇲 [my](../../../my/docs/reference/API_REFERENCE.md) · 🇳🇵 [ne](../../../ne/docs/reference/API_REFERENCE.md) · 🇳🇱 [nl](../../../nl/docs/reference/API_REFERENCE.md) · 🇳🇴 [no](../../../no/docs/reference/API_REFERENCE.md) · 🇮🇳 [or](../../../or/docs/reference/API_REFERENCE.md) · 🇮🇳 [pa](../../../pa/docs/reference/API_REFERENCE.md) · 🇵🇭 [phi](../../../phi/docs/reference/API_REFERENCE.md) · 🇵🇱 [pl](../../../pl/docs/reference/API_REFERENCE.md) · 🇵🇹 [pt](../../../pt/docs/reference/API_REFERENCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/API_REFERENCE.md) · 🇷🇴 [ro](../../../ro/docs/reference/API_REFERENCE.md) · 🇷🇺 [ru](../../../ru/docs/reference/API_REFERENCE.md) · 🇱🇰 [si](../../../si/docs/reference/API_REFERENCE.md) · 🇸🇰 [sk](../../../sk/docs/reference/API_REFERENCE.md) · 🇸🇮 [sl](../../../sl/docs/reference/API_REFERENCE.md) · 🇷🇸 [sr](../../../sr/docs/reference/API_REFERENCE.md) · 🇸🇪 [sv](../../../sv/docs/reference/API_REFERENCE.md) · 🇰🇪 [sw](../../../sw/docs/reference/API_REFERENCE.md) · 🇮🇳 [ta](../../../ta/docs/reference/API_REFERENCE.md) · 🇮🇳 [te](../../../te/docs/reference/API_REFERENCE.md) · 🇹🇭 [th](../../../th/docs/reference/API_REFERENCE.md) · 🇹🇷 [tr](../../../tr/docs/reference/API_REFERENCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/API_REFERENCE.md) · 🇵🇰 [ur](../../../ur/docs/reference/API_REFERENCE.md) · 🇺🇿 [uz](../../../uz/docs/reference/API_REFERENCE.md) · 🇻🇳 [vi](../../../vi/docs/reference/API_REFERENCE.md) · 🇳🇬 [yo](../../../yo/docs/reference/API_REFERENCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/API_REFERENCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/API_REFERENCE.md)
 
 ---
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/API_REFERENCE.md) · 🇪🇹 [am](../../../am/docs/reference/API_REFERENCE.md) · 🇸🇦 [ar](../../../ar/docs/reference/API_REFERENCE.md) · 🇦🇿 [az](../../../az/docs/reference/API_REFERENCE.md) · 🇧🇬 [bg](../../../bg/docs/reference/API_REFERENCE.md) · 🇧🇩 [bn](../../../bn/docs/reference/API_REFERENCE.md) · 🇨🇿 [cs](../../../cs/docs/reference/API_REFERENCE.md) · 🇩🇰 [da](../../../da/docs/reference/API_REFERENCE.md) · 🇩🇪 [de](../../../de/docs/reference/API_REFERENCE.md) · 🇬🇷 [el](../../../el/docs/reference/API_REFERENCE.md) · 🇪🇸 [es](../../../es/docs/reference/API_REFERENCE.md) · 🇪🇪 [et](../../../et/docs/reference/API_REFERENCE.md) · 🇮🇷 [fa](../../../fa/docs/reference/API_REFERENCE.md) · 🇫🇮 [fi](../../../fi/docs/reference/API_REFERENCE.md) · 🇫🇷 [fr](../../../fr/docs/reference/API_REFERENCE.md) · 🇮🇪 [ga](../../../ga/docs/reference/API_REFERENCE.md) · 🇮🇳 [gu](../../../gu/docs/reference/API_REFERENCE.md) · 🇳🇬 [ha](../../../ha/docs/reference/API_REFERENCE.md) · 🇮🇱 [he](../../../he/docs/reference/API_REFERENCE.md) · 🇮🇳 [hi](../../../hi/docs/reference/API_REFERENCE.md) · 🇭🇷 [hr](../../../hr/docs/reference/API_REFERENCE.md) · 🇦🇲 [hy](../../../hy/docs/reference/API_REFERENCE.md) · 🇮🇩 [id](../../../id/docs/reference/API_REFERENCE.md) · 🇳🇬 [ig](../../../ig/docs/reference/API_REFERENCE.md) · 🇮🇹 [it](../../../it/docs/reference/API_REFERENCE.md) · 🇯🇵 [ja](../../../ja/docs/reference/API_REFERENCE.md) · 🇬🇪 [ka](../../../ka/docs/reference/API_REFERENCE.md) · 🇰🇭 [km](../../../km/docs/reference/API_REFERENCE.md) · 🇮🇳 [kn](../../../kn/docs/reference/API_REFERENCE.md) · 🇰🇷 [ko](../../../ko/docs/reference/API_REFERENCE.md) · 🇱🇹 [lt](../../../lt/docs/reference/API_REFERENCE.md) · 🇱🇻 [lv](../../../lv/docs/reference/API_REFERENCE.md) · 🇮🇳 [ml](../../../ml/docs/reference/API_REFERENCE.md) · 🇮🇳 [mr](../../../mr/docs/reference/API_REFERENCE.md) · 🇲🇾 [ms](../../../ms/docs/reference/API_REFERENCE.md) · 🇲🇹 [mt](../../../mt/docs/reference/API_REFERENCE.md) · 🇲🇲 [my](../../../my/docs/reference/API_REFERENCE.md) · 🇳🇵 [ne](../../../ne/docs/reference/API_REFERENCE.md) · 🇳🇱 [nl](../../../nl/docs/reference/API_REFERENCE.md) · 🇳🇴 [no](../../../no/docs/reference/API_REFERENCE.md) · 🇮🇳 [or](../../../or/docs/reference/API_REFERENCE.md) · 🇮🇳 [pa](../../../pa/docs/reference/API_REFERENCE.md) · 🇵🇭 [phi](../../../phi/docs/reference/API_REFERENCE.md) · 🇵🇱 [pl](../../../pl/docs/reference/API_REFERENCE.md) · 🇵🇹 [pt](../../../pt/docs/reference/API_REFERENCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/API_REFERENCE.md) · 🇷🇴 [ro](../../../ro/docs/reference/API_REFERENCE.md) · 🇷🇺 [ru](../../../ru/docs/reference/API_REFERENCE.md) · 🇱🇰 [si](../../../si/docs/reference/API_REFERENCE.md) · 🇸🇰 [sk](../../../sk/docs/reference/API_REFERENCE.md) · 🇸🇮 [sl](../../../sl/docs/reference/API_REFERENCE.md) · 🇷🇸 [sr](../../../sr/docs/reference/API_REFERENCE.md) · 🇸🇪 [sv](../../../sv/docs/reference/API_REFERENCE.md) · 🇰🇪 [sw](../../../sw/docs/reference/API_REFERENCE.md) · 🇮🇳 [ta](../../../ta/docs/reference/API_REFERENCE.md) · 🇮🇳 [te](../../../te/docs/reference/API_REFERENCE.md) · 🇹🇭 [th](../../../th/docs/reference/API_REFERENCE.md) · 🇹🇷 [tr](../../../tr/docs/reference/API_REFERENCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/API_REFERENCE.md) · 🇵🇰 [ur](../../../ur/docs/reference/API_REFERENCE.md) · 🇺🇿 [uz](../../../uz/docs/reference/API_REFERENCE.md) · 🇻🇳 [vi](../../../vi/docs/reference/API_REFERENCE.md) · 🇳🇬 [yo](../../../yo/docs/reference/API_REFERENCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/API_REFERENCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../reference/API_REFERENCE.md) · 🇪🇹 [am](../../../am/docs/reference/API_REFERENCE.md) · 🇸🇦 [ar](../../../ar/docs/reference/API_REFERENCE.md) · 🇦🇿 [az](../../../az/docs/reference/API_REFERENCE.md) · 🇧🇬 [bg](../../../bg/docs/reference/API_REFERENCE.md) · 🇧🇩 [bn](../../../bn/docs/reference/API_REFERENCE.md) · 🇧🇦 [bs](../../../bs/docs/reference/API_REFERENCE.md) · 🇨🇿 [cs](../../../cs/docs/reference/API_REFERENCE.md) · 🇩🇰 [da](../../../da/docs/reference/API_REFERENCE.md) · 🇩🇪 [de](../../../de/docs/reference/API_REFERENCE.md) · 🇬🇷 [el](../../../el/docs/reference/API_REFERENCE.md) · 🇪🇸 [es](../../../es/docs/reference/API_REFERENCE.md) · 🇪🇪 [et](../../../et/docs/reference/API_REFERENCE.md) · 🇮🇷 [fa](../../../fa/docs/reference/API_REFERENCE.md) · 🇫🇮 [fi](../../../fi/docs/reference/API_REFERENCE.md) · 🇫🇷 [fr](../../../fr/docs/reference/API_REFERENCE.md) · 🇮🇪 [ga](../../../ga/docs/reference/API_REFERENCE.md) · 🇮🇳 [gu](../../../gu/docs/reference/API_REFERENCE.md) · 🇳🇬 [ha](../../../ha/docs/reference/API_REFERENCE.md) · 🇮🇱 [he](../../../he/docs/reference/API_REFERENCE.md) · 🇮🇳 [hi](../../../hi/docs/reference/API_REFERENCE.md) · 🇭🇷 [hr](../../../hr/docs/reference/API_REFERENCE.md) · 🇦🇲 [hy](../../../hy/docs/reference/API_REFERENCE.md) · 🇮🇩 [id](../../../id/docs/reference/API_REFERENCE.md) · 🇳🇬 [ig](../../../ig/docs/reference/API_REFERENCE.md) · 🇮🇹 [it](../../../it/docs/reference/API_REFERENCE.md) · 🇯🇵 [ja](../../../ja/docs/reference/API_REFERENCE.md) · 🇬🇪 [ka](../../../ka/docs/reference/API_REFERENCE.md) · 🇰🇭 [km](../../../km/docs/reference/API_REFERENCE.md) · 🇮🇳 [kn](../../../kn/docs/reference/API_REFERENCE.md) · 🇰🇷 [ko](../../../ko/docs/reference/API_REFERENCE.md) · 🇱🇹 [lt](../../../lt/docs/reference/API_REFERENCE.md) · 🇱🇻 [lv](../../../lv/docs/reference/API_REFERENCE.md) · 🇮🇳 [ml](../../../ml/docs/reference/API_REFERENCE.md) · 🇮🇳 [mr](../../../mr/docs/reference/API_REFERENCE.md) · 🇲🇾 [ms](../../../ms/docs/reference/API_REFERENCE.md) · 🇲🇹 [mt](../../../mt/docs/reference/API_REFERENCE.md) · 🇲🇲 [my](../../../my/docs/reference/API_REFERENCE.md) · 🇳🇵 [ne](../../../ne/docs/reference/API_REFERENCE.md) · 🇳🇱 [nl](../../../nl/docs/reference/API_REFERENCE.md) · 🇳🇴 [no](../../../no/docs/reference/API_REFERENCE.md) · 🇮🇳 [or](../../../or/docs/reference/API_REFERENCE.md) · 🇮🇳 [pa](../../../pa/docs/reference/API_REFERENCE.md) · 🇵🇭 [phi](../../../phi/docs/reference/API_REFERENCE.md) · 🇵🇱 [pl](../../../pl/docs/reference/API_REFERENCE.md) · 🇵🇹 [pt](../../../pt/docs/reference/API_REFERENCE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/API_REFERENCE.md) · 🇷🇴 [ro](../../../ro/docs/reference/API_REFERENCE.md) · 🇷🇺 [ru](../../../ru/docs/reference/API_REFERENCE.md) · 🇱🇰 [si](../../../si/docs/reference/API_REFERENCE.md) · 🇸🇰 [sk](../../../sk/docs/reference/API_REFERENCE.md) · 🇸🇮 [sl](../../../sl/docs/reference/API_REFERENCE.md) · 🇷🇸 [sr](../../../sr/docs/reference/API_REFERENCE.md) · 🇸🇪 [sv](../../../sv/docs/reference/API_REFERENCE.md) · 🇰🇪 [sw](../../../sw/docs/reference/API_REFERENCE.md) · 🇮🇳 [ta](../../../ta/docs/reference/API_REFERENCE.md) · 🇮🇳 [te](../../../te/docs/reference/API_REFERENCE.md) · 🇹🇭 [th](../../../th/docs/reference/API_REFERENCE.md) · 🇹🇷 [tr](../../../tr/docs/reference/API_REFERENCE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/API_REFERENCE.md) · 🇵🇰 [ur](../../../ur/docs/reference/API_REFERENCE.md) · 🇺🇿 [uz](../../../uz/docs/reference/API_REFERENCE.md) · 🇻🇳 [vi](../../../vi/docs/reference/API_REFERENCE.md) · 🇳🇬 [yo](../../../yo/docs/reference/API_REFERENCE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/API_REFERENCE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/API_REFERENCE.md)
 
 Az OmniRoute API alapvető referenciája. Bemutatja a nyilvános `/v1` felületet és a leggyakrabban használt felügyeleti végpontokat; a géppel olvasható [`docs/openapi.yaml`](../openapi.yaml) és a `src/app/api/` alatti útvonalfa szolgál teljes körű forrásként.
 
@@ -86,15 +86,11 @@ Content-Type: application/json
 
 > **Gyorsítótártalálat költségszemantikája:** szemantikus gyorsítótártalálat (`X-OmniRoute-Cache-Hit: true`) esetén nem történik upstream hívás, ezért az `X-OmniRoute-Response-Cost` értéke `0.0000000000` (a találat kiszolgálásának **járulékos** költsége). Az eredeti/a gyorsítótár nélkül felmerült költséget külön, az `X-OmniRoute-Cost-Saved` fejléc jelenti. A számlázási fogyasztóknak az `X-OmniRoute-Response-Cost` értékeit kell összegezniük (a találatoknak nincs költségük); a gyorsítótár-analitika az `X-OmniRoute-Cost-Saved` értékeit összesítheti.
 
-## Exkluzív felügyelt munkamenet-bérletek
+## Exkluzív menedzselt munkamenet-bérletek
 
-Az exkluzív felügyelt munkamenet-bérlés egy opcionális, klienssemleges útválasztási szerződés: egy aktív tulajdonos
-egy jogosult OmniRoute-kapcsolatot birtokol. Nem bérel modellt, nem igényel OAuth-hitelesítést, nem azonosít
-egy adott klienst, és nem követel meg egy adott szolgáltatót.
+Az exkluzív menedzselt munkamenet-bérlet egy opcionális, klienssemleges útválasztási szerződés: egy aktív tulajdonos egy jogosult OmniRoute kapcsolatot birtokol. Nem bérel modellt, nem igényel OAuth-ot, nem azonosít konkrét klienst, és nem igényel konkrét szolgáltatót.
 
-A hitelesítést végző API-kulcsnak rendelkeznie kell a `lease:exclusive` hatókörrel és egy explicit, nem üres
-`allowedConnections` listával. Az adatbázis-módosítási határvonal a kulcs létrehozásakor és részleges
-frissítésekor mindkét mező együttes meglétét kikényszeríti.
+Az autentikáló API kulcsnak rendelkeznie kell `lease:exclusive` hatókörrel és egy explicit, nem üres `allowedConnections` listával. Az adatbázis-módosítási határ mindkét mezőt érvényesíti a kulcs létrehozásakor és a részleges frissítéseknél.
 
 ```http
 POST /api/v1/session-leases
@@ -105,9 +101,7 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-A sikeres megszerzési, megújítási és felszabadítási válaszok időbélyegeket, `state` értéket és a pontos pozitív
-`generation` értéket teszik elérhetővé, de soha nem fedik fel a kiválasztott kapcsolatot vagy a hitelesítő adatokat. A megújítás és a felszabadítás a
-generációt a JSON-törzsben adja meg:
+A sikeres megszerzési, megújítási és felszabadítási válaszok időbélyegeket, `state`-et és az pontos pozitív `generation`-t tesznek közzé, de soha nem a kiválasztott kapcsolatot vagy hitelesítő adatokat. A megújítás és a felszabadítás a generációt a JSON törzsben adja meg:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -117,7 +111,7 @@ generációt a JSON-törzsben adja meg:
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-Egy aktív bérlet tulajdonosa explicit módon kérheti az aktuális hozzárendelés adatvédelmi szempontból biztonságos megjelenítési metaadatait:
+Egy aktív bérlet tulajdonos explicit módon kérhet adatvédelmi szempontból biztonságos megjelenítési metaadatokat az aktuális kötéséhez:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -137,37 +131,22 @@ Egy aktív bérlet tulajdonosa explicit módon kérheti az aktuális hozzárende
 }
 ```
 
-Ezt az opcionális állapotműveletet az átlátszatlan tulajdonos, a hitelesített felügyelt API-kulcs és a pontos
-aktív generáció egyetlen adatbázis-tranzakción belül védi. A `displayName` kizárólag a konfigurált
-kapcsolat szóközöktől megtisztított neve; értéke `null`, ha nem áll rendelkezésre biztonságosan használható konfigurált név. Az OmniRoute soha nem helyettesíti ezt
-e-mail-címmel vagy generált fiókazonosítóval. A szolgáltató értéke nem érzékeny megjelenítési címke, és soha nem
-generált kompatibilisszolgáltató-azonosító. A hitelesítő adatok, tokenek, cookie-k, nyers kapcsolat- vagy API-
-kulcsazonosítók, tulajdonoskivonatok, elkerítési titkok és belső útválasztási adatok ki vannak zárva.
+Ez az opcionális állapotművelet az átlátszatlan tulajdonos, az autentikált menedzselt API kulcs és az pontos aktív generáció által van védve egy adatbázis tranzakcióban. A `displayName` csak a levágott konfigurált kapcsolatnév; `null`, ha nincs biztonságos konfigurált név. Az OmniRoute soha nem helyettesít e-mailt vagy generált fiókazonosítót. A szolgáltató értéke egy nem érzékeny megjelenítési címke, és soha nem egy generált kompatibilis szolgáltató azonosító. A hitelesítő adatok, tokenek, sütik, nyers kapcsolat- vagy API kulcs azonosítók, tulajdonos hash-ek, védelmi titkok és belső útválasztási adatok kizárásra kerülnek.
 
-A helytelen kulccsal, helytelen tulajdonossal, elavult generációval végzett, illetve a hiányzó, lejárt, felszabadított vagy érvénytelenített bérletre irányuló lekérdezések mind
-ugyanazt a `409 LEASE_FENCE_STALE` hibát adják vissza kapcsolatmetaadatok nélkül. A kapacitásra várakozást jelző választ kapott kliensnek nincs megvizsgálható aktív hozzárendelése. Amikor az útválasztás átállít egy aktív bérletet,
-ugyanaz a generáció marad érvényben, és az állapotművelet atomi módon az új hozzárendelést adja vissza, soha nem a régit.
-A meglévő kliensek változatlanok maradnak, mivel a megszerzési, megújítási, felszabadítási és várakozási válaszok megőrzik
-korábbi formájukat.
+Helytelen kulcs, helytelen tulajdonos, elavult generáció, hiányzó, lejárt, felszabadított és érvénytelenített keresések mind ugyanazt a `409 LEASE_FENCE_STALE` hibát adják vissza kapcsolat metaadatok nélkül. Egy kliens, amely kapacitás-várakozási választ kapott, nem rendelkezik aktív kötéssel, amelyet ellenőrizhetne. Amikor az útválasztás átvisz egy aktív bérletet, ugyanaz a generáció érvényes marad, és az állapot atomi módon adja vissza az új kötést, soha nem a régit. A meglévő kliensek változatlanok maradnak, mert a megszerzési, megújítási, felszabadítási és várakozási válaszok megőrzik korábbi formájukat.
 
-Ez a kiszolgálói szerződés nem módosítja az alapértelmezett OpenAI Codex `/status` végpontját. Az alapértelmezett Codex jelenleg jelentést ad a
-modellszolgáltatójáról és a beépített hitelesítési-/fiókállapotról, de nem jelenít meg tetszőleges egyéni
-szolgáltatói fiókmetaadatokat; egy későbbi kliensintegrációnak meg kell hívnia ezt a műveletet, és el kell döntenie, hogyan
-jelenítse meg a `connection.displayName` értékét.
+Ez a szerver szerződés nem változtatja meg a standard OpenAI Codex `/status` működését. A standard Codex jelenleg jelenti a modell szolgáltatóját és a beépített hitelesítési/fiók állapotát, de nem jelenít meg tetszőleges egyedi szolgáltatói fiók metaadatokat; egy későbbi kliens integrációnak kell meghívnia ezt a műveletet, és el kell döntenie, hogyan jelenítse meg a `connection.displayName`-t.
 
-Ezután minden felügyelt következtetési kérés megadja mindkét vezérlőfejlécet:
+Minden menedzselt következtetési kérés ezután mindkét vezérlőfejlécet tartalmazza:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-A pontos tulajdonos, generáció, aktív kapcsolat és hitelesített API-kulcs ellenőrzése közvetlenül
-minden támogatott upstream-próbálkozás előtt történik. A tulajdonos és a generáció másik kulccsal történő újbóli felhasználása akkor is
-sikertelen, ha az a kulcs ugyanazt a kapcsolatot engedélyezi. A nyers tulajdonosértékeket a rendszer nem tárolja, nem naplózza, nem őrzi meg a
-kérés pillanatképében, és nem továbbítja upstream irányba.
+Az pontos tulajdonos, generáció, aktív kapcsolat és autentikált API kulcs azonnal védve van minden támogatott upstream kísérlet előtt. A tulajdonos és a generáció újrajátszása egy másik kulccsal meghiúsul, még akkor is, ha az a kulcs ugyanazt a kapcsolatot engedélyezi. A nyers tulajdonosok nem kerülnek tárolásra, naplózásra, megőrzésre a kérés pillanatképében, vagy továbbításra upstream.
 
-Az ideiglenes erőforrás-ütközés HTTP `429` választ ad vissza `Retry-After` fejléccel és a következő tartalommal:
+Az ideiglenes versengés HTTP `429` választ ad vissza `Retry-After` fejléccel és:
 
 ```json
 {
@@ -178,36 +157,35 @@ Az ideiglenes erőforrás-ütközés HTTP `429` választ ad vissza `Retry-After`
 }
 ```
 
-Ez a válasz csak azt jelenti, hogy a szokásos jogosult halmaz nem volt üres, és minden szabad jelöltet
-egy idegen aktív bérlet foglalt. A nem támogatott modellek/szolgáltatók, a házirend-eltérés, a lehűlési idő, a kvóta,
-az állapot és más szokásos jogosultsági hibák megtartják a meglévő OmniRoute-válaszaikat.
+Ez a válasz csak azt jelenti, hogy a szokásos jogosult halmaz nem volt üres, és minden szabad jelöltet egy idegen aktív bérlet tartott. A nem támogatott modellek/szolgáltatók, a házirend-eltérés, a lehűlési idő, a kvóta, az állapot és más szokásos jogosultsági hibák megőrzik meglévő OmniRoute válaszaikat.
 
 ### `x-omniroute-compression`
 
-A tömörítési terv kérésenkénti felülbírálása. A legmagasabb prioritású — felülírja az útválasztási kombináció
-felülbírálását, az aktív profilt, az automatikus aktiválást és a panel alapértelmezését. Értékek:
+Kérésenkénti felülbírálás a tömörítési tervre. Legmagasabb prioritás – felülírja az útválasztási-kombináció felülbírálását, az aktív profilt, az automatikus indítást és a panel alapértelmezett beállítását. Értékek:
 
-| Érték         | Hatás                                                                                                                               |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Ennél a kérésnél nincs tömörítés.                                                                                                   |
-| `default`     | A panelből származtatott alapértelmezett profil (figyelmen kívül hagyja az aktív profilt).                                          |
-| `engine:<id>` | Egyetlen motor, ha engedélyezve van, például `engine:rtk`.                                                                          |
-| `<combo>`     | Egy névvel ellátott kombináció; először név alapján történik az egyezés (kis- és nagybetűktől függetlenül), majd azonosító alapján. |
+| Érték         | Hatás                                                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Nincs tömörítés ehhez a kéréshez.                                                                                                 |
+| `default`     | A panelből származó alapértelmezett profil (figyelmen kívül hagyja az aktív profilt). A veszteséges motorok kikapcsolva maradnak. |
+| `safe`        | Csak duplikáció eltávolítás és szóközösszevonás.                                                                                  |
+| `allow-lossy` | Tartsa meg az operátor tervét ehhez a kéréshez, beleértve az összefoglalókat és a stílus újraírásokat.                            |
+| `engine:<id>` | Egyetlen motor, ha engedélyezve van, pl. `engine:rtk`. Kérésenkénti bekapcsolás az adott motorhoz.                                |
+| `<combo>`     | Egy elnevezett kombináció, először név (kis- és nagybetű érzéketlen) alapján, majd azonosító alapján egyezik.                     |
 
 Megjegyzések:
 
-- Az ismeretlen értékeket a rendszer figyelmen kívül hagyja (a kérést soha nem utasítja el); a feloldás a normál operátori precedencia szerint folytatódik.
-- Ha több kombinációnak ugyanaz a neve, a determinisztikus egyezéshez a kombináció **id** értékét adja meg.
-- Az `off` vagy `default` nevű kombinációk nem választhatók ki név alapján (ezeket a kulcsszavakat értelmezi először a rendszer); az ilyen kombinációkra az azonosítójukkal hivatkozzon.
-- A fő tömörítési kapcsoló kötelező korlát: ha a tömörítés globálisan le van tiltva, ez a fejléc nem engedélyezheti.
+- Az ismeretlen értékek figyelmen kívül maradnak (a kérés soha nem kerül elutasításra); a feloldás a normál operátori prioritás szerint történik.
+- Ha több kombináció osztozik egy néven, adja meg a kombináció **azonosítóját** a determinisztikus egyezéshez.
+- Az `off` vagy `default` nevű kombináció nem választható ki név alapján (ezeket a kulcsszavakat először értelmezik); hivatkozzon az ilyen kombinációra az azonosítója alapján.
+- A fő tömörítési kapcsoló egy kemény kapu: ha a tömörítés globálisan le van tiltva, ez a fejléc nem tudja engedélyezni.
 
-Az alkalmazott terv megjelenik a válasz fejlécében:
+Az alkalmazott terv a válasz fejlécében visszhangzik:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-ahol a `<source>` értéke a következők egyike: `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` vagy `off`.
+ahol `<source>` a `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` vagy `off` egyikét jelenti.
 
 ---
 
@@ -441,7 +419,7 @@ Ezt a végpontot akkor használja, ha egy sidecar folyamaton kívül fut, és ne
 
 ## Kompatibilitási végpontok
 
-| Metódus | Elérési út                                | Formátum                              |
+| Metódus | Útvonal                                   | Formátum                              |
 | ------- | ----------------------------------------- | ------------------------------------- |
 | POST    | `/v1/chat/completions`                    | OpenAI                                |
 | POST    | `/v1/messages`                            | Anthropic                             |
@@ -469,12 +447,12 @@ Ezt a végpontot akkor használja, ha egy sidecar folyamaton kívül fut, és ne
 | POST    | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenizált aliasa              |
 | GET     | `/api/v1/vscode/{token}/api/tags`         | Ollama-címkék tokenizált aliasa       |
 
-Minden POST-útvonal ugyanazt a struktúrát követi: `Bearer your-api-key` + Zod által ellenőrzött JSON-törzs (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` stb.; lásd: `src/shared/validation/schemas.ts`). A sémaellenőrzés sikertelensége esetén 4xx válasz érkezik.
+Minden POST-útvonal ugyanazt a formát követi: `Bearer your-api-key` + Zod által ellenőrzött JSON-törzs (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` stb.; lásd: `src/shared/validation/schemas.ts`). A sémaellenőrzés sikertelensége esetén 4xx válasz érkezik.
 
-Azon kliensek számára, amelyek nem tudják csatolni az `Authorization: Bearer ...` fejlécet, az OmniRoute az URL-ben is elfogad API-kulcsokat, akár lekérdezésikarakterlánc-kompatibilitással (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), akár az alább dokumentált, dedikált `/api/v1/vscode/{token}/...` végpontokon keresztül.
+Az `Authorization: Bearer ...` fejlécet csatolni nem képes kliensek számára az OmniRoute az API-kulcsokat az URL-ben is elfogadja, akár lekérdezésikarakterlánc-kompatibilitással (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), akár az alább dokumentált, dedikált `/api/v1/vscode/{token}/...` végpontokon keresztül.
 
 ```bash
-# Újrarangsorolás (felhőalapú nyilvántartási szolgáltató vagy OpenAI-kompatibilis szolgáltatói csomópont „<prefix>/<model>” formában)
+# Újrarangsorolás (felhőalapú regisztrációs szolgáltató vagy OpenAI-kompatibilis szolgáltatócsomópont "<prefix>/<model>" formában)
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
 # Jina-osztályozás (Foundation API-hitelesítő adatok)
@@ -490,36 +468,40 @@ POST /v1/search      { "query": "...", "provider": "jina-search" }
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
 # TTS — audio/mpeg (vagy a kért formátumú) törzset ad vissza
-POST /v1/audio/speech { "model": "openai/tts-1", "input": "Helló", "voice": "alloy" }
+POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
+
+# A Soniox TTS nyelvet és hangot igényel: a `language` alapértelmezett értéke "en"; a hiányzó
+# hang vagy egy szabványos OpenAI-hangnév (alloy, nova, …) értéke "Adrian" lesz
+POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # Képszerkesztés (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
 # Videó-/zenegenerálás (szolgáltatói előtaggal ellátott modellazonosító)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
-POST /v1/music/generations  { "model": "suno/v3.5",   "prompt": "..." }
+POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Újrarangsorolási szolgáltatói csomópontok:** A `POST /v1/rerank` OpenAI-kompatibilis szolgáltatói csomópontokhoz
-> (oMLX, vLLM, Infinity, átjáró mögötti TEI stb.) is irányít, amelyek címzése `<node-prefix>/<model>` formában történik. A visszacsatolási
+> **Újrarangsorolási szolgáltatócsomópontok:** A `POST /v1/rerank` az OpenAI-kompatibilis szolgáltatócsomópontokhoz
+> (oMLX, vLLM, Infinity, átjáró mögötti TEI, …) is továbbít, amelyek címzése `<node-prefix>/<model>` formájú. A visszacsatolási
 > csomópontok (`localhost`, `127.0.0.1`, `172.16.0.0/12`) mindig használhatók. Bármely más
-> állomáson található csomópont — legyen az egy LAN-gép vagy Tailscale-partner — csak akkor használható, ha az üzemeltető engedélyezi a
+> gazdagépen — helyi hálózati gépen vagy Tailscale-társponton — található csomópont csak akkor használható, ha az üzemeltető engedélyezi a
 > `RERANK_REMOTE_PROVIDER_NODES` funkciójelzőt, **és** a csomópont alap-URL-je megfelel a szolgáltató
 > kimenő URL-ekre vonatkozó szabályzatának (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`);
-> a felhőmetaadat-állomásokhoz soha nem történik továbbítás. A memóriamotor újrarangsorolási lépése visszacsatoláson keresztül hívja
-> ezt az útvonalat, ezért ugyanez a szabály vonatkozik a Memória beállításaiban szereplő `rerankProviderModel` értékére is.
+> a felhőmetaadat-gazdagépekhez soha nem történik továbbítás. A memóriamotor újrarangsorolási lépése a visszacsatolási
+> interfészen keresztül hívja ezt az útvonalat, így ugyanez a szabály vonatkozik a Memória beállításaiban szereplő `rerankProviderModel` értékre.
 >
-> **Helyi szerverstruktúrák:** A csomópont hívása a `<base>/v1/rerank` címen történik, 404 esetén pedig a `<base>/rerank`
-> címen (Infinity, TEI). A továbbított törzs tartalmazza mind a Cohere/OpenAI-féle elnevezéseket (`documents`,
-> `return_documents`), mind a TEI-féle elnevezéseket (`texts`, `return_text`), a továbbított válasz pedig
-> a Cohere-borítékra lesz normalizálva: a TEI csupasz `[{index, score, text}]` formátuma, a vékony átjáróktól érkező
-> `{results: [{index, score}]}`, valamint a Voyage-stílusú `{data: [...]}` is
-> `{results: [{index, relevance_score, document?}]}` formában kerül vissza a klienshez, pontszám szerint rendezve és a `top_n` értékére korlátozva.
+> **Helyi kiszolgálói formátumok:** a csomópont hívása a `<base>/v1/rerank`, 404 esetén pedig a `<base>/rerank`
+> útvonalon történik (Infinity, TEI). A továbbított törzs a Cohere/OpenAI-féle elnevezést (`documents`,
+> `return_documents`) és a TEI-féle elnevezést (`texts`, `return_text`) egyaránt tartalmazza, a továbbított válasz pedig
+> a Cohere-burkoló formátumára normalizálódik: a TEI csupasz `[{index, score, text}]` válasza, a vékony átjáróktól érkező
+> `{results: [{index, score}]}`, valamint a Voyage-stílusú `{data: [...]}` egyaránt
+> `{results: [{index, relevance_score, document?}]}` formában jut vissza a klienshez, pontszám szerint rendezve és `top_n` számú elemre korlátozva.
 
-> **Szolgáltatói csomópontok felderítése:** Az OpenAI-kompatibilis szolgáltatói csomópontokon található modellek a `GET /v1/models`
-> válaszában a csomópont előtagja alatt jelennek meg. A végpont-metaadatokat nem tartalmazó sorok (ami a helyi `/v1/models` listákra jellemző)
+> **Szolgáltatócsomópont-felderítés:** az OpenAI-kompatibilis szolgáltatócsomóponton lévő modellek a `GET /v1/models`
+> végponton, a csomópont előtagja alatt jelennek meg. A végpont-metaadatokat nem tartalmazó sorok (ami jellemző a helyi `/v1/models` listázásokra)
 > öröklik a csomópont `apiType` értékét, így egy `embeddings` csomópont modelljei `type: "embedding"`, egy
-> `rerank` csomópont modelljei pedig `type: "rerank"` típusúak lesznek az alapértelmezett csevegéstípus helyett; a szinkronizált vagy manuálisan hozzáadott sorokon megadott explicit
+> `rerank` csomópont modelljei pedig `type: "rerank"` típusúak lesznek ahelyett, hogy alapértelmezés szerint csevegési típusúak lennének; a szinkronizált vagy manuálisan hozzáadott soron explicit módon megadott
 > `supportedEndpoints` továbbra is elsőbbséget élvez.
 
 ### Dedikált szolgáltatói útvonalak
@@ -530,7 +512,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-A szolgáltatói előtag automatikusan hozzáadódik, ha hiányzik. A nem megfelelő modellek `400` állapotkódot adnak vissza.
+A szolgáltatói előtag automatikusan hozzáadódik, ha hiányzik. A nem egyező modellek esetén a válasz `400`.
 
 ---
 
@@ -1463,17 +1445,17 @@ Visszaadja a nyilvános A2A-ügynökkártyát (név, leírás, képességek, ké
 | Metódus | Útvonal | Leírás |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
 | POST | `/api/cloud/auth` | Bearer-kulcs ellenőrzése, valamint maszkolt szolgáltatói kapcsolatok és modellálnevek visszaadása a felhőszinkronizálási kliensek számára |
-| POST | `/api/cloud/credentials/update` | Egy felhővel szinkronizált szolgáltató titkosított hitelesítő adatainak frissítése |
-| POST | `/api/cloud/model/resolve` | Logikai modellazonosító feloldása konkrét szolgáltatóra/modellre a helyi útválasztási táblázat használatával |
+| POST | `/api/cloud/credentials/update` | Egy felhőben szinkronizált szolgáltató titkosított hitelesítő adatainak frissítése |
+| POST | `/api/cloud/model/resolve` | Egy logikai modellazonosító feloldása konkrét szolgáltatóra/modellre a helyi útválasztási tábla használatával |
 | GET | `/api/cloud/models/alias` | A felhőszinkronizálás számára elérhető modellálnevek listázása |
-| GET | `/api/assess` | A legutóbbi felmérési kategorizálások beolvasása (szolgáltatónként/modellenként) |
+| GET | `/api/assess` | A legújabb felmérési kategorizálások lekérése (szolgáltatónként/modellenként) |
 | POST | `/api/assess` | Felmérés futtatása — törzs: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | Beépített kiértékelési csomagok és legutóbbi futtatásaik listázása |
+| GET | `/api/evals` | A beépített kiértékelési csomagok és a legutóbbi futtatások listázása |
 | POST | `/api/evals` | Kiértékelési futtatás indítása |
-| POST | `/api/evals/suites` | Egyéni kiértékelési csomag létrehozása — a törzset az `evalSuiteSaveSchema` ellenőrzi |
+| POST | `/api/evals/suites` | Egyéni kiértékelési csomag létrehozása — a törzset az `evalSuiteSaveSchema` validálja |
 | GET | `/api/evals/suites/[id]` | Egyéni kiértékelési csomag lekérése |
 
-**Hitelesítés:** az `/api/cloud/auth` közvetlenül ellenőrzi a Bearer-kulcsot; a többi `/api/cloud/*`, `/api/evals/*` és `/api/assess` útvonal kezelési munkamenetet/API-kulcsot igényel. Az `/api/assess` POST a `validateBody` függvényt használja egy diszkriminált uniós hatókörsémával.
+**Hitelesítés:** Az `/api/cloud/auth` közvetlenül ellenőrzi a Bearer-kulcsot, és csak `manage` / `admin` hatókörű kulcs esetén adja vissza az egyes kapcsolatok maszkolt kulcsát és `projectId` értékét; a többi `/api/cloud/*`, `/api/evals/*` és `/api/assess` útvonal kezelői munkamenetet/API-kulcsot igényel. Az `/api/assess` POST a `validateBody` függvényt használja egy diszkriminált uniós hatókörsémával.
 
 ---
 

@@ -7,6 +7,8 @@ export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "audio-speech",
   "audio-transcriptions",
   "images-generations",
+  // System One typed-decision API (`POST /v1/systemone`): choice / noul / score answers.
+  "systemone",
   // Persisted legacy values remain valid input and normalize on write/edit.
   "video",
   "audio",

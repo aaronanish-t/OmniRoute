@@ -12,7 +12,16 @@ const OLLAMA_CAPABILITY_TO_ENDPOINT: Readonly<Record<string, string>> = {
   completion: "chat",
   embedding: "embeddings",
   image: "images",
+  // Ollama >= 0.35 tags System One models (Nimble, Tev) with `decision`; they answer
+  // typed questions on `/v1/systemone`.
+  decision: "systemone",
 };
+
+const ENDPOINT_TO_API_FORMAT: ReadonlyArray<readonly [string, string]> = [
+  ["chat", "chat-completions"],
+  ["embeddings", "embeddings"],
+  ["images", "images-generations"],
+];
 
 const MAX_CONCURRENT_SHOW_REQUESTS = 4;
 
@@ -45,15 +54,15 @@ export function applyOllamaShowCapabilities(model: unknown, showResponse: unknow
   );
   if (supportedEndpoints.length === 0) return record;
 
-  const apiFormat = supportedEndpoints.includes("chat")
-    ? "chat-completions"
-    : supportedEndpoints.includes("embeddings")
-      ? "embeddings"
-      : "images-generations";
+  // `systemone` has no wire format of its own, so a decision-only model keeps whatever
+  // apiFormat the record already carried.
+  const apiFormat = ENDPOINT_TO_API_FORMAT.find(([endpoint]) =>
+    supportedEndpoints.includes(endpoint)
+  )?.[1];
 
   return {
     ...record,
-    apiFormat,
+    ...(apiFormat ? { apiFormat } : {}),
     supportedEndpoints,
     ...(capabilities.includes("vision") ? { supportsVision: true } : {}),
     ...(capabilities.includes("tools") ? { supportsTools: true } : {}),

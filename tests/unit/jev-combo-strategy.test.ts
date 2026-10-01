@@ -27,8 +27,13 @@ import {
 } from "../../open-sse/services/combo/decisionTrace.ts";
 import { ROUTING_STRATEGY_VALUES } from "../../src/shared/constants/routingStrategies.ts";
 import { HANDLED_COMBO_STRATEGIES } from "../../open-sse/services/combo/strategyDispatch.ts";
-import { orderJevComboTargets } from "../../open-sse/services/combo/jevOrdering.ts";
+import {
+  extractPromptForJevState,
+  orderJevComboTargets,
+} from "../../open-sse/services/combo/jevOrdering.ts";
+import { partitionJevTargets } from "../../open-sse/services/combo/jevEligibility.ts";
 import type { ResolvedComboTarget } from "../../open-sse/services/combo/types.ts";
+import type { ComboSkipReason } from "../../open-sse/services/combo/decisionTrace.ts";
 
 const CANDIDATES: JevCandidate[] = [
   { id: "opus", userRank: 0, label: "Claude Opus" },
@@ -247,7 +252,7 @@ test("orderJevComboTargets skips ask when a session pin owns the request", async
     sessionPinned: true,
     ask: async () => {
       asked = true;
-      return null;
+      return { ok: false, reason: "unavailable" };
     },
   });
   assert.equal(asked, false);
@@ -265,9 +270,12 @@ test("orderJevComboTargets keeps accounts distinct when step ids collide", async
     ask: async ({ criteria }) => {
       assert.deepEqual(Object.keys(criteria), ["acct-1", "acct-2"]);
       return {
-        choice: "acct-2",
-        probabilities: { "acct-1": 0.2, "acct-2": 0.8 },
-        confidence: 0.9,
+        ok: true,
+        answer: {
+          choice: "acct-2",
+          probabilities: { "acct-1": 0.2, "acct-2": 0.8 },
+          confidence: 0.9,
+        },
       };
     },
   });
@@ -277,6 +285,8 @@ test("orderJevComboTargets keeps accounts distinct when step ids collide", async
     ["acct-2", "acct-1"]
   );
   assert.equal(outcome.holds.length, 0);
+  assert.ok(outcome.admitted[0].detail.includes("verdict=admitted"));
+  assert.ok(outcome.admitted[0].detail.includes("rank="));
 });
 
 test("orderJevComboTargets falls open when ask throws and records holds by execution key", async () => {
@@ -296,13 +306,18 @@ test("orderJevComboTargets falls open when ask throws and records holds by execu
     ["a", "b", "c"]
   );
   assert.equal(thrown.holds.length, 0);
+  assert.equal(thrown.fellOpen, true);
+  assert.equal(thrown.fallbackReason, "jev_unavailable");
 
   const held = await orderJevComboTargets(targets, "hi", {
     sessionPinned: false,
     ask: async () => ({
-      choice: "b",
-      probabilities: { a: 0.04, b: 0.9, c: 0.06 },
-      confidence: 0.92,
+      ok: true,
+      answer: {
+        choice: "b",
+        probabilities: { a: 0.04, b: 0.9, c: 0.06 },
+        confidence: 0.92,
+      },
     }),
   });
   assert.deepEqual(
@@ -313,6 +328,99 @@ test("orderJevComboTargets falls open when ask throws and records holds by execu
     held.holds.map((hold) => hold.executionKey),
     ["a", "c"]
   );
-  assert.equal(held.holds[0].detail, "p=0.04");
+  assert.ok(held.holds[0].detail?.includes("p=0.04"));
   assert.doesNotMatch(JSON.stringify(held), /Bearer secret/);
+});
+
+test("orderJevComboTargets marks missing TypeSafe key as Jev is not configured", async () => {
+  const targets = [modelTarget("a", "cc/opus"), modelTarget("b", "glm/glm")];
+  const outcome = await orderJevComboTargets(targets, "hi", {
+    sessionPinned: false,
+    ask: async () => ({ ok: false, reason: "missing_api_key" }),
+  });
+  assert.equal(outcome.fellOpen, true);
+  assert.equal(outcome.missingApiKey, true);
+  assert.ok(outcome.admitted.every((row) => row.detail.includes("Jev is not configured")));
+  assert.doesNotMatch(JSON.stringify(outcome), /Bearer |sk-/);
+});
+
+test("extractPromptForJevState uses only the latest user text from Responses input", () => {
+  const state = extractPromptForJevState({
+    input: [
+      { role: "system", content: "you are a router" },
+      { role: "user", content: "first question" },
+      { role: "assistant", content: "first answer" },
+      { role: "user", content: "rewrite this email" },
+      { type: "function_call_output", output: "tool blob with secrets" },
+    ],
+  });
+  assert.equal(state, "rewrite this email");
+  assert.doesNotMatch(state, /tool blob|you are a router|first answer/);
+});
+
+test("partitionJevTargets drops breaker, lockout, and quota before the ask", async () => {
+  const cases: Array<{ reason: ComboSkipReason; blockedKey: string }> = [
+    { reason: "circuit_open", blockedKey: "broken" },
+    { reason: "model_lockout", blockedKey: "locked" },
+    { reason: "quota_cutoff", blockedKey: "exhausted" },
+  ];
+
+  for (const { reason, blockedKey } of cases) {
+    const targets = [
+      modelTarget(blockedKey, "bad/model"),
+      modelTarget("healthy-a", "cc/opus"),
+      modelTarget("healthy-b", "glm/glm"),
+    ];
+    const partition = await partitionJevTargets(targets, async (target) =>
+      target.executionKey === blockedKey ? reason : null
+    );
+    assert.deepEqual(
+      partition.blocked.map((row) => ({ key: row.target.executionKey, reason: row.reason })),
+      [{ key: blockedKey, reason }]
+    );
+    assert.deepEqual(
+      partition.eligible.map((target) => target.executionKey),
+      ["healthy-a", "healthy-b"]
+    );
+
+    let askedKeys: string[] = [];
+    const outcome = await orderJevComboTargets(partition.eligible, "route me", {
+      sessionPinned: false,
+      ask: async ({ criteria }) => {
+        askedKeys = Object.keys(criteria);
+        return {
+          ok: true,
+          answer: {
+            choice: "healthy-b",
+            probabilities: { "healthy-a": 0.2, "healthy-b": 0.8 },
+            confidence: 0.9,
+          },
+        };
+      },
+    });
+    assert.deepEqual(askedKeys.sort(), ["healthy-a", "healthy-b"]);
+    assert.ok(!askedKeys.includes(blockedKey));
+    assert.ok(!outcome.targets.some((target) => target.executionKey === blockedKey));
+    assert.deepEqual(
+      outcome.targets.map((target) => target.executionKey),
+      ["healthy-b", "healthy-a"]
+    );
+  }
+});
+
+test("buildJevComboTestSummary sentences cover admitted held blocked without calling TypeSafe", async () => {
+  const { buildJevComboTestSummary } =
+    await import("../../open-sse/services/combo/jevTestSummary.ts");
+  const { resolveResilienceSettings } = await import("../../src/lib/resilience/settings.ts");
+  const targets = [modelTarget("a", "cc/opus"), modelTarget("b", "glm/glm")];
+  const summary = await buildJevComboTestSummary({
+    targets,
+    comboName: "stack",
+    resilienceSettings: resolveResilienceSettings(null),
+    hasTypesafeKey: false,
+  });
+  assert.match(summary.admittedSentence, /^Admitted:/);
+  assert.match(summary.heldSentence, /^Held:/);
+  assert.match(summary.blockedSentence, /^Blocked:/);
+  assert.equal(summary.configurationNote, "Jev is not configured");
 });

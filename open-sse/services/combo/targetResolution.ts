@@ -85,8 +85,9 @@ import {
   resolveDisableSessionStickiness,
   type ApplyStickinessResult,
 } from "./sessionStickiness.ts";
-import { applyRequestTagRouting, extractPromptForIntent } from "./autoStrategy.ts";
-import { orderJevComboTargets, type JevAsk } from "./jevOrdering.ts";
+import { applyRequestTagRouting } from "./autoStrategy.ts";
+import { extractPromptForJevState, orderJevComboTargets, type JevAsk } from "./jevOrdering.ts";
+import { partitionJevTargetsForAsk } from "./jevBlockChecker.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
 import { evaluateSystemOneChoice, TYPESAFE_PROVIDER_ID } from "../typesafe/systemOne.ts";
 import { getProviderCredentials } from "../../../src/sse/services/auth";
@@ -504,6 +505,8 @@ async function orderByStrategy(
 /**
  * #15276: Jev-managed combo ordering.
  *
+ * - Drop breaker / lockout / quota / other pre-dispatch blocks before the
+ *   TypeSafe call (they are traced once and never attempted).
  * - Live session pin → skip the TypeSafe call; leave user order (continuity
  *   filters promote the pin afterwards).
  * - Otherwise one System One choice call; admit winner + options ≥ 0.15 in
@@ -515,7 +518,30 @@ async function orderByJevStrategy(
   initialOrderedTargets: ResolvedComboTarget[]
 ) {
   const { body, combo, log, signal } = deps;
-  const sessionPinned = await jevSessionPinned(deps, initialOrderedTargets);
+
+  const partition = await partitionJevTargetsForAsk(initialOrderedTargets, {
+    body,
+    config: deps.config as Record<string, unknown> | null | undefined,
+    resilienceSettings: deps.resilienceSettings,
+    log,
+    isModelAvailable: deps.isModelAvailable,
+    comboName: combo.name,
+  });
+
+  if (deps.traceInvocationId) {
+    for (const blocked of partition.blocked) {
+      recordComboDecision(deps.traceInvocationId, {
+        step: blocked.target.executionKey,
+        target: blocked.target.modelStr,
+        decision: "skipped_before_dispatch",
+        reason: blocked.reason,
+        detail: `verdict=blocked reason=${blocked.reason}`,
+      });
+    }
+  }
+
+  const eligible = partition.eligible;
+  const sessionPinned = await jevSessionPinned(deps, eligible);
   const ask: JevAsk = async ({ state, criteria }) => {
     try {
       const credentials = await getProviderCredentials(TYPESAFE_PROVIDER_ID);
@@ -531,20 +557,26 @@ async function orderByJevStrategy(
       });
       if (result.ok) {
         return {
-          choice: result.choice,
-          probabilities: result.probabilities,
-          confidence: result.confidence,
+          ok: true as const,
+          answer: {
+            choice: result.choice,
+            probabilities: result.probabilities,
+            confidence: result.confidence,
+          },
         };
       }
       log.info("COMBO", `[jev] System One unavailable: ${result.reason}`);
-      return null;
+      if (result.reason === "missing_api_key") {
+        return { ok: false as const, reason: "missing_api_key" as const };
+      }
+      return { ok: false as const, reason: "unavailable" as const };
     } catch {
       log.warn("COMBO", "[jev] System One call failed (non-fatal); falling open to user order");
-      return null;
+      return { ok: false as const, reason: "unavailable" as const };
     }
   };
 
-  const outcome = await orderJevComboTargets(initialOrderedTargets, extractPromptForIntent(body), {
+  const outcome = await orderJevComboTargets(eligible, extractPromptForJevState(body), {
     sessionPinned,
     ask,
   });
@@ -559,6 +591,22 @@ async function orderByJevStrategy(
         detail: hold.detail,
       });
     }
+    for (const admitted of outcome.admitted) {
+      recordComboDecision(deps.traceInvocationId, {
+        step: admitted.executionKey,
+        target: admitted.modelStr,
+        decision: "not_reached",
+        detail: admitted.detail,
+      });
+    }
+    if (outcome.fellOpen && outcome.fallbackReason) {
+      log.info(
+        "COMBO",
+        outcome.missingApiKey
+          ? `[jev] Falling open to user order (Jev is not configured)`
+          : `[jev] Falling open to user order (${outcome.fallbackReason})`
+      );
+    }
   }
 
   if (sessionPinned) {
@@ -566,7 +614,7 @@ async function orderByJevStrategy(
   } else {
     log.info(
       "COMBO",
-      `[jev] Admitted ${outcome.targets.length}/${initialOrderedTargets.length}: ${outcome.targets
+      `[jev] Admitted ${outcome.targets.length}/${eligible.length} eligible (${partition.blocked.length} blocked): ${outcome.targets
         .map((target) => target.modelStr)
         .join(" → ")}`
     );

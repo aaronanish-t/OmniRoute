@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   publish:
-    name: Build and publish ghcr.io/rafacpti23/omniroute:prod
+    name: Build and publish ${{ github.repository }}:prod
     runs-on: ubuntu-latest
 
     permissions:
@@ -63,7 +63,7 @@ jobs:
           target: runner-base
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/rafacpti23/omniroute:prod
+          tags: ghcr.io/${{ github.repository }}:prod
           build-args: |
             OMNIROUTE_USE_TURBOPACK=0
             OMNIROUTE_BUILD_MEMORY_MB=6144
@@ -75,4 +75,4 @@ jobs:
           cache-to: type=gha,scope=ghcr-prod,mode=max
 
       - name: Verify prod image
-        run: docker buildx imagetools inspect ghcr.io/rafacpti23/omniroute:prod
+        run: docker buildx imagetools inspect ghcr.io/${{ github.repository }}:prod

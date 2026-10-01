@@ -43,3 +43,35 @@ test("chat-format models behind a custom baseUrl still use /chat/completions", (
     "https://gateway.example/v1/chat/completions"
   );
 });
+
+// Live 2026-10-01: health probes with max_output_tokens 16–32 got
+// response.incomplete(max_output_tokens) + response.failed "Provider returned empty
+// content" — Muse spends the budget on hidden reasoning — so every probe was a 502
+// plus a model lockout. 128+ returned text (95–293 reasoning tokens).
+test("muse-code floors tiny output budgets and leaves larger or unset budgets alone", () => {
+  const executor = new DefaultExecutor("muse-code");
+  const send = (extra: Record<string, unknown>) =>
+    executor.transformRequest(
+      "muse-spark-1.3",
+      { model: "muse-spark-1.3", input: [{ role: "user", content: "ok" }], ...extra },
+      false,
+      museCredentials
+    ) as Record<string, unknown>;
+
+  const tiny = send({ max_output_tokens: 16, max_tokens: 32 });
+  assert.equal(tiny.max_output_tokens, 512);
+  assert.equal(tiny.max_tokens, 512);
+  assert.equal(send({ max_output_tokens: 4000 }).max_output_tokens, 4000);
+  assert.equal(send({}).max_output_tokens, undefined);
+});
+
+test("non-Muse providers keep a tiny caller budget", () => {
+  const executor = new DefaultExecutor("openrouter");
+  const out = executor.transformRequest(
+    "openai/gpt-4o-mini",
+    { model: "openai/gpt-4o-mini", messages: [{ role: "user", content: "ok" }], max_tokens: 16 },
+    false,
+    { apiKey: "k" }
+  ) as Record<string, unknown>;
+  assert.equal(out.max_tokens, 16);
+});

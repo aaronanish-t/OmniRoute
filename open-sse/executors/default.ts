@@ -60,6 +60,7 @@ import {
   normalizeGigachatChatUrl,
 } from "@/lib/providers/validation/urlHelpers";
 import { forwardOpencodeClientHeaders } from "../utils/opencodeHeaders.ts";
+import { MUSE_SPARK_MIN_OUTPUT_TOKENS } from "./opencodeMuseSpark.ts";
 import { resolveZaiUrl } from "./default/zaiFormatOverride.ts";
 import { normalizePoolConfig, rejectStrictPool } from "./default/poolConfig.ts";
 import { acquireNvidiaConcurrencySlot } from "./default/nvidiaConcurrencyGate.ts";
@@ -822,6 +823,25 @@ export class DefaultExecutor extends BaseExecutor {
     withDefaults = this.defaultResponsesTextFormat(withDefaults);
     if (this.provider === "perplexity-agent") {
       withDefaults = defaultPerplexityAgentMaxOutputTokens(withDefaults);
+    }
+    // Muse spends the whole budget on hidden reasoning before any text: a tiny caller
+    // budget (health probes send 16–32) ends `response.incomplete` + `response.failed`
+    // "Provider returned empty content" → 502 and a model lockout. Same floor as the
+    // opencode muse-spark path; larger budgets and unset budgets are untouched.
+    if (
+      this.provider === "muse-code" &&
+      withDefaults &&
+      typeof withDefaults === "object" &&
+      !Array.isArray(withDefaults)
+    ) {
+      const record = { ...(withDefaults as Record<string, unknown>) };
+      for (const field of ["max_output_tokens", "max_tokens"] as const) {
+        const value = record[field];
+        if (typeof value === "number" && value < MUSE_SPARK_MIN_OUTPUT_TOKENS) {
+          record[field] = MUSE_SPARK_MIN_OUTPUT_TOKENS;
+        }
+      }
+      withDefaults = record;
     }
 
     if (this.provider === "nvidia") {

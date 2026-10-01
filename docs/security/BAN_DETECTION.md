@@ -64,7 +64,10 @@ evaluated first — so the project-route recovery added for Gemini Code Assist i
 Three adjacent, **separate** signal tables are _not_ part of banned-keyword detection:
 
 - `CREDITS_EXHAUSTED_SIGNALS` — billing/quota depleted (`insufficient_quota`,
-  `credit_balance_too_low`, `payment required`, …) → terminal `credits_exhausted`.
+  `credit_balance_too_low`, `payment required`, …) → `credits_exhausted` testStatus
+  (selection-skip + alert). **Not** an auto `is_active=0`, and **not** forever:
+  `connectionRecovery` re-probes on a timer so unpaid→renew restores the account
+  without an OmniRoute UI re-enable.
 - `OAUTH_INVALID_TOKEN_SIGNALS` — **non-terminal**; a token refresh can recover.
 - `ACCOUNT_VERIFICATION_REQUIRED_SIGNALS` — **non-terminal**; the operator has to
   re-verify the account upstream. Lives in `open-sse/services/errorClassifier.ts`
@@ -92,9 +95,13 @@ upstream error response
   (`isAccountDeactivated`, `accountFallback.ts`).
 - The permanent `banned` terminalization fires on a banned-signal body at **any
   HTTP status** (via `markAccountUnavailable` → `checkFallbackError`). The
-  narrower **`deactivated`** label (`isActive=false` when the connection has no
-  spare API keys) is written by the inline `chatCore.ts` path on **HTTP 401 / 403**
-  (classified via `classifyProviderError` → `ACCOUNT_DEACTIVATED`). Note the
+  narrower **`deactivated`** / **`banned`** labels are written by the inline
+  `chatCore.ts` path on **HTTP 401 / 403** (classified via `classifyProviderError`
+  → `ACCOUNT_DEACTIVATED` / `FORBIDDEN`). Those paths record `testStatus` for
+  selection skip + alerts and only flip `isActive=false` when
+  `autoDisableBannedAccounts` (+ scope) allows it — same gate as
+  `maybeAutoDisableBannedAccount` in `auth.ts`. Ungated OAuth-refresh death also
+  keeps `is_active=1` and only sets `testStatus=expired`. Note the
   `markAccountUnavailable()` path writes a _different_ terminal status —
   **`expired`** — for the same `ACCOUNT_DEACTIVATED` signal (via
   `resolveTerminalConnectionStatus`), so the same ban can surface as either
@@ -144,9 +151,10 @@ doubt, watch the connection's `lastError` first, then add the exact wording.
 
 ## Recovering a flagged connection
 
-Terminal `banned` / `deactivated` states **never auto-recover** (they are excluded
-from the proactive-recovery tick — only `unavailable` cooldowns recover on their
-own). An operator must clear them explicitly:
+Terminal `banned` / `deactivated` / `expired` states **never auto-recover** (they
+are excluded from the proactive-recovery tick — only `unavailable` cooldowns and
+`credits_exhausted` re-probes recover on their own). An operator must clear true
+bans explicitly:
 
 1. **Re-test the connection** — the dashboard **Test** action
    (`POST /api/providers/{id}/test`); a successful probe resets `testStatus` to

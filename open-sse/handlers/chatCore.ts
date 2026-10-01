@@ -419,6 +419,7 @@ import { generateRequestId } from "@/shared/utils/requestId";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
+import { maybeAutoDisableBannedAccount } from "@/sse/services/autoDisableBannedAccount";
 import { extractFacts } from "@/lib/memory/extraction";
 import { handleToolCallExecution } from "@/lib/skills/interception";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
@@ -3852,11 +3853,13 @@ async function handleChatCoreInner({
       try {
         if (errorType === PROVIDER_ERROR_TYPES.FORBIDDEN) {
           const probeIsolated = await shouldIsolateProbeFailures();
+          // HARD: record terminal testStatus for selection skip / alerts, but do
+          // NOT ungated-flip isActive. Permanent deactivation is opt-in via
+          // autoDisableBannedAccounts (same gate as auth.ts).
           await writeTerminalStatus(
             errorConnectionId,
             {
               testStatus: "banned",
-              isActive: false,
               lastError: persistentMessage,
               lastErrorType: errorType,
               errorCode: String(statusCode),
@@ -3868,8 +3871,16 @@ async function handleChatCoreInner({
               `[provider] Node ${errorConnectionId} probe ${errorType} (${statusCode}) -- connection stays active`
             );
           } else {
+            await maybeAutoDisableBannedAccount({
+              connectionId: errorConnectionId,
+              provider,
+              authType: (credentials as { authType?: string | null } | null | undefined)?.authType,
+              connectionProvider: (credentials as { provider?: string | null } | null | undefined)
+                ?.provider,
+              permanent: true,
+            });
             console.warn(
-              `[provider] Node ${errorConnectionId} banned (${statusCode}) -- disabling permanently`
+              `[provider] Node ${errorConnectionId} banned (${statusCode}) -- testStatus=banned; isActive gated by autoDisableBannedAccounts`
             );
           }
         } else if (errorType === PROVIDER_ERROR_TYPES.ACCOUNT_DEACTIVATED) {
@@ -3890,11 +3901,12 @@ async function handleChatCoreInner({
             );
           } else {
             const probeIsolated2 = await shouldIsolateProbeFailures();
+            // HARD: stay is_active=1 through temporary unpaid/ban-looking flaps
+            // unless autoDisableBannedAccounts opts into permanent deactivation.
             await writeTerminalStatus(
               errorConnectionId,
               {
                 testStatus: "deactivated",
-                isActive: false,
                 lastError: persistentMessage,
                 lastErrorType: errorType,
                 errorCode: String(statusCode),
@@ -3906,8 +3918,17 @@ async function handleChatCoreInner({
                 `[provider] Node ${errorConnectionId} probe ${errorType} (${statusCode}) -- connection stays active`
               );
             } else {
+              await maybeAutoDisableBannedAccount({
+                connectionId: errorConnectionId,
+                provider,
+                authType: (credentials as { authType?: string | null } | null | undefined)
+                  ?.authType,
+                connectionProvider: (credentials as { provider?: string | null } | null | undefined)
+                  ?.provider,
+                permanent: true,
+              });
               console.warn(
-                `[provider] Node ${errorConnectionId} account deactivated (${statusCode}) -- disabling permanently`
+                `[provider] Node ${errorConnectionId} account deactivated (${statusCode}) -- testStatus=deactivated; isActive gated by autoDisableBannedAccounts`
               );
             }
           }
@@ -4621,11 +4642,11 @@ async function handleChatCoreInner({
       } else {
         log?.warn?.("TOKEN", `${provider?.toUpperCase()} | refresh failed`);
         if (isUnrecoverableRefreshError(newCredentials) && onCredentialsRefreshed) {
-          // Front 3 (reuse-race tolerance): before deactivating, re-read the DB.
+          // Front 3 (reuse-race tolerance): before marking expired, re-read the DB.
           // If a sibling/concurrent refresh already rotated this connection's
           // refresh_token (common for Codex/OpenAI under one shared Auth0 client),
           // the failure we saw was a stale-token reuse — the account is healthy
-          // with the newer token, so keep it active instead of killing it.
+          // with the newer token, so keep it active instead of marking expired.
           let alreadyRotated = false;
           if (typeof connectionId === "string" && connectionId && attemptedRefreshToken) {
             try {
@@ -4638,11 +4659,15 @@ async function handleChatCoreInner({
                 );
               }
             } catch {
-              // DB read failed — fall through to the safe default (deactivate).
+              // DB read failed — fall through to the safe default (mark expired).
             }
           }
           if (!alreadyRotated) {
-            await onCredentialsRefreshed({ testStatus: "expired", isActive: false });
+            // HARD: OAuth refresh death is informative (alerts / selection skip via
+            // testStatus=expired), not an auto is_active=0. Access can recover after
+            // re-auth / token rotation without requiring a UI re-enable. Permanent
+            // deactivation stays behind autoDisableBannedAccounts on true bans.
+            await onCredentialsRefreshed({ testStatus: "expired" });
           }
         }
       }

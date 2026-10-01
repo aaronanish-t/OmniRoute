@@ -884,7 +884,14 @@ test("v1 models catalog retains registered effort aliases beside synced OpenCode
   assert.ok(ids.includes("opencode-go/hy3-high"));
 });
 
-test("v1 models catalog advertises GLM-5.2 provider aliases with hosted context limits", async () => {
+test("v1 models catalog preserves GLM-5.2 limits alongside GitHub Copilot Astra", async () => {
+  await seedConnection("github", {
+    authType: "oauth",
+    name: "github-astra-regression",
+    apiKey: null,
+    accessToken: "github-access",
+    providerSpecificData: { copilotToken: "copilot-token" },
+  });
   const hfConnection = await seedConnection("huggingface", {
     name: "huggingface-glm52",
     apiKey: "hf-key",
@@ -959,6 +966,10 @@ test("v1 models catalog advertises GLM-5.2 provider aliases with hosted context 
     );
     const body = (await response.json()) as any;
     const byId = new Map(body.data.map((item) => [item.id, item]));
+
+    // Loading the curated Copilot Astra entries must not change other providers' metadata.
+    assert.ok(byId.has("github/gpt-6-astra"));
+    assert.ok(byId.has("gh/gpt-6-astra"));
 
     for (const [id, expectedContext] of [
       ["huggingface/zai-org/GLM-5.2", 128000],

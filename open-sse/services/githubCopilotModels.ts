@@ -18,7 +18,6 @@
  * offline/unauthed/failed refresh so the import flow never breaks.
  */
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
-import { githubProvider } from "../config/providers/registry/github/index.ts";
 import { isRetiredGitHubCopilotModelId } from "../config/providers/registry/github/retiredModels.ts";
 
 export const GITHUB_COPILOT_MODELS_URL = "https://api.githubcopilot.com/models";
@@ -30,9 +29,24 @@ export const GITHUB_COPILOT_MODELS_URL = "https://api.githubcopilot.com/models";
 // every entitled chat model the catalog returns (so newly-entitled models like
 // grok-4.6 / mai-code-1.1-flash / gemini-3.8-flash appear without a code edit).
 // Upstream retirements and explicit local removals are excluded from both results.
-export const GITHUB_COPILOT_STATIC_FALLBACK_MODELS: readonly string[] = Object.freeze(
-  githubProvider.models.map((model) => model.id)
-);
+// Avoid importing the provider registry here; its initialization graph can
+// recurse through catalog metadata and affect unrelated providers.
+export const GITHUB_COPILOT_STATIC_FALLBACK_MODELS: readonly string[] = Object.freeze([
+  "gpt-6-astra",
+  "gpt-5.6-sol",
+  "gpt-5.6-terra",
+  "gpt-5.6-luna",
+  "claude-fable-5.1",
+  "claude-opus-5",
+  "claude-sonnet-5",
+  "claude-opus-4.8-fast",
+  "claude-opus-4.8",
+  "claude-haiku-4.5",
+  "gemini-3.8-flash",
+  "mai-code-1.1-flash",
+  "kimi-k3",
+  "grok-4.6",
+]);
 
 // Back-compat alias: earlier code + tests imported this name. It is now the
 // static FALLBACK catalog, not a live-response gate.

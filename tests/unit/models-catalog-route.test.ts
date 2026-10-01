@@ -887,27 +887,13 @@ test("v1 models catalog retains registered effort aliases beside synced OpenCode
 test("v1 models catalog preserves GLM-5.2 limits alongside GitHub Copilot Astra", async () => {
   await seedConnection("github", {
     authType: "oauth",
-    name: "github-astra-regression",
-    apiKey: null,
     accessToken: "github-access",
     providerSpecificData: { copilotToken: "copilot-token" },
   });
-  const hfConnection = await seedConnection("huggingface", {
-    name: "huggingface-glm52",
-    apiKey: "hf-key",
-  });
-  const cfConnection = await seedConnection("cloudflare-ai", {
-    name: "cloudflare-glm52",
-    apiKey: "cf-key",
-  });
-  const zenmuxConnection = await seedConnection("zenmux", {
-    name: "zenmux-glm52",
-    apiKey: "zen-key",
-  });
-  await seedConnection("opencode-go", {
-    name: "opencode-go-glm52",
-    apiKey: "go-key",
-  });
+  const hfConnection = await seedConnection("huggingface");
+  const cfConnection = await seedConnection("cloudflare-ai");
+  const zenmuxConnection = await seedConnection("zenmux");
+  await seedConnection("opencode-go");
 
   await modelsDb.replaceSyncedAvailableModelsForConnection(
     "huggingface",
@@ -947,7 +933,6 @@ test("v1 models catalog preserves GLM-5.2 limits alongside GitHub Copilot Astra"
       outputTokenLimit: 128000,
     },
   ]);
-
   try {
     modelsDevSync.saveModelsDevCapabilities({
       huggingface: {
@@ -966,11 +951,7 @@ test("v1 models catalog preserves GLM-5.2 limits alongside GitHub Copilot Astra"
     );
     const body = (await response.json()) as any;
     const byId = new Map(body.data.map((item) => [item.id, item]));
-
-    // Loading the curated Copilot Astra entries must not change other providers' metadata.
-    assert.ok(byId.has("github/gpt-6-astra"));
-    assert.ok(byId.has("gh/gpt-6-astra"));
-
+    for (const id of ["github/gpt-6-astra", "gh/gpt-6-astra"]) assert.ok(byId.has(id), id);
     for (const [id, expectedContext] of [
       ["huggingface/zai-org/GLM-5.2", 128000],
       ["cloudflare-ai/@cf/zai-org/glm-5.2", 128000],

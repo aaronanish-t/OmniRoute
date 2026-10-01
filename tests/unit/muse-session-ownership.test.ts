@@ -6,7 +6,9 @@ import {
   bindMuseGeneration,
   recordMuseOutput,
   usesMuseOAuthOwnership,
+  museClaimCandidates,
 } from "../../src/sse/services/museSessionOwnership.ts";
+import { lockModel, clearAllModelLockouts } from "../../open-sse/services/accountFallback.ts";
 import { getDbInstance, resetDbInstance } from "../../src/lib/db/core.ts";
 
 const candidates = [{ id: "account-a" }, { id: "account-b" }];
@@ -192,6 +194,40 @@ test("exhausted account is skipped for new sessions and unserved pins move to a 
       error.status === 503 && /cross-account continuation is forbidden/.test(error.message || "")
   );
   assert.equal(claimMuseSession(served, { input: "continue" }, flipped).connectionId, "account-a");
+});
+
+test("a Muse 429 model lockout makes new and unserved sessions claim the healthy account", () => {
+  getDbInstance()
+    .prepare("DELETE FROM key_value WHERE namespace = ?")
+    .run("muse_session_ownership");
+  clearAllModelLockouts();
+  const connections = [
+    { id: "account-a", authType: "oauth", rateLimitedUntil: null, testStatus: "active" },
+    { id: "account-b", authType: "oauth", rateLimitedUntil: null, testStatus: "active" },
+  ];
+  const model = "muse-spark-1.3";
+  const unserved = museSessionScope({ session_id: "lock-unserved" }, undefined, "client");
+  const before = museClaimCandidates(connections, model);
+  assert.equal(claimMuseSession(unserved, { input: "fresh" }, before).connectionId, "account-a");
+
+  // Account A's upstream 429 records only a per-model lockout; rateLimitedUntil and
+  // testStatus stay untouched, as observed live.
+  lockModel("muse-code", "account-a", model, "rate_limit_exceeded", 120_000);
+  const locked = museClaimCandidates(connections, model);
+  assert.deepEqual(
+    locked.map((candidate) => candidate.unavailable),
+    [true, false]
+  );
+  for (const session of ["lock-fresh-1", "lock-fresh-2"]) {
+    const scope = museSessionScope({ session_id: session }, undefined, "client");
+    assert.equal(claimMuseSession(scope, { input: "fresh" }, locked).connectionId, "account-b");
+  }
+  assert.equal(claimMuseSession(unserved, { input: "retry" }, locked).connectionId, "account-b");
+  assert.equal(
+    museClaimCandidates(connections, model, null, true).every((c) => !c.unavailable),
+    true
+  );
+  clearAllModelLockouts();
 });
 
 test("API-key Muse connections bypass OAuth ownership unless OAuth is selected", () => {

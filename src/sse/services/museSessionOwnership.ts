@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 import { getDbInstance } from "@/lib/db/core";
+import { isAccountUnavailable, isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
 
 const NAMESPACE = "muse_session_ownership";
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");
@@ -12,6 +13,34 @@ export function usesMuseOAuthOwnership(
 ): boolean {
   if (selectedId) return connections.find((item) => item.id === selectedId)?.authType === "oauth";
   return connections.some((item) => item.authType === "oauth");
+}
+
+// OAuth accounts eligible for a session claim; cooldown, terminal status and the per-model
+// lockout a Muse 429 records all count as unavailable so new/unserved sessions skip them.
+export function museClaimCandidates(
+  connections: {
+    id: string;
+    authType?: string;
+    rateLimitedUntil?: string | null;
+    testStatus?: string | null;
+  }[],
+  model: string | null | undefined,
+  allowedIds?: string[] | null,
+  allowUnavailable = false
+): Connection[] {
+  return connections
+    .filter((connection) => connection.authType === "oauth")
+    .filter((connection) => !allowedIds || allowedIds.includes(connection.id))
+    .map((connection) => ({
+      id: connection.id,
+      unavailable:
+        !allowUnavailable &&
+        (isAccountUnavailable(connection.rateLimitedUntil) ||
+          ["banned", "expired", "credits_exhausted"].includes(
+            String(connection.testStatus || "").toLowerCase()
+          ) ||
+          isModelLocked("muse-code", connection.id, model)),
+    }));
 }
 
 export class MuseOwnershipError extends Error {

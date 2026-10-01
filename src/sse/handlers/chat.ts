@@ -23,7 +23,6 @@ import {
   lockModel,
   recordModelLockoutFailure,
   isDailyQuotaExhausted,
-  isAccountUnavailable,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
@@ -89,6 +88,7 @@ import {
   bindMuseGeneration,
   recordMuseOutput,
   usesMuseOAuthOwnership,
+  museClaimCandidates,
 } from "../services/museSessionOwnership";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
@@ -1706,22 +1706,12 @@ async function handleSingleModelChat(
   ) {
     try {
       const scope = museSessionScope(body, request?.headers, apiKeyInfo?.id ?? null);
-      const candidates = museConnections
-        .filter((connection) => connection.authType === "oauth")
-        .filter(
-          (candidate) =>
-            !effectiveAllowedConnections || effectiveAllowedConnections.includes(candidate.id)
-        )
-        .map((connection) => ({
-          id: connection.id,
-          unavailable:
-            !runtimeOptions.allowRateLimitedConnection &&
-            !forceLiveComboTest &&
-            (isAccountUnavailable(connection.rateLimitedUntil) ||
-              ["banned", "expired", "credits_exhausted"].includes(
-                String(connection.testStatus || "").toLowerCase()
-              )),
-        }));
+      const candidates = museClaimCandidates(
+        museConnections,
+        model,
+        effectiveAllowedConnections,
+        runtimeOptions.allowRateLimitedConnection === true || forceLiveComboTest
+      );
       const owner = claimMuseSession(scope, body, candidates, forcedConnectionId);
       museOwner = { scope, ...owner };
     } catch (error) {

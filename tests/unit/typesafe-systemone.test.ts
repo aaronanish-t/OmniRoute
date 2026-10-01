@@ -17,6 +17,7 @@ import { getRegistryEntry } from "../../open-sse/config/providerRegistry.ts";
 import { getStaticModelsForProvider } from "../../src/lib/providers/staticModels.ts";
 import { getProviderModels } from "../../open-sse/config/providerModels.ts";
 import { filterChatSelectableModels } from "../../open-sse/services/modelEndpointPolicy.ts";
+import { validateTypesafeProvider } from "../../src/lib/providers/validation/typesafe.ts";
 
 test("typesafe is registered as an API-key specialty provider with no chat serviceKinds", () => {
   const entry = APIKEY_PROVIDERS.typesafe;
@@ -205,4 +206,29 @@ test("evaluateSystemOneChoice truncates state and refuses more than 255 options"
   });
   assert.equal(called, false);
   assert.equal(tooMany.ok, false);
+});
+
+test("validateTypesafeProvider maps a probe without sending the key to the error", async () => {
+  const valid = await validateTypesafeProvider({
+    apiKey: "ts_live_key",
+    fetchImpl: async () =>
+      new Response(
+        JSON.stringify({
+          answers: {
+            route: { type: "choice", choice: "ok", probabilities: { ok: 1 }, confidence: 1 },
+          },
+        }),
+        { status: 200 }
+      ),
+  });
+  assert.equal(valid.valid, true);
+
+  const invalid = await validateTypesafeProvider({
+    apiKey: "ts_live_key",
+    fetchImpl: async () =>
+      new Response(JSON.stringify({ error: "nope ts_live_key" }), { status: 401 }),
+  });
+  assert.equal(invalid.valid, false);
+  assert.equal(invalid.error, "Invalid API key");
+  assert.doesNotMatch(JSON.stringify(invalid), /ts_live_key/);
 });

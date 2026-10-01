@@ -137,6 +137,42 @@ function LiveZoneToggle({
   );
 }
 
+// Saves on Enter or when the field loses focus, so typing a number sends one save with the
+// final value. A newly saved or rolled-back value replaces the draft unless the field holds
+// an edit that has not been saved.
+function AutoTriggerInput({
+  value,
+  onCommit,
+}: {
+  value: number;
+  onCommit: (tokens: number) => void;
+}) {
+  const [draft, setDraft] = useState(String(value));
+  const [shown, setShown] = useState(value);
+  if (value !== shown) {
+    setShown(value);
+    if (draft === String(shown)) setDraft(String(value));
+  }
+  const commit = (text: string) => {
+    const tokens = parseInt(text) || 0;
+    if (tokens !== value) onCommit(tokens);
+  };
+  return (
+    <input
+      type="number"
+      min={0}
+      max={100000}
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={(e) => commit(e.currentTarget.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commit(e.currentTarget.value);
+      }}
+      className="w-24 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
+    />
+  );
+}
+
 function AdaptiveContextBudgetDial({
   contextBudget,
   saving,
@@ -225,11 +261,10 @@ export default function CompressionPanel() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"" | "saved" | "error">("");
   const saveGenRef = useRef(0);
-  // The last config the server confirmed, and per field the save that confirmed it.
+  // The last config the server confirmed.
   const lastConfirmedRef = useRef(config);
-  const confirmedGenRef = useRef<Record<string, number>>({});
   // Saves still waiting on the server, oldest first.
-  const pendingRef = useRef<Array<{ gen: number; updates: Partial<CompressionConfig> }>>([]);
+  const pendingRef = useRef<Partial<CompressionConfig>[]>([]);
   const batchFailedRef = useRef(false);
 
   useEffect(() => {
@@ -270,37 +305,30 @@ export default function CompressionPanel() {
       .catch(() => {});
   }, []);
 
-  // The fields of a save that no newer confirmed save has set.
-  const unconfirmedFields = (
-    gen: number,
-    updates: Partial<CompressionConfig>
-  ): Partial<CompressionConfig> =>
-    Object.fromEntries(
-      Object.entries(updates).filter(([key]) => gen > (confirmedGenRef.current[key] ?? 0))
-    );
-
-  // Each field shows its newest save that has not failed, or the loaded value.
+  // The confirmed config with the saves still in flight laid over it, oldest first.
   const showSaves = () =>
     setConfig(
       pendingRef.current.reduce<CompressionConfig>(
-        (shown, pending) => ({ ...shown, ...unconfirmedFields(pending.gen, pending.updates) }),
+        (shown, pending) => ({ ...shown, ...pending }),
         lastConfirmedRef.current
       )
     );
 
   // Persist a merge-patch. The server replaces each top-level key the PUT carries, so callers
   // that touch an engine pass the full engines map to avoid dropping the other engines.
-  // Every save goes out at once. A confirmed save updates only the fields that no newer
-  // confirmed save has set, and a failed save drops out, so a failure rolls back only its own
-  // fields and never undoes a newer save. The status reads "error" when any save failed since
-  // the panel last had none in flight.
+  // Every save goes out at once. The server stores each save just before it answers, so a
+  // confirmed save applies its fields whatever its age, and a failed save drops out of the
+  // saves in flight, which rolls back only its own fields. "Save failed" shows from the first
+  // failure until a save starts with no other save in flight.
   const save = async (updates: Partial<CompressionConfig>) => {
-    const gen = ++saveGenRef.current;
-    if (pendingRef.current.length === 0) batchFailedRef.current = false;
-    pendingRef.current.push({ gen, updates });
+    saveGenRef.current += 1;
+    if (pendingRef.current.length === 0) {
+      batchFailedRef.current = false;
+      setStatus("");
+    }
+    pendingRef.current.push(updates);
     showSaves();
     setSaving(true);
-    setStatus("");
     let ok = false;
     try {
       const res = await fetch("/api/settings/compression", {
@@ -314,21 +342,17 @@ export default function CompressionPanel() {
       // A network error or the timeout counts as a failed save.
       console.error("Failed to save compression settings:", error);
     }
-    pendingRef.current = pendingRef.current.filter((pending) => pending.gen !== gen);
+    pendingRef.current = pendingRef.current.filter((pending) => pending !== updates);
     if (ok) {
-      const confirmed = unconfirmedFields(gen, updates);
-      lastConfirmedRef.current = { ...lastConfirmedRef.current, ...confirmed };
-      for (const key of Object.keys(confirmed)) confirmedGenRef.current[key] = gen;
+      lastConfirmedRef.current = { ...lastConfirmedRef.current, ...updates };
     } else {
       batchFailedRef.current = true;
+      setStatus("error");
     }
     showSaves();
     if (pendingRef.current.length > 0) return;
     setSaving(false);
-    if (batchFailedRef.current) {
-      setStatus("error");
-      return;
-    }
+    if (batchFailedRef.current) return;
     setStatus("saved");
     const latestGen = saveGenRef.current;
     setTimeout(() => {
@@ -647,13 +671,9 @@ export default function CompressionPanel() {
         <label className="flex items-center justify-between">
           <span className="text-sm text-text-muted">{t("compressionAutoTrigger")}</span>
           <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={0}
-              max={100000}
+            <AutoTriggerInput
               value={config.autoTriggerTokens}
-              onChange={(e) => save({ autoTriggerTokens: parseInt(e.target.value) || 0 })}
-              className="w-24 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
+              onCommit={(autoTriggerTokens) => save({ autoTriggerTokens })}
             />
             <span className="text-xs text-text-muted">{t("tokens")}</span>
           </div>

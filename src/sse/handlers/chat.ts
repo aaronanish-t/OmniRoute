@@ -2236,7 +2236,7 @@ async function handleSingleModelChat(
           result.errorCode !== "MUSE_OWNERSHIP_REJECTED" &&
           result.errorType !== "stream_timeout" &&
           result.errorType !== "stream_early_eof" &&
-          result.errorCode !== "empty_response"
+          museEmptyResponseRetryDelayMs(result.errorCode, 0) === null
         ) {
           await markAccountUnavailable(
             credentials.connectionId,

@@ -156,3 +156,16 @@ test("a Muse stream that already emitted output is never retried", async () => {
   await response.text();
   assert.equal(calls.length, 1);
 });
+
+test("exhausted empty-response retries do not lock out the session owner", async () => {
+  const { calls } = stubInference((i) => (i < 3 ? emptyResponse() : textResponse()));
+  const failed = await handleChat(museRequest("retry-then-continue"));
+  await failed.text();
+  assert.equal(failed.status, 502);
+
+  const next = await handleChat(museRequest("retry-then-continue"));
+  const text = await next.text();
+  assert.equal(next.status, 200, text);
+  assert.equal(calls.length, 4);
+  assert.equal(calls[3], calls[0], "the same owner keeps serving the session");
+});

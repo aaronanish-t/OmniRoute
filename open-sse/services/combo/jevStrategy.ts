@@ -1,5 +1,5 @@
 /**
- * Pure JEV (Judged Eligibility Verdict) judge for the `jev` combo strategy.
+ * Pure judge for the `jev` combo strategy.
  *
  * The user authors an ordered preference list. Jev (TypeSafe System One) picks
  * which of those entries this request may attempt. Among the admitted set, the
@@ -198,13 +198,18 @@ export function buildJevCriteria(
 
 /**
  * Reorder `targets` to match `admitted` order (winner first, then userRank).
- * Targets whose stepId is not admitted are dropped.
+ * Identity is `executionKey` when present, otherwise `stepId`. Targets that
+ * were not admitted are dropped.
  */
-export function orderTargetsByJevVerdicts<T extends { stepId: string }>(
+export function orderTargetsByJevVerdicts<T extends { stepId?: string; executionKey?: string }>(
   targets: readonly T[],
   admitted: readonly JevVerdictRow[]
 ): T[] {
-  const byId = new Map(targets.map((t) => [t.stepId, t]));
+  const byId = new Map<string, T>();
+  for (const target of targets) {
+    const id = target.executionKey ?? target.stepId;
+    if (id) byId.set(id, target);
+  }
   const ordered: T[] = [];
   for (const row of admitted) {
     const target = byId.get(row.id);

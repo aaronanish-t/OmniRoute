@@ -27,6 +27,8 @@ import {
 } from "../../open-sse/services/combo/decisionTrace.ts";
 import { ROUTING_STRATEGY_VALUES } from "../../src/shared/constants/routingStrategies.ts";
 import { HANDLED_COMBO_STRATEGIES } from "../../open-sse/services/combo/strategyDispatch.ts";
+import { orderJevComboTargets } from "../../open-sse/services/combo/jevOrdering.ts";
+import type { ResolvedComboTarget } from "../../open-sse/services/combo/types.ts";
 
 const CANDIDATES: JevCandidate[] = [
   { id: "opus", userRank: 0, label: "Claude Opus" },
@@ -218,4 +220,99 @@ test("decision trace records jev holds without prompt text", () => {
 test("jev is registered in ROUTING_STRATEGY_VALUES and HANDLED_COMBO_STRATEGIES", () => {
   assert.ok((ROUTING_STRATEGY_VALUES as readonly string[]).includes("jev"));
   assert.ok((HANDLED_COMBO_STRATEGIES as readonly string[]).includes("jev"));
+});
+
+function modelTarget(
+  executionKey: string,
+  modelStr: string,
+  stepId = "shared"
+): ResolvedComboTarget {
+  return {
+    kind: "model",
+    stepId,
+    executionKey,
+    modelStr,
+    provider: "p",
+    providerId: null,
+    connectionId: null,
+    weight: 1,
+    label: null,
+  };
+}
+
+test("orderJevComboTargets skips ask when a session pin owns the request", async () => {
+  let asked = false;
+  const targets = [modelTarget("a", "cc/opus"), modelTarget("b", "glm/glm")];
+  const outcome = await orderJevComboTargets(targets, "continue the edit", {
+    sessionPinned: true,
+    ask: async () => {
+      asked = true;
+      return null;
+    },
+  });
+  assert.equal(asked, false);
+  assert.equal(outcome.protectHead, false);
+  assert.deepEqual(
+    outcome.targets.map((target) => target.executionKey),
+    ["a", "b"]
+  );
+});
+
+test("orderJevComboTargets keeps accounts distinct when step ids collide", async () => {
+  const targets = [modelTarget("acct-1", "glm/glm"), modelTarget("acct-2", "glm/glm")];
+  const outcome = await orderJevComboTargets(targets, "write a parser", {
+    sessionPinned: false,
+    ask: async ({ criteria }) => {
+      assert.deepEqual(Object.keys(criteria), ["acct-1", "acct-2"]);
+      return {
+        choice: "acct-2",
+        probabilities: { "acct-1": 0.2, "acct-2": 0.8 },
+        confidence: 0.9,
+      };
+    },
+  });
+  assert.equal(outcome.protectHead, true);
+  assert.deepEqual(
+    outcome.targets.map((target) => target.executionKey),
+    ["acct-2", "acct-1"]
+  );
+  assert.equal(outcome.holds.length, 0);
+});
+
+test("orderJevComboTargets falls open when ask throws and records holds by execution key", async () => {
+  const targets = [
+    modelTarget("a", "cc/opus"),
+    modelTarget("b", "glm/glm"),
+    modelTarget("c", "local/small"),
+  ];
+  const thrown = await orderJevComboTargets(targets, "hi", {
+    sessionPinned: false,
+    ask: async () => {
+      throw new Error("socket hang up with Bearer secret");
+    },
+  });
+  assert.deepEqual(
+    thrown.targets.map((target) => target.executionKey),
+    ["a", "b", "c"]
+  );
+  assert.equal(thrown.holds.length, 0);
+
+  const held = await orderJevComboTargets(targets, "hi", {
+    sessionPinned: false,
+    ask: async () => ({
+      choice: "b",
+      probabilities: { a: 0.04, b: 0.9, c: 0.06 },
+      confidence: 0.92,
+    }),
+  });
+  assert.deepEqual(
+    held.targets.map((target) => target.modelStr),
+    ["glm/glm"]
+  );
+  assert.deepEqual(
+    held.holds.map((hold) => hold.executionKey),
+    ["a", "c"]
+  );
+  assert.equal(held.holds[0].detail, "p=0.04");
+  assert.doesNotMatch(JSON.stringify(held), /Bearer secret/);
 });

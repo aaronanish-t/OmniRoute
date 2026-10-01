@@ -86,15 +86,10 @@ import {
   type ApplyStickinessResult,
 } from "./sessionStickiness.ts";
 import { applyRequestTagRouting, extractPromptForIntent } from "./autoStrategy.ts";
-import {
-  buildJevCriteria,
-  judgeJev,
-  orderTargetsByJevVerdicts,
-  type JevCandidate,
-} from "./jevStrategy.ts";
+import { orderJevComboTargets, type JevAsk } from "./jevOrdering.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
 import { evaluateSystemOneChoice, TYPESAFE_PROVIDER_ID } from "../typesafe/systemOne.ts";
-import { getProviderCredentialsWithQuotaPreflight } from "../../../src/sse/services/auth";
+import { getProviderCredentials } from "../../../src/sse/services/auth";
 import type {
   ComboCollectionLike,
   ComboLike,
@@ -484,9 +479,12 @@ async function orderByStrategy(
     };
   }
   if (strategy === "jev") {
-    const orderedTargets = await orderByJevStrategy(deps, initialOrderedTargets);
-    // Treat the admitted head as an explicit router pin so later stages keep it.
-    return { orderedTargets, autoUsedExplicitRouter: true, quotaShareRelease: null };
+    const outcome = await orderByJevStrategy(deps, initialOrderedTargets);
+    return {
+      orderedTargets: outcome.targets,
+      autoUsedExplicitRouter: outcome.protectHead,
+      quotaShareRelease: null,
+    };
   }
   const { orderedTargets, quotaShareRelease } = await applyStrategyOrdering(
     strategy,
@@ -515,102 +513,84 @@ async function orderByStrategy(
 async function orderByJevStrategy(
   deps: ResolveComboTargetPipelineDeps,
   initialOrderedTargets: ResolvedComboTarget[]
-): Promise<ResolvedComboTarget[]> {
-  const { body, combo, config, settings, log } = deps;
-  const modelTargets = initialOrderedTargets.filter(
-    (t): t is ResolvedComboTarget => t.kind === "model"
-  );
-
-  if (modelTargets.length <= 1) {
-    return initialOrderedTargets;
-  }
-
-  const disableSessionStickiness =
-    resolveDisableSessionStickiness(
-      config as Record<string, unknown> | null | undefined,
-      settings as Record<string, unknown> | null | undefined
-    ) === true;
-  if (!disableSessionStickiness) {
-    const stickyPreview = await applySessionStickiness(
-      modelTargets,
-      normalizeStickinessMessages(body as { messages?: unknown; input?: unknown }),
-      combo.name
-    );
-    if (stickyPreview.stuck) {
-      log.info("COMBO", `[jev] Skipping System One — live session pin for combo "${combo.name}"`);
-      return initialOrderedTargets;
-    }
-  }
-
-  const candidates: JevCandidate[] = modelTargets.map((t, index) => ({
-    id: t.stepId,
-    userRank: index,
-    label: t.label || t.modelStr,
-  }));
-
-  let answer: { choice: string; probabilities: Record<string, number>; confidence: number } | null =
-    null;
-  try {
-    const credentials = await getProviderCredentialsWithQuotaPreflight(TYPESAFE_PROVIDER_ID);
-    const apiKey =
-      credentials && typeof (credentials as { apiKey?: unknown }).apiKey === "string"
-        ? (credentials as { apiKey: string }).apiKey
-        : null;
-    const state = extractPromptForIntent(body);
-    const result = await evaluateSystemOneChoice({
-      apiKey,
-      state,
-      criteria: buildJevCriteria(candidates),
-      instructions: "Which of these configured models is the most appropriate for this request?",
-    });
-    if (result.ok) {
-      answer = {
-        choice: result.choice,
-        probabilities: result.probabilities,
-        confidence: result.confidence,
-      };
-    } else {
+) {
+  const { body, combo, log, signal } = deps;
+  const sessionPinned = await jevSessionPinned(deps, initialOrderedTargets);
+  const ask: JevAsk = async ({ state, criteria }) => {
+    try {
+      const credentials = await getProviderCredentials(TYPESAFE_PROVIDER_ID);
+      const apiKey =
+        credentials && typeof (credentials as { apiKey?: unknown }).apiKey === "string"
+          ? (credentials as { apiKey: string }).apiKey
+          : null;
+      const result = await evaluateSystemOneChoice({
+        apiKey,
+        state,
+        criteria,
+        signal,
+      });
+      if (result.ok) {
+        return {
+          choice: result.choice,
+          probabilities: result.probabilities,
+          confidence: result.confidence,
+        };
+      }
       log.info("COMBO", `[jev] System One unavailable: ${result.reason}`);
+      return null;
+    } catch {
+      log.warn("COMBO", "[jev] System One call failed (non-fatal); falling open to user order");
+      return null;
     }
-  } catch (err) {
-    log.warn("COMBO", "[jev] System One call failed (non-fatal); falling open to user order", {
-      err,
-    });
-  }
+  };
 
-  const judged = judgeJev(candidates, answer);
-  const byStepId = new Map(modelTargets.map((t) => [t.stepId, t]));
+  const outcome = await orderJevComboTargets(initialOrderedTargets, extractPromptForIntent(body), {
+    sessionPinned,
+    ask,
+  });
 
   if (deps.traceInvocationId) {
-    for (const row of judged.held) {
-      const target = byStepId.get(row.id);
-      if (!target) continue;
+    for (const hold of outcome.holds) {
       recordComboDecision(deps.traceInvocationId, {
-        step: target.executionKey,
-        target: target.modelStr,
+        step: hold.executionKey,
+        target: hold.modelStr,
         decision: "skipped_before_dispatch",
-        reason: row.reason,
-        detail:
-          row.probability !== null && row.probability !== undefined
-            ? `p=${row.probability}`
-            : judged.fallbackReason || undefined,
+        reason: hold.reason,
+        detail: hold.detail,
       });
-    }
-    // When we fell open, record the fallback reason on a synthetic first decision detail
-    // via logging only — admitted targets are attempted normally.
-    if (judged.fellOpen && judged.fallbackReason) {
-      log.info("COMBO", `[jev] Falling open to user order (${judged.fallbackReason})`);
     }
   }
 
-  const ordered = orderTargetsByJevVerdicts(modelTargets, judged.admitted);
-  log.info(
-    "COMBO",
-    `[jev] Admitted ${ordered.length}/${modelTargets.length}: ${ordered
-      .map((t) => t.modelStr)
-      .join(" → ")}`
+  if (sessionPinned) {
+    log.info("COMBO", `[jev] Skipping System One — live session pin for combo "${combo.name}"`);
+  } else {
+    log.info(
+      "COMBO",
+      `[jev] Admitted ${outcome.targets.length}/${initialOrderedTargets.length}: ${outcome.targets
+        .map((target) => target.modelStr)
+        .join(" → ")}`
+    );
+  }
+  return outcome;
+}
+
+/** True when continuity will pin this combo. Uses the same stickiness pass the pipeline runs again. */
+async function jevSessionPinned(
+  deps: ResolveComboTargetPipelineDeps,
+  targets: ResolvedComboTarget[]
+): Promise<boolean> {
+  const disableSessionStickiness =
+    resolveDisableSessionStickiness(
+      deps.config as Record<string, unknown> | null | undefined,
+      deps.settings as Record<string, unknown> | null | undefined
+    ) === true;
+  if (disableSessionStickiness || targets.length <= 1) return false;
+  const stickyPreview = await applySessionStickiness(
+    targets,
+    normalizeStickinessMessages(deps.body as { messages?: unknown; input?: unknown }),
+    deps.combo.name
   );
-  return ordered;
+  return stickyPreview.stuck;
 }
 
 /**

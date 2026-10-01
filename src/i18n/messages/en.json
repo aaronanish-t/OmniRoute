@@ -7256,6 +7256,7 @@
     "comboStrategyAria": "Combo strategy",
     "priority": "Priority",
     "weighted": "Weighted",
+    "jev": "Jev",
     "contextRelay": "Context Relay",
     "contextRelayDesc": "Priority-style routing with automatic context handoffs when account rotation happens",
     "maxRetriesLabel": "Max Retries",

@@ -172,9 +172,10 @@ Muse (`muse-code`) returns caller-bound opaque reasoning (`encrypted_content`). 
 - SQLite `key_value` records in the `muse_session_ownership` namespace persist ownership and the rotation cursor across restarts. Records contain connection IDs and hashes of account identity, credentials, opaque content, and continuation references, not secrets or conversation history. Clients must retain and send their full history and opaque reasoning.
 - Unknown or foreign opaque reasoning, a missing owner, an unavailable owner account, or a generation change with recorded history fails closed with an explicit 4xx/503 — never silent cross-account failover and never dropped reasoning.
 - A reminted same-account key is adopted only when the session recorded no replayable history; recorded sessions keep failing closed until started fresh.
+- An empty upstream response (`upstream_empty_response` / `empty_response`, nothing emitted to the caller) is retried at most twice on the same owner, after 0.5 s then 1.5 s (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). If all attempts are empty, the original 502 is returned without cooldown or breaker marking, so a flaky reply never locks out the owner.
 - All `muse-code` requests bypass semantic-cache reads and writes, including streaming writes, so cached opaque output cannot acquire a different session owner.
 
-Regression guards: `tests/unit/muse-session-ownership.test.ts` and `tests/unit/chatcore-semantic-cache.test.ts`.
+Regression guards: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-empty-response-retry.test.ts`, and `tests/unit/chatcore-semantic-cache.test.ts`.
 
 ## See Also
 

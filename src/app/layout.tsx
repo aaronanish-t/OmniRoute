@@ -23,7 +23,7 @@ export async function generateMetadata() {
   return {
     title: `${instanceName} — AI Gateway for Multi-Provider LLMs`,
     description:
-      "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
+      "Firbo AI Gateway: one endpoint for every AI model, with routing, fallback and cost control.",
     manifest: "/manifest.webmanifest",
     applicationName: instanceName,
     appleWebApp: {

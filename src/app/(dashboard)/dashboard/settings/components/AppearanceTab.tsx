@@ -523,7 +523,7 @@ export default function AppearanceTab() {
               </div>
               <input
                 type="text"
-                value={settings.instanceName || "OmniRoute"}
+                value={settings.instanceName || "Firbo AI"}
                 onChange={(e) => updateSetting("instanceName", e.target.value)}
                 placeholder="OmniRoute"
                 maxLength={100}

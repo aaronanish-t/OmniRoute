@@ -1,6 +1,9 @@
 import { createHash } from "crypto";
 import { getDbInstance } from "@/lib/db/core";
-import { isAccountUnavailable, isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
+import {
+  isAccountUnavailable,
+  isModelLocked,
+} from "@omniroute/open-sse/services/accountFallback.ts";
 
 const NAMESPACE = "muse_session_ownership";
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");

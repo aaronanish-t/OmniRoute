@@ -66,8 +66,7 @@ interface CapturedPut {
   body: Record<string, unknown>;
 }
 
-// A settings PUT whose body carries `failPutKey` gets a 500, as when the server rejects that save.
-function setupFetchMock(failPutKey?: string): { puts: CapturedPut[] } {
+function setupFetchMock(): { puts: CapturedPut[] } {
   const puts: CapturedPut[] = [];
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {
@@ -111,7 +110,6 @@ function setupFetchMock(failPutKey?: string): { puts: CapturedPut[] } {
         if (method === "PUT") {
           const body = JSON.parse(String(init?.body ?? "{}"));
           puts.push({ url, body });
-          if (failPutKey && failPutKey in body) return json({ error: "rejected" }, 500);
           // Echo a merged config so the panel keeps a coherent state.
           return json({ ...initialConfig, ...body });
         }
@@ -256,8 +254,17 @@ describe("CompressionPanel", () => {
     return { puts, answer };
   }
 
+  async function commitAutoTrigger(input: HTMLInputElement, value: string) {
+    await act(async () => {
+      fireEvent.change(input, { target: { value } });
+    });
+    await act(async () => {
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
+  }
+
   // The ultra-engine select is disabled while a save is in flight, but the auto-trigger input
-  // never is, so a change there goes out while the ultra-engine save still waits on the server.
+  // never is, so a value committed there goes out while the ultra-engine save still waits.
   async function changeUltraEngineThenAutoTrigger(container: HTMLElement) {
     const ultraEngine = container.querySelector(
       `[data-testid="ultra-engine-select"]`
@@ -265,52 +272,119 @@ describe("CompressionPanel", () => {
     const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
     await act(async () => {
       fireEvent.change(ultraEngine, { target: { value: "slm" } });
-      fireEvent.change(autoTrigger, { target: { value: "500" } });
     });
-    for (let i = 0; i < 5; i++) await flush();
+    await commitAutoTrigger(autoTrigger, "500");
     return { ultraEngine, autoTrigger };
   }
 
   it("a failed save rolls back its own field and keeps a later save", async () => {
-    const { puts } = setupFetchMock("ultraEngine");
+    const { puts, answer } = holdSettingsPuts();
     const container = await renderPanel();
     const { ultraEngine, autoTrigger } = await changeUltraEngineThenAutoTrigger(container);
-
     // Each PUT carries only its own field, so the server never stored ultraEngine "slm".
-    expect(puts.map((p) => p.body)).toEqual([{ ultraEngine: "slm" }, { autoTriggerTokens: 500 }]);
+    expect(puts).toEqual([{ ultraEngine: "slm" }, { autoTriggerTokens: 500 }]);
+
+    await answer(0, 500);
+    await answer(1, 200);
     expect(ultraEngine.value).toBe("heuristic");
     expect(autoTrigger.value).toBe("500");
     expect(container.textContent).toContain("saveFailed");
   });
 
   it("a failed later save rolls back its own field and keeps the earlier save", async () => {
-    setupFetchMock("autoTriggerTokens");
+    const { answer } = holdSettingsPuts();
     const container = await renderPanel();
     const { ultraEngine, autoTrigger } = await changeUltraEngineThenAutoTrigger(container);
 
+    await answer(0, 200);
+    await answer(1, 500);
     expect(ultraEngine.value).toBe("slm");
     expect(autoTrigger.value).toBe("0");
     expect(container.textContent).toContain("saveFailed");
   });
 
-  it("keeps the newest value when an older save of the same field answers last", async () => {
-    const { puts, answer } = holdSettingsPuts();
+  it("saves the auto-trigger value once, on Enter or when the field loses focus", async () => {
+    const { puts } = holdSettingsPuts();
     const container = await renderPanel();
-
     const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
-    for (const value of ["1", "100"]) {
+
+    for (const value of ["8", "80", "8000"]) {
       await act(async () => {
         fireEvent.change(autoTrigger, { target: { value } });
       });
     }
-    // Each save goes out while the earlier one is still in flight.
+    expect(puts, "typing alone saves nothing").toEqual([]);
+    await act(async () => {
+      fireEvent.keyDown(autoTrigger, { key: "Enter" });
+    });
+    await act(async () => {
+      fireEvent.blur(autoTrigger);
+    });
+    expect(puts, "the blur after Enter has nothing new to save").toEqual([
+      { autoTriggerTokens: 8000 },
+    ]);
+
+    await act(async () => {
+      fireEvent.change(autoTrigger, { target: { value: "9000" } });
+    });
+    await act(async () => {
+      fireEvent.blur(autoTrigger);
+    });
+    expect(puts).toEqual([{ autoTriggerTokens: 8000 }, { autoTriggerTokens: 9000 }]);
+  });
+
+  it("shows the value of the save that answered last when saves of one field overlap", async () => {
+    const { puts, answer } = holdSettingsPuts();
+    const container = await renderPanel();
+    const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
+    await commitAutoTrigger(autoTrigger, "1");
+    await commitAutoTrigger(autoTrigger, "100");
     expect(puts).toEqual([{ autoTriggerTokens: 1 }, { autoTriggerTokens: 100 }]);
 
+    // The server stores each save just before it answers, so the save that answers last holds
+    // the stored value.
     await answer(1, 200);
-    expect(autoTrigger.value, "the confirmed newer value shows over the older save").toBe("100");
     await answer(0, 200);
-    expect(autoTrigger.value).toBe("100");
+    expect(autoTrigger.value).toBe("1");
+  });
+
+  it("shows Saved again once a save succeeds after an earlier failure settled", async () => {
+    const { answer } = holdSettingsPuts();
+    const container = await renderPanel();
+    const ultraEngine = container.querySelector(
+      `[data-testid="ultra-engine-select"]`
+    ) as HTMLSelectElement;
+
+    await act(async () => {
+      fireEvent.change(ultraEngine, { target: { value: "slm" } });
+    });
+    await answer(0, 500);
+    expect(container.textContent).toContain("saveFailed");
+
+    await act(async () => {
+      fireEvent.change(ultraEngine, { target: { value: "slm" } });
+    });
+    await answer(1, 200);
+    expect(ultraEngine.value).toBe("slm");
     expect(container.textContent).toContain("saved");
+    expect(container.textContent).not.toContain("saveFailed");
+  });
+
+  it("shows Save failed at once and keeps it while other saves are in flight", async () => {
+    const { answer } = holdSettingsPuts();
+    const container = await renderPanel();
+    const { autoTrigger } = await changeUltraEngineThenAutoTrigger(container);
+
+    // The auto-trigger save fails while the ultra-engine save still waits on the server.
+    await answer(1, 500);
+    expect(container.textContent, "the failure shows at once").toContain("saveFailed");
+    await commitAutoTrigger(autoTrigger, "700");
+    expect(container.textContent, "a new save does not hide it").toContain("saveFailed");
+
+    await answer(2, 200);
+    await answer(0, 200);
+    expect(autoTrigger.value).toBe("700");
+    expect(container.textContent).toContain("saveFailed");
   });
 
   it("fails a PUT that outlives the save timeout", async () => {

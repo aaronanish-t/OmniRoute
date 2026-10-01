@@ -162,6 +162,38 @@ test("chat tool history cannot acquire a fresh owner and emitted calls remain us
   assert.throws(() => claimMuseSession(foreign, { messages }, candidates), /not issued/);
 });
 
+test("exhausted account is skipped for new sessions and unserved pins move to a healthy account", async () => {
+  getDbInstance()
+    .prepare("DELETE FROM key_value WHERE namespace = ?")
+    .run("muse_session_ownership");
+  const healthy = [{ id: "account-a" }, { id: "account-b" }];
+  const exhausted = [{ id: "account-a", unavailable: true }, { id: "account-b" }];
+  const unserved = museSessionScope({ session_id: "unserved" }, undefined, "client");
+  assert.equal(claimMuseSession(unserved, { input: "fresh" }, healthy).connectionId, "account-a");
+  for (const session of ["fresh-1", "fresh-2", "fresh-3"]) {
+    const scope = museSessionScope({ session_id: session }, undefined, "client");
+    assert.equal(claimMuseSession(scope, { input: "fresh" }, exhausted).connectionId, "account-b");
+  }
+  assert.equal(claimMuseSession(unserved, { input: "retry" }, exhausted).connectionId, "account-b");
+  assert.equal(claimMuseSession(unserved, { input: "retry" }, healthy).connectionId, "account-b");
+
+  const served = museSessionScope({ session_id: "served" }, undefined, "client");
+  const flipped = [{ id: "account-a" }, { id: "account-b", unavailable: true }];
+  assert.equal(claimMuseSession(served, { input: "fresh" }, flipped).connectionId, "account-a");
+  const generation = bindMuseGeneration(served, "account-a", "served-key", "served-identity");
+  await recordMuseOutput(
+    new Response(JSON.stringify({ output: [{ type: "message", id: "msg-served" }] })),
+    served,
+    generation
+  ).text();
+  assert.throws(
+    () => claimMuseSession(served, { input: "continue" }, exhausted),
+    (error: { status?: number; message?: string }) =>
+      error.status === 503 && /cross-account continuation is forbidden/.test(error.message || "")
+  );
+  assert.equal(claimMuseSession(served, { input: "continue" }, flipped).connectionId, "account-a");
+});
+
 test("API-key Muse connections bypass OAuth ownership unless OAuth is selected", () => {
   const keys = [{ id: "key", authType: "apikey" }];
   assert.equal(usesMuseOAuthOwnership(keys), false);

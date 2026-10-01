@@ -23,6 +23,7 @@ import {
   lockModel,
   recordModelLockoutFailure,
   isDailyQuotaExhausted,
+  isAccountUnavailable,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
@@ -1710,7 +1711,17 @@ async function handleSingleModelChat(
         .filter(
           (candidate) =>
             !effectiveAllowedConnections || effectiveAllowedConnections.includes(candidate.id)
-        );
+        )
+        .map((connection) => ({
+          id: connection.id,
+          unavailable:
+            !runtimeOptions.allowRateLimitedConnection &&
+            !forceLiveComboTest &&
+            (isAccountUnavailable(connection.rateLimitedUntil) ||
+              ["banned", "expired", "credits_exhausted"].includes(
+                String(connection.testStatus || "").toLowerCase()
+              )),
+        }));
       const owner = claimMuseSession(scope, body, candidates, forcedConnectionId);
       museOwner = { scope, ...owner };
     } catch (error) {
@@ -2207,7 +2218,34 @@ async function handleSingleModelChat(
         return successResponse;
       }
       // Never let generic account fallback or affinity eviction move a Muse caller.
-      if (museOwner) return withSelectedConnectionHeader(result.response, museOwner.connectionId);
+      if (museOwner) {
+        if (
+          result.errorCode !== "MUSE_OWNERSHIP_REJECTED" &&
+          result.errorType !== "stream_timeout" &&
+          result.errorType !== "stream_early_eof" &&
+          result.errorCode !== "empty_response"
+        ) {
+          await markAccountUnavailable(
+            credentials.connectionId,
+            result.status,
+            String(result.rawMessage ?? result.error ?? ""),
+            provider,
+            model,
+            providerProfile,
+            buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
+              isCombo,
+              headers: result.response.headers,
+            })
+          );
+          if (
+            !(await shouldIsolateProbeFailures()) &&
+            classifyProviderBreakerResult(result, isCombo, forceLiveComboTest) === "failure"
+          ) {
+            breaker._onFailure();
+          }
+        }
+        return withSelectedConnectionHeader(result.response, museOwner.connectionId);
+      }
 
       // A final hard-lease fence rejection is authoritative. It must never mutate
       // connection health/cooldown state or fall through to ordinary account/model

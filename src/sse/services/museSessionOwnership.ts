@@ -4,7 +4,7 @@ import { getDbInstance } from "@/lib/db/core";
 const NAMESPACE = "muse_session_ownership";
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");
 type Owner = { connectionId: string; generation?: string; account?: string };
-type Connection = { id: string };
+type Connection = { id: string; unavailable?: boolean };
 
 export function usesMuseOAuthOwnership(
   connections: { id: string; authType?: string }[],
@@ -106,7 +106,7 @@ function continuationIds(value: unknown, ids = new Set<string>()): Set<string> {
   return ids;
 }
 
-/** Atomic session assignment; pins never expire or move when an account is removed. */
+/** Atomic session assignment; once output was served, pins never expire or move to another account. */
 export function claimMuseSession(
   scope: string,
   body: Record<string, unknown>,
@@ -116,9 +116,15 @@ export function claimMuseSession(
   let owner!: Owner;
   getDbInstance().immediate(() => {
     const stored = load(`session:${scope}`);
-    if (stored) {
-      owner = JSON.parse(stored);
-      if (!candidates.some((candidate) => candidate.id === owner.connectionId)) {
+    const prior = stored ? (JSON.parse(stored) as Owner) : null;
+    const current = prior && candidates.find((candidate) => candidate.id === prior.connectionId);
+    const pinned = load(`served:${scope}`) === "1";
+    if (
+      prior &&
+      (pinned || (current && !current.unavailable && (!forcedId || forcedId === current.id)))
+    ) {
+      owner = prior;
+      if (!current || current.unavailable) {
         throw new MuseOwnershipError(
           "Muse session owner is unavailable; cross-account continuation is forbidden.",
           503
@@ -151,9 +157,10 @@ export function claimMuseSession(
       if (!ordered.length)
         throw new MuseOwnershipError("No native OAuth Muse account is available.", 503);
       const cursor = Number(load("cursor") || "0");
+      const rotation = ordered.map((_, index) => ordered[(cursor + index) % ordered.length]);
       const connection = forcedId
         ? ordered.find((candidate) => candidate.id === forcedId)
-        : ordered[cursor % ordered.length];
+        : (rotation.find((candidate) => !candidate.unavailable) ?? rotation[0]);
       if (!connection)
         throw new MuseOwnershipError("Requested Muse OAuth account is unavailable.", 503);
       owner = { connectionId: connection.id };
@@ -224,6 +231,7 @@ export function bindMuseGeneration(
 /** Observe the exact downstream output without altering events, tools, opaque reasoning, or terminal errors. */
 export function recordMuseOutput(response: Response, scope: string, generation: string): Response {
   if (!response.body || !response.ok) return response;
+  save(`served:${scope}`, "1");
   const record = (value: unknown) => {
     for (const hash of opaqueHashes(value)) save(`opaque:${scope}:${hash}`, generation);
     for (const id of continuationIds(value)) save(`reference:${scope}:${digest(id)}`, generation);

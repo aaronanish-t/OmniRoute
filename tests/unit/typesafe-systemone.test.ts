@@ -7,6 +7,8 @@ import assert from "node:assert/strict";
 import {
   evaluateSystemOneChoice,
   parseSystemOneChoiceResponse,
+  TYPESAFE_MAX_CHOICE_OPTIONS,
+  TYPESAFE_MAX_STATE_CHARS,
   TYPESAFE_PROVIDER_ID,
   TYPESAFE_SYSTEM_ONE_PATH,
 } from "../../open-sse/services/typesafe/systemOne.ts";
@@ -139,7 +141,8 @@ test("evaluateSystemOneChoice maps HTTP 401 to unavailable without throwing", as
   if (result.ok) return;
   assert.equal(result.reason, "http_error");
   assert.equal(result.status, 401);
-  assert.doesNotMatch(result.detail, /Bearer |sk-|ts_test/);
+  assert.equal(result.detail, "System One returned HTTP 401");
+  assert.doesNotMatch(result.detail, /unauthorized|Bearer |sk-|ts_test/);
 });
 
 test("evaluateSystemOneChoice maps AbortError to timeout without throwing", async () => {
@@ -164,4 +167,42 @@ test("evaluateSystemOneChoice maps AbortError to timeout without throwing", asyn
   assert.equal(result.ok, false);
   if (result.ok) return;
   assert.equal(result.reason, "timeout");
+});
+
+test("evaluateSystemOneChoice truncates state and refuses more than 255 options", async () => {
+  let posted = "";
+  const long = "x".repeat(TYPESAFE_MAX_STATE_CHARS + 50);
+  const result = await evaluateSystemOneChoice({
+    apiKey: "key",
+    state: long,
+    criteria: { a: "A" },
+    fetchImpl: async (_url, init) => {
+      posted = String(init?.body);
+      return new Response(
+        JSON.stringify({
+          answers: {
+            route: { type: "choice", choice: "a", probabilities: { a: 1 }, confidence: 1 },
+          },
+        }),
+        { status: 200 }
+      );
+    },
+  });
+  assert.equal(result.ok, true);
+  assert.equal(JSON.parse(posted).state.length, TYPESAFE_MAX_STATE_CHARS);
+
+  let called = false;
+  const criteria: Record<string, string> = {};
+  for (let i = 0; i < TYPESAFE_MAX_CHOICE_OPTIONS + 1; i++) criteria[`k${i}`] = `L${i}`;
+  const tooMany = await evaluateSystemOneChoice({
+    apiKey: "key",
+    state: "hi",
+    criteria,
+    fetchImpl: async () => {
+      called = true;
+      return new Response("no", { status: 500 });
+    },
+  });
+  assert.equal(called, false);
+  assert.equal(tooMany.ok, false);
 });

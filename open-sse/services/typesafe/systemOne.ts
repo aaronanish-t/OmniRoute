@@ -17,6 +17,10 @@ export const TYPESAFE_DEFAULT_MODEL = "jev-latest";
 
 /** Hard ceiling so a hung TypeSafe call cannot stall combo dispatch. */
 export const TYPESAFE_SYSTEM_ONE_TIMEOUT_MS = 8_000;
+/** TypeSafe choice questions accept at most 255 options. */
+export const TYPESAFE_MAX_CHOICE_OPTIONS = 255;
+/** Cap on `state` so a long transcript cannot be forwarded wholesale. */
+export const TYPESAFE_MAX_STATE_CHARS = 8_000;
 
 type FetchLike = typeof fetch;
 
@@ -60,6 +64,8 @@ export type EvaluateSystemOneChoiceOptions = {
   timeoutMs?: number;
   fetchImpl?: FetchLike;
   baseUrl?: string;
+  /** Aborted when the caller cancels; combined with the timeout. */
+  signal?: AbortSignal | null;
 };
 
 const DEFAULT_INSTRUCTIONS =
@@ -171,6 +177,12 @@ export async function evaluateSystemOneChoice(
   if (criteriaEntries.length === 0) {
     return unavailable("empty_criteria", "System One choice requires at least one criterion");
   }
+  if (criteriaEntries.length > TYPESAFE_MAX_CHOICE_OPTIONS) {
+    return unavailable(
+      "invalid_response",
+      `System One choice accepts at most ${TYPESAFE_MAX_CHOICE_OPTIONS} options`
+    );
+  }
 
   const criteria: Record<string, string | null> = {};
   for (const [key, value] of criteriaEntries) {
@@ -182,7 +194,11 @@ export async function evaluateSystemOneChoice(
           : String(value);
   }
 
-  const state = typeof options.state === "string" ? options.state : "";
+  const rawState = typeof options.state === "string" ? options.state : "";
+  const state =
+    rawState.length > TYPESAFE_MAX_STATE_CHARS
+      ? rawState.slice(0, TYPESAFE_MAX_STATE_CHARS)
+      : rawState;
   const instructions =
     typeof options.instructions === "string" && options.instructions.trim().length > 0
       ? options.instructions.trim()
@@ -200,7 +216,13 @@ export async function evaluateSystemOneChoice(
   const baseUrl = (options.baseUrl || TYPESAFE_SYSTEM_ONE_BASE_URL).replace(/\/+$/, "");
   const fetchImpl = options.fetchImpl ?? fetch;
 
+  if (options.signal?.aborted) {
+    return unavailable("timeout", "System One call aborted before it started");
+  }
+
   const controller = new AbortController();
+  const onAbort = () => controller.abort();
+  options.signal?.addEventListener("abort", onAbort, { once: true });
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
@@ -225,14 +247,12 @@ export async function evaluateSystemOneChoice(
     });
 
     if (!response.ok) {
-      let upstreamDetail = `System One returned HTTP ${response.status}`;
-      try {
-        const errBody = await response.text();
-        if (errBody) upstreamDetail = `${upstreamDetail}: ${errBody.slice(0, 200)}`;
-      } catch {
-        // ignore body read failures
-      }
-      return unavailable("http_error", upstreamDetail, response.status);
+      // Status only. Upstream bodies can echo the state or the key.
+      return unavailable(
+        "http_error",
+        `System One returned HTTP ${response.status}`,
+        response.status
+      );
     }
 
     let json: unknown;
@@ -248,9 +268,9 @@ export async function evaluateSystemOneChoice(
     if (err instanceof Error && err.name === "AbortError") {
       return unavailable("timeout", `System One timed out after ${timeoutMs}ms`);
     }
-    const message = err instanceof Error ? err.message : String(err);
-    return unavailable("network_error", `System One request failed: ${message}`);
+    return unavailable("network_error", "System One request failed");
   } finally {
     clearTimeout(timer);
+    options.signal?.removeEventListener("abort", onAbort);
   }
 }

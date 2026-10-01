@@ -429,12 +429,24 @@ test("chatCore provider-failure writes use the projected persistent message", ()
   );
   assert.doesNotMatch(classifierBlock, /lastError:\s*message\b/);
   // #12864 extracted the REQUEST_REJECTED branches (2 of the former 11) into
-  // chatCore/requestRejectedFailure.ts. Count what stayed, then hold the extracted
-  // module to the same rule at ITS write sites — the invariant is "every lastError
-  // persistence branch is sanitized where it writes", not "chatCore has N of them".
+  // chatCore/requestRejectedFailure.ts. #14853 (Refs) then extracted the two
+  // FORBIDDEN / ACCOUNT_DEACTIVATED terminal-ban writes into
+  // chatCore/gatedTerminalBan.ts. Count what stayed, then hold each extracted
+  // module to the same rule at ITS write sites — the invariant is "every
+  // lastError persistence branch is sanitized where it writes", not "chatCore
+  // has N of them".
   assert.ok(
-    (classifierBlock.match(/lastError:\s*persistentMessage\b/g) || []).length >= 9,
+    (classifierBlock.match(/lastError:\s*persistentMessage\b/g) || []).length >= 7,
     "every providerFailure persistence branch must use persistentMessage"
+  );
+  const gatedBan = fs.readFileSync(
+    path.join(REPO_ROOT, "open-sse/handlers/chatCore/gatedTerminalBan.ts"),
+    "utf8"
+  );
+  assert.doesNotMatch(gatedBan, /lastError:\s*(`\$\{)?message\b/);
+  assert.ok(
+    (gatedBan.match(/lastError:\s*(params\.)?persistentMessage\b/g) || []).length >= 1,
+    "every lastError write in gatedTerminalBan.ts must use the projected persistentMessage"
   );
   const rejected = fs.readFileSync(
     path.join(REPO_ROOT, "open-sse/handlers/chatCore/requestRejectedFailure.ts"),

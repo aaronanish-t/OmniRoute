@@ -461,7 +461,14 @@ export class DefaultExecutor extends BaseExecutor {
             : null;
         const isOpenAIFormat = !this.config.format || this.config.format === "openai";
         if (customBaseUrl && isOpenAIFormat) {
-          return normalizeOpenAIChatUrl(customBaseUrl);
+          const chatUrl = normalizeOpenAIChatUrl(customBaseUrl);
+          // A Responses-format model (registry targetFormat, e.g. muse-code) carries a
+          // Responses body; sending it to /chat/completions fails upstream with
+          // "unknown parameter `input`". Keep the URL in lockstep with the body.
+          if (getModelTargetFormat(this.provider, model) === "openai-responses") {
+            return chatUrl.replace(/\/chat\/completions\/?$/, "/responses");
+          }
+          return chatUrl;
         }
         const url = this.config.baseUrl;
         const entry = getRegistryEntry(this.provider);

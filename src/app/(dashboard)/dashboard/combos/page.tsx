@@ -197,6 +197,13 @@ const STRATEGY_GUIDANCE_FALLBACK = {
     example:
       "Example: 10 Antigravity Gemini accounts with different 5h/weekly resets; skip empty ones and pick among the rest in proportion to leftover.",
   },
+  jev: {
+    when: "Use when you want to rank providers yourself and let TypeSafe Jev decide which of those entries run for each request.",
+    avoid:
+      "Avoid when you have no TypeSafe API key, or when you need a strict priority schedule that never skips a healthy favorite.",
+    example:
+      "Example: Opus → mid GPT → small GLM; Jev sends short chats to GLM and keeps Opus for hard coding turns.",
+  },
 };
 
 const ADVANCED_FIELD_HELP_FALLBACK = {
@@ -4661,6 +4668,19 @@ function ComboFormModal({
                           }
                           className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
+                      </div>
+                    </div>
+                  )}
+                  {strategy === "jev" && (
+                    <div className="pt-2 border-t border-black/5 dark:border-white/5">
+                      <div className="rounded-md border border-indigo-500/20 bg-indigo-500/5 px-2 py-1.5">
+                        <p className="text-[10px] text-indigo-700 dark:text-indigo-300">
+                          {getI18nOrFallback(
+                            t,
+                            "jevPrivacyNote",
+                            "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model."
+                          )}
+                        </p>
                       </div>
                     </div>
                   )}

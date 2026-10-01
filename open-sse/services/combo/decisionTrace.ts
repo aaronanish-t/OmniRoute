@@ -35,6 +35,10 @@ export const COMBO_SKIP_REASONS = [
   "auto_resilience_filter",
   "auto_strict_zero_cost",
   "auto_constraint_filter",
+  "below_probability_floor",
+  "dominated",
+  "low_confidence",
+  "jev_unavailable",
 ] as const;
 
 export type ComboSkipReason = (typeof COMBO_SKIP_REASONS)[number];

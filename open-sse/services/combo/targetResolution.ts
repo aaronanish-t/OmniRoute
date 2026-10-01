@@ -85,7 +85,16 @@ import {
   resolveDisableSessionStickiness,
   type ApplyStickinessResult,
 } from "./sessionStickiness.ts";
-import { applyRequestTagRouting } from "./autoStrategy.ts";
+import { applyRequestTagRouting, extractPromptForIntent } from "./autoStrategy.ts";
+import {
+  buildJevCriteria,
+  judgeJev,
+  orderTargetsByJevVerdicts,
+  type JevCandidate,
+} from "./jevStrategy.ts";
+import { recordComboDecision } from "./decisionTrace.ts";
+import { evaluateSystemOneChoice, TYPESAFE_PROVIDER_ID } from "../typesafe/systemOne.ts";
+import { getProviderCredentialsWithQuotaPreflight } from "../../../src/sse/services/auth";
 import type {
   ComboCollectionLike,
   ComboLike,
@@ -119,6 +128,8 @@ export interface ResolveComboTargetPipelineDeps {
    */
   buildAutoCandidates: ResolveAutoStrategyDeps["buildAutoCandidates"];
   hiddenModelsByProvider?: HiddenModelsByProvider;
+  /** #15276: decision-trace id so jev can record holds before the attempt loop. */
+  traceInvocationId?: string | null;
 }
 
 export interface ResolvedComboTargetPipeline {
@@ -435,10 +446,11 @@ function logPipelineFallthrough(pipelineErr: unknown, log: ComboLogger): void {
 }
 
 /**
- * Strategy ordering: the `auto` router for auto combos, the per-strategy chain for
- * everything else. `autoUsedExplicitRouter` is the #4945 guard — when an explicit
- * router (lkgp/cost/…) pinned orderedTargets[0], task-aware reordering below must
- * refine only the fallback order, never override the router's primary choice.
+ * Strategy ordering: the `auto` router for auto combos, the jev judge for jev
+ * combos, the per-strategy chain for everything else. `autoUsedExplicitRouter`
+ * is the #4945 guard — when an explicit router (lkgp/cost/…) pinned
+ * orderedTargets[0], task-aware reordering below must refine only the fallback
+ * order, never override the router's primary choice.
  */
 async function orderByStrategy(
   deps: ResolveComboTargetPipelineDeps,
@@ -471,6 +483,11 @@ async function orderByStrategy(
       quotaShareRelease: null,
     };
   }
+  if (strategy === "jev") {
+    const orderedTargets = await orderByJevStrategy(deps, initialOrderedTargets);
+    // Treat the admitted head as an explicit router pin so later stages keep it.
+    return { orderedTargets, autoUsedExplicitRouter: true, quotaShareRelease: null };
+  }
   const { orderedTargets, quotaShareRelease } = await applyStrategyOrdering(
     strategy,
     initialOrderedTargets,
@@ -484,6 +501,116 @@ async function orderByStrategy(
     }
   );
   return { orderedTargets, autoUsedExplicitRouter: false, quotaShareRelease };
+}
+
+/**
+ * #15276: Jev-managed combo ordering.
+ *
+ * - Live session pin → skip the TypeSafe call; leave user order (continuity
+ *   filters promote the pin afterwards).
+ * - Otherwise one System One choice call; admit winner + options ≥ 0.15 in
+ *   user order (cap 4). Fall open to user order on missing key / timeout /
+ *   low confidence / bad winner id.
+ */
+async function orderByJevStrategy(
+  deps: ResolveComboTargetPipelineDeps,
+  initialOrderedTargets: ResolvedComboTarget[]
+): Promise<ResolvedComboTarget[]> {
+  const { body, combo, config, settings, log } = deps;
+  const modelTargets = initialOrderedTargets.filter(
+    (t): t is ResolvedComboTarget => t.kind === "model"
+  );
+
+  if (modelTargets.length <= 1) {
+    return initialOrderedTargets;
+  }
+
+  const disableSessionStickiness =
+    resolveDisableSessionStickiness(
+      config as Record<string, unknown> | null | undefined,
+      settings as Record<string, unknown> | null | undefined
+    ) === true;
+  if (!disableSessionStickiness) {
+    const stickyPreview = await applySessionStickiness(
+      modelTargets,
+      normalizeStickinessMessages(body as { messages?: unknown; input?: unknown }),
+      combo.name
+    );
+    if (stickyPreview.stuck) {
+      log.info("COMBO", `[jev] Skipping System One — live session pin for combo "${combo.name}"`);
+      return initialOrderedTargets;
+    }
+  }
+
+  const candidates: JevCandidate[] = modelTargets.map((t, index) => ({
+    id: t.stepId,
+    userRank: index,
+    label: t.label || t.modelStr,
+  }));
+
+  let answer: { choice: string; probabilities: Record<string, number>; confidence: number } | null =
+    null;
+  try {
+    const credentials = await getProviderCredentialsWithQuotaPreflight(TYPESAFE_PROVIDER_ID);
+    const apiKey =
+      credentials && typeof (credentials as { apiKey?: unknown }).apiKey === "string"
+        ? (credentials as { apiKey: string }).apiKey
+        : null;
+    const state = extractPromptForIntent(body);
+    const result = await evaluateSystemOneChoice({
+      apiKey,
+      state,
+      criteria: buildJevCriteria(candidates),
+      instructions: "Which of these configured models is the most appropriate for this request?",
+    });
+    if (result.ok) {
+      answer = {
+        choice: result.choice,
+        probabilities: result.probabilities,
+        confidence: result.confidence,
+      };
+    } else {
+      log.info("COMBO", `[jev] System One unavailable: ${result.reason}`);
+    }
+  } catch (err) {
+    log.warn("COMBO", "[jev] System One call failed (non-fatal); falling open to user order", {
+      err,
+    });
+  }
+
+  const judged = judgeJev(candidates, answer);
+  const byStepId = new Map(modelTargets.map((t) => [t.stepId, t]));
+
+  if (deps.traceInvocationId) {
+    for (const row of judged.held) {
+      const target = byStepId.get(row.id);
+      if (!target) continue;
+      recordComboDecision(deps.traceInvocationId, {
+        step: target.executionKey,
+        target: target.modelStr,
+        decision: "skipped_before_dispatch",
+        reason: row.reason,
+        detail:
+          row.probability !== null && row.probability !== undefined
+            ? `p=${row.probability}`
+            : judged.fallbackReason || undefined,
+      });
+    }
+    // When we fell open, record the fallback reason on a synthetic first decision detail
+    // via logging only — admitted targets are attempted normally.
+    if (judged.fellOpen && judged.fallbackReason) {
+      log.info("COMBO", `[jev] Falling open to user order (${judged.fallbackReason})`);
+    }
+  }
+
+  const ordered = orderTargetsByJevVerdicts(modelTargets, judged.admitted);
+  log.info(
+    "COMBO",
+    `[jev] Admitted ${ordered.length}/${modelTargets.length}: ${ordered
+      .map((t) => t.modelStr)
+      .join(" → ")}`
+  );
+  return ordered;
 }
 
 /**
@@ -715,6 +842,7 @@ async function applyPromptCacheStage(
     "weighted",
     "fill-first",
     "quota-share",
+    "jev",
   ]);
   const isDeterministicStrategy = modelOrderPreservingStrategies.has(strategy);
   const promptCacheAffinity = applyPromptCacheAffinity(

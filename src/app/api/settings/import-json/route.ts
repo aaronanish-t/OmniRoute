@@ -3,7 +3,7 @@ import { getDbInstance } from "@/lib/db/core";
 import { backupDbFile } from "@/lib/db/backup";
 import { clearApiKeyCaches } from "@/lib/db/apiKeys";
 import { invalidateDbCache } from "@/lib/db/readCache";
-import { isAuthRequired, isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { runJsonMigration, type LegacyJsonData } from "@/lib/db/jsonMigration";
 import { getSettings } from "@/lib/db/settings";
 import { setSystemPromptConfig } from "@omniroute/open-sse/services/systemPrompt.ts";
@@ -20,11 +20,8 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
  * 🔒 A pre-import backup is created automatically before any data is written.
  */
 export async function POST(request: Request) {
-  if (await isAuthRequired(request)) {
-    if (!(await isAuthenticated(request))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
 
   try {
     let rawText: string | null = null;

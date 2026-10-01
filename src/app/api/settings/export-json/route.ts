@@ -4,8 +4,10 @@ import { getProviderConnections } from "@/lib/db/providers";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import { getCombos } from "@/lib/db/combos";
 import { getApiKeys } from "@/lib/db/apiKeys";
-import { isAuthRequired, isAuthenticated } from "@/shared/utils/apiAuth";
+import { listAllApiKeyBillingHistory, listTeams } from "@/lib/db/teams";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import {
+  getAllDailyTeamUsageSummary,
   getAllUsageHistory,
   getAllDomainCostHistory,
   getAllDomainBudgets,
@@ -47,11 +49,8 @@ export function filterPaidComboSteps<T extends { models?: unknown }>(combos: T[]
  * Exports a legacy OmniRoute-compatible JSON backup.
  */
 export async function GET(request: Request) {
-  if (await isAuthRequired(request)) {
-    if (!(await isAuthenticated(request))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
 
   try {
     const url = new URL(request.url);
@@ -84,6 +83,8 @@ export async function GET(request: Request) {
       providerNodes,
       combos,
       apiKeys,
+      teams: listTeams({ includeArchived: true }),
+      apiKeyBillingTeamHistory: listAllApiKeyBillingHistory(),
       // Metadata to identify export version
       _meta: {
         exportedAt: new Date().toISOString(),
@@ -97,6 +98,7 @@ export async function GET(request: Request) {
     // thousands of rows and make the config backup grow to many MBs.
     if (includeHistory) {
       exportData.usageHistory = getAllUsageHistory();
+      exportData.dailyTeamUsageSummary = getAllDailyTeamUsageSummary();
       exportData.domainCostHistory = getAllDomainCostHistory();
       exportData.domainBudgets = getAllDomainBudgets();
     }

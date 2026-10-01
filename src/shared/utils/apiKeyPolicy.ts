@@ -31,6 +31,7 @@ import {
 import { resolveQuotaKeyScope } from "@/lib/quota/quotaKey";
 import { isQuotaModelName, parseQuotaModelName } from "@/lib/quota/quotaModelNaming";
 import { buildApiKeyUsageLimitPolicyRejection } from "@/lib/usage/apiKeyUsageLimits";
+import { buildTeamUsageLimitPolicyRejection } from "@/lib/usage/teamUsageLimits";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 
 // Default to no per-key request cap. API keys can still opt into explicit
@@ -440,6 +441,9 @@ export interface ApiKeyPolicyResult {
   rejection: Response | null;
 }
 
+type PolicyValidationStage =
+  "validateEndpointAccess" | "validateTeamUsage" | "validateQuotaAccess" | "validateModelAccess";
+
 export interface EnforceApiKeyPolicyOptions {
   /**
    * Where the metered dollar budget is enforced for this request.
@@ -457,6 +461,8 @@ export interface EnforceApiKeyPolicyOptions {
    * entirely. Every other check on this path is unaffected.
    */
   meteredBudget?: "enforce" | "defer-to-candidate";
+  /** Test/diagnostic observer; it cannot alter policy outcomes. */
+  validationObserver?: (stage: PolicyValidationStage) => void;
 }
 
 /**
@@ -549,6 +555,15 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
   } catch (error) {
     log.error("API_POLICY", "API key USD usage limit check failed. Request blocked.", { error });
     return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key usage limit unavailable");
+  }
+}
+
+async function validateTeamUsage(context: PolicyContext): Promise<Response | null> {
+  try {
+    return await buildTeamUsageLimitPolicyRejection(context.request, context.apiKeyInfo.id);
+  } catch (error) {
+    log.error("API_POLICY", "Team shared usage limit check failed. Request blocked.", { error });
+    return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Team usage limit unavailable");
   }
 }
 
@@ -867,11 +882,18 @@ export async function enforceApiKeyPolicy(
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };
+  options?.validationObserver?.("validateEndpointAccess");
   const endpointRejection = validateEndpointAccess(context);
   if (endpointRejection) return { apiKey, apiKeyInfo, rejection: endpointRejection };
 
+  options?.validationObserver?.("validateTeamUsage");
+  const teamUsageRejection = await validateTeamUsage(context);
+  if (teamUsageRejection) return { apiKey, apiKeyInfo, rejection: teamUsageRejection };
+
+  options?.validationObserver?.("validateQuotaAccess");
   const quotaRejection = await validateQuotaAccess(context);
   if (quotaRejection) return { apiKey, apiKeyInfo, rejection: quotaRejection };
+  options?.validationObserver?.("validateModelAccess");
   const modelRejection = await validateModelAccess(context);
   if (modelRejection) return { apiKey, apiKeyInfo, rejection: modelRejection };
 

@@ -142,6 +142,8 @@ const CRITICAL_DB_TABLES: CriticalTableSpec[] = [
   { table: "provider_nodes", maxRows: 5_000 },
   { table: "combos", maxRows: 5_000 },
   { table: "api_keys", maxRows: 5_000 },
+  { table: "teams", maxRows: 5_000 },
+  { table: "api_key_billing_team_history", maxRows: 20_000 },
   { table: "proxy_registry", maxRows: 5_000 },
   { table: "proxy_assignments", maxRows: 10_000 },
   { table: "model_combo_mappings", maxRows: 5_000 },
@@ -321,6 +323,8 @@ const SCHEMA_SQL = `
     account_key TEXT,
     account_label TEXT,
     account_label_priority INTEGER DEFAULT 0,
+    billing_team_id TEXT,
+    team_rollup_processed_at TEXT,
     api_key_id TEXT,
     api_key_name TEXT,
     tokens_input INTEGER DEFAULT 0,
@@ -1609,8 +1613,7 @@ function migrateFromJson(db: SqliteDatabase, jsonPath: string) {
         let rateLimitOverridesJson = serializeJsonField(conn.rateLimitOverrides);
         if (!hasOverrides && typeof conn.id === "string") {
           const existing = selectExistingOverrides.get(conn.id) as
-            | { rate_limit_overrides_json: string | null }
-            | undefined;
+            { rate_limit_overrides_json: string | null } | undefined;
           if (existing) rateLimitOverridesJson = existing.rate_limit_overrides_json;
         }
         insertConn.run({

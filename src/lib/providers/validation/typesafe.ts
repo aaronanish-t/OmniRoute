@@ -8,7 +8,13 @@
 
 import { evaluateSystemOneChoice } from "@omniroute/open-sse/services/typesafe/systemOne.ts";
 
-export async function validateTypesafeProvider({ apiKey }: { apiKey?: string | null }) {
+export async function validateTypesafeProvider({
+  apiKey,
+  fetchImpl,
+}: {
+  apiKey?: string | null;
+  fetchImpl?: typeof fetch;
+}) {
   const result = await evaluateSystemOneChoice({
     apiKey,
     state: "ping",
@@ -18,6 +24,7 @@ export async function validateTypesafeProvider({ apiKey }: { apiKey?: string | n
       other: "Any other destination",
     },
     timeoutMs: 10_000,
+    fetchImpl,
   });
 
   if (result.ok) {

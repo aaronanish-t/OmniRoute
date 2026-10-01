@@ -118,7 +118,6 @@ const TLS_PROVIDER_PROFILE: Record<string, { browser: string; os: string }> = {
 
 type TlsProfileResult = { browserProfile?: string; os?: string };
 function tlsProfileForProvider(provider: string | null | undefined): TlsProfileResult {
-
   if (!provider) return {};
   const p = TLS_PROVIDER_PROFILE[provider.trim().toLowerCase()];
   return p ? { browserProfile: p.browser, os: p.os } : {};
@@ -808,6 +807,7 @@ export function hasAmbientProxyContext(): boolean {
   const store = proxyContext.getStore();
   return Boolean(store) && store !== DIRECT_PROXY_CONTEXT;
 }
+export const isDirectFetchContext = () => proxyContext.getStore() === DIRECT_PROXY_CONTEXT;
 
 /**
  * Like {@link runWithProxyContext}, but if the assigned proxy is unreachable or fails

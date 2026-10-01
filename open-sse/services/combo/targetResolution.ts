@@ -544,7 +544,11 @@ async function orderByJevStrategy(
   const sessionPinned = await jevSessionPinned(deps, eligible);
   const ask: JevAsk = async ({ state, criteria }) => {
     try {
-      const credentials = await getProviderCredentials(TYPESAFE_PROVIDER_ID);
+      const credentials = await getProviderCredentials(
+        TYPESAFE_PROVIDER_ID,
+        null,
+        deps.apiKeyAllowedConnections ?? null
+      );
       const apiKey =
         credentials && typeof (credentials as { apiKey?: unknown }).apiKey === "string"
           ? (credentials as { apiKey: string }).apiKey

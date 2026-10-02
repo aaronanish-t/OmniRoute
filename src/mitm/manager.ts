@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from "child_process";
 import path from "path";
 import fs from "fs";
 import { resolveMitmDataDir } from "./dataDir.ts";
+import { getBridgeProcessState, releaseExitedBridgeChild } from "./processLifecycle.ts";
 import {
   removeDNSEntry,
   removeDNSEntries,
@@ -71,8 +72,7 @@ export function interpretMitmStartupError(stderr: string, port: number): string 
 }
 
 // Store server process
-let serverProcess: ChildProcess | null = null;
-let serverPid: number | null = null;
+const lifecycle = getBridgeProcessState();
 
 /**
  * Test-only seam: install a fake server process (and pid) so stopMitm() can be
@@ -81,17 +81,16 @@ let serverPid: number | null = null;
  * ordering (#1809). No-op in production code paths.
  */
 export function __setServerProcessForTest(proc: ChildProcess | null, pid: number | null): void {
-  serverProcess = proc;
-  serverPid = pid;
+  lifecycle.serverProcess = proc;
+  lifecycle.serverPid = pid;
 }
 
 // Set while startMitm() is in flight, from the guard check through spawn.
 // Guards a TOCTOU race: the "already running" check above only trips once
-// `serverProcess` is assigned by spawn() — ~130 lines and several awaits
+// `lifecycle.serverProcess` is assigned by spawn() — ~130 lines and several awaits
 // later (DNS entries, cert generation, cert install). Two concurrent
 // startMitm() calls would both pass that check before either assigns
-// serverProcess. (upstream 9router#2316)
-let mitmStarting = false;
+// lifecycle.serverProcess. (upstream 9router#2316)
 
 /**
  * Attempt to acquire the single-flight "MITM server is starting" lock.
@@ -102,14 +101,14 @@ let mitmStarting = false;
  * (DNS/cert/spawn).
  */
 export function tryAcquireMitmStartLock(): boolean {
-  if (mitmStarting) return false;
-  mitmStarting = true;
+  if (lifecycle.starting) return false;
+  lifecycle.starting = true;
   return true;
 }
 
 /** Release the single-flight start lock acquired via `tryAcquireMitmStartLock()`. */
 export function releaseMitmStartLock(): void {
-  mitmStarting = false;
+  lifecycle.starting = false;
 }
 
 // Set when getMitmStatus() finds a stale PID file (server died without clean
@@ -119,7 +118,6 @@ let _orphanedStateDetected = false;
 
 // Guards installCleanupHandlers() so the parent-process signal handlers are
 // registered at most once. (Gap 7.)
-let _cleanupHandlersInstalled = false;
 
 // Module-scoped password cache (not exposed on globalThis).
 // Cleared automatically when the MITM proxy is stopped.
@@ -288,8 +286,8 @@ export async function repairMitm(sudoPassword: string): Promise<{ repaired: stri
  * Idempotent; never blocks process exit. (Gap 7.)
  */
 export function installCleanupHandlers(): void {
-  if (_cleanupHandlersInstalled) return;
-  _cleanupHandlersInstalled = true;
+  if (lifecycle.cleanupInstalled) return;
+  lifecycle.cleanupInstalled = true;
   const onSignal = (signal: string) => {
     void handleExitCleanup(signal);
   };
@@ -327,7 +325,8 @@ export async function handleExitCleanup(
   };
 
   try {
-    if (serverProcess && !serverProcess.killed) serverProcess.kill("SIGTERM");
+    if (lifecycle.serverProcess && !lifecycle.serverProcess.killed)
+      lifecycle.serverProcess.kill("SIGTERM");
   } catch {
     // ignore
   }
@@ -379,8 +378,8 @@ export async function getMitmStatus(agentId?: string): Promise<{
   orphanedStateDetected: boolean;
 }> {
   // Check in-memory process first, then fallback to PID file
-  let running = serverProcess !== null && !serverProcess.killed;
-  let pid = serverPid;
+  let running = lifecycle.serverProcess !== null && !lifecycle.serverProcess.killed;
+  let pid = lifecycle.serverPid;
 
   if (!running) {
     try {
@@ -446,18 +445,20 @@ export async function startMitm(
   sudoPassword: string,
   options: { port?: number } = {}
 ): Promise<{ running: true; pid: number | null; certTrusted: boolean }> {
+  if (lifecycle.stopping) throw new Error("MITM server is already stopping");
   // Check if already running
-  if (serverProcess && !serverProcess.killed) {
+  if (lifecycle.serverProcess && !lifecycle.serverProcess.killed) {
     throw new Error("MITM proxy is already running");
   }
 
   // Check if another startMitm() call is already in flight (TOCTOU guard —
-  // see the `mitmStarting` comment above).
+  // see the `lifecycle.starting` comment above).
   if (!tryAcquireMitmStartLock()) {
     throw new Error("MITM server is already starting");
   }
 
   try {
+    if ((await getMitmStatus()).running) throw new Error("MITM proxy is already running");
     return await startMitmInternal(apiKey, sudoPassword, options);
   } finally {
     releaseMitmStartLock();
@@ -615,7 +616,7 @@ async function startMitmInternal(
     }
   }
 
-  serverProcess = spawn(process.execPath, [resolveMitmServerPath()], {
+  lifecycle.serverProcess = spawn(process.execPath, [resolveMitmServerPath()], {
     windowsHide: true,
     env: {
       ...process.env,
@@ -632,17 +633,8 @@ async function startMitmInternal(
     stdio: ["ignore", "pipe", "pipe"],
   });
 
-  const proc = serverProcess;
-  serverPid = proc.pid ?? null;
-
-  // Save PID to file — best-effort, must not orphan spawned child process
-  if (serverPid !== null) {
-    try {
-      fs.writeFileSync(PID_FILE, String(serverPid));
-    } catch (err) {
-      log.error({ err, pid: serverPid }, "Failed to write MITM PID file (continuing)");
-    }
-  }
+  const proc = lifecycle.serverProcess;
+  lifecycle.serverPid = proc.pid ?? null;
 
   // Buffer recent stderr so a startup failure can be reported with its real
   // cause (capped to avoid unbounded growth on a chatty/looping process). (#3606)
@@ -661,15 +653,7 @@ async function startMitmInternal(
 
   proc.on("exit", (code) => {
     log.info({ exitCode: code }, "MITM server exited");
-    serverProcess = null;
-    serverPid = null;
-
-    // Remove PID file
-    try {
-      fs.unlinkSync(PID_FILE);
-    } catch (error) {
-      // Ignore
-    }
+    releaseExitedBridgeChild(lifecycle, proc, PID_FILE);
   });
 
   // Wait and verify server actually started
@@ -722,22 +706,31 @@ async function startMitmInternal(
     throw new Error(interpretMitmStartupError(stderrBuffer, port));
   }
 
+  // A failed bind must never replace the active listener's PID record.
+  if (proc.pid !== undefined) {
+    try {
+      fs.writeFileSync(PID_FILE, String(proc.pid), { mode: 0o600 });
+    } catch (err) {
+      log.error({ err, pid: proc.pid }, "Failed to write MITM PID file (continuing)");
+    }
+  }
+
   return {
     running: true,
-    pid: serverPid,
+    pid: lifecycle.serverPid,
     certTrusted,
   };
 }
 
 /**
  * Kill the MITM server process during stop — either the in-memory
- * `serverProcess` handle or, if that's gone, the PID recorded in `PID_FILE`.
+ * `lifecycle.serverProcess` handle or, if that's gone, the PID recorded in `PID_FILE`.
  * Split out of stopMitm() purely to keep that function's complexity under
  * the repo's ratchet; behavior is unchanged from the original inline
  * implementation.
  */
 async function killMitmServerProcessOnStop(): Promise<void> {
-  const proc = serverProcess;
+  const proc = lifecycle.serverProcess;
   if (proc && !proc.killed) {
     log.info("Stopping MITM server...");
     proc.kill("SIGTERM");
@@ -745,8 +738,8 @@ async function killMitmServerProcessOnStop(): Promise<void> {
     if (!proc.killed) {
       proc.kill("SIGKILL");
     }
-    serverProcess = null;
-    serverPid = null;
+    lifecycle.serverProcess = null;
+    lifecycle.serverPid = null;
     return;
   }
 
@@ -766,8 +759,8 @@ async function killMitmServerProcessOnStop(): Promise<void> {
   } catch {
     // Ignore
   }
-  serverProcess = null;
-  serverPid = null;
+  lifecycle.serverProcess = null;
+  lifecycle.serverPid = null;
 }
 
 /**
@@ -793,32 +786,39 @@ export async function stopMitm(
     collectManagedHosts?: () => string[];
   }
 ): Promise<{ running: false; pid: null }> {
-  const deps = {
-    removeDNSEntry: _depsOverride?.removeDNSEntry ?? removeDNSEntry,
-    removeDNSEntries: _depsOverride?.removeDNSEntries ?? removeDNSEntries,
-    collectManagedHosts: _depsOverride?.collectManagedHosts ?? collectManagedHosts,
-  };
-
-  // 1. Remove DNS entries FIRST — see function doc + module doc above (#1809).
-  await runPrivilegedMitmStep(
-    sudoPassword,
-    "Skipping DNS teardown — no sudo password available (#7938)",
-    () => removeStopDnsEntries(deps, sudoPassword)
-  );
-
-  // 2. Kill server process (in-memory or from PID file)
-  await killMitmServerProcessOnStop();
-
-  // 3. Clean up
-  clearCachedPassword(); // Clear password from memory when proxy stops
+  if (lifecycle.starting) throw new Error("MITM server is already starting");
+  if (lifecycle.stopping) throw new Error("MITM server is already stopping");
+  lifecycle.stopping = true;
   try {
-    fs.unlinkSync(PID_FILE);
-  } catch (error) {
-    // Ignore
-  }
+    const deps = {
+      removeDNSEntry: _depsOverride?.removeDNSEntry ?? removeDNSEntry,
+      removeDNSEntries: _depsOverride?.removeDNSEntries ?? removeDNSEntries,
+      collectManagedHosts: _depsOverride?.collectManagedHosts ?? collectManagedHosts,
+    };
 
-  return {
-    running: false,
-    pid: null,
-  };
+    // 1. Remove DNS entries FIRST — see function doc + module doc above (#1809).
+    await runPrivilegedMitmStep(
+      sudoPassword,
+      "Skipping DNS teardown — no sudo password available (#7938)",
+      () => removeStopDnsEntries(deps, sudoPassword)
+    );
+
+    // 2. Kill server process (in-memory or from PID file)
+    await killMitmServerProcessOnStop();
+
+    // 3. Clean up
+    clearCachedPassword(); // Clear password from memory when proxy stops
+    try {
+      fs.unlinkSync(PID_FILE);
+    } catch (error) {
+      // Ignore
+    }
+
+    return {
+      running: false,
+      pid: null,
+    };
+  } finally {
+    lifecycle.stopping = false;
+  }
 }

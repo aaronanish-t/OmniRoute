@@ -67,16 +67,23 @@ test("native messages retain protocol, compressed bodies, status and selected ho
     output_config: { effort: "high" },
   };
   let mode = "json";
+  let heldResponse: http.ServerResponse | undefined;
   const received: { url?: string; headers: http.IncomingHttpHeaders; body: unknown }[] = [];
   const router = http.createServer(async (req, res) => {
     let body = "";
     for await (const chunk of req) body += chunk;
     received.push({ url: req.url, headers: req.headers, body: JSON.parse(body) });
     res.writeHead(mode === "error" ? 429 : 200, {
-      "content-type": mode === "sse" ? "text/event-stream" : "application/json",
+      "content-type":
+        mode === "sse" || mode === "held-sse" ? "text/event-stream" : "application/json",
       "request-id": "synthetic-id",
       "retry-after": "12",
     });
+    if (mode === "held-sse") {
+      heldResponse = res;
+      res.write('event: message_start\ndata: {"type":"message_start"}\n\n');
+      return;
+    }
     res.end(
       mode === "sse"
         ? 'event: message_stop\ndata: {"type":"message_stop"}\n\n'
@@ -92,10 +99,25 @@ test("native messages retain protocol, compressed bodies, status and selected ho
   const reservation = net.createServer();
   const port = await listen(reservation);
   await new Promise<void>((resolve) => reservation.close(() => resolve()));
+  const dnsFixture = path.join(root, "dns-fixture.cjs");
+  fs.writeFileSync(
+    dnsFixture,
+    `
+    const dns = require("node:dns");
+    const resolve4 = dns.Resolver.prototype.resolve4;
+    dns.Resolver.prototype.resolve4 = function(host, callback) {
+      if (host === "missing-bridge-fixture.invalid") {
+        return setImmediate(() => callback(Object.assign(new Error("synthetic DNS failure"), { code: "ENOTFOUND" })));
+      }
+      return resolve4.call(this, host, callback);
+    };
+  `
+  );
   const child = spawn(process.execPath, [path.resolve("src/mitm/server.cjs")], {
     env: {
       ...process.env,
       DATA_DIR: root,
+      NODE_OPTIONS: `${process.env.NODE_OPTIONS || ""} --require=${dnsFixture}`,
       ROUTER_API_KEY: "synthetic-router-token",
       OMNIROUTE_BASE_URL: `http://127.0.0.1:${routerPort}`,
       MITM_LOCAL_PORT: String(port),
@@ -202,6 +224,77 @@ test("native messages retain protocol, compressed bodies, status and selected ho
       else assert.doesNotThrow(() => JSON.parse(response.body));
     });
   }
+  await t.test(
+    "a failed passthrough DNS lookup returns 502 without killing other sessions",
+    async () => {
+      mode = "held-sse";
+      let streamStarted!: () => void;
+      const started = new Promise<void>((resolve) => {
+        streamStarted = resolve;
+      });
+      const activeStream = new Promise<string>((resolve, reject) => {
+        const request = https.request(
+          {
+            hostname: "127.0.0.1",
+            port,
+            servername: "api.anthropic.com",
+            ca: fs.readFileSync(cert),
+            method: "POST",
+            path: "/v1/messages",
+            headers: { host: "api.anthropic.com" },
+            timeout: 5000,
+          },
+          (res) => {
+            let body = "";
+            res.on("data", (chunk) => {
+              body += chunk;
+              streamStarted();
+            });
+            res.on("end", () => resolve(body));
+            res.on("error", reject);
+          }
+        );
+        request.on("error", reject);
+        request.on("timeout", () => request.destroy(new Error("Held stream timed out")));
+        request.end(JSON.stringify({ ...payload, stream: true }));
+      });
+      // Avoid an unhandled rejection in the failing baseline, before the final assertion.
+      void activeStream.catch(() => {});
+      t.after(() => heldResponse?.end());
+      await started;
+      const response = await new Promise<{ status?: number; body: string }>((resolve, reject) => {
+        const request = https.get(
+          {
+            hostname: "127.0.0.1",
+            port,
+            servername: "api.anthropic.com",
+            ca: fs.readFileSync(cert),
+            path: "/fixture",
+            headers: { host: "missing-bridge-fixture.invalid" },
+            timeout: 3000,
+          },
+          (res) => {
+            let body = "";
+            res.on("data", (chunk) => (body += chunk));
+            res.on("end", () => resolve({ status: res.statusCode, body }));
+          }
+        );
+        request.on("timeout", () => request.destroy(new Error("DNS fixture request timed out")));
+        request.on("error", reject);
+      });
+      assert.equal(response.status, 502);
+      assert.equal(child.exitCode, null);
+      heldResponse!.end('event: message_stop\ndata: {"type":"message_stop"}\n\n');
+      const completed = await activeStream;
+      assert.match(completed, /event: message_start/);
+      assert.match(completed, /event: message_stop/);
+      assert.equal(JSON.parse(response.body).error.type, "mitm_error");
+      assert.doesNotMatch(
+        response.body,
+        /ENOTFOUND|synthetic DNS failure|stack|missing-bridge-fixture/
+      );
+    }
+  );
   await t.test("TLS health identifies the selected native transport", async () => {
     const health = await new Promise<string>((resolve, reject) => {
       const request = https.get(

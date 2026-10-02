@@ -732,7 +732,7 @@ async function startMitmServer() {
   const sslOptions =
     CERT_MODE === "root-ca" ? await loadRootCaSslOptions() : loadLegacySslOptions();
 
-  const server = https.createServer(sslOptions, async (req, res) => {
+  const handleRequest = async (req, res) => {
     if (req.method === "GET" && req.url === "/__omniroute_bridge_health") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(
@@ -830,6 +830,28 @@ async function startMitmServer() {
           : "")
     );
     return intercept(req, res, bodyBuffer, mappedOverride, model);
+  };
+
+  // EventEmitter does not consume an async listener's rejection. A single DNS,
+  // body-read or routing failure must not terminate every active agent stream.
+  const server = https.createServer(sslOptions, (req, res) => {
+    void handleRequest(req, res).catch((error) => {
+      console.error(`[MITM] Request failed: ${error && error.message}`);
+      if (res.destroyed || res.writableEnded) return;
+      if (res.headersSent) {
+        res.destroy();
+        return;
+      }
+      res.writeHead(502, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: {
+            message: sanitizeErrorMessage("Agent Bridge could not complete the upstream request."),
+            type: "mitm_error",
+          },
+        })
+      );
+    });
   });
 
   // =========================================================================

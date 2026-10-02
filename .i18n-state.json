@@ -81273,8 +81273,17 @@
       "locales": {
         "pl": {
           "source_hash": "7d08a55656e078501044a3e018a6c91adaad177a5729042637979918de70e2d8",
-          "target_hash": "52233a366aaa5f527f236b3e06ccce17f27e704061abc48140f873e0b20efd27",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "b2aa2929047c653bc7cfd1d0aeb0df217217e144c5eb6d96c9241a7b68467410",
+          "section_hashes": [
+            "2ebe4cf48392",
+            "1ee258e36a02",
+            "9eb77a71aa8c",
+            "ab9372b344c6",
+            "c516b09496ee",
+            "8fed20fa7764",
+            "4759275562a5"
+          ],
+          "updated_at": "2026-10-02T06:03:16.469Z"
         },
         "ar": {
           "source_hash": "7d08a55656e078501044a3e018a6c91adaad177a5729042637979918de70e2d8",

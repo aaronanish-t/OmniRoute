@@ -89,6 +89,39 @@ test("self-service migration 197 coexists with upstream attempt timing migration
   );
 });
 
+test("historical self-service migration 194 upgrades without skipping upstream timing columns", async () => {
+  const db = core.getDbInstance();
+  const saved = settingsDb.updateApiKeySelfServiceSettings("historical-key", {
+    sharedQuotaProviders: ["codex"],
+    anthropicRateLimitHeaders: "strip",
+  });
+  db.exec(`
+    DELETE FROM _omniroute_migrations WHERE version = '194';
+    UPDATE _omniroute_migrations SET version = '194'
+      WHERE version = '197' AND name = 'api_key_self_service_settings';
+    ALTER TABLE proxy_logs DROP COLUMN headers_ms;
+    ALTER TABLE proxy_logs DROP COLUMN first_chunk_ms;
+  `);
+  const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+  runMigrations(db);
+  settingsDb.clearApiKeySelfServiceSettingsCache();
+  assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("historical-key"), saved);
+  assert.deepEqual(
+    db
+      .prepare(
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('194', '197') ORDER BY version"
+      )
+      .all(),
+    [
+      { version: "194", name: "proxy_logs_attempt_timing" },
+      { version: "197", name: "api_key_self_service_settings" },
+    ]
+  );
+  const columns = db.prepare("PRAGMA table_info(proxy_logs)").all() as { name: string }[];
+  assert.ok(columns.some((column) => column.name === "headers_ms"));
+  assert.ok(columns.some((column) => column.name === "first_chunk_ms"));
+});
+
 test("settings default to all providers + forward when no row exists", () => {
   assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("no-such-key"), {
     sharedQuotaProviders: null,

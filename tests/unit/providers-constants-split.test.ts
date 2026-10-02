@@ -41,12 +41,14 @@
 // Muse Code device OAuth dual-auth moves `muse-code` from frontier-labs into
 // OAUTH_PROVIDERS (same pattern as clinepass/codebuddy-cn) — 242.
 // Retiring suno (#14224, 4af4937e) removes one specialty-media apikey entry — 241.
+// Freebuff browser login dual-auth (#15336) moves `freebuff` from gateways into
+// OAUTH_PROVIDERS (same pattern as codebuddy-cn/muse-code) — 240.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
 const P = await import("../../src/shared/constants/providers.ts");
 
-const APIKEY_PROVIDER_COUNT = 241;
+const APIKEY_PROVIDER_COUNT = 240;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [

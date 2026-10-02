@@ -322,4 +322,21 @@ export const OAUTH_PROVIDERS = {
     authHint:
       "Sign in with the Muse Code device flow (same as `muse login` / CLIProxyAPI `-meta-login`) to use a Muse subscription, or paste a META_API_KEY. Device login keeps the durable dca token and mints the inference key; a 401 remints that key. Wire format is OpenAI Responses (POST /responses).",
   },
+  freebuff: {
+    id: "freebuff",
+    serviceKinds: ["llm"],
+    alias: "freebuff",
+    name: "Freebuff",
+    icon: "terminal",
+    color: "#10B981",
+    textIcon: "FB",
+    website: "https://freebuff.com",
+    hasFree: true,
+    freeNote: "Free Codebuff / Freebuff AI models.",
+    riskNoticeVariant: "oauth",
+    passthroughModels: true,
+    authHint:
+      "Sign in with the Freebuff browser login (same as `freebuff login`), or paste an existing Freebuff / Codebuff auth token. The token has no refresh grant — when it expires, sign in again.",
+    apiHint: "Token is authenticated against the Codebuff upstream session pool.",
+  },
 };

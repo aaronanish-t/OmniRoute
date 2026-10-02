@@ -119,6 +119,19 @@ export const CODEBUDDY_CN_CONFIG = {
   pollInterval: 5000,
 };
 
+// Freebuff (freebuff.com — Codebuff free tier) Login Configuration
+// (Custom fingerprint flow, same as `freebuff login`: POST codeUrl → open loginUrl →
+// GET statusUrl?fingerprintId&fingerprintHash&expiresAt until { user.authToken }).
+// No client_id/secret — the upstream CLI ships none. The auth token is a long-lived
+// session token with no refresh grant; an expired token requires a fresh login.
+export const FREEBUFF_CONFIG = {
+  baseUrl: "https://freebuff.com",
+  codeUrl: "https://freebuff.com/api/auth/cli/code",
+  statusUrl: "https://freebuff.com/api/auth/cli/status",
+  pollInterval: 5000,
+  loginTimeoutSec: 300,
+};
+
 // Grok Build (xAI) OAuth Configuration (Device Code + import-token fallback)
 // Public client_id resolved through resolvePublicCred so it is never a literal.
 export const GROK_CLI_CONFIG = {
@@ -520,6 +533,7 @@ export const PROVIDERS = {
   DEVIN_CLI: "devin-cli",
   TRAE: "trae",
   CODEBUDDY_CN: "codebuddy-cn",
+  FREEBUFF: "freebuff",
   GROK_CLI: "grok-cli",
   XAI_OAUTH: "xai-oauth",
   OPENFERENCE: "openference",

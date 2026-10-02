@@ -38,22 +38,6 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
       "Create an API key at https://cheaperinference.com/?utm_source=omniroute (needs the `inference` scope), then paste the ir_live_… token here.",
     passthroughModels: true,
   },
-  freebuff: {
-    id: "freebuff",
-    alias: "freebuff",
-    name: "Freebuff",
-    icon: "terminal",
-    color: "#10B981",
-    textIcon: "FB",
-    website: "https://freebuff.com",
-    hasFree: true,
-    serviceKinds: ["llm"],
-    authHint:
-      "Enter Freebuff / Codebuff Auth Token (obtained via CLI login or automated harvester).",
-    freeNote: "Free Codebuff / Freebuff AI models.",
-    apiHint: "Token is authenticated against Codebuff upstream session pool.",
-    passthroughModels: true,
-  },
   "charm-hyper": {
     id: "charm-hyper",
     serviceKinds: ["llm"],

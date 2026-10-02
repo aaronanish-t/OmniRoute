@@ -153,8 +153,10 @@ function AutoTriggerInput({
     setShown(value);
     if (draft === String(shown)) setDraft(String(value));
   }
+  // The draft takes the committed number's own text, so a rollback can tell it holds no edit.
   const commit = (text: string) => {
     const tokens = parseInt(text) || 0;
+    setDraft(String(tokens));
     if (tokens !== value) onCommit(tokens);
   };
   return (

@@ -333,6 +333,22 @@ describe("CompressionPanel", () => {
     expect(puts).toEqual([{ autoTriggerTokens: 8000 }, { autoTriggerTokens: 9000 }]);
   });
 
+  it("rolls the auto-trigger box back when a cleared or zero-padded value fails to save", async () => {
+    const { answer } = holdSettingsPuts();
+    const container = await renderPanel();
+    const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
+    await commitAutoTrigger(autoTrigger, "500");
+    await answer(0, 200);
+
+    await commitAutoTrigger(autoTrigger, "");
+    await answer(1, 500);
+    expect(autoTrigger.value, "a cleared box comes back to the saved value").toBe("500");
+
+    await commitAutoTrigger(autoTrigger, "0700");
+    await answer(2, 500);
+    expect(autoTrigger.value, "a zero-padded value comes back to the saved value").toBe("500");
+  });
+
   it("shows the value of the save that answered last when saves of one field overlap", async () => {
     const { puts, answer } = holdSettingsPuts();
     const container = await renderPanel();

@@ -7,7 +7,15 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+import type Database from "better-sqlite3";
+import {
+  betterSqlite3Available,
+  BETTER_SQLITE3_SKIP_REASON,
+} from "../_helpers/betterSqlite3Availability.ts";
+
+const canUseBetterSqlite3 = betterSqlite3Available();
+const skipReason = canUseBetterSqlite3 ? false : BETTER_SQLITE3_SKIP_REASON;
 
 const repoMigrations = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -36,7 +44,9 @@ function columns(db: Database.Database): string[] {
 }
 
 function openDb(withColumn: boolean): Database.Database {
-  const db = new Database(":memory:");
+  const require = createRequire(import.meta.url);
+  const BetterSqlite3 = require("better-sqlite3") as typeof Database;
+  const db = new BetterSqlite3(":memory:");
   db.exec(
     `CREATE TABLE call_logs (id TEXT PRIMARY KEY, status INTEGER${
       withColumn ? ", resilience_actions TEXT" : ""
@@ -45,19 +55,23 @@ function openDb(withColumn: boolean): Database.Database {
   return db;
 }
 
-test("an older call_logs gains resilience_actions and a second run is a no-op", () => {
-  const db = openDb(false);
-  try {
-    runMigrations(db);
-    assert.ok(columns(db).includes("resilience_actions"));
-    runMigrations(db);
-    assert.ok(columns(db).includes("resilience_actions"));
-  } finally {
-    db.close();
+test(
+  "an older call_logs gains resilience_actions and a second run is a no-op",
+  { skip: skipReason },
+  () => {
+    const db = openDb(false);
+    try {
+      runMigrations(db);
+      assert.ok(columns(db).includes("resilience_actions"));
+      runMigrations(db);
+      assert.ok(columns(db).includes("resilience_actions"));
+    } finally {
+      db.close();
+    }
   }
-});
+);
 
-test("a fresh call_logs keeps its column and stays idempotent", () => {
+test("a fresh call_logs keeps its column and stays idempotent", { skip: skipReason }, () => {
   const db = openDb(true);
   try {
     runMigrations(db);

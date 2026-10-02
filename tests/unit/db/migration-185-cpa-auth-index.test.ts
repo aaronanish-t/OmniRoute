@@ -7,7 +7,15 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+import type Database from "better-sqlite3";
+import {
+  betterSqlite3Available,
+  BETTER_SQLITE3_SKIP_REASON,
+} from "../_helpers/betterSqlite3Availability.ts";
+
+const canUseBetterSqlite3 = betterSqlite3Available();
+const skipReason = canUseBetterSqlite3 ? false : BETTER_SQLITE3_SKIP_REASON;
 
 const repoMigrations = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -36,7 +44,9 @@ function columns(db: Database.Database): string[] {
 }
 
 function openDb(withColumn: boolean): Database.Database {
-  const db = new Database(":memory:");
+  const require = createRequire(import.meta.url);
+  const BetterSqlite3 = require("better-sqlite3") as typeof Database;
+  const db = new BetterSqlite3(":memory:");
   db.exec(
     `CREATE TABLE usage_history (id INTEGER PRIMARY KEY, provider TEXT${
       withColumn ? ", cpa_auth_index TEXT" : ""
@@ -45,29 +55,37 @@ function openDb(withColumn: boolean): Database.Database {
   return db;
 }
 
-test("an older usage_history gains cpa_auth_index and a second run is a no-op", () => {
-  const db = openDb(false);
-  try {
-    assert.equal(runMigrations(db, { isNewDb: true }), 1);
-    assert.ok(columns(db).includes("cpa_auth_index"));
-    assert.equal(runMigrations(db, { isNewDb: true }), 0);
-    assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
-      { version: "185", name: "usage_history_cpa_auth_index" },
-    ]);
-  } finally {
-    db.close();
+test(
+  "an older usage_history gains cpa_auth_index and a second run is a no-op",
+  { skip: skipReason },
+  () => {
+    const db = openDb(false);
+    try {
+      assert.equal(runMigrations(db, { isNewDb: true }), 1);
+      assert.ok(columns(db).includes("cpa_auth_index"));
+      assert.equal(runMigrations(db, { isNewDb: true }), 0);
+      assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
+        { version: "185", name: "usage_history_cpa_auth_index" },
+      ]);
+    } finally {
+      db.close();
+    }
   }
-});
+);
 
-test("a database that already has cpa_auth_index still records migration 185", () => {
-  const db = openDb(true);
-  try {
-    assert.equal(runMigrations(db, { isNewDb: true }), 1);
-    assert.equal(columns(db).filter((name) => name === "cpa_auth_index").length, 1);
-    assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
-      { version: "185", name: "usage_history_cpa_auth_index" },
-    ]);
-  } finally {
-    db.close();
+test(
+  "a database that already has cpa_auth_index still records migration 185",
+  { skip: skipReason },
+  () => {
+    const db = openDb(true);
+    try {
+      assert.equal(runMigrations(db, { isNewDb: true }), 1);
+      assert.equal(columns(db).filter((name) => name === "cpa_auth_index").length, 1);
+      assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
+        { version: "185", name: "usage_history_cpa_auth_index" },
+      ]);
+    } finally {
+      db.close();
+    }
   }
-});
+);

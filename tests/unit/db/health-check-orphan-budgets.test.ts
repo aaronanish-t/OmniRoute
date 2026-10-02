@@ -12,11 +12,19 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+import type Database from "better-sqlite3";
+import {
+  betterSqlite3Available,
+  BETTER_SQLITE3_SKIP_REASON,
+} from "../_helpers/betterSqlite3Availability.ts";
 
 import { runDbHealthCheck, type DbHealthCheckResult } from "../../../src/lib/db/healthCheck.ts";
 import { SYNTHETIC_ENV_API_KEY_ID } from "../../../src/shared/constants/apiKeyIdentities.ts";
 import type { SqliteAdapter } from "../../../src/lib/db/adapters/types.ts";
+
+const canUseBetterSqlite3 = betterSqlite3Available();
+const skipReason = canUseBetterSqlite3 ? false : BETTER_SQLITE3_SKIP_REASON;
 
 const MANAGED_KEY_ID = "11111111-2222-3333-4444-555555555555";
 const REAL_ORPHAN_ID = "99999999-8888-7777-6666-555555555555";
@@ -56,7 +64,9 @@ function makeHarness(seed: {
 }): Harness {
   const dir = mkdtempSync(path.join(tmpdir(), "omniroute-healthcheck-"));
   const file = path.join(dir, "storage.sqlite");
-  const raw = new Database(file);
+  const require = createRequire(import.meta.url);
+  const BetterSqlite3 = require("better-sqlite3") as typeof Database;
+  const raw = new BetterSqlite3(file);
   raw.exec(`
     CREATE TABLE api_keys (id TEXT PRIMARY KEY, name TEXT);
     CREATE TABLE domain_budgets (api_key_id TEXT PRIMARY KEY, daily_limit_usd REAL);
@@ -114,7 +124,7 @@ function makeHarness(seed: {
   return harness;
 }
 
-test("CASE A — a managed key's budget and history survive repair", () => {
+test("CASE A — a managed key's budget and history survive repair", { skip: skipReason }, () => {
   const h = makeHarness({ budgets: [MANAGED_KEY_ID], history: [MANAGED_KEY_ID] });
   try {
     h.run();
@@ -125,26 +135,30 @@ test("CASE A — a managed key's budget and history survive repair", () => {
   }
 });
 
-test("CASE B — the synthetic env key's budget and history survive repair", () => {
-  const h = makeHarness({
-    budgets: [SYNTHETIC_ENV_API_KEY_ID],
-    history: [SYNTHETIC_ENV_API_KEY_ID],
-  });
-  try {
-    const result = h.run();
-    assert.deepEqual(h.budgetIds(), [SYNTHETIC_ENV_API_KEY_ID]);
-    assert.deepEqual(h.historyIds(), [SYNTHETIC_ENV_API_KEY_ID]);
-    assert.equal(
-      result.issues.filter((i) => i.type === "broken_reference").length,
-      0,
-      "a synthetic owner must not even be reported as a broken reference"
-    );
-  } finally {
-    h.cleanup();
+test(
+  "CASE B — the synthetic env key's budget and history survive repair",
+  { skip: skipReason },
+  () => {
+    const h = makeHarness({
+      budgets: [SYNTHETIC_ENV_API_KEY_ID],
+      history: [SYNTHETIC_ENV_API_KEY_ID],
+    });
+    try {
+      const result = h.run();
+      assert.deepEqual(h.budgetIds(), [SYNTHETIC_ENV_API_KEY_ID]);
+      assert.deepEqual(h.historyIds(), [SYNTHETIC_ENV_API_KEY_ID]);
+      assert.equal(
+        result.issues.filter((i) => i.type === "broken_reference").length,
+        0,
+        "a synthetic owner must not even be reported as a broken reference"
+      );
+    } finally {
+      h.cleanup();
+    }
   }
-});
+);
 
-test("CASE C — a genuine orphan is still removed", () => {
+test("CASE C — a genuine orphan is still removed", { skip: skipReason }, () => {
   const h = makeHarness({ budgets: [REAL_ORPHAN_ID], history: [REAL_ORPHAN_ID] });
   try {
     const result = h.run();
@@ -156,7 +170,7 @@ test("CASE C — a genuine orphan is still removed", () => {
   }
 });
 
-test("CASE D — orphan budget only", () => {
+test("CASE D — orphan budget only", { skip: skipReason }, () => {
   const h = makeHarness({ budgets: [REAL_ORPHAN_ID] });
   try {
     h.run();
@@ -166,7 +180,7 @@ test("CASE D — orphan budget only", () => {
   }
 });
 
-test("CASE E — orphan history only", () => {
+test("CASE E — orphan history only", { skip: skipReason }, () => {
   const h = makeHarness({ history: [REAL_ORPHAN_ID] });
   try {
     h.run();
@@ -176,7 +190,7 @@ test("CASE E — orphan history only", () => {
   }
 });
 
-test("CASE F — nothing orphaned emits no destructive repair", () => {
+test("CASE F — nothing orphaned emits no destructive repair", { skip: skipReason }, () => {
   const h = makeHarness({
     budgets: [MANAGED_KEY_ID, SYNTHETIC_ENV_API_KEY_ID],
     history: [MANAGED_KEY_ID, SYNTHETIC_ENV_API_KEY_ID],
@@ -190,7 +204,7 @@ test("CASE F — nothing orphaned emits no destructive repair", () => {
   }
 });
 
-test("CASE G — mixed owners: only the orphan goes", () => {
+test("CASE G — mixed owners: only the orphan goes", { skip: skipReason }, () => {
   const h = makeHarness({
     budgets: [MANAGED_KEY_ID, SYNTHETIC_ENV_API_KEY_ID, REAL_ORPHAN_ID],
     history: [MANAGED_KEY_ID, SYNTHETIC_ENV_API_KEY_ID, REAL_ORPHAN_ID],
@@ -204,7 +218,7 @@ test("CASE G — mixed owners: only the orphan goes", () => {
   }
 });
 
-test("CASE H — backup still precedes a destructive repair", () => {
+test("CASE H — backup still precedes a destructive repair", { skip: skipReason }, () => {
   const h = makeHarness({ budgets: [REAL_ORPHAN_ID] });
   try {
     const result = h.run();
@@ -215,7 +229,7 @@ test("CASE H — backup still precedes a destructive repair", () => {
   }
 });
 
-test("CASE I — the env-key budget survives repeated repair cycles", () => {
+test("CASE I — the env-key budget survives repeated repair cycles", { skip: skipReason }, () => {
   const h = makeHarness({
     budgets: [SYNTHETIC_ENV_API_KEY_ID],
     history: [SYNTHETIC_ENV_API_KEY_ID],
@@ -229,7 +243,7 @@ test("CASE I — the env-key budget survives repeated repair cycles", () => {
   }
 });
 
-test("CASE J — fail-open is never reached through maintenance", () => {
+test("CASE J — fail-open is never reached through maintenance", { skip: skipReason }, () => {
   // The budget check is fail-open when the row is absent, so "row still there
   // after maintenance" is the property that keeps the ceiling enforceable.
   const h = makeHarness({ budgets: [SYNTHETIC_ENV_API_KEY_ID] });
@@ -241,7 +255,7 @@ test("CASE J — fail-open is never reached through maintenance", () => {
   }
 });
 
-test("read-only check reports nothing destructive", () => {
+test("read-only check reports nothing destructive", { skip: skipReason }, () => {
   const h = makeHarness({ budgets: [REAL_ORPHAN_ID] });
   try {
     h.run(false);

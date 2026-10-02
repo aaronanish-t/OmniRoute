@@ -23,7 +23,21 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+import type Database from "better-sqlite3";
+import {
+  betterSqlite3Available,
+  BETTER_SQLITE3_SKIP_REASON,
+} from "../_helpers/betterSqlite3Availability.ts";
+
+const canUseBetterSqlite3 = betterSqlite3Available();
+const skipReason = canUseBetterSqlite3 ? false : BETTER_SQLITE3_SKIP_REASON;
+
+function openBetterSqlite3(filename: string, options?: Database.Options): Database.Database {
+  const require = createRequire(import.meta.url);
+  const BetterSqlite3 = require("better-sqlite3") as typeof Database;
+  return new BetterSqlite3(filename, options);
+}
 
 const { getOmpCredentials, saveOmpCredentials, deleteOmpCredentials } =
   await import("../../../src/lib/db/omp.ts");
@@ -41,7 +55,7 @@ function getOmpDbPath() {
 function seedOmpDb() {
   const dbPath = getOmpDbPath();
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-  const db = new Database(dbPath);
+  const db = openBetterSqlite3(dbPath);
   db.exec(`
     CREATE TABLE IF NOT EXISTS auth_credentials (
       provider TEXT NOT NULL,
@@ -67,7 +81,7 @@ afterEach(() => {
   fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-describe("db/omp.ts — getOmpCredentials", () => {
+describe("db/omp.ts — getOmpCredentials", { skip: skipReason }, () => {
   it("returns hasOmniRoute:false without throwing when the omp DB file does not exist", () => {
     assert.ok(!fs.existsSync(getOmpDbPath()), "precondition: no DB file yet");
     const creds = getOmpCredentials(PROVIDER_ID);
@@ -84,7 +98,7 @@ describe("db/omp.ts — getOmpCredentials", () => {
     const dbPath = getOmpDbPath();
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     // Valid sqlite file, but no auth_credentials table at all.
-    const db = new Database(dbPath);
+    const db = openBetterSqlite3(dbPath);
     db.exec("CREATE TABLE unrelated (id INTEGER)");
     db.close();
 
@@ -93,39 +107,43 @@ describe("db/omp.ts — getOmpCredentials", () => {
   });
 });
 
-describe("db/omp.ts — saveOmpCredentials + getOmpCredentials round trip", () => {
-  it("persists apiKey/baseUrl so a subsequent read sees them", () => {
-    seedOmpDb();
+describe(
+  "db/omp.ts — saveOmpCredentials + getOmpCredentials round trip",
+  { skip: skipReason },
+  () => {
+    it("persists apiKey/baseUrl so a subsequent read sees them", () => {
+      seedOmpDb();
 
-    saveOmpCredentials(PROVIDER_ID, "sk-test-omp-key", "http://localhost:20128/v1");
+      saveOmpCredentials(PROVIDER_ID, "sk-test-omp-key", "http://localhost:20128/v1");
 
-    const creds = getOmpCredentials(PROVIDER_ID);
-    assert.equal(creds.hasOmniRoute, true);
-    assert.equal(creds.apiKey, "sk-test-omp-key");
-    assert.equal(creds.baseUrl, "http://localhost:20128/v1");
-  });
+      const creds = getOmpCredentials(PROVIDER_ID);
+      assert.equal(creds.hasOmniRoute, true);
+      assert.equal(creds.apiKey, "sk-test-omp-key");
+      assert.equal(creds.baseUrl, "http://localhost:20128/v1");
+    });
 
-  it("overwrites an existing row for the same provider instead of duplicating it", () => {
-    seedOmpDb();
+    it("overwrites an existing row for the same provider instead of duplicating it", () => {
+      seedOmpDb();
 
-    saveOmpCredentials(PROVIDER_ID, "sk-old-key", "http://localhost:20128/v1");
-    saveOmpCredentials(PROVIDER_ID, "sk-new-key", "http://localhost:20129/v1");
+      saveOmpCredentials(PROVIDER_ID, "sk-old-key", "http://localhost:20128/v1");
+      saveOmpCredentials(PROVIDER_ID, "sk-new-key", "http://localhost:20129/v1");
 
-    const dbPath = getOmpDbPath();
-    const db = new Database(dbPath, { readonly: true });
-    const rows = db
-      .prepare("SELECT data FROM auth_credentials WHERE provider = ?")
-      .all(PROVIDER_ID) as { data: string }[];
-    db.close();
+      const dbPath = getOmpDbPath();
+      const db = openBetterSqlite3(dbPath, { readonly: true });
+      const rows = db
+        .prepare("SELECT data FROM auth_credentials WHERE provider = ?")
+        .all(PROVIDER_ID) as { data: string }[];
+      db.close();
 
-    assert.equal(rows.length, 1, "must not accumulate duplicate rows for the same provider");
-    const parsed = JSON.parse(rows[0].data);
-    assert.equal(parsed.apiKey, "sk-new-key");
-    assert.equal(parsed.baseUrl, "http://localhost:20129/v1");
-  });
-});
+      assert.equal(rows.length, 1, "must not accumulate duplicate rows for the same provider");
+      const parsed = JSON.parse(rows[0].data);
+      assert.equal(parsed.apiKey, "sk-new-key");
+      assert.equal(parsed.baseUrl, "http://localhost:20129/v1");
+    });
+  }
+);
 
-describe("db/omp.ts — deleteOmpCredentials", () => {
+describe("db/omp.ts — deleteOmpCredentials", { skip: skipReason }, () => {
   it("removes the row so a subsequent get reports hasOmniRoute:false", () => {
     seedOmpDb();
     saveOmpCredentials(PROVIDER_ID, "sk-test-omp-key", "http://localhost:20128/v1");

@@ -130,6 +130,7 @@ import {
   PROVIDER_MODELS_CONFIG,
 } from "./discovery/providerModelsConfig";
 import {
+  buildCodexLocalFallbackCatalog,
   enrichCodexModelsFromGithubCatalog,
   fetchCodexDiscoveryModels,
   fetchCodexGithubCatalogModels,
@@ -2078,7 +2079,7 @@ export async function GET(
         return buildResponse({
           provider,
           connectionId,
-          models: finalizeCodexCatalog([]),
+          models: buildCodexLocalFallbackCatalog(staticCodexCatalog),
           source: "local_catalog",
           warning: "Auto-fetch disabled — using local catalog",
         });
@@ -2110,20 +2111,12 @@ export async function GET(
             ? enrichCodexModelsFromGithubCatalog(liveModels, githubCatalogModels)
             : liveModels;
         const catalog = reconcileCodexCatalog(enrichedLiveModels);
-        return buildApiDiscoveryResponse(catalog.activeModels, undefined, {
-          discovery: { mode: codexDiscoveryMode },
-          ...(includeCandidates ? { candidateModels: catalog.candidateModels } : {}),
-        });
-      }
-
-      if (githubCatalogModels && githubCatalogModels.length > 0) {
-        const catalog = reconcileCodexCatalog(githubCatalogModels, "github");
+        await persistDiscoveredModels(provider, connectionId, catalog.activeModels);
         return buildResponse({
           provider,
           connectionId,
           models: catalog.activeModels,
-          source: "github_catalog",
-          warning: "Codex live catalog unavailable — using GitHub model catalog",
+          source: "api",
           discovery: { mode: codexDiscoveryMode },
           ...(includeCandidates ? { candidateModels: catalog.candidateModels } : {}),
         });
@@ -2139,10 +2132,23 @@ export async function GET(
           warning: "Codex live catalog unavailable — using cached catalog",
         });
       }
+      if (githubCatalogModels && githubCatalogModels.length > 0) {
+        const catalog = reconcileCodexCatalog(githubCatalogModels, "github");
+        return buildResponse({
+          provider,
+          connectionId,
+          models: catalog.activeModels,
+          source: "github_catalog",
+          warning: "Codex live catalog unavailable — using GitHub model catalog",
+          discovery: { mode: codexDiscoveryMode },
+          ...(includeCandidates ? { candidateModels: catalog.candidateModels } : {}),
+        });
+      }
+
       return buildResponse({
         provider,
         connectionId,
-        models: finalizeCodexCatalog([]),
+        models: buildCodexLocalFallbackCatalog(staticCodexCatalog),
         source: "local_catalog",
         intentional: true,
         warning: "Codex live and GitHub catalogs unavailable — using local catalog",

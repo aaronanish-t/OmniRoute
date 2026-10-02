@@ -4,6 +4,7 @@ import { MockAgent, fetch } from "undici";
 import {
   buildSocksFamilySocketOptions,
   createSocksDispatcherWithFamily,
+  socksConnectorWithFamily,
 } from "../../open-sse/utils/socksConnectorWithFamily.ts";
 
 describe("socksConnectorWithFamily", () => {
@@ -46,4 +47,22 @@ it("SOCKS dispatch disables HTTP/2 even when the caller enables it", async () =>
     await dispatcher.close();
     await mockAgent.close();
   }
+});
+
+// The custom connect bypasses Agent.allowH2; the TLS connector itself must not offer h2 via ALPN.
+it("SOCKS TLS connector is built with allowH2:false", () => {
+  let built: Record<string, unknown> | undefined;
+  const fakeBuild = ((opts: Record<string, unknown>) => {
+    built = opts;
+    return () => {};
+  }) as never;
+  socksConnectorWithFamily(
+    { host: "127.0.0.1", port: 1080, type: 5 },
+    4,
+    { allowH2: true } as never,
+    5000,
+    fakeBuild
+  );
+  assert.equal(built?.allowH2, false);
+  assert.equal(built?.timeout, 5000);
 });

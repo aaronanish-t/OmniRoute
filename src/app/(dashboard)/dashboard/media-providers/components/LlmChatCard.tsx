@@ -13,6 +13,8 @@ import { cn } from "@/shared/utils/cn";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { useProviderModels } from "../../providers/hooks/useProviderModels";
 import { getProviderAlias } from "@/shared/constants/providers";
+import { playgroundMessagesStorageKey } from "./llmChatStorage";
+import { usePersistedPlaygroundMessages } from "./usePersistedPlaygroundMessages";
 
 const ENDPOINT = "/api/v1/chat/completions";
 
@@ -167,11 +169,23 @@ export function LlmChatCard({
     [onModelChange]
   );
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState<string>("");
+  const storageKey = playgroundMessagesStorageKey(providerId, selectedKey);
+
   const [streaming, setStreaming] = useState<boolean>(false);
-  const [stats, setStats] = useState<Stats | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const abortInFlight = useCallback(() => {
+    const controller = abortRef.current;
+    controller?.abort();
+    return controller !== null;
+  }, []);
+  const [messages, setMessages] = usePersistedPlaygroundMessages(
+    storageKey,
+    streaming,
+    abortInFlight
+  );
+
+  const [input, setInput] = useState<string>("");
+  const [stats, setStats] = useState<Stats | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -348,7 +362,7 @@ export function LlmChatCard({
       // Refocus textarea so user can keep typing
       requestAnimationFrame(() => textareaRef.current?.focus());
     }
-  }, [input, streaming, selectedKey, keys, providerId, qualifiedModel, messages, t]);
+  }, [input, streaming, selectedKey, keys, providerId, qualifiedModel, messages, setMessages, t]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -365,7 +379,7 @@ export function LlmChatCard({
     if (streaming) abortRef.current?.abort();
     setMessages([]);
     setStats(null);
-  }, [streaming]);
+  }, [streaming, setMessages]);
 
   useImperativeHandle(
     controlsRef,
@@ -407,7 +421,9 @@ export function LlmChatCard({
               disabled={loading}
               className="min-w-0 flex-1 rounded-md border border-border bg-bg-subtle text-xs px-2 py-1 text-text-main focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60"
             >
-              {modelOptions.length === 0 && !loading && <option value="">{initialModel || "—"}</option>}
+              {modelOptions.length === 0 && !loading && (
+                <option value="">{initialModel || "—"}</option>
+              )}
               {loading && <option value="">{t("loading") ?? "Loading…"}</option>}
               {modelOptions.map((m) => (
                 <option key={m.id} value={m.id}>

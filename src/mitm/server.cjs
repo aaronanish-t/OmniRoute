@@ -5,6 +5,22 @@ const path = require("path");
 const dns = require("dns");
 const { promisify } = require("util");
 const os = require("os");
+const zlib = require("node:zlib");
+function decodeChatBody(req, raw) {
+  if (!String(req.url || "").includes("/v1/messages")) return raw;
+  const encoding = String(req.headers["content-encoding"] || "identity").toLowerCase();
+  const options = { maxOutputLength: 64 * 1024 * 1024 };
+  try {
+    if (encoding === "gzip") return zlib.gunzipSync(raw, options);
+    if (encoding === "deflate") return zlib.inflateSync(raw, options);
+    if (encoding === "br") return zlib.brotliDecompressSync(raw, options);
+    if (encoding === "zstd" && zlib.zstdDecompressSync)
+      return zlib.zstdDecompressSync(raw, options);
+  } catch {
+    /* Preserve malformed or unsupported bodies for normal passthrough. */
+  }
+  return raw;
+}
 
 // Resolve data directory — mirrors src/lib/dataPaths.ts logic.
 // This file runs as a standalone CommonJS process and cannot import the ES module.
@@ -87,6 +103,12 @@ function loadDynamicTargets() {
 }
 // T-A-F3: load dynamic targets at startup; antigravity baseline remains intact.
 const _dynamicAdded = loadDynamicTargets();
+// Select the configured owner when multiple agents share Anthropic's API host.
+if (process.env.MITM_TARGET_AGENT && TARGET_HOSTS.has("api.anthropic.com")) {
+  if (["claude-code", "kiro"].includes(process.env.MITM_TARGET_AGENT)) {
+    TARGET_HOST_AGENT.set("api.anthropic.com", process.env.MITM_TARGET_AGENT);
+  }
+}
 if (_dynamicAdded > 0) {
   console.log(`[MITM] Loaded ${_dynamicAdded} additional host(s) from targets.json`);
 }
@@ -562,9 +584,35 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
     res.once("close", onDownstreamClose);
     let reader = null;
     try {
-      const response = await fetch(forward.url, {
+      const forwardUrl = new URL(forward.url);
+      if (agentId === "claude-code")
+        forwardUrl.search = new URL(req.url, "https://api.anthropic.com").search;
+      const retainedHeaders = {};
+      const excludedHeaders = new Set([
+        "host",
+        "authorization",
+        "x-api-key",
+        "cookie",
+        "content-encoding",
+        "content-length",
+        "connection",
+        "transfer-encoding",
+        "accept-encoding",
+        "proxy-authorization",
+        "proxy-connection",
+        "keep-alive",
+        "te",
+        "trailer",
+        "upgrade",
+      ]);
+      for (const [name, value] of Object.entries(req.headers)) {
+        if (!excludedHeaders.has(name.toLowerCase()) && value !== undefined)
+          retainedHeaders[name] = value;
+      }
+      const response = await fetch(forwardUrl, {
         method: "POST",
         headers: {
+          ...retainedHeaders,
           "Content-Type": "application/json",
           Authorization: `Bearer ${API_KEY}`,
           "x-omniroute-source": "agent-bridge",
@@ -577,19 +625,30 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
       captureStatus = response.status;
       respHeaders = headersToObject(response.headers);
 
+      const clientHeaders = {};
+      const excludedResponseHeaders = new Set([
+        "connection",
+        "transfer-encoding",
+        "content-length",
+        "content-encoding",
+        "keep-alive",
+        "te",
+        "trailer",
+        "upgrade",
+        "set-cookie",
+      ]);
+      for (const [name, value] of response.headers.entries()) {
+        if (!excludedResponseHeaders.has(name.toLowerCase())) clientHeaders[name] = value;
+      }
+      clientHeaders["x-accel-buffering"] = "no";
+      res.writeHead(response.status, clientHeaders);
       if (!response.ok) {
         const errText = await response.text().catch(() => "");
         respBody = errText.slice(0, INGEST_MAX_BODY);
         respSize = Buffer.byteLength(errText);
-        throw new Error(`OmniRoute ${response.status}: ${errText}`);
+        res.end(errText);
+        return;
       }
-
-      res.writeHead(200, {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        "X-Accel-Buffering": "no",
-      });
 
       reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -674,11 +733,24 @@ async function startMitmServer() {
     CERT_MODE === "root-ca" ? await loadRootCaSslOptions() : loadLegacySslOptions();
 
   const server = https.createServer(sslOptions, async (req, res) => {
+    if (req.method === "GET" && req.url === "/__omniroute_bridge_health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          ok: true,
+          transportVersion: 1,
+          port: LOCAL_PORT,
+          targetAgent: process.env.MITM_TARGET_AGENT || null,
+        })
+      );
+      return;
+    }
     stats.totalRequests++;
     stats.lastRequestAt = new Date().toISOString();
     writeStats();
 
-    const bodyBuffer = await collectBodyRaw(req);
+    const rawBodyBuffer = await collectBodyRaw(req);
+    const bodyBuffer = decodeChatBody(req, rawBodyBuffer);
     const host = String(req.headers.host || "")
       .split(":")[0]
       .toLowerCase();
@@ -693,12 +765,12 @@ async function startMitmServer() {
 
     if (req.headers["x-omniroute-source"] === "omniroute") {
       vlog(1, `[MITM] → PASSTHROUGH (OmniRoute source loop)`);
-      return passthrough(req, res, bodyBuffer);
+      return passthrough(req, res, rawBodyBuffer);
     }
 
     if (!TARGET_HOSTS.has(host)) {
       vlog(1, `[MITM] → PASSTHROUGH (host ${host} not in target list)`);
-      return passthrough(req, res, bodyBuffer);
+      return passthrough(req, res, rawBodyBuffer);
     }
 
     const agentId = TARGET_HOST_AGENT.get(host) || "antigravity";
@@ -736,14 +808,14 @@ async function startMitmServer() {
 
     if (!isChatRequest) {
       vlog(1, `[MITM] → PASSTHROUGH (URL ${req.url} does not match chat patterns)`);
-      return passthrough(req, res, bodyBuffer);
+      return passthrough(req, res, rawBodyBuffer);
     }
 
     const mappedOverride = getMappedOverride(model, agentId);
 
     if (!mappedOverride) {
       vlog(1, `[MITM] → PASSTHROUGH (model "${model}" has no MITM alias mapping)`);
-      return passthrough(req, res, bodyBuffer);
+      return passthrough(req, res, rawBodyBuffer);
     }
 
     stats.interceptedRequests++;
@@ -898,7 +970,7 @@ async function startMitmServer() {
   server.headersTimeout = MITM_IDLE_TIMEOUT_MS; // time allowed to send headers
   server.keepAliveTimeout = MITM_IDLE_TIMEOUT_MS; // idle keep-alive window
 
-  server.listen(LOCAL_PORT, () => {
+  server.listen(LOCAL_PORT, process.env.MITM_LOCAL_HOST || "127.0.0.1", () => {
     stats.startedAt = new Date().toISOString();
     writeStats();
     console.log(`🚀 MITM ready on :${LOCAL_PORT} → ${ROUTER_URL}`);

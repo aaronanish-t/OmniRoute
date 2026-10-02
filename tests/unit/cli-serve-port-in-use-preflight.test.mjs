@@ -74,6 +74,20 @@ test("findListeningPids reports the PID holding the port (posix lsof)", async ()
   assert.deepEqual(pids, [4242, 4243]);
 });
 
+test("findListeningPids only queries TCP listeners on POSIX", async () => {
+  const calls = [];
+  const pids = await findListeningPids(20128, {
+    platform: "darwin",
+    execFileAsync: async (command, args) => {
+      calls.push([command, args]);
+      // A connected client is visible to an unfiltered query even with no server.
+      return { stdout: args.includes("-sTCP:LISTEN") ? "" : "1687\n" };
+    },
+  });
+  assert.deepEqual(pids, [], "a client connection must not block restarting serve");
+  assert.deepEqual(calls, [["lsof", ["-nP", "-t", "-iTCP:20128", "-sTCP:LISTEN"]]]);
+});
+
 test("findListeningPids treats an empty lsof result as a free port", async () => {
   const noMatch = Object.assign(new Error("lsof exited with no matches"), {
     code: 1,

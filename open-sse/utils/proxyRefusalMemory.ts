@@ -60,6 +60,7 @@ export const REFUSAL_POLICIES: {
   ip_quota_429: RefusalPolicy;
   transport: { baseMs: 60_000; maxMs: 600_000 };
   slow: { baseMs: 60_000; maxMs: 600_000 };
+  geo_blocked: { baseMs: 60_000; maxMs: 600_000 };
 } = {
   /** The TCP probe could not open a connection to the proxy. */
   proxy_unreachable: { baseMs: 60_000, maxMs: 600_000 },
@@ -77,6 +78,8 @@ export const REFUSAL_POLICIES: {
    * a refused probe, kept apart from the quota curve.
    */
   slow: { baseMs: 60_000, maxMs: 600_000 },
+  /** The provider refused this region through this member; short set-aside. */
+  geo_blocked: { baseMs: 60_000, maxMs: 600_000 },
 };
 
 export type ProxyRefusalKind = keyof typeof REFUSAL_POLICIES;

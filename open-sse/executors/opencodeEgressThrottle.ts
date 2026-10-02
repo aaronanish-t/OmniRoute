@@ -24,6 +24,7 @@ import {
   noteProxyRefusal,
   proxyEgressKey,
   recordSlowOverrun,
+  type ProxyRefusalKind,
 } from "../utils/proxyRefusalMemory.ts";
 
 export const DIRECT_EGRESS_SENTINEL = "direct";
@@ -162,7 +163,11 @@ export interface AppliedEgressTracker {
   keyOfMember: (account: AppliedEgressAccount) => string | null;
   resetAttempt: () => void;
   rememberServed: (account: AppliedEgressAccount) => void;
-  noteRefused: (account: AppliedEgressAccount, skipRecentlyFailed: boolean) => number | null;
+  noteRefused: (
+    account: AppliedEgressAccount,
+    skipRecentlyFailed: boolean,
+    kind?: ProxyRefusalKind
+  ) => number | null;
 }
 
 /**
@@ -197,8 +202,11 @@ export function createAppliedEgressTracker(
     if (attemptAmbientKey === undefined) attemptAmbientKey = resolveAmbientKey();
     return attemptAmbientKey;
   };
-  const noteRefused = (a: AppliedEgressAccount, skipRecentlyFailed: boolean) =>
-    noteRefusedMember(a.proxy, skipRecentlyFailed, readAppliedKey, a.fingerprint);
+  const noteRefused = (
+    a: AppliedEgressAccount,
+    skipRecentlyFailed: boolean,
+    kind: ProxyRefusalKind = "ip_quota_429"
+  ) => noteRefusedMember(a.proxy, skipRecentlyFailed, readAppliedKey, a.fingerprint, kind);
   return {
     readAppliedKey,
     keyOfMember: (a) => (a.proxy !== null ? proxyEgressKey(a.proxy) : readAppliedKey(a)),
@@ -494,7 +502,8 @@ export function noteRefusedMember(
   proxy: { host: string; port: number } | null,
   skipRecentlyFailed: boolean,
   readApplied?: AppliedEgressReader | null,
-  fingerprint?: string
+  fingerprint?: string,
+  kind: ProxyRefusalKind = "ip_quota_429"
 ): number | null {
   if (!skipRecentlyFailed) return null;
   const key =
@@ -502,7 +511,7 @@ export function noteRefusedMember(
       ? proxyEgressKey(proxy)
       : resolveAppliedEgressKey({ proxy, fingerprint }, readApplied);
   if (key === null || key === DIRECT_EGRESS_SENTINEL) return null;
-  return noteProxyRefusal(key, "ip_quota_429");
+  return noteProxyRefusal(key, kind);
 }
 
 /**
@@ -580,6 +589,26 @@ export function releasePacingSlot(release: (() => void) | null): void {
 }
 
 /**
+ * Log one refused-member outcome on the request logger. The wording lives
+ * here so each arm holds one call; the loop control stays at the seam.
+ */
+export function logRefusedOutcome(
+  log: { warn?: (tag: string, message: string) => void } | undefined,
+  cid: string,
+  masked: string,
+  setAsideMs: number | null,
+  refusal: "geo-blocked" | "burst 429"
+): void {
+  log?.warn?.(
+    "OPENCODE",
+    `${cid}${refusal} on account ${masked}` +
+      (setAsideMs ? `, member set aside for ${Math.round(setAsideMs / 1000)}s` : "") +
+      ", rotating" +
+      (refusal === "burst 429" ? " to next" : "") +
+      "…"
+  );
+}
+/**
  * Log one 429 outcome on the request logger. The stop/park/rotate wording
  * lives here so the arm holds one call; the loop control stays at the seam.
  */
@@ -598,12 +627,7 @@ export function log429Outcome(
       `${cid}fleet backing off: slot budget used, parking (returning last answer)`
     );
   } else {
-    log?.warn?.(
-      "OPENCODE",
-      `${cid}burst 429 on account ${masked}` +
-        (setAsideMs ? `, member set aside for ${Math.round(setAsideMs / 1000)}s` : "") +
-        ", rotating to next…"
-    );
+    logRefusedOutcome(log, cid, masked, setAsideMs, "burst 429");
   }
 }
 /**

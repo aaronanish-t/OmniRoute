@@ -130,6 +130,9 @@ import { sanitizeReasoningEffortForProvider } from "./base/reasoningEffort.ts";
 export { sanitizeReasoningEffortForProvider } from "./base/reasoningEffort.ts";
 import { mergeAbortSignals } from "./base/mergeAbortSignals.ts";
 export { mergeAbortSignals } from "./base/mergeAbortSignals.ts";
+import { assertValidationCredentials, validationFetch } from "./base/validationDispatch.ts";
+import type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
+export type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
 
 function parseSerializedBody(bodyString: string): unknown {
@@ -176,19 +179,6 @@ export type ProviderConfig = {
   format?: string;
 };
 
-export type ProviderCredentials = {
-  accessToken?: string;
-  refreshToken?: string;
-  apiKey?: string;
-  email?: string | null;
-  projectId?: string | null;
-  expiresAt?: string;
-  connectionId?: string; // T07: used for API key rotation index
-  maxConcurrent?: number | null;
-  providerSpecificData?: JsonRecord;
-  requestEndpointPath?: string;
-};
-
 export type ExecutorLog = {
   debug?: (tag: string, message: string) => void;
   info?: (tag: string, message: string) => void;
@@ -222,6 +212,8 @@ export type ExecuteInput = {
   ) => Promise<void> | void;
   /** When true, skip the intra-URL 429 retry in execute() so the caller handles fallback. */
   skipUpstreamRetry?: boolean;
+  /** In-process capability; never accepted from an HTTP body or client header. */
+  validationDispatch?: StrictValidationDispatch;
   /** Request-scoped id for log attribution; absent off the chat path, never fabricated. */
   correlationId?: string | null;
   /** Delegated Context Editing (Claude only): when enabled, attach the
@@ -734,6 +726,7 @@ export class BaseExecutor {
       onCredentialsRefreshed,
       contextEditing,
     } = input;
+    assertValidationCredentials(input.validationDispatch, credentials);
     const fallbackCount = this.getFallbackCount();
     let lastError: unknown = null;
     let lastStatus = 0;
@@ -747,6 +740,8 @@ export class BaseExecutor {
     // routing state untouched; the reactive 401/403 path is probe-guarded
     // in chatCore (#9817).
     if (!isProbeContext() && this.needsRefresh(credentials)) {
+      // Outside the refresh catch below, which would swallow the rejection.
+      input.validationDispatch?.reject();
       try {
         // Fix A: wire onCredentialsRefreshed through runWithOnPersist so it runs
         // INSIDE the per-connection mutex inside getAccessToken. Not every
@@ -969,7 +964,12 @@ export class BaseExecutor {
             : requestOptions;
 
           try {
-            return await fetch(requestUrl, optionsWithSignal);
+            return await validationFetch(
+              input.validationDispatch,
+              this.provider,
+              model,
+              requestCredentials
+            )(requestUrl, optionsWithSignal);
           } finally {
             if (timeoutId) clearTimeout(timeoutId);
           }

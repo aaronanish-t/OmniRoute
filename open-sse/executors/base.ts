@@ -17,9 +17,6 @@ import {
 import { applyContextEditingToBody } from "../config/contextEditing.ts";
 import { createCopilotIdentityFallback } from "./copilotIdentityFallback.ts";
 import {
-  findOffendingField,
-  detectUnsupportedParam,
-  isAdvisorUndecryptableError,
   replaceRedactedAdvisorResults,
   stripGroqUnsupportedFields,
 } from "../config/providerFieldStrips.ts";
@@ -27,11 +24,6 @@ import {
   recordLearnedThinkingCap,
   parseThinkingBudgetMax,
 } from "../services/learnedThinkingCaps.ts";
-import {
-  getParamFilterConfig,
-  addParamToBlocklist,
-  isAutoLearnGloballyEnabled,
-} from "@/lib/db/paramFilters";
 import { applyFingerprint, isCliCompatEnabled, stripInternalBodyFields } from "../config/cliFingerprints.ts"; // prettier-ignore
 import { getThinkingBudgetConfig, ThinkingMode } from "../services/thinkingBudget.ts";
 import {
@@ -134,6 +126,8 @@ import { assertValidationCredentials, validationFetch } from "./base/validationD
 import type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 export type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
+import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
+import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
 
 function parseSerializedBody(bodyString: string): unknown {
   try {
@@ -1556,6 +1550,14 @@ export class BaseExecutor {
           }
         }
 
+        const serializeRetryBody = async (b: unknown) => {
+          let retryBody = JSON.stringify(b);
+          if (usesClaudeCodeProtocol || this.provider === "claude") {
+            retryBody = await signRequestBody(retryBody);
+          }
+          return retryBody;
+        };
+
         // Reasoning-effort enum 4xx clamp-and-retry (any provider/model without a
         // declared reasoning_effort capability — custom OpenAI-compatible
         // connections, or a registered provider the registry hasn't caught up
@@ -1579,13 +1581,7 @@ export class BaseExecutor {
             body: transformedBody,
             fetchOptions,
             fetchFn: fetchWithStartTimeout,
-            serializeBody: async (b) => {
-              let retryBody = JSON.stringify(b);
-              if (usesClaudeCodeProtocol || this.provider === "claude") {
-                retryBody = await signRequestBody(retryBody);
-              }
-              return retryBody;
-            },
+            serializeBody: serializeRetryBody,
             log,
           });
           if (recovery.attempted) reasoningEffortClamped = true;
@@ -1594,93 +1590,33 @@ export class BaseExecutor {
         }
 
         // Generic reactive 400 field-downgrade; each field is stripped at most once.
-        if (
-          response.status === HTTP_STATUS.BAD_REQUEST &&
-          transformedBody &&
-          typeof transformedBody === "object"
-        ) {
-          const errText = await response
-            .clone()
-            .text()
-            .catch(() => "");
-          const offending = findOffendingField(errText);
-          if (
-            offending &&
-            !strippedFields.has(offending) &&
-            (transformedBody as Record<string, unknown>)[offending] !== undefined
-          ) {
-            strippedFields.add(offending);
-            delete (transformedBody as Record<string, unknown>)[offending];
-            let retryBody = JSON.stringify(transformedBody);
-            if (usesClaudeCodeProtocol || this.provider === "claude") {
-              retryBody = await signRequestBody(retryBody);
-            }
-            log?.debug?.(
-              "FIELD_400",
-              `Upstream 400 rejected ${offending} on ${url} — retrying without it`
-            );
-            response = await fetchWithStartTimeout(url, { ...fetchOptions, body: retryBody });
-          } else {
-            // Auto-learn: detect "Unsupported parameter" errors and persist to DB
-            // when the provider config has autoLearn enabled (#6625).
-            const autoLearned = detectUnsupportedParam(errText);
-            if (
-              autoLearned &&
-              !strippedFields.has(autoLearned) &&
-              (transformedBody as Record<string, unknown>)[autoLearned] !== undefined
-            ) {
-              try {
-                const config = getParamFilterConfig(this.provider);
-                const shouldAutoLearn = isAutoLearnGloballyEnabled() || config?.autoLearn === true;
-                if (shouldAutoLearn) {
-                  strippedFields.add(autoLearned);
-                  addParamToBlocklist(this.provider, autoLearned, model);
-                  delete (transformedBody as Record<string, unknown>)[autoLearned];
-                  let retryBody = JSON.stringify(transformedBody);
-                  if (usesClaudeCodeProtocol || this.provider === "claude") {
-                    retryBody = await signRequestBody(retryBody);
-                  }
-                  log?.info?.(
-                    "AUTO_LEARN",
-                    `Auto-learned "${autoLearned}" for provider ${this.provider} (model: ${model}) from 400 on ${url} — retrying`
-                  );
-                  response = await fetchWithStartTimeout(url, { ...fetchOptions, body: retryBody });
-                }
-              } catch (learnError) {
-                log?.warn?.(
-                  "AUTO_LEARN",
-                  `Failed to persist auto-learned param "${autoLearned}" for ${this.provider}: ${String(learnError)}`
-                );
-              }
-            }
-          }
-        }
+        response = await applyFieldDowngradeRecovery({
+          response,
+          url,
+          provider: this.provider,
+          model,
+          body: transformedBody,
+          fetchOptions,
+          fetchFn: fetchWithStartTimeout,
+          serializeBody: serializeRetryBody,
+          strippedFields,
+          log,
+        });
 
-        if (
-          !advisorResultsReplaced &&
-          response.status === HTTP_STATUS.BAD_REQUEST &&
-          transformedBody &&
-          typeof transformedBody === "object"
-        ) {
-          const errText = await response
-            .clone()
-            .text()
-            .catch(() => "");
-          if (isAdvisorUndecryptableError(errText)) {
-            const { body: replacedBody, replaced } = replaceRedactedAdvisorResults(transformedBody);
-            if (replaced > 0) {
-              advisorResultsReplaced = true;
-              transformedBody = replacedBody;
-              let retryBody = JSON.stringify(transformedBody);
-              if (usesClaudeCodeProtocol || this.provider === "claude") {
-                retryBody = await signRequestBody(retryBody);
-              }
-              log?.info?.(
-                "ADVISOR_UNDECRYPTABLE",
-                `Upstream 400 could not decrypt ${replaced} advisor result(s) on ${url}, retrying with them marked unavailable`
-              );
-              response = await fetchWithStartTimeout(url, { ...fetchOptions, body: retryBody });
-            }
+        if (!advisorResultsReplaced) {
+          const advisorRecovery = await applyAdvisorUndecryptableRecovery({
+            response,
+            url,
+            body: transformedBody,
+            fetchOptions,
+            fetchFn: fetchWithStartTimeout,
+            serializeBody: serializeRetryBody,
+            log,
+          });
+          if (advisorRecovery.replaced) {
+            advisorResultsReplaced = true;
+            transformedBody = advisorRecovery.body;
+            response = advisorRecovery.response;
           }
         }
 

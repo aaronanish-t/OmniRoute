@@ -328,8 +328,7 @@ RTK mode is inspired by **[RTK - Rust Token Killer](https://github.com/rtk-ai/rt
 
 ## Advanced Compression Systems
 
-Beyond the 7 standard modes, OmniRoute includes several advanced compression
-systems that work automatically based on context.
+Beyond the 7 standard modes, OmniRoute includes several advanced compression systems.
 
 ### Cache-Aware Compression
 
@@ -421,14 +420,24 @@ particularly effective for:
 
 ### Caveman Output Mode
 
-The `outputMode.ts` module injects **system prompt instructions** to make the
-model itself produce compressed, terse output (a "caveman" style).
+Caveman output mode adds **system prompt instructions** that make the model itself
+produce compressed, terse output (a "caveman" style). Requests receive them through
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
+`open-sse/handlers/chatCore.ts` first resolves the selection with the back-compat shim
+(`resolveOutputStyleSelection()` in
+`open-sse/services/compression/outputStyles/backCompat.ts`), which maps this mode to the
+`terse-prose` output style (see Back-compat below). `outputMode.ts` holds the instruction
+texts (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), the content bypass and the placement helper
+that injection uses; its own `applyCavemanOutputMode()` injector has no production
+caller.
 
 #### How it works
 
-Instead of compressing the input, this mode adds a system prompt like:
+Instead of compressing the input, this mode adds an instruction block to the system
+prompt (see How injection works below). Ahead of the shared boundaries clause that every
+level ends with, the English `full` level reads:
 
-> "Reply in minimal words. Skip pleasantries. Use short sentences."
+> "Respond terse like smart caveman. Drop articles (a/an/the), filler (just/really/basically/actually/simply), pleasantries, hedging. Fragments OK. Short synonyms (big not extensive, fix not implement). Keep all technical substance, code, errors, URLs, identifiers exact."
 
 This works particularly well for:
 
@@ -467,18 +476,23 @@ into a catalog of composable output styles: `OUTPUT_STYLE_CATALOG` in
 instruction that makes the model itself produce cheaper output; styles can be enabled
 together and are injected in catalog order.
 
-| Style                      | `id`          | What it does                                                                                                                                                                                                 | Instruction languages                                              |
-| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Terse prose                | `terse-prose` | Drop filler/articles/hedging; keep technical substance exact. Same text as the legacy caveman output mode (referenced, not re-typed).                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                      |
-| Less code                  | `less-code`   | YAGNI ladder: smallest working change, no unrequested abstractions.                                                                                                                                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                      |
-| Ponytail (lazy senior dev) | `ponytail`    | "The best code is the code never written": reuse > rewrite, root cause > symptom, shortest working diff.                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                      |
-| I have ADHD (action-first) | `i-have-adhd` | Action first (command/path/snippet before prose), numbered bounded steps, ONE concrete next step, no preamble/recap/closers. Adapted from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                      |
-| Terse CJK (文言)           | `terse-cjk`   | Classical-Chinese ultra-terse style.                                                                                                                                                                         | zh (locale-gated: only offered when the resolved language is `zh`) |
+| Style                      | `id`          | What it does                                                                                                                                                                                                 | Instruction languages                         |
+| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Terse prose                | `terse-prose` | Drop filler/articles/hedging; keep technical substance exact. Same text as the legacy caveman output mode (referenced, not re-typed).                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Less code                  | `less-code`   | YAGNI ladder: smallest working change, no unrequested abstractions.                                                                                                                                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (lazy senior dev) | `ponytail`    | "The best code is the code never written": reuse > rewrite, root cause > symptom, shortest working diff.                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| I have ADHD (action-first) | `i-have-adhd` | Action first (command/path/snippet before prose), numbered bounded steps, ONE concrete next step, no preamble/recap/closers. Adapted from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (文言)           | `terse-cjk`   | Classical-Chinese ultra-terse style.                                                                                                                                                                         | zh (locale-gated, see below)                  |
 
 Every style ships three intensity levels — `lite`, `full`, `ultra` — and every level
 ends with the shared boundaries clause (`SHARED_BOUNDARIES` in `outputMode.ts`), which
 keeps code blocks, file paths, commands, errors and URLs exact. The `terse-prose` and
 `terse-cjk` level texts add identifiers to that list.
+
+`terse-cjk` is locale-gated to `zh` in two places. The Compression Settings page lists
+its row only when the dashboard UI language is Chinese (`zh-CN` or `zh-TW`), and
+`applyOutputStyles()` injects it only when the request's resolved language (see Language
+selection below) is `zh`.
 
 #### How injection works
 
@@ -491,7 +505,7 @@ single idempotency marker (`[OmniRoute Output Styles]`), so re-applying is a no-
 the resolved language (see Language selection below) has a translation, the localized
 instruction is injected instead of English.
 
-On a body with `messages`, a content bypass (`shouldBypassCavemanOutputMode()` in
+On a body with a non-empty `messages` array, a content bypass (`shouldBypassCavemanOutputMode()` in
 `open-sse/services/compression/outputMode.ts`) checks the last three messages and skips
 the styles for the whole turn when they match its security, irreversible-action,
 clarification, or order-sensitive keywords. The bypass runs while the **Auto-Clarity
@@ -508,9 +522,10 @@ never creates a new `messages[0]`, places the block in the first of these it fin
    text.
 4. None of the above: the block goes into a new system message at the end of `messages`.
 
-On a body without `messages`, the block is appended to a string `instructions` field,
-or becomes `instructions` when the body carries `input` (a string or an array). A body
-with neither `instructions` nor `input` is skipped as `no_messages`.
+On a body without `messages`, or with an empty `messages` array, the block is appended
+to a string `instructions` field, or becomes `instructions` when the body carries `input`
+(a string or an array). A body with neither `instructions` nor `input` is skipped as
+`no_messages`.
 
 #### How to enable
 
@@ -539,31 +554,53 @@ extra space before the boundaries clause. `terse-prose` translates into pt-BR, e
 fr, it, ru, zh, ja, id and vi, so a request whose resolved language is `hu` gets the
 English text where the legacy injector used its Hungarian one.
 
-Language selection: with `languageConfig.enabled` on, `autoDetect` picks the
-language of the latest user message (same detector as the input engines);
-turning `autoDetect` off pins `defaultLanguage`. Off → English.
+Language selection: with `languageConfig.enabled` on, `autoDetect` picks the language
+of the latest user message that has text (string content, or the `text` of its content
+parts), using the Caveman engine's detector (`detectCompressionLanguage()`). When no user
+message has text, or with `autoDetect` off, `defaultLanguage` applies, then English. With
+`languageConfig.enabled` off, the language is English.
 
 The style × language matrix is pinned by
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: a new style cannot ship
-without at least a pt-BR translation (or an explicit tracked exception), and an
-existing style cannot silently lose a locale. To add a style, see
+`tests/unit/compression/output-styles-i18n-matrix.test.ts`: every catalog style needs an
+entry in the test's `BASELINE_LANGUAGES`; a style that is not locale-gated must ship a
+pt-BR translation unless it is listed in `KNOWN_ENGLISH_ONLY` (locale-gated styles such as
+`terse-cjk` are exempt); and a style fails the test when it loses a language that its
+`BASELINE_LANGUAGES` entry lists. To add a style, see
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Tool Result Compression
 
-The `toolResultCompressor.ts` module provides **5 specialized compression strategies**
-for tool results (function calls, agent outputs, search results, etc.):
+`compressToolResult()` in `open-sse/services/compression/toolResultCompressor.ts`
+compresses tool-result text with **5 strategies**. It tries them in this order, and the
+first enabled strategy whose check matches the content decides the result:
 
-1. **Search result compression** — Removes redundant results, keeps top-N
-2. **File read compression** — Truncates large files, preserves headers/imports
-3. **Code execution compression** — Keeps only essential stdout/stderr
-4. **Database query compression** — Limits rows, removes verbose metadata
-5. **API response compression** — Strips null fields, condenses arrays
+1. **`fileContent`**: content of 3 or more lines with at least one line that starts with
+   a code keyword (`import`, `export`, `function`, `const` and similar) keeps its first
+   20 and last 5 lines, with the elided middle marked.
+2. **`grepSearch`**: only the `path:line:` match lines are kept, at most 30, followed by
+   a count of any further matches and the list of matched files.
+3. **`shellOutput`**: output with ANSI escape codes or a `$ ` prompt loses the escape
+   codes and keeps its last 50 lines, with consecutive repeated lines collapsed.
+4. **`json`**: a JSON payload over 2,000 characters is summarized: an array of more than
+   7 items keeps its first 5 and last 2 items and its total count, and an object keeps
+   its first 20 keys, with nested objects reduced to their key counts.
+5. **`errorMessage`**: error-like output (`error:`, `exception:`, `traceback` and similar)
+   keeps its first line, the next 10 lines and the last 3, with the frames between them
+   elided.
+
+When the matching strategy saves no tokens (for example a code-like file of 25 lines or
+fewer, or a JSON array of 7 items or fewer), the tool result stays unchanged and the later
+strategies are not tried.
 
 #### When to use
 
-Tool result compression is **always on** when tool calls are present. No
-configuration needed.
+Tool result compression is step 1 of the aggressive engine (`compressAggressive()` in
+`open-sse/services/compression/aggressive.ts`), so it runs in Aggressive mode and in an
+`aggressive` step of a stacked pipeline. It compresses OpenAI-shape `tool` and `function`
+messages and the text inside Anthropic `tool_result` blocks. Each strategy has its own
+switch under `aggressive.toolStrategies`, all on by default. In the dashboard, the
+switches are in the Caveman page's **Advanced** view while compression is on and the
+default mode is Aggressive.
 
 ### Stacked Pipeline
 

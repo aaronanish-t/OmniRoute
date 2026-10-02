@@ -99417,8 +99417,9 @@
       "locales": {
         "pl": {
           "source_hash": "ffdb7f8695298a78f16bfc22cdb81311329d987d3f6ed657e1992a7ccb280b18",
-          "target_hash": "05c0399529b4a03597760a2af4ed6cb047468e2cb36334440a7c6e35a5043738",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "25cf06ba31a5130725bcf222b63d5df201e2086300923a12967f5a416dcf04d7",
+          "section_hashes": ["36cf94a9caea", "bdf253043a44", "13f84529f9da", "72df22656954"],
+          "updated_at": "2026-10-02T06:21:00.750Z"
         },
         "ar": {
           "source_hash": "ffdb7f8695298a78f16bfc22cdb81311329d987d3f6ed657e1992a7ccb280b18",

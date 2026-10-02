@@ -662,7 +662,7 @@ export class BaseExecutor {
     if (!url) return null;
     this.assertOutboundUrlAllowed(url); // GHSA-4f49
 
-    const headers = this.buildHeaders(credentials, false, clientHeaders, model);
+    const headers = this.buildHeaders(credentials, false, clientHeaders, model, undefined, body);
     const requestBody =
       body && typeof body === "object"
         ? {

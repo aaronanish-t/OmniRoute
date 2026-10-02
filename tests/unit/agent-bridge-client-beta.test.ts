@@ -78,6 +78,11 @@ class NativeBetaExecutor extends BaseExecutor {
   constructor() {
     super("claude", { format: "claude", baseUrls: ["https://api.anthropic.com/v1/messages"] });
   }
+  buildHeaders(...args: Parameters<BaseExecutor["buildHeaders"]>) {
+    if (args[1] === false && args[2])
+      assert.ok(args[5], "header eligibility needs the count request body");
+    return super.buildHeaders(...args);
+  }
   needsRefresh() {
     return false;
   }

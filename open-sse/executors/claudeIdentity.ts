@@ -9,6 +9,7 @@
  */
 
 import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { modelSupportsContext1mBeta } from "../config/context1m.ts";
 
 import {
   CLAUDE_CODE_CLIENT_VERSION,
@@ -303,7 +304,7 @@ export function parseUpstreamMetadataUserId(
  */
 const HEAVY_AGENT_BETA_MODEL_PREFIXES = ["claude-opus", "claude-sonnet"];
 /**
- * Models that support the context-1m beta tier. Only Opus is eligible;
+ * Models that support the context-1m beta tier. Only eligible Opus models qualify;
  * Sonnet trips long-context credit gates under OAuth full-agent traffic.
  * Opus 5 is excluded because its 1M context window is native.
  */
@@ -322,7 +323,10 @@ function isHeavyAgentModel(model: unknown): boolean {
 }
 
 function isContext1mModel(model: unknown): boolean {
+  const normalized = typeof model === "string" ? model.toLowerCase() : "";
+  const claudeModel = normalized.slice(normalized.lastIndexOf("claude-"));
   return (
+    modelSupportsContext1mBeta(claudeModel) &&
     matchesModelPrefix(model, CONTEXT_1M_BETA_MODEL_PREFIXES) &&
     !matchesModelPrefix(model, CONTEXT_1M_NATIVE_MODEL_PREFIXES)
   );
@@ -399,7 +403,12 @@ export function selectBetaFlags(
   const effectiveModel = model ?? (typeof b.model === "string" ? b.model : "");
   const isHeavyAgent = isFullAgent && isHeavyAgentModel(effectiveModel);
   const isOpusAgent = shouldUseMidConversationSystem(b, effectiveModel);
-  const isContext1m = isFullAgent && isContext1mModel(effectiveModel);
+  // A native client must actually negotiate long context; a full tool list alone
+  // must not opt an account into the beta. Opaque clients retain eligible defaults.
+  const isContext1m =
+    isFullAgent &&
+    isContext1mModel(effectiveModel) &&
+    (clientBetaSet === null || clientBetaSet.has("context-1m-2025-08-07"));
   // Message-level output_config (per-message effort directive, #14746): Anthropic
   // rejects it with 400 `messages.N.output_config: Extra inputs are not permitted`
   // unless its gating beta ships on the same request.

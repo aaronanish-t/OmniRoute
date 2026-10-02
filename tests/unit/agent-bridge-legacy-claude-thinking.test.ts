@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { selectBetaFlags } from "../../open-sse/executors/claudeIdentity.ts";
 import { BaseExecutor } from "../../open-sse/executors/base.ts";
 import {
   setThinkingBudgetConfig,
@@ -92,5 +93,44 @@ for (const model of [
     );
     assert.deepEqual(upstream.thinking, { type: "adaptive" });
     assert.deepEqual(upstream.output_config, { effort: "high" });
+  });
+}
+for (const model of [
+  "claude-opus-4-5-20251101",
+  "claude-sonnet-4-5-20250929",
+  "claude-sonnet-4-20250514",
+]) {
+  test(`full native ${model} does not force unsupported 1M beta`, () => {
+    const beta = selectBetaFlags(
+      {
+        model,
+        system: "Native fixture",
+        tools: [{ name: "Read", input_schema: { type: "object" } }],
+        messages: [{ role: "user", content: "hi" }],
+      },
+      model,
+      "oauth-2025-04-20,claude-code-20250219"
+    );
+    assert.equal(beta.split(",").includes("context-1m-2025-08-07"), false);
+  });
+}
+for (const beta of [undefined, "oauth-2025-04-20,context-1m-2025-08-07"]) {
+  test(`legacy Opus full-agent rejects forced or negotiated unsupported 1M: ${beta ?? "opaque"}`, () => {
+    const flags = selectBetaFlags(
+      { model: "claude-opus-4-5-20251101", system: "Native fixture", tools: [{ name: "Read" }] },
+      null,
+      beta
+    );
+    assert.equal(flags.split(",").includes("context-1m-2025-08-07"), false);
+  });
+}
+for (const requested of [false, true]) {
+  test(`supported Opus preserves actual client 1M negotiation: ${requested}`, () => {
+    const flags = selectBetaFlags(
+      { model: "claude-opus-4-8", system: "Native fixture", tools: [{ name: "Read" }] },
+      null,
+      `oauth-2025-04-20${requested ? ",context-1m-2025-08-07" : ""}`
+    );
+    assert.equal(flags.split(",").includes("context-1m-2025-08-07"), requested);
   });
 }

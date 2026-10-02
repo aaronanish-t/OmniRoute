@@ -564,6 +564,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
     // nor block the request-scoped context.
     const apiKeyId = entry.apiKeyId || apiKeyContext?.apiKeyId || null;
     const apiKeyName = entry.apiKeyName || apiKeyContext?.apiKeyName || null;
+    const connectionId = entry.connectionId || apiKeyContext?.connectionId || null;
     const noLogEnabled = Boolean(entry.noLog) || (apiKeyId ? isNoLog(apiKeyId) : false);
 
     const protectedRequestBody = noLogEnabled ? null : protectPayloadForLog(entry.requestBody);
@@ -602,14 +603,14 @@ async function saveCallLogOperation(entry: any): Promise<void> {
       );
     }
 
-    // resilience resilience summary for this attempt (implicit ALS store opened
+    // Resilience summary for this attempt (implicit ALS store opened
     // around the attempt; null outside a store or when nothing was noted).
     // Read BEFORE any await: the ALS context is synchronous and later awaits
     // (resolveAccountName, artifact write) may cross async boundaries.
     const resilienceActions = serializeResilienceActions();
     const hasResilienceColumn = hasCallLogsColumn("resilience_actions");
 
-    const account = await resolveAccountName(entry.connectionId || null);
+    const account = await resolveAccountName(connectionId);
     const rawProvider: string = entry.provider || "-";
     const rawRequestedModel: string | null = entry.requestedModel || null;
     let resolvedRequestedModel = rawRequestedModel;
@@ -701,7 +702,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
       requestedModel: resolvedRequestedModel,
       provider: rawProvider,
       account,
-      connectionId: entry.connectionId || null,
+      connectionId,
       duration: entry.duration || 0,
       // #13130: TTFT (ms to first forwarded stream chunk) when the streaming
       // pipeline measured it; null for non-streaming rows. The dashboard TPS

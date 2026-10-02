@@ -263,6 +263,8 @@ export const FORWARDABLE_CLIENT_BETAS = Object.freeze([
   "effort-2025-11-24",
   // Native message-thread fields require the client-negotiated beta.
   "message-threads-2026-08-12",
+  "inline-tools-2026-09-15",
+  "advisor-tool-2026-03-01",
   // Per-message effort (message-level output_config) — sources in doc comment above.
   "mid-conversation-output-config-2026-07-01",
   "per-turn-control-2026-07-01",
@@ -295,13 +297,18 @@ export const FORWARDABLE_CLIENT_BETAS = Object.freeze([
  * skills beta on tool-less requests causes upstream Anthropic to reject with
  * HTTP 400 "Skills beta requires the code_execution tool". When omitted or null,
  * backward-compatible allowlist forwarding is preserved.
+ *
+ * Native first-party Claude Code callers can preserve their negotiated protocol
+ * flags, including new client versions, while retaining the model/body gates.
+ * Other callers retain the explicit compatibility allowlist.
  */
 export function mergeClientAnthropicBeta(
   base: string,
   clientBeta: string | null | undefined,
   allow: readonly string[] = FORWARDABLE_CLIENT_BETAS,
   model?: string | null,
-  body?: unknown
+  body?: unknown,
+  preserveNativeClientBetas = false
 ): string {
   const baseList = base
     .split(",")
@@ -309,7 +316,16 @@ export function mergeClientAnthropicBeta(
     .filter(Boolean);
   if (typeof clientBeta !== "string" || !clientBeta.trim()) return baseList.join(",");
   const seen = new Set(baseList.map((s) => s.toLowerCase()));
-  const allowList = allow
+  const negotiatedAllow = preserveNativeClientBetas
+    ? [
+        ...allow,
+        ...clientBeta
+          .split(",")
+          .map((token) => token.trim())
+          .filter(Boolean),
+      ]
+    : allow;
+  const allowList = negotiatedAllow
     .map((s) => s.toLowerCase())
     .filter((lower) => {
       if (lower === "context-1m-2025-08-07") {

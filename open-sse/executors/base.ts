@@ -1282,7 +1282,8 @@ export class BaseExecutor {
                 // model that does not qualify (e.g. Haiku), which Anthropic rejects (#10119).
                 model,
                 // Gate skills-2025-10-02 on presence of code_execution tool in transformed body (#14200):
-                tb
+                tb,
+                this.provider === "claude" && Boolean(isClaudeCodeClient)
               ),
               "anthropic-dangerous-direct-browser-access": "true",
               "x-app": "cli",

@@ -28,6 +28,8 @@ jobs:
           context: .
           target: runner-web
           push: true
+          build-args: |
+            OMNIROUTE_BUILD_MEMORY_MB=12288
           tags: ghcr.io/${{ github.repository_owner }}/omniroute:firbo
           cache-from: type=gha
           cache-to: type=gha,mode=max

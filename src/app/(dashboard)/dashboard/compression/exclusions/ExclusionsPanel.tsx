@@ -8,7 +8,7 @@
 // `normalizeCompressionExclusions` (open-sse/services/compression/exclusions.ts).
 // Default (empty list) preserves pre-existing behavior exactly.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
@@ -30,6 +30,7 @@ export default function ExclusionsPanel() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"" | "saved" | "error">("");
+  const savedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     fetch("/api/settings/compression")
@@ -46,6 +47,8 @@ export default function ExclusionsPanel() {
   const locked = loading || saving || loadError !== null;
 
   const save = async () => {
+    // Each save stops the previous save's timer, so that timer cannot hide this save's message.
+    clearTimeout(savedTimer.current);
     setSaving(true);
     setStatus("");
     try {
@@ -55,7 +58,7 @@ export default function ExclusionsPanel() {
         body: JSON.stringify({ exclusions: patterns }),
       });
       setStatus(res.ok ? "saved" : "error");
-      if (res.ok) setTimeout(() => setStatus((shown) => (shown === "saved" ? "" : shown)), 2000);
+      if (res.ok) savedTimer.current = setTimeout(() => setStatus(""), 2000);
     } catch {
       setStatus("error");
     } finally {
@@ -72,7 +75,9 @@ export default function ExclusionsPanel() {
       <div className="flex flex-col gap-3">
         {loadError !== null && (
           <p role="alert" className="flex items-center gap-1 text-xs font-medium text-red-500">
-            <span className="material-symbols-outlined text-[14px]">error</span>
+            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+              error
+            </span>
             {t("failedLoadWithStatus", { status: loadError || t("unknownError") })}
           </p>
         )}
@@ -92,17 +97,17 @@ export default function ExclusionsPanel() {
                 : t("compressionExclusionsCount", { count: patterns.length }))}
           </span>
           <div className="flex items-center gap-2">
-            {status === "saved" && (
-              <span className="text-xs text-emerald-600 dark:text-emerald-400">
-                {t("compressionExclusionsSaved")}
-              </span>
-            )}
+            <span role="status" className="text-xs text-emerald-600 dark:text-emerald-400">
+              {status === "saved" && t("compressionExclusionsSaved")}
+            </span>
             {status === "error" && (
               <span
                 role="alert"
                 className="flex items-center gap-1 text-xs font-medium text-red-500"
               >
-                <span className="material-symbols-outlined text-[14px]">error</span>
+                <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                  error
+                </span>
                 {t("saveFailed")}
               </span>
             )}

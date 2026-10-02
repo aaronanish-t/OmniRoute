@@ -32,6 +32,8 @@ type RtkConfig = {
   rawOutputMaxBytes: number;
 };
 
+type ConfigUpdate = (current: RtkConfig) => Partial<RtkConfig>;
+
 type AnalyticsSummary = {
   totalRequests: number;
   totalTokensSaved: number;
@@ -59,6 +61,29 @@ Found 1 error in src/lib/example.ts:10`;
 
 function formatNumber(value: number | undefined): string {
   return new Intl.NumberFormat().format(value ?? 0);
+}
+
+// A save or read-back that gets no reply in this time counts as failed, so one stalled request
+// cannot hold back the saves queued behind it.
+const REQUEST_TIMEOUT_MS = 15_000;
+
+// Config saves and loads from every copy of this page run one at a time, in order. A save still
+// queued when the user leaves the page then goes out before the next visit loads, so it cannot
+// overwrite a newer edit made there, and the reopened page starts from what it stored.
+let configQueue = Promise.resolve();
+
+function queueConfigTask(task: () => Promise<void>) {
+  configQueue = configQueue.then(task);
+}
+
+// The stored config, or null when the request fails or gets no reply in time.
+function requestConfig(init?: RequestInit): Promise<RtkConfig | null> {
+  return fetch("/api/context/rtk/config", {
+    ...init,
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
+    .then((res) => (res.ok ? res.json() : null))
+    .catch(() => null);
 }
 
 // Keeps the typed text locally and saves once the edit is committed (blur or Enter), so typing a
@@ -111,12 +136,12 @@ export default function RtkContextPageClient() {
   const [sample, setSample] = useState(SAMPLE_OUTPUT);
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
-  // Saves go out one at a time. The form shows the config the server last confirmed plus the
-  // edits still queued, so the newest edit stays on screen and a failed save rolls back only its
-  // own change.
+  // The form shows the config the server last confirmed plus the edits still queued, so the
+  // newest edit stays on screen and a failed save rolls back only its own change. A queued edit is
+  // worked out again from the confirmed config when its save goes out, so it never carries an
+  // earlier edit that failed.
   const savedRef = useRef<RtkConfig | null>(null);
-  const queuedRef = useRef<Partial<RtkConfig>[]>([]);
-  const saveQueueRef = useRef(Promise.resolve());
+  const queuedRef = useRef<ConfigUpdate[]>([]);
   const [viewMode, setViewMode] = useState<"simple" | "advanced">("simple");
   const [masterEnabled, setMasterEnabled] = useState<boolean | null>(null);
 
@@ -135,13 +160,11 @@ export default function RtkContextPageClient() {
 
   useEffect(() => {
     void loadFilters();
-    fetch("/api/context/rtk/config")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        savedRef.current = data;
-        setConfig(data);
-      })
-      .catch(() => {});
+    queueConfigTask(async () => {
+      const data = await requestConfig();
+      savedRef.current = data;
+      setConfig(data);
+    });
     fetch("/api/context/analytics?since=7d")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setAnalytics(data))
@@ -161,40 +184,49 @@ export default function RtkContextPageClient() {
     return filters.filter((filter) => !config.disabledFilters.includes(filter.id)).length;
   }, [config, filters]);
 
-  const saveConfig = (patch: Partial<RtkConfig>) => {
+  const saveConfig = (patch: Partial<RtkConfig> | ConfigUpdate) => {
     if (!savedRef.current) return;
+    const update = typeof patch === "function" ? patch : () => patch;
     const showQueued = () =>
       setConfig(
         queuedRef.current.reduce<RtkConfig>(
-          (shown, queued) => ({ ...shown, ...queued }),
+          (shown, queued) => ({ ...shown, ...queued(shown) }),
           savedRef.current
         )
       );
-    queuedRef.current.push(patch);
+    queuedRef.current.push(update);
     showQueued();
     setSaveFailed(false);
-    saveQueueRef.current = saveQueueRef.current.then(async () => {
-      const saved: RtkConfig | null = await fetch("/api/context/rtk/config", {
+    queueConfigTask(async () => {
+      const body = update(savedRef.current);
+      const reply = await requestConfig({
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patch),
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .catch(() => null);
+        body: JSON.stringify(body),
+      });
+      // Without a reply the server may still have stored the change, so read back what it holds;
+      // the save failed only if the change is not there.
+      const stored = reply ?? (await requestConfig());
+      const kept =
+        reply !== null ||
+        (stored !== null &&
+          Object.entries(body).every(
+            ([key, value]) =>
+              JSON.stringify(stored[key as keyof RtkConfig]) === JSON.stringify(value)
+          ));
       queuedRef.current.shift();
-      if (saved) savedRef.current = saved;
-      else setSaveFailed(true);
+      if (stored) savedRef.current = stored;
+      if (!kept) setSaveFailed(true);
       showQueued();
     });
   };
 
-  const toggleFilter = (filterId: string, enabled: boolean) => {
-    if (!config) return;
-    const disabledFilters = enabled
-      ? config.disabledFilters.filter((id) => id !== filterId)
-      : [...new Set([...config.disabledFilters, filterId])];
-    saveConfig({ disabledFilters });
-  };
+  const toggleFilter = (filterId: string, enabled: boolean) =>
+    saveConfig((current) => ({
+      disabledFilters: enabled
+        ? current.disabledFilters.filter((id) => id !== filterId)
+        : [...new Set([...current.disabledFilters, filterId])],
+    }));
 
   const runPreview = async () => {
     const res = await fetch("/api/context/rtk/test", {
@@ -260,7 +292,9 @@ export default function RtkContextPageClient() {
               role="alert"
               className="mb-3 flex items-center gap-1 text-xs font-medium text-red-500"
             >
-              <span className="material-symbols-outlined text-[14px]">error</span>
+              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                error
+              </span>
               {tSettings("saveFailed")}
             </p>
           )}

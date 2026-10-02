@@ -8,10 +8,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-self-service-settings-"));
+const DATA_ROOT = process.env.DATA_DIR ?? path.resolve("_artifacts/self-service-settings-tests");
+fs.mkdirSync(DATA_ROOT, { recursive: true });
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(DATA_ROOT, "self-service-settings-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = "self-service-settings-test-secret";
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
@@ -69,6 +70,24 @@ function assertNoStackLeak(body: unknown) {
 }
 
 // ──────────────── DB module ────────────────
+
+test("self-service migration 197 coexists with upstream attempt timing migration 194", () => {
+  // Regression: stale stack children reused 194 and collided with upstream schema updates.
+  const db = core.getDbInstance();
+  const applied = db
+    .prepare("SELECT version FROM _omniroute_migrations WHERE name = ?")
+    .all("api_key_self_service_settings");
+  assert.deepEqual(applied, [{ version: "197" }]);
+  const timingColumns = db.prepare("PRAGMA table_info(proxy_logs)").all() as { name: string }[];
+  assert.ok(timingColumns.some((column) => column.name === "headers_ms"));
+  assert.deepEqual(
+    settingsDb.updateApiKeySelfServiceSettings("migration-key", {
+      sharedQuotaProviders: ["codex"],
+      anthropicRateLimitHeaders: "strip",
+    }),
+    { sharedQuotaProviders: ["codex"], anthropicRateLimitHeaders: "strip" }
+  );
+});
 
 test("settings default to all providers + forward when no row exists", () => {
   assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("no-such-key"), {
@@ -130,7 +149,7 @@ test("returned settings are copies; mutating them does not change later reads", 
   ]);
 });
 
-test("a corrupt stored provider list fails closed to none; an unknown mode reads as auto", () => {
+test("a corrupt stored provider list fails closed to none; an unknown mode reads as forward", () => {
   core
     .getDbInstance()
     .prepare(
@@ -419,6 +438,28 @@ test("GET /v1/me/status returns 403 without self:usage and honors sharedQuotaPro
 });
 
 // ──────────────── Policy merge ────────────────
+
+test("unreadable self-service settings cannot silently re-enable stripped account headers", async () => {
+  const key = await apiKeys.createApiKey("private headers", "test-machine", [SELF_USAGE_SCOPE]);
+  settingsDb.updateApiKeySelfServiceSettings(key.id, { anthropicRateLimitHeaders: "strip" });
+  settingsDb.clearApiKeySelfServiceSettingsCache();
+  core
+    .getDbInstance()
+    .exec(
+      "ALTER TABLE api_key_self_service_settings RENAME COLUMN anthropic_ratelimit_headers TO unreadable_headers"
+    );
+
+  const policy = await enforceApiKeyPolicy(
+    new Request("http://localhost/v1/messages", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key.key}` },
+    }),
+    null
+  );
+
+  assert.equal(policy.apiKeyInfo?.anthropicRateLimitHeaders, "strip");
+  assert.deepEqual(policy.apiKeyInfo?.sharedQuotaProviders, []);
+});
 
 test("enforceApiKeyPolicy merges the key's self-service settings into apiKeyInfo", async () => {
   const key = await apiKeys.createApiKey("policy", "test-machine", [SELF_USAGE_SCOPE]);

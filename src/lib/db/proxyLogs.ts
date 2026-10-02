@@ -15,7 +15,8 @@
  */
 
 import { getDbInstance } from "./core";
-import { normalizeProxyHostForLog } from "../proxyLogger";
+import { normalizeProxyHostForLog } from "../proxyLogHost";
+import { sanitizeTimingMs } from "@omniroute/open-sse/utils/timingMs.ts";
 
 // ---------------------------------------------------------------------------
 // Queries
@@ -161,6 +162,34 @@ export function getRecentEgressIpForProxy(
   return { egressIp: row.egress_ip, at: row.timestamp };
 }
 
+/**
+ * Distinct non-null egress IPs observed through a proxy endpoint since
+ * `sinceIso` (up to `limit`). Same host-key normalization and port validation
+ * as `getRecentEgressIpForProxy`: anything unusable yields `[]`, never a throw.
+ */
+export function getRecentEgressIpsForProxy(
+  host: string,
+  port: number,
+  sinceIso: string,
+  limit = 3
+): string[] {
+  const h = normalizeProxyHostKey(host);
+  if (!h) return [];
+  if (!Number.isInteger(port) || port < 1 || port > 65535) return [];
+  if (typeof sinceIso !== "string" || !sinceIso) return [];
+  const capped = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 10) : 3;
+  const db = getDbInstance();
+  const rows = db
+    .prepare(
+      `SELECT DISTINCT egress_ip FROM proxy_logs
+       WHERE proxy_host = ? AND proxy_port = ?
+         AND egress_ip IS NOT NULL AND timestamp >= ?
+       LIMIT ?`
+    )
+    .all(h, port, sinceIso, capped) as Array<{ egress_ip: string }>;
+  return rows.map((r) => r.egress_ip).filter((ip) => typeof ip === "string" && ip);
+}
+
 export type PoolEgressObservationCounts = {
   connections: number;
   distinctExits: number;
@@ -272,6 +301,44 @@ export function getPoolEgressFailureBreakdown(
     unattributed,
     attributionNote: POOL_EGRESS_ATTRIBUTION_NOTE,
   };
+}
+
+/**
+ * Deferred per-attempt upstream timing patch. Rows are inserted with the
+ * first-chunk duration unknown on slow streams (NULL); the capture layer
+ * patches it once the first useful body byte arrives. Only non-negative
+ * integers are written - anything else is rejected (returns false) so
+ * partially migrated databases and clock skew never corrupt the row.
+ * Returns true when exactly one row was patched.
+ */
+export function updateAttemptTiming(
+  id: string,
+  patch: { headersMs?: number | null; firstChunkMs?: number | null }
+): boolean {
+  if (typeof id !== "string" || !id) return false;
+  const clean = {
+    headersMs: sanitizeTimingValue(patch.headersMs),
+    firstChunkMs: sanitizeTimingValue(patch.firstChunkMs),
+  };
+  if (clean.headersMs === undefined && clean.firstChunkMs === undefined) return false;
+  const db = getDbInstance();
+  const sets: string[] = [];
+  const params: Record<string, unknown> = { id };
+  if (clean.headersMs !== undefined) {
+    sets.push("headers_ms = @headersMs");
+    params.headersMs = clean.headersMs;
+  }
+  if (clean.firstChunkMs !== undefined) {
+    sets.push("first_chunk_ms = @firstChunkMs");
+    params.firstChunkMs = clean.firstChunkMs;
+  }
+  const result = db.prepare(`UPDATE proxy_logs SET ${sets.join(", ")} WHERE id = @id`).run(params);
+  return Number(result.changes) === 1;
+}
+
+// Undefined = column left untouched; an invalid value is never written.
+function sanitizeTimingValue(value: number | null | undefined): number | undefined {
+  return value === undefined ? undefined : (sanitizeTimingMs(value) ?? undefined);
 }
 
 /**

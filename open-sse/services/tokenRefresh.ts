@@ -53,6 +53,7 @@ import {
 } from "./antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersist.ts";
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
+import { refreshChatGptToken } from "./tokenRefresh/providers/chatgpt.ts";
 import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
 import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
 import { refreshKiroToken } from "./tokenRefresh/providers/kiro.ts";
@@ -110,6 +111,7 @@ export const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 // Providers with non-rotating tokens (Google, Anthropic) or where multi-
 // account is naturally isolated keep longer lead times.
 export const REFRESH_LEAD_MS: Record<string, number> = {
+  chatgpt: 60_000, // Official SIWC local SDK refresh window.
   // Rotating refresh tokens — minimize refresh frequency to avoid the
   // "refresh-invalidates-siblings" cascade documented for OpenAI Auth0.
   codex: 5 * 60 * 1000, // 5 minutes
@@ -416,6 +418,9 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "codex":
       return await refreshCodexToken(credentials.refreshToken, log, proxyConfig);
 
+    case "chatgpt":
+      return await refreshChatGptToken(credentials, proxyConfig);
+
     case "cursor":
       if (!credentials.refreshToken) {
         return { error: "unrecoverable_refresh_error", code: "no_refresh_token" };
@@ -482,6 +487,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
  */
 export function supportsTokenRefresh(provider) {
   const explicitlySupported = new Set([
+    "chatgpt",
     "gemini",
     "antigravity",
     "agy",
@@ -634,12 +640,7 @@ export async function getAccessToken(
   // the legacy `connectionId`-less path would silently swallow the callback,
   // leaving DB rows out of sync with rotated tokens (Codex/OpenAI). We still
   // resolve the promise to all waiters with the refreshed credentials.
-  const refreshPromise = _getAccessTokenWithStalenessCheck(
-    provider,
-    credentials,
-    log,
-    proxyConfig
-  )
+  const refreshPromise = _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig)
     .then(async (result) => {
       if (result?.accessToken && effectiveOnPersist) {
         // #4038: same compare-and-swap guard as Layer 1 — skip the persist if a concurrent
@@ -718,10 +719,17 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
               accessToken: dbConnection.accessToken,
               refreshToken: dbConnection.refreshToken,
               expiresAt: dbConnection.expiresAt,
+              ...(provider === "chatgpt"
+                ? { providerSpecificData: dbConnection.providerSpecificData }
+                : {}),
             };
           }
           credentials.refreshToken = dbConnection.refreshToken;
           credentials.accessToken = dbConnection.accessToken;
+          if (provider === "chatgpt") {
+            credentials.expiresAt = dbConnection.expiresAt;
+            credentials.providerSpecificData = dbConnection.providerSpecificData;
+          }
         }
       }
     } catch (e) {

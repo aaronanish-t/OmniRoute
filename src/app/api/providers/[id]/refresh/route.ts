@@ -8,11 +8,17 @@ import {
   resolveCopilotTokenBaseUrl,
 } from "@/sse/services/tokenRefresh";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
 type RefreshResult = {
   accessToken?: string;
   expiresIn?: number;
+  expiresAt?: string;
   error?: string;
+  status?: number;
+  code?: string;
+  reason?: string;
+  migrateTo?: string;
 };
 
 /**
@@ -152,10 +158,23 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     let persistedCredentials: RefreshResult | null = null;
     const newCredentials = (await getAccessToken(provider, credentials, async (result) => {
       await updateProviderCredentials(id, result);
+      if (provider === "chatgpt" && result.idToken) {
+        await updateProviderConnection(id, { idToken: result.idToken });
+      }
       persistedCredentials = result;
     })) as RefreshResult | null;
 
     if (newCredentials && typeof newCredentials === "object" && newCredentials.error) {
+      if (provider === "chatgpt" && newCredentials.error === "temporary_refresh_error") {
+        return NextResponse.json(
+          {
+            error: sanitizeErrorMessage(
+              "ChatGPT token renewal is temporarily unavailable. Your saved sign-in has been preserved. Try again later."
+            ),
+          },
+          { status: newCredentials.status === 429 ? 429 : 503 }
+        );
+      }
       if (
         newCredentials.error === "unrecoverable_refresh_error" ||
         newCredentials.error === "refresh_token_reused" ||
@@ -181,7 +200,11 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
           {
             error: isDeprecated
               ? "This provider was deprecated and can no longer be refreshed"
-              : "Token refresh failed — provider returned no new token",
+              : provider === "chatgpt"
+                ? sanitizeErrorMessage(
+                    "ChatGPT could not renew this sign-in. Please sign in again using Continue with ChatGPT."
+                  )
+                : "Token refresh failed — provider returned no new token",
             requiresReauth: true,
             ...(isDeprecated ? { deprecated: true, migrateTo: newCredentials.migrateTo } : {}),
           },

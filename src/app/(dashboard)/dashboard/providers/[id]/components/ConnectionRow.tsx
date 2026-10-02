@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  ChatGptManageUsageButton,
+  ChatGptUsageLimitNotice,
+} from "@/shared/components/ChatGptPlanUi";
+import { hasChatGptUsageLimit } from "@/shared/utils/chatgptPlanUi";
+
 // Phase 1d extraction — Issue #3501
 // ConnectionRow (and its local helpers CooldownTimer, inferErrorType,
 // getStatusPresentation) moved out of ProviderDetailPageClient.tsx.
@@ -396,6 +402,8 @@ export default function ConnectionRow({
   onToggleProxyEnabled,
 }: ConnectionRowProps) {
   const t = useTranslations("providers");
+  const isChatGpt = connection.provider === "chatgpt";
+  const chatGptRenewsAutomatically = isChatGpt && connection.testStatus === "active";
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const displayName = isOAuth
     ? pickDisplayValue(
@@ -416,8 +424,7 @@ export default function ConnectionRow({
   // #11497: cookie rows with a decodable JWT credential carry a persisted
   // cookieExpiresAt — feed it into the same countdown badge OAuth rows use.
   const cookieExpiresAt = readCookieExpiresAt(connection.providerSpecificData);
-  const effectiveExpiresAt =
-    connection.tokenExpiresAt || connection.expiresAt || cookieExpiresAt;
+  const effectiveExpiresAt = connection.tokenExpiresAt || connection.expiresAt || cookieExpiresAt;
   const hasExpirySource = isOAuth || Boolean(cookieExpiresAt);
   const getTokenMinsLeft = () => {
     if (!hasExpirySource || !effectiveExpiresAt) return null;
@@ -529,7 +536,7 @@ export default function ConnectionRow({
 
   return (
     <div
-      className={`group flex items-center justify-between p-3 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${connection.isActive === false ? "opacity-60" : ""}`}
+      className={`group flex items-center justify-between p-3 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${isChatGpt ? "flex-wrap gap-3" : ""} ${connection.isActive === false ? "opacity-60" : ""}`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {onToggleSelect && (
@@ -589,10 +596,16 @@ export default function ConnectionRow({
                 ) : null
               ) : tokenMinsLeft < 30 ? (
                 <span
-                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium bg-amber-500/15 text-amber-500"
-                  title={t("tokenExpiresSoonTitle", { minutes: tokenMinsLeft })}
+                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium ${chatGptRenewsAutomatically ? "bg-blue-500/15 text-blue-500" : "bg-amber-500/15 text-amber-500"}`}
+                  title={
+                    chatGptRenewsAutomatically
+                      ? t("chatgptTokenRenewsTitle", { minutes: tokenMinsLeft })
+                      : t("tokenExpiresSoonTitle", { minutes: tokenMinsLeft })
+                  }
                 >
-                  <span className="material-symbols-outlined text-[11px]">warning</span>
+                  <span className="material-symbols-outlined text-[11px]">
+                    {chatGptRenewsAutomatically ? "autorenew" : "warning"}
+                  </span>
                   {`~${tokenMinsLeft}m`}
                 </span>
               ) : null)}
@@ -849,7 +862,10 @@ export default function ConnectionRow({
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div
+        className={`flex flex-wrap items-center justify-end gap-2 ${isChatGpt ? "max-w-full min-w-0" : ""}`}
+      >
+        {isChatGpt && <ChatGptManageUsageButton />}
         <Button
           size="sm"
           variant="ghost"
@@ -872,9 +888,9 @@ export default function ConnectionRow({
             disabled={connection.isActive === false || isRefreshing}
             onClick={onRefreshToken}
             className="!h-7 !px-2 text-xs text-amber-500 hover:text-amber-400"
-            title={t("refreshOauthTokenTitle")}
+            title={isChatGpt ? t("chatgptRefreshTokenTitle") : t("refreshOauthTokenTitle")}
           >
-            {t("tokenShort")}
+            {isChatGpt ? t("chatgptRefreshToken") : t("tokenShort")}
           </Button>
         )}
         {isCodex && onApplyCodexAuthLocal && (
@@ -939,14 +955,20 @@ export default function ConnectionRow({
           onChange={onToggleActive}
           title={(connection.isActive ?? true) ? t("disableConnection") : t("enableConnection")}
         />
-        <div className="flex gap-1 ms-1 transition-opacity">
+        <div
+          className={`flex gap-1 ms-1 transition-opacity ${isChatGpt ? "flex-wrap min-w-0 max-w-full items-center" : ""}`}
+        >
           {onReauth && (
             <button
               onClick={onReauth}
               className="p-2 hover:bg-amber-500/10 rounded text-amber-600 hover:text-amber-500"
               title={t("reauthenticateConnection")}
+              aria-label={t("reauthenticateConnection")}
+              aria-haspopup="dialog"
             >
-              <span className="material-symbols-outlined text-[18px]">passkey</span>
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                passkey
+              </span>
             </button>
           )}
           <button
@@ -972,6 +994,11 @@ export default function ConnectionRow({
           </button>
         </div>
       </div>
+      {hasChatGptUsageLimit(connection) && (
+        <div className="w-full pt-3">
+          <ChatGptUsageLimitNotice />
+        </div>
+      )}
       {isCodex && connection.codexAccountPool ? (
         <CodexAccountDetails pool={connection.codexAccountPool} />
       ) : null}

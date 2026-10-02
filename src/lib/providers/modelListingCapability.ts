@@ -33,10 +33,19 @@ export function providerUsesCuratedModelsOnly(providerId: string): boolean {
  * static registry for dashboard / `/v1/models` / Test All listing. Static rows
  * remain offline fallback only when synced is empty.
  *
- * Cursor-only for now — other authoritative live-catalog providers keep
+ * Cursor and ChatGPT — other authoritative live-catalog providers keep
  * coverage-style static preservation (e.g. command-code uncovered static ids).
  */
 export function providerUsesExclusiveSyncedListing(providerId: string): boolean {
+  const id = providerId.trim().toLowerCase();
+  return providerIsCursor(id) || id === "chatgpt";
+}
+
+/**
+ * Cursor-specific listing behavior (`owned_by: "cursor"` + synthetic `auto*`
+ * router rows). Exclusive-listing providers other than Cursor must not inherit it.
+ */
+export function providerIsCursor(providerId: string): boolean {
   const id = providerId.trim().toLowerCase();
   return id === "cursor" || id === "cu";
 }

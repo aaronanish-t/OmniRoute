@@ -377,6 +377,8 @@ export default function ProviderLimits({
 
   const fetchQuota = useCallback(
     async (connectionId: string, provider: string, options: { force?: boolean } = {}) => {
+      // SIWC exposes usage management in ChatGPT settings, not a quota polling API.
+      if (provider === "chatgpt") return;
       const force = options?.force === true;
       const now = Date.now();
       const lastFetch = lastFetchTimeRef.current[connectionId] || 0;
@@ -531,7 +533,7 @@ export default function ProviderLimits({
       connections.filter(
         (conn) =>
           isProviderQuotaVisible(conn) &&
-          supportsProviderQuota(conn.provider, conn) &&
+          (conn.provider === "chatgpt" || supportsProviderQuota(conn.provider, conn)) &&
           (conn.authType === "oauth" || conn.authType === "apikey")
       ),
     [connections]

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { discoverChatGptModels } from "@/lib/providerModels/chatgptDiscovery";
 import {
   getProviderConnectionFamilyIds,
   isClaudeCodeCompatibleProvider,
@@ -208,6 +209,20 @@ export async function GET(
       return NextResponse.json({ error: "Invalid connection provider" }, { status: 400 });
     }
     const usesCuratedModelsOnly = providerUsesCuratedModelsOnly(provider);
+    if (provider === "chatgpt") {
+      try {
+        const models = await discoverChatGptModels(connection);
+        return NextResponse.json({
+          models: excludeHidden ? models.filter((m) => !getModelIsHidden(provider, m.id)) : models,
+          source: "api",
+        });
+      } catch {
+        return errorResponse(
+          503,
+          "ChatGPT live catalog unavailable. Check plan authorization and reconnect if necessary."
+        );
+      }
+    }
 
     // Resolve proxy for this provider (provider-level → global → direct)
     const proxy = await resolveProxyForProvider(provider);

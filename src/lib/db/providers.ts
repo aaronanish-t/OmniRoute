@@ -16,6 +16,8 @@ import { createLazyRowProxy } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
 import { invalidateConnectionUpdate } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
+import { findChatGptConnectionByRegistration } from "./chatgpt";
+import { sanitizeMergedConnectionOverrides } from "./providers/connectionUpdateSanitize";
 import {
   removeConnectionHealth,
   removeConnectionIndex,
@@ -525,7 +527,9 @@ export async function createProviderConnection(data: JsonRecord) {
   const workspaceId = toStringOrNull(providerSpecificData.workspaceId);
   const chatgptUserId = toStringOrNull(providerSpecificData.chatgptUserId);
 
-  if (data.authType === "oauth" && data.provider === "codex" && chatgptUserId) {
+  if (data.authType === "oauth" && data.provider === "chatgpt") {
+    existing = findChatGptConnectionByRegistration(providerSpecificData);
+  } else if (data.authType === "oauth" && data.provider === "codex" && chatgptUserId) {
     const strongSql = workspaceId
       ? "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND json_extract(provider_specific_data, '$.workspaceId') = ? AND json_extract(provider_specific_data, '$.chatgptUserId') = ?"
       : "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND (json_extract(provider_specific_data, '$.workspaceId') IS NULL OR json_extract(provider_specific_data, '$.workspaceId') = '') AND json_extract(provider_specific_data, '$.chatgptUserId') = ?";
@@ -1009,8 +1013,6 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
 
 export async function updateProviderConnection(id: string, data: JsonRecord) {
   const db = getDbInstance() as unknown as DbLike;
-  const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
-  if (!existing) return null;
 
   // The incoming value only. A connection that already holds the password has
   // to stay editable, or an operator cannot repair the one this guard exists
@@ -1018,53 +1020,40 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
   // on every unrelated field edit.
   await assertApiKeyIsNotManagementPassword(data.apiKey);
 
-  const existingCamel = toRecord(rowToCamel(existing));
-  const merged: JsonRecord = {
-    ...existingCamel,
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-  merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
-    data,
-    normalizeConnectionProviderSpecificData(
-      toStringOrNull(merged.provider),
-      merged.providerSpecificData,
-      merged,
-      existingCamel.providerSpecificData
-    )
-  );
-  // Mirror the sanitization the create path applies — keep the returned
-  // object in lockstep with what we persist.
-  if ("quotaWindowThresholds" in merged) {
-    const result = sanitizeQuotaWindowThresholds(merged.quotaWindowThresholds);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist quotaWindowThresholds with rejected keys: ${result.rejected.join(", ")}`
-      );
-    }
-    // For updates we always carry the key forward (even as null) so the read
-    // path surfaces the cleared state to callers that merged it.
-    merged.quotaWindowThresholds = result.sanitized;
-  }
-  if ("rateLimitOverrides" in merged) {
-    const result = sanitizeRateLimitOverrides(merged.rateLimitOverrides);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist rateLimitOverrides with rejected keys: ${result.rejected.join(", ")}`
-      );
-    }
-    merged.rateLimitOverrides = result.sanitized;
-  }
-  const existingRecord = toRecord(existing);
+  // Read only after asynchronous validation, inside the write transaction.
+  // Otherwise a metadata update can snapshot old credentials, yield to a rotation,
+  // and then write the consumed refresh token back over its replacement.
+  const persisted = db.transaction(() => {
+    const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
+    if (!existing) return null;
+    const existingCamel = toRecord(rowToCamel(existing));
+    const merged: JsonRecord = {
+      ...existingCamel,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
+      data,
+      normalizeConnectionProviderSpecificData(
+        toStringOrNull(merged.provider),
+        merged.providerSpecificData,
+        merged,
+        existingCamel.providerSpecificData
+      )
+    );
+    sanitizeMergedConnectionOverrides(merged);
+    const existingRecord = toRecord(existing);
 
-  db.transaction(() => {
     reconcileCodexUsageHistory(db, {
       connectionId: id,
       existing: existingRecord,
       merged,
     });
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
+    return { existing, merged };
   })();
+  if (!persisted) return null;
+  const { existing, merged } = persisted;
   backupDbFile("pre-write");
   invalidateConnectionUpdate(id, data);
   bumpProxyConfigGeneration();

@@ -2,6 +2,7 @@
 
 // Phase 1t.6 extraction — Issue #3501
 import { Button } from "@/shared/components";
+import ChatGptSignInButton from "@/shared/components/ChatGptSignInButton";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
 
 interface CommandCodeAuthState {
@@ -85,9 +86,16 @@ export default function EmptyConnectionsPlaceholder({
             </>
           ) : (
             <>
-              <Button icon="add" onClick={() => gateConnectionFlow(openPrimaryAddFlow)}>
-                {providerSupportsPat ? "Add PAT" : t("addConnection")}
-              </Button>
+              {providerId === "chatgpt" ? (
+                <ChatGptSignInButton
+                  opensDialog
+                  onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
+                />
+              ) : (
+                <Button icon="add" onClick={() => gateConnectionFlow(openPrimaryAddFlow)}>
+                  {providerSupportsPat ? "Add PAT" : t("addConnection")}
+                </Button>
+              )}
               {providerId === "qoder" && (
                 <Button variant="secondary" onClick={() => gateConnectionFlow(onOpenOAuthModal)}>
                   Experimental OAuth

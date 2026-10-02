@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Card from "@/shared/components/Card";
+import ChatGptLocalUsage from "@/shared/components/ChatGptLocalUsage";
+import { hasChatGptUsageLimit } from "@/shared/utils/chatgptPlanUi";
 import {
   isProviderBillingProvider,
   type ProviderBillingStatus,
@@ -147,32 +149,40 @@ export default function QuotaCard({
         onToggleActive={onToggleActive}
         togglingActive={togglingActive}
       />
-      <QuotaCardExpanded
-        quotas={quotas}
-        providerId={connection.provider}
-        loading={loading}
-        error={error}
-        message={quota?.message ?? null}
-        billing={
-          isProviderBillingProvider(connection.provider)
-            ? (quota?.billing ?? quota?.raw?.billing)
-            : null
-        }
-        refreshedAt={displayRefreshedAt}
-        hasStaleData={hasStaleData}
-        onRefresh={onRefresh}
-        onOpenCutoff={onOpenCutoff}
-        onOpenCost={() => setCostModalOpen(true)}
-        onOpenResetCredits={onOpenResetCredits}
-        hiddenQuotaRows={hiddenQuotaRows}
-        onHideQuota={onHideQuota}
-        onShowQuota={onShowQuota}
-        canEditCutoff={canEditCutoff}
-        hasCutoffOverrides={hasOverrides}
-        canRedeemResetCredit={canRedeemResetCredit}
-        redeemingResetCredit={redeemingResetCredit}
-        loadingResetCredits={loadingResetCredits}
-      />
+      {connection.provider === "chatgpt" && (
+        <ChatGptLocalUsage
+          connectionId={connection.id}
+          limitReached={hasChatGptUsageLimit(connection)}
+        />
+      )}
+      {connection.provider !== "chatgpt" && (
+        <QuotaCardExpanded
+          quotas={quotas}
+          providerId={connection.provider}
+          loading={loading}
+          error={error}
+          message={quota?.message ?? null}
+          billing={
+            isProviderBillingProvider(connection.provider)
+              ? (quota?.billing ?? quota?.raw?.billing)
+              : null
+          }
+          refreshedAt={displayRefreshedAt}
+          hasStaleData={hasStaleData}
+          onRefresh={onRefresh}
+          onOpenCutoff={onOpenCutoff}
+          onOpenCost={() => setCostModalOpen(true)}
+          onOpenResetCredits={onOpenResetCredits}
+          hiddenQuotaRows={hiddenQuotaRows}
+          onHideQuota={onHideQuota}
+          onShowQuota={onShowQuota}
+          canEditCutoff={canEditCutoff}
+          hasCutoffOverrides={hasOverrides}
+          canRedeemResetCredit={canRedeemResetCredit}
+          redeemingResetCredit={redeemingResetCredit}
+          loadingResetCredits={loadingResetCredits}
+        />
+      )}
       <ProviderUsdCostModal
         isOpen={costModalOpen}
         onClose={() => setCostModalOpen(false)}

@@ -79209,7 +79209,7 @@
         },
         "zh-CN": {
           "source_hash": "0cfe583891c0196105a321f8763a1df90e8243a6a3b0567c37ef162aca16a129",
-          "target_hash": "60acbb5a61157a6715af0725b46f506ad3fa5d6612798f3bc7f51c97c56d9668",
+          "target_hash": "2ec13d7b507a3a82ce2557f5de13f6b73fcaa7fbf4d9b21e90717557cf601ce5",
           "section_hashes": [
             "b20276c0e9f5",
             "5912b80681d8",
@@ -79221,7 +79221,7 @@
             "8dae03f7d8eb",
             "fcd3b8c89194"
           ],
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "updated_at": "2026-10-02T06:02:18.054Z"
         },
         "uz": {
           "source_hash": "0cfe583891c0196105a321f8763a1df90e8243a6a3b0567c37ef162aca16a129",

@@ -132,6 +132,9 @@ describe("compressionAnalytics", () => {
       recentRuns: [
         {
           timestamp,
+          conversationId: null,
+          model: null,
+          promptEstimatedTokens: null,
           provider: "llamacpp",
           originalTokens: 100_000,
           compressedTokens: 20_000,
@@ -141,7 +144,65 @@ describe("compressionAnalytics", () => {
           estimatedCacheHitTokens: 200_000,
         },
       ],
+      conversations: [],
     });
+  });
+
+  it("aggregates message-level compression and engine savings into one row per chat", () => {
+    const timestamp = new Date().toISOString();
+    const base = {
+      timestamp,
+      mode: "grevcaching",
+      provider: "llamacpp",
+      effective_model: "test-model",
+      conversation_id: "key-a\x1fsession-a",
+      measurement_scope: "message",
+    };
+    insertCompressionAnalyticsRow({
+      ...base,
+      request_id: "turn-1",
+      original_tokens: 1000,
+      compressed_tokens: 900,
+      tokens_saved: 100,
+      prompt_estimated_tokens: 1000,
+      estimated_cache_hit_tokens: 0,
+    });
+    insertCompressionAnalyticsRow({
+      ...base,
+      request_id: "turn-2",
+      original_tokens: 3000,
+      compressed_tokens: 2400,
+      tokens_saved: 600,
+      prompt_estimated_tokens: 4000,
+      actual_prompt_tokens: 3900,
+      estimated_cache_hit_tokens: 3000,
+    });
+    insertCompressionAnalyticsRow({
+      ...base,
+      request_id: "turn-2::rollover",
+      measurement_scope: "rollover",
+      original_tokens: 10_000,
+      compressed_tokens: 1000,
+      tokens_saved: 9000,
+    });
+
+    const analytics = getGrevCachingAnalytics("all");
+    assert.equal(analytics.totalRuns, 2);
+    assert.equal(analytics.tokensSaved, 700);
+    assert.deepEqual(analytics.conversations, [
+      {
+        conversationId: "key-a\x1fsession-a",
+        model: "test-model",
+        exchanges: 2,
+        promptEstimatedTokens: 5000,
+        actualPromptTokens: 3900,
+        compressionTokensSaved: 700,
+        compressionSavingsPercent: 17.5,
+        engineTokensSaved: 3000,
+        engineSavingsPercent: 60,
+        lastActivity: timestamp,
+      },
+    ]);
   });
 
   it("includes only per-engine breakdowns attached to GrevCaching requests", () => {

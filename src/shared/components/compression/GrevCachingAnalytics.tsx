@@ -21,15 +21,17 @@ interface Analytics {
     tokensSaved: number;
     averageSavingsPercent: number;
   }>;
-  recentRuns: Array<{
-    timestamp: string;
-    provider: string | null;
-    originalTokens: number;
-    compressedTokens: number;
-    tokensSaved: number;
-    actualPromptTokens: number | null;
-    cacheReadTokens: number | null;
-    estimatedCacheHitTokens: number | null;
+  conversations: Array<{
+    conversationId: string;
+    model: string | null;
+    exchanges: number;
+    promptEstimatedTokens: number;
+    actualPromptTokens: number;
+    compressionTokensSaved: number;
+    compressionSavingsPercent: number;
+    engineTokensSaved: number;
+    engineSavingsPercent: number;
+    lastActivity: string;
   }>;
 }
 
@@ -62,15 +64,10 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
   }, [since]);
 
   const cards = [
-    ["Grev runs", stats ? number.format(stats.totalRuns) : "—"],
-    ["Estimated tokens saved (compression)", stats ? formatTokens(stats.tokensSaved) : "—"],
-    ["Average reduction", stats ? `${stats.averageSavingsPercent}%` : "—"],
-    [
-      "Estimated tokens saved (KV-cache hits)",
-      stats
-        ? formatTokens(stats.estimatedCacheHitTokens)
-        : "—",
-    ],
+    ["Grev exchanges", stats ? number.format(stats.totalRuns) : "—"],
+    ["Estimated compression tokens saved", stats ? number.format(stats.tokensSaved) : "—"],
+    ["Average compression reduction", stats ? `${stats.averageSavingsPercent}%` : "—"],
+    ["Estimated engine prefix reuse", stats ? number.format(stats.estimatedCacheHitTokens) : "—"],
   ];
 
   return (
@@ -79,9 +76,9 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
         <div>
           <h2 className="font-medium text-text">GrevCaching usage</h2>
           <p className="mt-1 text-xs text-text-muted">
-            Compression savings are separate from estimated KV-cache reuse. Reuse estimates count
-            the unchanged message prefix from the previous request in this model/session; provider-
-            reported cache reads are shown separately when available.
+            Compression savings are measured per exchange and added up by conversation. Engine
+            savings estimate the unchanged prompt prefix across turns; this is not provider
+            confirmation of a KV-cache hit. Provider-reported cache reads are tracked separately.
           </p>
         </div>
         <label className="text-xs text-text-muted">
@@ -115,9 +112,7 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
           <div className="mt-4 grid gap-3 text-sm text-text sm:grid-cols-3">
             <div>Estimated input before: {formatTokens(stats.originalTokens)} tokens</div>
             <div>Estimated input after: {formatTokens(stats.compressedTokens)} tokens</div>
-            <div>
-              Provider-reported prompt tokens: {formatTokens(stats.actualPromptTokens)}
-            </div>
+            <div>Provider-reported prompt tokens: {formatTokens(stats.actualPromptTokens)}</div>
           </div>
           <h3 className="mt-6 font-medium text-text">GrevCaching engine breakdown</h3>
           {stats.engines.length === 0 ? (
@@ -148,34 +143,44 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
               </table>
             </div>
           )}
-          <h3 className="mt-6 font-medium text-text">Recent Grev requests</h3>
-          {stats.recentRuns.length === 0 ? (
-            <p className="mt-2 text-sm text-text-muted">No GrevCaching runs recorded yet.</p>
+          <h3 className="mt-6 font-medium text-text">Conversation history</h3>
+          {stats.conversations.length === 0 ? (
+            <p className="mt-2 text-sm text-text-muted">
+              No GrevCaching conversations recorded yet.
+            </p>
           ) : (
             <div className="mt-2 overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
+              <table className="w-full min-w-[1050px] text-left text-sm">
                 <thead className="text-xs text-text-muted">
                   <tr>
-                    <th className="p-2">Time</th>
-                    <th className="p-2">Provider</th>
-                    <th className="p-2">Compression tokens saved</th>
-                    <th className="p-2">Prompt tokens</th>
-                    <th className="p-2">Estimated prefix reuse</th>
-                    <th className="p-2">Provider cache reads</th>
+                    <th className="p-2">Chat / last activity</th>
+                    <th className="p-2">Model</th>
+                    <th className="p-2">Turns</th>
+                    <th className="p-2">Estimated prompt total</th>
+                    <th className="p-2">Actual prompt tokens</th>
+                    <th className="p-2">Compression saved</th>
+                    <th className="p-2">Compression saved %</th>
+                    <th className="p-2">Estimated engine saved</th>
+                    <th className="p-2">Engine saved %</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.recentRuns.map((run, index) => (
-                    <tr
-                      key={`${run.timestamp}-${index}`}
-                      className="border-t border-border text-text"
-                    >
-                      <td className="p-2">{new Date(run.timestamp).toLocaleString()}</td>
-                      <td className="p-2">{run.provider ?? "—"}</td>
-                      <td className="p-2">{number.format(run.tokensSaved)}</td>
-                      <td className="p-2">{formatTokens(run.actualPromptTokens)}</td>
-                      <td className="p-2">{formatTokens(run.estimatedCacheHitTokens)}</td>
-                      <td className="p-2">{formatTokens(run.cacheReadTokens)}</td>
+                  {stats.conversations.map((chat) => (
+                    <tr key={chat.conversationId} className="border-t border-border text-text">
+                      <td className="p-2" title={chat.conversationId}>
+                        Chat {chat.conversationId.slice(-8)} ·{" "}
+                        {new Date(chat.lastActivity).toLocaleString()}
+                      </td>
+                      <td className="p-2">{chat.model ?? "—"}</td>
+                      <td className="p-2">{number.format(chat.exchanges)}</td>
+                      <td className="p-2">{number.format(chat.promptEstimatedTokens)}</td>
+                      <td className="p-2">
+                        {chat.actualPromptTokens ? number.format(chat.actualPromptTokens) : "—"}
+                      </td>
+                      <td className="p-2">{number.format(chat.compressionTokensSaved)}</td>
+                      <td className="p-2">{chat.compressionSavingsPercent}%</td>
+                      <td className="p-2">{number.format(chat.engineTokensSaved)}</td>
+                      <td className="p-2">{chat.engineSavingsPercent}%</td>
                     </tr>
                   ))}
                 </tbody>

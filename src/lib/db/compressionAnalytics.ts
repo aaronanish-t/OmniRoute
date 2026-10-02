@@ -33,6 +33,10 @@ export interface CompressionAnalyticsRow {
   // ran) but produced no recordable saving. NULL on a normal saving row. Lets
   // analytics distinguish "ran but saved nothing" from "never ran" (#4268).
   skip_reason?: string | null;
+  measurement_scope?: string | null;
+  conversation_id?: string | null;
+  effective_model?: string | null;
+  prompt_estimated_tokens?: number | null;
 }
 
 /**
@@ -107,6 +111,9 @@ export interface GrevCachingAnalytics {
   }>;
   recentRuns: Array<{
     timestamp: string;
+    conversationId: string | null;
+    model: string | null;
+    promptEstimatedTokens: number | null;
     provider: string | null;
     originalTokens: number;
     compressedTokens: number;
@@ -114,6 +121,18 @@ export interface GrevCachingAnalytics {
     actualPromptTokens: number | null;
     cacheReadTokens: number | null;
     estimatedCacheHitTokens: number | null;
+  }>;
+  conversations: Array<{
+    conversationId: string;
+    model: string | null;
+    exchanges: number;
+    promptEstimatedTokens: number;
+    actualPromptTokens: number;
+    compressionTokensSaved: number;
+    compressionSavingsPercent: number;
+    engineTokensSaved: number;
+    engineSavingsPercent: number;
+    lastActivity: string;
   }>;
 }
 
@@ -139,6 +158,10 @@ const COMPRESSION_ANALYTICS_COLUMNS = [
   ["rtk_raw_output_pointers", "TEXT"],
   ["rtk_raw_output_total_bytes", "INTEGER"],
   ["skip_reason", "TEXT"],
+  ["measurement_scope", "TEXT"],
+  ["conversation_id", "TEXT"],
+  ["effective_model", "TEXT"],
+  ["prompt_estimated_tokens", "INTEGER"],
 ] as const;
 
 function ensureCompressionAnalyticsColumns(): void {
@@ -168,7 +191,9 @@ export function getGrevCachingAnalytics(
     "30d": 30 * 24 * 60 * 60 * 1000,
   };
   const cutoff = since === "all" ? null : new Date(Date.now() - durations[since]).toISOString();
-  const where = cutoff ? "mode = ? AND timestamp >= ?" : "mode = ?";
+  const where = cutoff
+    ? "mode = ? AND timestamp >= ? AND COALESCE(measurement_scope, 'message') = 'message'"
+    : "mode = ? AND COALESCE(measurement_scope, 'message') = 'message'";
   const params = cutoff ? ["grevcaching", cutoff] : ["grevcaching"];
   const totals = db
     .prepare(
@@ -188,9 +213,28 @@ export function getGrevCachingAnalytics(
     .get(...params) as Record<string, number>;
   const recentRuns = db
     .prepare(
-      `SELECT timestamp, provider, original_tokens, compressed_tokens, tokens_saved,
+      `SELECT timestamp, provider, conversation_id, effective_model, prompt_estimated_tokens,
+              original_tokens, compressed_tokens, tokens_saved,
               actual_prompt_tokens, actual_cache_read_tokens, estimated_cache_hit_tokens
        FROM compression_analytics WHERE ${where} ORDER BY timestamp DESC, id DESC LIMIT 50`
+    )
+    .all(...params) as Array<Record<string, string | number | null>>;
+  const conversations = db
+    .prepare(
+      `SELECT conversation_id, GROUP_CONCAT(DISTINCT effective_model) AS model,
+              COUNT(*) AS exchanges,
+              COALESCE(SUM(prompt_estimated_tokens), 0) AS prompt_estimated_tokens,
+              COALESCE(SUM(actual_prompt_tokens), 0) AS actual_prompt_tokens,
+              COALESCE(SUM(tokens_saved), 0) AS compression_tokens_saved,
+              COALESCE(SUM(estimated_cache_hit_tokens), 0) AS engine_tokens_saved,
+              COALESCE(100.0 * SUM(tokens_saved) / NULLIF(SUM(original_tokens), 0), 0)
+                AS compression_savings_percent,
+              COALESCE(100.0 * SUM(estimated_cache_hit_tokens) /
+                NULLIF(SUM(prompt_estimated_tokens), 0), 0) AS engine_savings_percent,
+              MAX(timestamp) AS last_activity
+       FROM compression_analytics WHERE ${where} AND conversation_id IS NOT NULL
+       GROUP BY conversation_id
+       ORDER BY last_activity DESC LIMIT 50`
     )
     .all(...params) as Array<Record<string, string | number | null>>;
   const engineRows = db
@@ -231,6 +275,10 @@ export function getGrevCachingAnalytics(
     })),
     recentRuns: recentRuns.map((row) => ({
       timestamp: String(row.timestamp),
+      conversationId: typeof row.conversation_id === "string" ? row.conversation_id : null,
+      model: typeof row.effective_model === "string" ? row.effective_model : null,
+      promptEstimatedTokens:
+        typeof row.prompt_estimated_tokens === "number" ? row.prompt_estimated_tokens : null,
       provider: typeof row.provider === "string" ? row.provider : null,
       originalTokens: Number(row.original_tokens ?? 0),
       compressedTokens: Number(row.compressed_tokens ?? 0),
@@ -240,9 +288,20 @@ export function getGrevCachingAnalytics(
       cacheReadTokens:
         typeof row.actual_cache_read_tokens === "number" ? row.actual_cache_read_tokens : null,
       estimatedCacheHitTokens:
-        typeof row.estimated_cache_hit_tokens === "number"
-          ? row.estimated_cache_hit_tokens
-          : null,
+        typeof row.estimated_cache_hit_tokens === "number" ? row.estimated_cache_hit_tokens : null,
+    })),
+    conversations: conversations.map((row) => ({
+      conversationId: String(row.conversation_id),
+      model: typeof row.model === "string" ? row.model : null,
+      exchanges: Number(row.exchanges ?? 0),
+      promptEstimatedTokens: Number(row.prompt_estimated_tokens ?? 0),
+      actualPromptTokens: Number(row.actual_prompt_tokens ?? 0),
+      compressionTokensSaved: Number(row.compression_tokens_saved ?? 0),
+      compressionSavingsPercent:
+        Math.round(Number(row.compression_savings_percent ?? 0) * 100) / 100,
+      engineTokensSaved: Number(row.engine_tokens_saved ?? 0),
+      engineSavingsPercent: Math.round(Number(row.engine_savings_percent ?? 0) * 100) / 100,
+      lastActivity: String(row.last_activity),
     })),
   };
 }
@@ -258,9 +317,10 @@ export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): voi
       actual_total_tokens, actual_cache_read_tokens, estimated_cache_hit_tokens, actual_cache_write_tokens,
       estimated_usd_saved, mcp_description_tokens_saved, multimodal_skip_count,
       receipt_source, validation_fallback, output_mode, rtk_raw_output_pointer, rtk_raw_output_bytes,
-      rtk_raw_output_pointers, rtk_raw_output_total_bytes, skip_reason
+      rtk_raw_output_pointers, rtk_raw_output_total_bytes, skip_reason,
+      measurement_scope, conversation_id, effective_model, prompt_estimated_tokens
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     row.timestamp,
@@ -290,7 +350,11 @@ export function insertCompressionAnalyticsRow(row: CompressionAnalyticsRow): voi
     row.rtk_raw_output_bytes ?? null,
     row.rtk_raw_output_pointers ?? null,
     row.rtk_raw_output_total_bytes ?? null,
-    row.skip_reason ?? null
+    row.skip_reason ?? null,
+    row.measurement_scope ?? null,
+    row.conversation_id ?? null,
+    row.effective_model ?? null,
+    row.prompt_estimated_tokens ?? null
   );
 }
 
@@ -434,7 +498,8 @@ export function attachEstimatedCacheHitTokens(
   requestId: string | null | undefined,
   estimatedTokens: number | null | undefined
 ): void {
-  if (!requestId || typeof estimatedTokens !== "number" || !Number.isFinite(estimatedTokens)) return;
+  if (!requestId || typeof estimatedTokens !== "number" || !Number.isFinite(estimatedTokens))
+    return;
   const db = getDbInstance();
   ensureCompressionAnalyticsColumns();
   db.prepare(

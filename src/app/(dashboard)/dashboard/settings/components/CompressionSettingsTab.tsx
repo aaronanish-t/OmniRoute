@@ -21,12 +21,6 @@ interface CavemanConfig {
   intensity: CavemanIntensity;
 }
 
-interface CavemanOutputModeConfig {
-  enabled: boolean;
-  intensity: CavemanIntensity;
-  autoClarity: boolean;
-}
-
 interface RtkConfig {
   enabled: boolean;
   intensity: RtkIntensity;
@@ -81,7 +75,6 @@ interface CompressionConfig extends CompressionTokenSaverConfig {
   mcpDescriptionCompressionEnabled?: boolean;
   comboOverrides: Record<string, CompressionMode>;
   cavemanConfig?: CavemanConfig;
-  cavemanOutputMode?: CavemanOutputModeConfig;
   rtkConfig?: RtkConfig;
   codexResponsesConfig?: CodexResponsesConfig;
   aggressive?: AggressiveConfig;
@@ -189,7 +182,6 @@ export default function CompressionSettingsTab() {
     cavemanOutputMode: {
       enabled: false,
       intensity: "full",
-      autoClarity: true,
     },
     rtkConfig: {
       enabled: true,

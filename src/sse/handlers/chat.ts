@@ -1884,7 +1884,6 @@ async function handleSingleModelChat(
         resolveBareModelToConnectionDefault(modelStr, model, credentials.defaultModel) ?? model;
       let requestBody =
         effectiveModel !== model ? { ...body, model: `${provider}/${effectiveModel}` } : body;
-
       // If the combo explicitly overrode the provider to a passthrough provider, we
       // must preserve the original unstripped modelStr so that proxy providers
       // (e.g., cline, kilocode) get the exact string they expect.
@@ -2025,6 +2024,7 @@ async function handleSingleModelChat(
                 : undefined,
             // Forward only the DB override, not the credential-blind format fallback.
             modelTargetFormat: customModelTargetFormat,
+            runtimeModelInfo: resolved.modelInfo,
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,
             skipUpstreamRetry: runtimeOptions.skipUpstreamRetry ?? false,

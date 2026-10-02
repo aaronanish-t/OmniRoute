@@ -3,6 +3,7 @@ import {
   getCodexClientVersion,
   getCodexDefaultHeaders,
 } from "@omniroute/open-sse/config/codexClient.ts";
+import { readCodexReasoningMetadata } from "@/shared/reasoning/codexEfforts";
 import {
   classifyCodexDiscoveryModel,
   isCodexDiscoveryModelExcluded,
@@ -33,9 +34,10 @@ export type CodexDiscoveryModel = {
   inputTokenLimit?: number;
   outputTokenLimit?: number;
   description?: string;
+  supportedThinkingEfforts?: string[];
+  defaultThinkingEffort?: string;
   supportsThinking?: boolean;
   supportsVision?: boolean;
-  supportedThinkingEfforts?: string[];
   visibility?: string;
   supportedInApi?: boolean;
   minimalClientVersion?: string;
@@ -148,20 +150,6 @@ function recordSupportsVision(record: JsonRecord): boolean {
   return Array.isArray(record.input_modalities) && record.input_modalities.some(isImageModality);
 }
 
-function reasoningEffortValue(entry: unknown): string | null {
-  if (typeof entry === "string") return toNonEmptyString(entry);
-  const effort = asRecord(entry).effort;
-  return typeof effort === "string" ? toNonEmptyString(effort) : null;
-}
-
-function supportedThinkingEfforts(record: JsonRecord): string[] | undefined {
-  if (!Array.isArray(record.supported_reasoning_levels)) return undefined;
-  const efforts = record.supported_reasoning_levels
-    .map(reasoningEffortValue)
-    .filter((effort): effort is string => effort !== null);
-  return efforts.length > 0 ? efforts : undefined;
-}
-
 function buildCodexDiscoveryModel(
   record: JsonRecord,
   source: CodexDiscoverySource = "live"
@@ -182,6 +170,7 @@ function buildCodexDiscoveryModel(
     supportedEndpoints: ["responses"],
     ...(source === "github" ? { discoverySource: source } : {}),
     ...metadata,
+    ...readCodexReasoningMetadata(record),
   };
   // The live Codex OAuth catalog reports BOTH `context_window` (the first
   // pricing tier, ~272K) and `max_context_window` (the real usable window,
@@ -215,9 +204,7 @@ function buildCodexDiscoveryModel(
   if (typeof inputTokenLimit === "number") model.inputTokenLimit = inputTokenLimit;
   if (typeof outputTokenLimit === "number") model.outputTokenLimit = outputTokenLimit;
   if (description) model.description = description;
-  const efforts = supportedThinkingEfforts(record);
   if (recordSupportsThinking(record)) model.supportsThinking = true;
-  if (efforts) model.supportedThinkingEfforts = efforts;
   if (recordSupportsVision(record)) model.supportsVision = true;
 
   return model;

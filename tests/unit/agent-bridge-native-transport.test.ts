@@ -65,6 +65,8 @@ test("native messages retain protocol, compressed bodies, status and selected ho
     ],
     thinking: { type: "adaptive" },
     output_config: { effort: "high" },
+    thread: { type: "create" },
+    diagnostics: { previous_message_id: null },
   };
   let mode = "json";
   let heldResponse: http.ServerResponse | undefined;

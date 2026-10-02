@@ -245,7 +245,10 @@ export async function POST(request) {
         return NextResponse.json({ error: "Combo not found" }, { status: 404 });
       }
       try {
-        combo = await materializeAutoCombo(comboName);
+        // Spread into a fresh object so the result fits ComboRecord
+        // (Record<string, unknown>) — interfaces like VirtualAutoCombo do not
+        // get an implicit index signature.
+        combo = { ...(await materializeAutoCombo(comboName)) };
       } catch {
         return NextResponse.json({ error: "Combo not found" }, { status: 404 });
       }

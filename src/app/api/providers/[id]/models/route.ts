@@ -1436,8 +1436,8 @@ export async function GET(
       // also locking remote model discovery for every non-Cursor provider. Gate the spawn
       // itself on the trusted peer-locality header stamped by the authz pipeline from the real
       // TCP peer (never the spoofable Host header), mirroring cursorAgentImage.ts. Fail closed:
-      // an absent/unrecognized locality skips the spawn and falls through to the cached/local
-      // catalog instead of executing a child process.
+      // an absent/unrecognized locality skips the spawn and serves the cached/local catalog, or an
+      // explicit 403 when neither exists — it never falls through to executing a child process.
       if (request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) !== "loopback") {
         warnings.push(
           "cursor-agent model discovery requires a local request; using cached catalog"
@@ -1447,6 +1447,7 @@ export async function GET(
           localWarning: `${warnings.join("; ")} — using local catalog`,
         });
         if (localFallback) return localFallback;
+        return errorResponse(403, "cursor-agent model discovery requires a local request");
       }
 
       try {

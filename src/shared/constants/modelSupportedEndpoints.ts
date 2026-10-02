@@ -37,6 +37,7 @@ export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
   type?: "embedding" | "rerank" | "image" | "video" | "audio";
   subtype?: "speech" | "transcription";
 } {
+  if (endpoints.includes("chat") || endpoints.includes("responses")) return {};
   if (endpoints.includes("embeddings")) return { type: "embedding" };
   if (endpoints.includes("rerank")) return { type: "rerank" };
   if (endpoints.includes("images")) return { type: "image" };

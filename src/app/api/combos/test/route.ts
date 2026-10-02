@@ -12,6 +12,11 @@ import { getRuntimePorts } from "@/lib/runtime/ports";
 import { requiresWebSessionCredential } from "@/shared/providers/webSessionCredentials";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import type { ResolvedComboTarget } from "@omniroute/open-sse/services/combo/types.ts";
+import { buildJevComboTestSummary } from "@omniroute/open-sse/services/combo/jevTestSummary.ts";
+import { TYPESAFE_PROVIDER_ID } from "@omniroute/open-sse/services/typesafe/systemOne.ts";
+import { getProviderCredentials } from "@/sse/services/auth";
+import { getCachedSettings } from "@/lib/db/readCache";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import { testComboSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -263,6 +268,32 @@ export async function POST(request) {
     }
     const resolvedResult = results.find((result) => result.status === "ok") || null;
     const resolvedBy = resolvedResult?.model || null;
+    const strategy = String(combo.strategy || "priority")
+      .trim()
+      .toLowerCase();
+
+    let jev: Awaited<ReturnType<typeof buildJevComboTestSummary>> | null = null;
+    if (strategy === "jev") {
+      const settings = await getCachedSettings();
+      const resilienceSettings = resolveResilienceSettings(settings);
+      let hasTypesafeKey = false;
+      try {
+        const credentials = await getProviderCredentials(TYPESAFE_PROVIDER_ID);
+        hasTypesafeKey =
+          !!credentials &&
+          typeof (credentials as { apiKey?: unknown }).apiKey === "string" &&
+          (credentials as { apiKey: string }).apiKey.trim().length > 0;
+      } catch {
+        hasTypesafeKey = false;
+      }
+      jev = await buildJevComboTestSummary({
+        targets,
+        comboName: combo.name,
+        config: (combo.config as Record<string, unknown> | null | undefined) ?? null,
+        resilienceSettings,
+        hasTypesafeKey,
+      });
+    }
 
     return NextResponse.json({
       comboName,
@@ -281,6 +312,7 @@ export async function POST(request) {
           }
         : null,
       results,
+      ...(jev ? { jev } : {}),
       testedAt: new Date().toISOString(),
     });
   } catch (error) {

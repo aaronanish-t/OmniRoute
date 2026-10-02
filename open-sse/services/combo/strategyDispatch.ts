@@ -41,7 +41,8 @@ export const COMBO_STRATEGY_DISPATCH_LEAVES = {
  * Conjunto exato de estratégias de roteamento que possuem implementação de despacho real.
  *
  * Cobertura esperada (em `main` do gate): este set ∪ IMPLICIT_DEFAULT_STRATEGIES deve
- * igualar o canônico. 20 estratégias canônicas + 1 interna (`quota-share`); HANDLED 有 21 项；IMPLICIT_DEFAULT_STRATEGIES 仍空。
+ * igualar o canônico. 21 estratégias canônicas + 1 interna (`quota-share`); HANDLED
+ * tem 22 itens; IMPLICIT_DEFAULT_STRATEGIES ainda vazio.
  */
 export const HANDLED_COMBO_STRATEGIES: readonly string[] = [
   "priority",
@@ -64,5 +65,6 @@ export const HANDLED_COMBO_STRATEGIES: readonly string[] = [
   "cache-optimized",
   "fusion",
   "pipeline",
+  "jev",
   "quota-share",
 ] as const;

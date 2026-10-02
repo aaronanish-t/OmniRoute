@@ -197,6 +197,13 @@ const STRATEGY_GUIDANCE_FALLBACK = {
     example:
       "Example: 10 Antigravity Gemini accounts with different 5h/weekly resets; skip empty ones and pick among the rest in proportion to leftover.",
   },
+  jev: {
+    when: "Use when you want to rank providers yourself and let TypeSafe Jev decide which of those entries run for each request.",
+    avoid:
+      "Avoid when you have no TypeSafe API key, or when you need a strict priority schedule that never skips a healthy favorite.",
+    example:
+      "Example: Opus → mid GPT → small GLM; Jev sends short chats to GLM and keeps Opus for hard coding turns.",
+  },
 };
 
 const ADVANCED_FIELD_HELP_FALLBACK = {
@@ -2013,6 +2020,10 @@ const ComboCard = memo(ComboCardInner);
 
 function TestResultsView({ results }) {
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
+  const strategy = String(results?.strategy || "")
+    .trim()
+    .toLowerCase();
+  const isJev = strategy === "jev";
 
   if (results.error) {
     return (
@@ -2025,10 +2036,31 @@ function TestResultsView({ results }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs text-text-muted">
-        Targets are tested independently. This checks model health, not the combo’s routing strategy
-        or fallback order.
-      </p>
+      {isJev && results.jev ? (
+        <div className="rounded-md border border-indigo-500/20 bg-indigo-500/5 px-2.5 py-2 flex flex-col gap-1.5">
+          <p className="text-xs text-indigo-800 dark:text-indigo-200">
+            {results.jev.admittedSentence}
+          </p>
+          <p className="text-xs text-indigo-800 dark:text-indigo-200">{results.jev.heldSentence}</p>
+          <p className="text-xs text-indigo-800 dark:text-indigo-200">
+            {results.jev.blockedSentence}
+          </p>
+          {results.jev.configurationNote ? (
+            <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+              {results.jev.configurationNote}
+            </p>
+          ) : null}
+          <p className="text-[10px] text-text-muted">
+            Target rows below are independent health probes. Live Jev admission is recorded on the
+            decision trace for a real chat request.
+          </p>
+        </div>
+      ) : (
+        <p className="text-xs text-text-muted">
+          Targets are tested independently. This checks model health, not the combo’s routing
+          strategy or fallback order.
+        </p>
+      )}
       {results.resolvedBy && (
         <div className="flex items-center gap-2 text-sm">
           <span className="material-symbols-outlined text-emerald-500 text-[18px]">
@@ -2796,6 +2828,7 @@ function ComboFormModal({
 
   const handleAddComboReference = () => {
     if (!builderComboRefName) return;
+    if (strategy === "jev") return;
 
     setModels([
       ...models,
@@ -3779,40 +3812,42 @@ function ComboFormModal({
                       </div>
                     )}
 
-                    <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/5">
-                      <label className="text-[10px] font-medium uppercase tracking-wide text-text-muted block mb-1">
-                        {getI18nOrFallback(t, "builderComboRef", "Reference another combo")}
-                      </label>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <select
-                          value={builderComboRefName}
-                          onChange={(e) => setBuilderComboRefName(e.target.value)}
-                          className="flex-1 text-xs py-2 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 text-text-main focus:border-primary focus:outline-none"
-                        >
-                          <option value="">
-                            {getI18nOrFallback(
-                              t,
-                              "selectComboToReference",
-                              "Select an existing combo to reference"
-                            )}
-                          </option>
-                          {builderComboRefs.map((comboRef) => (
-                            <option key={comboRef.id} value={comboRef.name}>
-                              {comboRef.name} · {comboRef.strategy} · {comboRef.stepCount} step
-                              {comboRef.stepCount === 1 ? "" : "s"}
+                    {strategy !== "jev" && (
+                      <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/5">
+                        <label className="text-[10px] font-medium uppercase tracking-wide text-text-muted block mb-1">
+                          {getI18nOrFallback(t, "builderComboRef", "Reference another combo")}
+                        </label>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <select
+                            value={builderComboRefName}
+                            onChange={(e) => setBuilderComboRefName(e.target.value)}
+                            className="flex-1 text-xs py-2 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 text-text-main focus:border-primary focus:outline-none"
+                          >
+                            <option value="">
+                              {getI18nOrFallback(
+                                t,
+                                "selectComboToReference",
+                                "Select an existing combo to reference"
+                              )}
                             </option>
-                          ))}
-                        </select>
-                        <Button
-                          onClick={handleAddComboReference}
-                          variant="ghost"
-                          size="sm"
-                          disabled={!builderComboRefName}
-                        >
-                          {getI18nOrFallback(t, "builderAddComboRef", "Add combo ref")}
-                        </Button>
+                            {builderComboRefs.map((comboRef) => (
+                              <option key={comboRef.id} value={comboRef.name}>
+                                {comboRef.name} · {comboRef.strategy} · {comboRef.stepCount} step
+                                {comboRef.stepCount === 1 ? "" : "s"}
+                              </option>
+                            ))}
+                          </select>
+                          <Button
+                            onClick={handleAddComboReference}
+                            variant="ghost"
+                            size="sm"
+                            disabled={!builderComboRefName}
+                          >
+                            {getI18nOrFallback(t, "builderAddComboRef", "Add combo ref")}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
 
@@ -4661,6 +4696,19 @@ function ComboFormModal({
                           }
                           className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
+                      </div>
+                    </div>
+                  )}
+                  {strategy === "jev" && (
+                    <div className="pt-2 border-t border-black/5 dark:border-white/5">
+                      <div className="rounded-md border border-indigo-500/20 bg-indigo-500/5 px-2 py-1.5">
+                        <p className="text-[10px] text-indigo-700 dark:text-indigo-300">
+                          {getI18nOrFallback(
+                            t,
+                            "jevPrivacyNote",
+                            "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model."
+                          )}
+                        </p>
                       </div>
                     </div>
                   )}

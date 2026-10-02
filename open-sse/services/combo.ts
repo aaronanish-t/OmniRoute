@@ -851,6 +851,7 @@ async function handleComboChatInner({
     handleSingleModelWithTimeout,
     buildAutoCandidates,
     hiddenModelsByProvider,
+    traceInvocationId,
   });
   if ("earlyResponse" in targetResolution) return targetResolution.earlyResponse;
   const { stickyWeightedLimit, getWeightedStepKeyForTarget, preScreenMap } = targetResolution;

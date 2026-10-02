@@ -7,7 +7,12 @@
  * No handler state is captured; behaviour is byte-identical to the previous inline closures.
  */
 
-import type { CompressionConfig } from "../../services/compression/types.ts";
+import type {
+  CompressionConfig,
+  CompressionPipelineStep,
+} from "../../services/compression/types.ts";
+import { applyLossyRequestPolicy } from "../../services/compression/lossyRequestPolicy.ts";
+import { planFromHeader } from "../../services/compression/planResolution.ts";
 
 export type RuntimeCompressionCombo = {
   id: string;
@@ -38,4 +43,27 @@ export function isStackedCompressionCombo(
   // >= 1: a single-engine default combo (user enabled exactly one layer via the per-engine config
   // page) must still apply. applyCompressionComboConfig already guards length === 0.
   return Boolean(compressionCombo && compressionCombo.pipeline.length >= 1);
+}
+
+/**
+ * The legacy default combo as this request may run it, or null when it must not apply. A plan
+ * the request header chose (a named combo, engine:<id>, default) wins over every operator layer.
+ * The default combo is operator configuration, not a request opt-in, so its lossy steps get the
+ * same policy resolveBasePlan applies to every other plan.
+ */
+export function defaultComboForRequest(
+  compressionCombo: RuntimeCompressionCombo | null,
+  request: {
+    config: CompressionConfig;
+    header: string | null;
+    combos: Record<string, CompressionPipelineStep[]>;
+  }
+): RuntimeCompressionCombo | null {
+  if (!isStackedCompressionCombo(compressionCombo)) return null;
+  if (request.header && planFromHeader(request.config, request.header, request.combos)) return null;
+  const { stackedPipeline } = applyLossyRequestPolicy(
+    { mode: "stacked", stackedPipeline: compressionCombo.pipeline },
+    request.header
+  );
+  return { ...compressionCombo, pipeline: stackedPipeline as RuntimeCompressionCombo["pipeline"] };
 }

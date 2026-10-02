@@ -279,9 +279,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    const message = sanitizeErrorMessage(
-      error instanceof Error ? error.message : "Unknown error"
-    );
+    const message = sanitizeErrorMessage(error instanceof Error ? error.message : "Unknown error");
     return NextResponse.json({ error: `Simulation error: ${message}` }, { status: 500 });
   }
 }

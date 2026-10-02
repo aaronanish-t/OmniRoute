@@ -241,27 +241,34 @@ export async function detectComposeCommand(
   }
 }
 
+async function validateCommandMode(
+  command: string,
+  existsImpl: (targetPath: string) => Promise<boolean>
+): Promise<AutoUpdateValidation> {
+  if (!command) {
+    return {
+      supported: false,
+      reason: "AUTO_UPDATE_MODE=command needs AUTO_UPDATE_COMMAND (an executable path).",
+      composeCommand: null,
+    };
+  }
+  if (!(await existsImpl(command))) {
+    return {
+      supported: false,
+      reason: `Update command not found: ${command}`,
+      composeCommand: null,
+    };
+  }
+  return { supported: true, reason: null, composeCommand: null };
+}
+
 export async function validateAutoUpdateRuntime(
   config: AutoUpdateConfig,
   execFileImpl: ExecFileLike = execFileAsync,
   existsImpl: (targetPath: string) => Promise<boolean> = pathExists
 ): Promise<AutoUpdateValidation> {
   if (config.mode === "command") {
-    if (!config.command) {
-      return {
-        supported: false,
-        reason: "AUTO_UPDATE_MODE=command needs AUTO_UPDATE_COMMAND (an executable path).",
-        composeCommand: null,
-      };
-    }
-    if (!(await existsImpl(config.command))) {
-      return {
-        supported: false,
-        reason: `Update command not found: ${config.command}`,
-        composeCommand: null,
-      };
-    }
-    return { supported: true, reason: null, composeCommand: null };
+    return validateCommandMode(config.command, existsImpl);
   }
 
   if (config.mode === "source") {
@@ -452,6 +459,12 @@ export function buildDockerComposeUpdateScript({
   ].join("\n");
 }
 
+function buildModeUpdateScript(latest: string, config: AutoUpdateConfig): string {
+  if (config.mode === "source") return buildSourceUpdateScript(latest, config.gitRemote);
+  if (config.mode === "command") return buildCommandUpdateScript(latest, config.command);
+  return buildNpmUpdateScript(latest);
+}
+
 export async function launchAutoUpdate({
   latest,
   env = process.env,
@@ -485,11 +498,7 @@ export async function launchAutoUpdate({
           config,
           composeCommand: validation.composeCommand || "docker-compose",
         })
-      : config.mode === "source"
-        ? buildSourceUpdateScript(latest, config.gitRemote)
-        : config.mode === "command"
-          ? buildCommandUpdateScript(latest, config.command)
-          : buildNpmUpdateScript(latest);
+      : buildModeUpdateScript(latest, config);
 
   mkdirSync(path.dirname(config.logPath), { recursive: true });
   const logFd = openSync(config.logPath, "a");

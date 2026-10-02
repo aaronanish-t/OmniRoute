@@ -137,9 +137,7 @@ export function selectAntigravityQuotaWindowNames(
   // unrelated Gemini sibling can never dilute exact-model exhaustion. This is
   // intentionally version-agnostic for newly discovered Gemini Flash releases.
   if (exactWindows.length === 0) {
-    const flashMatch = bareModel.match(
-      /^(gemini-\d+(?:\.\d+)*-flash)(?:-(?:high|medium|low))?$/
-    );
+    const flashMatch = bareModel.match(/^(gemini-\d+(?:\.\d+)*-flash)(?:-(?:high|medium|low))?$/);
     if (flashMatch) {
       const technicalTieredModel = `${flashMatch[1]}-tiered`;
       exactWindows = quotaNames.filter((windowName) => {
@@ -153,5 +151,7 @@ export function selectAntigravityQuotaWindowNames(
   const scoped = [...exactWindows, ...aggregateWindows];
   if (scoped.length > 0) return scoped;
 
-  return quotaNames.filter((windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily);
+  return quotaNames.filter(
+    (windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily
+  );
 }

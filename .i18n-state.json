@@ -102110,8 +102110,21 @@
         },
         "ga": {
           "source_hash": "c440b0ecb9c2dc60cb2bd321516a2218adad402708d26e6357e9c0d33567fe2b",
-          "target_hash": "ab9ee202c3c8bb7ec73ab5a6ccc1a8c2486e295e45152d3b5cbbbf301d6e17fe",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "bcc9f4b6050c47ba0c5bed7e2a21aed8bde97e6e075c1da38f86ecce089ef1a4",
+          "section_hashes": [
+            "604551543ad0",
+            "30888350b3b9",
+            "a9649e540c22",
+            "8e32334aa704",
+            "4f9cb6fc725f",
+            "ca01ea64ce02",
+            "cf378e83491e",
+            "6955f0b56570",
+            "6c7706403068",
+            "9aa588261cf5",
+            "f1150fc2035c"
+          ],
+          "updated_at": "2026-10-02T06:25:31.159Z"
         },
         "kn": {
           "source_hash": "c440b0ecb9c2dc60cb2bd321516a2218adad402708d26e6357e9c0d33567fe2b",

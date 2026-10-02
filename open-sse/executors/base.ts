@@ -1096,6 +1096,16 @@ export class BaseExecutor {
             // must opt in with x-omniroute-thinking; force-injecting adaptive thinking
             // leaks non-standard reasoning replay fields back into those clients.
             const isHaiku = typeof tb.model === "string" && tb.model.includes("haiku");
+            // Claude 4.5 and earlier accept manual thinking, not adaptive thinking.
+            // Preserve a native request's absent or explicit manual thinking there.
+            const claudeVersion =
+              /(?:^|[/.])claude-(?:(?:opus|sonnet)-)?(\d+)(?:[-.](\d{1,2})(?!\d))?/.exec(
+                model.toLowerCase()
+              );
+            const legacyThinkingModel =
+              claudeVersion !== null &&
+              (Number(claudeVersion[1]) < 4 ||
+                (Number(claudeVersion[1]) === 4 && Number(claudeVersion[2] ?? 0) < 6));
             // #5312 RC-B: honor the operator's proxy-level Thinking-Budget mode.
             // `auto` means "strip — let the provider decide", so suppress the default
             // adaptive injection. Passthrough/no-config keeps the native Claude Code
@@ -1111,7 +1121,11 @@ export class BaseExecutor {
               delete tb.thinking;
               delete tb.context_management;
               delete tb.output_config;
-            } else if (tb.thinking === undefined && tb.output_config === undefined) {
+            } else if (
+              !legacyThinkingModel &&
+              tb.thinking === undefined &&
+              tb.output_config === undefined
+            ) {
               tb.thinking = { type: "adaptive" };
               tb.context_management = {
                 edits: [{ type: "clear_thinking_20251015", keep: "all" }],
@@ -1122,7 +1136,11 @@ export class BaseExecutor {
             // When an operator budget (custom/adaptive mode) produced an enabled block
             // upstream, remap it to adaptive + output_config.effort here.
             const th = tb.thinking as Record<string, unknown> | undefined;
-            if (th?.type === "enabled" && tbMode !== ThinkingMode.PASSTHROUGH) {
+            if (
+              !legacyThinkingModel &&
+              th?.type === "enabled" &&
+              tbMode !== ThinkingMode.PASSTHROUGH
+            ) {
               const b = typeof th.budget_tokens === "number" ? th.budget_tokens : 0;
               tb.thinking = { type: "adaptive" };
               tb.output_config = {

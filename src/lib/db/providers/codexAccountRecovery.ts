@@ -67,7 +67,6 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
         window.total > 0;
       if (!valid(session) && !valid(weekly)) continue;
       const keys = [
-        "codexScopeRateLimitedUntil",
         "codexScopeRateLimitSource",
         "codexExhaustedWindowByScope",
         "codexQuotaStateByScope",

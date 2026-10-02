@@ -388,7 +388,7 @@ import {
   recordCoreOwnedAntigravityQuotaState,
   shouldDeferAntigravityQuotaStateToCaller,
 } from "../services/accountFallback.ts";
-import { saveIdempotency } from "@/lib/idempotencyLayer";
+import { saveIdempotencyWithSettings } from "@/lib/idempotencyLayer";
 import {
   isModelUnavailableError,
   getNextFamilyFallback,
@@ -5665,9 +5665,9 @@ async function handleChatCoreInner({
       });
 
       // ── Phase 9.2: Save for idempotency ──
-      // Reuse the key resolved by checkIdempotencyCache() above (single derivation per
-      // request). (#3821-review LEDGER-6)
-      saveIdempotency(idempotencyKey, translatedResponse, 200);
+      // Reuse the key resolved by checkIdempotencyCache() above (#3821-review LEDGER-6). The
+      // helper falls back to getCachedSettings() when cachedSettings is null (single-model, #15124).
+      await saveIdempotencyWithSettings(idempotencyKey, translatedResponse, 200, cachedSettings);
       reqLogger.logConvertedResponse(translatedResponse);
       persistAttemptLogs({
         status: 200,

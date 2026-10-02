@@ -1,0 +1,1 @@
+- **fix(dashboard):** Recognize Codex Pro Standard, Pro Extra, and Pro Max in provider labels and quota tier filters; support OAuth and imported plan metadata without changing other providers ([#15163](https://github.com/diegosouzapw/OmniRoute/pull/15163)) — thanks @xiaoyaner0201

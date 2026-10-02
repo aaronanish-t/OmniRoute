@@ -116,6 +116,7 @@ export async function generateForSubscription(
     }
     return null;
   } catch {
-    return warn("write_failed");
+    console.warn("[ProxySubscription] core config generation failed");
+    return warn("internal_error");
   }
 }

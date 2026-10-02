@@ -1,21 +1,62 @@
 import { NextResponse } from "next/server";
 import { getCachedSettings } from "@/lib/db/readCache";
-import { updateSettings } from "@/lib/db/settings";
 import { cookies } from "next/headers";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
-import { getDashboardJwtSecret } from "@/shared/utils/dashboardSessionToken";
 import {
-  createDashboardSessionJwt,
   getGoogleOAuthConfig,
   getRequestOrigin,
   isEmailAllowed,
   isRequestSecure,
-  timingSafeCompare,
 } from "@/lib/auth/socialOAuth";
+import {
+  asRecord,
+  consumeOAuthState,
+  getJsonWithBearer,
+  postForJson,
+  startDashboardSession,
+  type SocialCookieStore,
+  type StepResult,
+} from "@/lib/auth/socialLogin";
 
 export const googleCallbackInternals = {
-  getCookieStore: cookies,
+  getCookieStore: cookies as unknown as () => Promise<SocialCookieStore>,
 };
+
+async function exchangeCodeForAccessToken(
+  config: ReturnType<typeof getGoogleOAuthConfig>,
+  code: string,
+  redirectUri: string
+): Promise<StepResult<string>> {
+  const token = await postForJson(
+    "https://oauth2.googleapis.com/token",
+    {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: redirectUri,
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+      }).toString(),
+    },
+    { request: "token_exchange", response: "token_response" }
+  );
+  if (!token.ok) return token;
+  const accessToken = token.value.access_token;
+  return typeof accessToken === "string" && accessToken
+    ? { ok: true, value: accessToken }
+    : { ok: false, error: "token_response" };
+}
+
+/** Returns the lower-cased e-mail only when Google reports it as verified. */
+async function fetchVerifiedEmail(accessToken: string): Promise<StepResult<string>> {
+  const raw = await getJsonWithBearer("https://www.googleapis.com/oauth2/v3/userinfo", accessToken);
+  if (raw === null) return { ok: false, error: "user_info_failed" };
+  const info = asRecord(raw);
+  const email = typeof info.email === "string" ? info.email.trim().toLowerCase() : "";
+  if (!email || info.email_verified !== true) return { ok: false, error: "email_not_verified" };
+  return { ok: true, value: email };
+}
 
 /**
  * GET /api/auth/google/callback
@@ -26,105 +67,32 @@ export async function GET(request: Request) {
   const code = url.searchParams.get("code");
   const returnedState = url.searchParams.get("state");
   const origin = getRequestOrigin(request);
-  const auditContext = getAuditRequestContext(request as any);
+  const fail = (error: string) => NextResponse.redirect(new URL(`/login?error=${error}`, origin));
 
-  if (!code || !returnedState) {
-    return NextResponse.redirect(new URL("/login?error=missing_code", origin));
-  }
+  if (!code || !returnedState) return fail("missing_code");
 
   const cookieStore = await googleCallbackInternals.getCookieStore();
-  const storedState = cookieStore.get("google_oauth_state")?.value;
-
-  if (!storedState || !timingSafeCompare(storedState, returnedState)) {
-    return NextResponse.redirect(new URL("/login?error=invalid_state", origin));
+  if (!consumeOAuthState(cookieStore, "google_oauth_state", returnedState)) {
+    return fail("invalid_state");
   }
-
-  // Clear state cookie
-  cookieStore.set("google_oauth_state", "", {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
 
   const settings = await getCachedSettings();
   const config = getGoogleOAuthConfig(settings);
+  if (!config.enabled) return fail("not_configured");
 
-  if (!config.enabled || !config.clientId || !config.clientSecret) {
-    return NextResponse.redirect(new URL("/login?error=not_configured", origin));
-  }
-
-  const redirectUri = `${origin}${config.redirectPath}`;
-
-  // Exchange authorization code for tokens
-  const tokenParams = new URLSearchParams({
-    grant_type: "authorization_code",
+  const accessToken = await exchangeCodeForAccessToken(
+    config,
     code,
-    redirect_uri: redirectUri,
-    client_id: config.clientId,
-    client_secret: config.clientSecret,
-  });
+    `${origin}${config.redirectPath}`
+  );
+  if (!accessToken.ok) return fail(accessToken.error);
 
-  let tokenResp: Response;
-  try {
-    tokenResp = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: tokenParams.toString(),
-      signal: AbortSignal.timeout(10000),
-    });
-  } catch {
-    return NextResponse.redirect(new URL("/login?error=token_exchange", origin));
-  }
+  const verified = await fetchVerifiedEmail(accessToken.value);
+  if (!verified.ok) return fail(verified.error);
+  const email = verified.value;
 
-  if (!tokenResp.ok) {
-    return NextResponse.redirect(new URL("/login?error=token_exchange", origin));
-  }
-
-  let tokenData: any;
-  try {
-    tokenData = await tokenResp.json();
-  } catch {
-    return NextResponse.redirect(new URL("/login?error=token_response", origin));
-  }
-
-  const accessToken = typeof tokenData?.access_token === "string" ? tokenData.access_token : undefined;
-  if (!accessToken) {
-    return NextResponse.redirect(new URL("/login?error=token_response", origin));
-  }
-
-  // Fetch Google User Profile
-  let userInfoResp: Response;
-  try {
-    userInfoResp = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      signal: AbortSignal.timeout(5000),
-    });
-  } catch {
-    return NextResponse.redirect(new URL("/login?error=user_info_failed", origin));
-  }
-
-  if (!userInfoResp.ok) {
-    return NextResponse.redirect(new URL("/login?error=user_info_failed", origin));
-  }
-
-  let userInfo: any;
-  try {
-    userInfo = await userInfoResp.json();
-  } catch {
-    return NextResponse.redirect(new URL("/login?error=user_info_failed", origin));
-  }
-
-  const email = typeof userInfo?.email === "string" ? userInfo.email.trim().toLowerCase() : "";
-  const emailVerified = userInfo?.email_verified === true;
-
-  if (!email || !emailVerified) {
-    return NextResponse.redirect(new URL("/login?error=email_not_verified", origin));
-  }
-
-  // Validate against allowlist
-  const allowed = isEmailAllowed(email, settings.authAllowedEmails);
-  if (!allowed) {
+  const auditContext = getAuditRequestContext(request);
+  if (!isEmailAllowed(email, settings.authAllowedEmails)) {
     logAuditEvent({
       action: "auth.login.google.unauthorized",
       actor: email,
@@ -135,31 +103,12 @@ export async function GET(request: Request) {
       requestId: auditContext.requestId,
       metadata: { email, reason: "email_not_in_allowlist" },
     });
-    return NextResponse.redirect(new URL("/login?error=unauthorized_email", origin));
+    return fail("unauthorized_email");
   }
 
-  // First successful login completes setup
-  try {
-    await updateSettings({ setupComplete: true });
-  } catch {
-    // non-fatal
+  if (!(await startDashboardSession(cookieStore, isRequestSecure(request)))) {
+    return fail("server_misconfigured");
   }
-
-  const secret = getDashboardJwtSecret();
-  if (!secret) {
-    return NextResponse.redirect(new URL("/login?error=server_misconfigured", origin));
-  }
-
-  const useSecureCookie = isRequestSecure(request);
-  const jwt = await createDashboardSessionJwt(secret);
-
-  cookieStore.set("auth_token", jwt, {
-    httpOnly: true,
-    secure: useSecureCookie,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
 
   logAuditEvent({
     action: "auth.login.google.success",

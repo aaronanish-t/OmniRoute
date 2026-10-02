@@ -1,21 +1,79 @@
 import { NextResponse } from "next/server";
 import { getCachedSettings } from "@/lib/db/readCache";
-import { updateSettings } from "@/lib/db/settings";
 import { cookies } from "next/headers";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
-import { getDashboardJwtSecret } from "@/shared/utils/dashboardSessionToken";
 import {
-  createDashboardSessionJwt,
   getGitHubOAuthConfig,
   getRequestOrigin,
   isEmailAllowed,
+  isGithubLoginAllowed,
   isRequestSecure,
-  timingSafeCompare,
 } from "@/lib/auth/socialOAuth";
+import {
+  asRecord,
+  consumeOAuthState,
+  getJsonWithBearer,
+  postForJson,
+  startDashboardSession,
+  type SocialCookieStore,
+  type StepResult,
+} from "@/lib/auth/socialLogin";
 
 export const githubCallbackInternals = {
-  getCookieStore: cookies,
+  getCookieStore: cookies as unknown as () => Promise<SocialCookieStore>,
 };
+
+const GITHUB_API_HEADERS = { "User-Agent": "OmniRoute-OAuth" };
+
+async function exchangeCodeForAccessToken(
+  config: ReturnType<typeof getGitHubOAuthConfig>,
+  code: string,
+  redirectUri: string
+): Promise<StepResult<string>> {
+  const token = await postForJson(
+    "https://github.com/login/oauth/access_token",
+    {
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+        code,
+        redirect_uri: redirectUri,
+      }),
+    },
+    { request: "token_exchange", response: "token_response" }
+  );
+  if (!token.ok) return token;
+  const accessToken = token.value.access_token;
+  return typeof accessToken === "string" && accessToken
+    ? { ok: true, value: accessToken }
+    : { ok: false, error: "token_response" };
+}
+
+/**
+ * Resolves the account's verified e-mail from `/user/emails` (primary first, then any verified).
+ * The public profile e-mail carries no `verified` flag and is deliberately NOT a fallback: when
+ * this call fails or yields nothing verified, the login fails closed.
+ */
+async function fetchVerifiedEmail(accessToken: string): Promise<string> {
+  const raw = await getJsonWithBearer(
+    "https://api.github.com/user/emails",
+    accessToken,
+    GITHUB_API_HEADERS
+  );
+  const entries = Array.isArray(raw) ? raw.map(asRecord) : [];
+  const match =
+    entries.find((entry) => entry.primary === true && entry.verified === true) ??
+    entries.find((entry) => entry.verified === true);
+  return typeof match?.email === "string" ? match.email.trim().toLowerCase() : "";
+}
+
+async function fetchLogin(accessToken: string): Promise<string> {
+  const profile = asRecord(
+    await getJsonWithBearer("https://api.github.com/user", accessToken, GITHUB_API_HEADERS)
+  );
+  return typeof profile.login === "string" ? profile.login.toLowerCase() : "";
+}
 
 /**
  * GET /api/auth/github/callback
@@ -26,180 +84,61 @@ export async function GET(request: Request) {
   const code = url.searchParams.get("code");
   const returnedState = url.searchParams.get("state");
   const origin = getRequestOrigin(request);
-  const auditContext = getAuditRequestContext(request as any);
+  const fail = (error: string) => NextResponse.redirect(new URL(`/login?error=${error}`, origin));
 
-  if (!code || !returnedState) {
-    return NextResponse.redirect(new URL("/login?error=missing_code", origin));
-  }
+  if (!code || !returnedState) return fail("missing_code");
 
   const cookieStore = await githubCallbackInternals.getCookieStore();
-  const storedState = cookieStore.get("github_oauth_state")?.value;
-
-  if (!storedState || !timingSafeCompare(storedState, returnedState)) {
-    return NextResponse.redirect(new URL("/login?error=invalid_state", origin));
+  if (!consumeOAuthState(cookieStore, "github_oauth_state", returnedState)) {
+    return fail("invalid_state");
   }
-
-  // Clear state cookie
-  cookieStore.set("github_oauth_state", "", {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0,
-  });
 
   const settings = await getCachedSettings();
   const config = getGitHubOAuthConfig(settings);
+  if (!config.enabled) return fail("not_configured");
 
-  if (!config.enabled || !config.clientId || !config.clientSecret) {
-    return NextResponse.redirect(new URL("/login?error=not_configured", origin));
-  }
+  const accessToken = await exchangeCodeForAccessToken(
+    config,
+    code,
+    `${origin}${config.redirectPath}`
+  );
+  if (!accessToken.ok) return fail(accessToken.error);
 
-  const redirectUri = `${origin}${config.redirectPath}`;
+  const email = await fetchVerifiedEmail(accessToken.value);
+  if (!email) return fail("email_not_verified");
+  const githubUsername = await fetchLogin(accessToken.value);
 
-  // Exchange authorization code for access token
-  let tokenResp: Response;
-  try {
-    tokenResp = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_id: config.clientId,
-        client_secret: config.clientSecret,
-        code,
-        redirect_uri: redirectUri,
-      }),
-      signal: AbortSignal.timeout(10000),
-    });
-  } catch {
-    return NextResponse.redirect(new URL("/login?error=token_exchange", origin));
-  }
-
-  if (!tokenResp.ok) {
-    return NextResponse.redirect(new URL("/login?error=token_exchange", origin));
-  }
-
-  let tokenData: any;
-  try {
-    tokenData = await tokenResp.json();
-  } catch {
-    return NextResponse.redirect(new URL("/login?error=token_response", origin));
-  }
-
-  const accessToken = typeof tokenData?.access_token === "string" ? tokenData.access_token : undefined;
-  if (!accessToken) {
-    return NextResponse.redirect(new URL("/login?error=token_response", origin));
-  }
-
-  // Fetch GitHub User Profile
-  let userProfile: any = null;
-  try {
-    const userResp = await fetch("https://api.github.com/user", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "User-Agent": "OmniRoute-OAuth",
-      },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (userResp.ok) {
-      userProfile = await userResp.json();
-    }
-  } catch {
-    // Non-fatal if emails fetch succeeds
-  }
-
-  // Fetch GitHub User Emails (for verified and primary email resolution)
-  let userEmails: any[] = [];
-  try {
-    const emailsResp = await fetch("https://api.github.com/user/emails", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "User-Agent": "OmniRoute-OAuth",
-      },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (emailsResp.ok) {
-      userEmails = await emailsResp.json();
-    }
-  } catch {
-    // Fall back to profile email
-  }
-
-  // Resolve verified email
-  let resolvedEmail = "";
-  if (Array.isArray(userEmails) && userEmails.length > 0) {
-    const primaryVerified = userEmails.find((e: any) => e.primary && e.verified);
-    if (primaryVerified && typeof primaryVerified.email === "string") {
-      resolvedEmail = primaryVerified.email.trim().toLowerCase();
-    } else {
-      const anyVerified = userEmails.find((e: any) => e.verified);
-      if (anyVerified && typeof anyVerified.email === "string") {
-        resolvedEmail = anyVerified.email.trim().toLowerCase();
-      }
-    }
-  }
-
-  if (!resolvedEmail && typeof userProfile?.email === "string") {
-    resolvedEmail = userProfile.email.trim().toLowerCase();
-  }
-
-  if (!resolvedEmail) {
-    return NextResponse.redirect(new URL("/login?error=email_not_verified", origin));
-  }
-
-  // Validate against allowlist (email or github username)
-  const isAllowedByEmail = isEmailAllowed(resolvedEmail, settings.authAllowedEmails);
-  const githubUsername = typeof userProfile?.login === "string" ? userProfile.login.toLowerCase() : "";
-  const isAllowedByUsername = githubUsername ? isEmailAllowed(githubUsername, settings.authAllowedEmails) : false;
-
-  if (!isAllowedByEmail && !isAllowedByUsername) {
+  const auditContext = getAuditRequestContext(request);
+  const allowed =
+    isEmailAllowed(email, settings.authAllowedEmails) ||
+    isGithubLoginAllowed(githubUsername, settings.authAllowedEmails);
+  if (!allowed) {
     logAuditEvent({
       action: "auth.login.github.unauthorized",
-      actor: resolvedEmail,
+      actor: email,
       target: "dashboard-auth",
       resourceType: "auth_session",
       status: "failed",
       ipAddress: auditContext.ipAddress || undefined,
       requestId: auditContext.requestId,
-      metadata: { email: resolvedEmail, githubUsername, reason: "not_in_allowlist" },
+      metadata: { email, githubUsername, reason: "not_in_allowlist" },
     });
-    return NextResponse.redirect(new URL("/login?error=unauthorized_email", origin));
+    return fail("unauthorized_email");
   }
 
-  // First successful login completes setup
-  try {
-    await updateSettings({ setupComplete: true });
-  } catch {
-    // non-fatal
+  if (!(await startDashboardSession(cookieStore, isRequestSecure(request)))) {
+    return fail("server_misconfigured");
   }
-
-  const secret = getDashboardJwtSecret();
-  if (!secret) {
-    return NextResponse.redirect(new URL("/login?error=server_misconfigured", origin));
-  }
-
-  const useSecureCookie = isRequestSecure(request);
-  const jwt = await createDashboardSessionJwt(secret);
-
-  cookieStore.set("auth_token", jwt, {
-    httpOnly: true,
-    secure: useSecureCookie,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
 
   logAuditEvent({
     action: "auth.login.github.success",
-    actor: resolvedEmail,
+    actor: email,
     target: "dashboard-auth",
     resourceType: "auth_session",
     status: "success",
     ipAddress: auditContext.ipAddress || undefined,
     requestId: auditContext.requestId,
-    metadata: { email: resolvedEmail, githubUsername },
+    metadata: { email, githubUsername },
   });
 
   return NextResponse.redirect(`${origin}/dashboard`);

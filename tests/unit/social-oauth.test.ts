@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   isEmailAllowed,
+  isGithubLoginAllowed,
   getGoogleOAuthConfig,
   getGitHubOAuthConfig,
   getRequestOrigin,
@@ -21,10 +22,16 @@ test("timingSafeCompare properly checks string equality in constant time", () =>
 });
 
 test("isEmailAllowed validates emails against configured allowlists", () => {
-  // Empty or undefined allowlist allows any email (self-hosted open default)
-  assert.equal(isEmailAllowed("developer@example.com", []), true);
-  assert.equal(isEmailAllowed("developer@example.com", undefined), true);
-  assert.equal(isEmailAllowed("developer@example.com", "*"), true);
+  // Deny-by-default (#15153): an empty/undefined allowlist — or a bare "*" — never admits anyone,
+  // otherwise any Google/GitHub account on the planet would receive a 30-day admin session.
+  const savedEnv = process.env.AUTH_ALLOWED_EMAILS;
+  delete process.env.AUTH_ALLOWED_EMAILS;
+  assert.equal(isEmailAllowed("developer@example.com", []), false);
+  assert.equal(isEmailAllowed("developer@example.com", undefined), false);
+  assert.equal(isEmailAllowed("developer@example.com", "*"), false);
+  assert.equal(isEmailAllowed("developer@example.com", ["*"]), false);
+  assert.equal(isEmailAllowed("developer@example.com", ["  ", ""]), false);
+  if (savedEnv !== undefined) process.env.AUTH_ALLOWED_EMAILS = savedEnv;
 
   // Exact matching with case insensitivity
   const allowedList = ["admin@company.com", "CTO@Company.com", "DevOps@CLOUD.io"];
@@ -57,6 +64,7 @@ test("getGoogleOAuthConfig resolves credentials from settings and env", () => {
   // From settings
   const settings = {
     googleAuthEnabled: true,
+    authAllowedEmails: ["admin@company.com"],
     googleClientId: "g-client-123",
     googleClientSecret: "g-secret-456",
     googleRedirectPath: "/custom/callback",
@@ -70,7 +78,7 @@ test("getGoogleOAuthConfig resolves credentials from settings and env", () => {
   // Fallback to env
   process.env.AUTH_GOOGLE_CLIENT_ID = "env-g-client";
   process.env.AUTH_GOOGLE_CLIENT_SECRET = "env-g-secret";
-  const envConfig = getGoogleOAuthConfig({});
+  const envConfig = getGoogleOAuthConfig({ authAllowedEmails: ["admin@company.com"] });
   assert.equal(envConfig.enabled, true);
   assert.equal(envConfig.clientId, "env-g-client");
   assert.equal(envConfig.clientSecret, "env-g-secret");
@@ -83,6 +91,7 @@ test("getGitHubOAuthConfig resolves credentials from settings and env", () => {
   // From settings
   const settings = {
     githubAuthEnabled: true,
+    authAllowedEmails: ["admin@company.com"],
     githubClientId: "gh-client-123",
     githubClientSecret: "gh-secret-456",
   };
@@ -95,7 +104,7 @@ test("getGitHubOAuthConfig resolves credentials from settings and env", () => {
   // Fallback to env
   process.env.AUTH_GITHUB_CLIENT_ID = "env-gh-client";
   process.env.AUTH_GITHUB_CLIENT_SECRET = "env-gh-secret";
-  const envConfig = getGitHubOAuthConfig({});
+  const envConfig = getGitHubOAuthConfig({ authAllowedEmails: ["admin@company.com"] });
   assert.equal(envConfig.enabled, true);
   assert.equal(envConfig.clientId, "env-gh-client");
   assert.equal(envConfig.clientSecret, "env-gh-secret");
@@ -103,11 +112,12 @@ test("getGitHubOAuthConfig resolves credentials from settings and env", () => {
   delete process.env.AUTH_GITHUB_CLIENT_SECRET;
 });
 
-test("getRequestOrigin extracts forwarded proto and host", () => {
+test("getRequestOrigin honours forwarded proto and Host, never X-Forwarded-Host", () => {
   const req = new Request("http://internal-docker:3000/api/auth/google/login", {
     headers: {
       "x-forwarded-proto": "https",
-      "x-forwarded-host": "omniroute.example.com",
+      host: "omniroute.example.com",
+      "x-forwarded-host": "evil.example.net",
     },
   });
   const origin = getRequestOrigin(req);
@@ -132,4 +142,104 @@ test("createDashboardSessionJwt mints a valid session token that passes verifyDa
   const wrongSecret = new TextEncoder().encode("wrong-secret-key-32-characters-long!!");
   const invalidPayload = await verifyDashboardSessionToken(jwt, wrongSecret);
   assert.equal(invalidPayload, null, "Wrong secret must fail verification");
+});
+
+test("provider is disabled until an allowlist is configured (#15153)", () => {
+  const savedEnv = process.env.AUTH_ALLOWED_EMAILS;
+  delete process.env.AUTH_ALLOWED_EMAILS;
+  try {
+    const creds = {
+      googleClientId: "g-id",
+      googleClientSecret: "g-secret",
+      githubClientId: "gh-id",
+      githubClientSecret: "gh-secret",
+    };
+    assert.equal(getGoogleOAuthConfig(creds).enabled, false);
+    assert.equal(getGitHubOAuthConfig(creds).enabled, false);
+    assert.equal(getGoogleOAuthConfig({ ...creds, authAllowedEmails: ["*"] }).enabled, false);
+    assert.equal(getGoogleOAuthConfig({ ...creds, authAllowedEmails: ["a@b.co"] }).enabled, true);
+    assert.equal(getGitHubOAuthConfig({ ...creds, authAllowedEmails: ["a@b.co"] }).enabled, true);
+
+    process.env.AUTH_ALLOWED_EMAILS = "ops@company.com";
+    assert.equal(getGoogleOAuthConfig(creds).enabled, true);
+  } finally {
+    if (savedEnv === undefined) delete process.env.AUTH_ALLOWED_EMAILS;
+    else process.env.AUTH_ALLOWED_EMAILS = savedEnv;
+  }
+});
+
+test("generic GOOGLE_CLIENT_ID / GITHUB_CLIENT_ID env vars are NOT used as login credentials", () => {
+  const saved = {
+    gid: process.env.GOOGLE_CLIENT_ID,
+    gsecret: process.env.GOOGLE_CLIENT_SECRET,
+    hid: process.env.GITHUB_CLIENT_ID,
+    hsecret: process.env.GITHUB_CLIENT_SECRET,
+  };
+  process.env.GOOGLE_CLIENT_ID = "generic-g";
+  process.env.GOOGLE_CLIENT_SECRET = "generic-g-secret";
+  process.env.GITHUB_CLIENT_ID = "generic-gh";
+  process.env.GITHUB_CLIENT_SECRET = "generic-gh-secret";
+  try {
+    const settings = { authAllowedEmails: ["admin@company.com"] };
+    const google = getGoogleOAuthConfig(settings);
+    const github = getGitHubOAuthConfig(settings);
+    assert.equal(google.enabled, false);
+    assert.equal(google.clientId, "");
+    assert.equal(github.enabled, false);
+    assert.equal(github.clientId, "");
+  } finally {
+    for (const [key, value] of [
+      ["GOOGLE_CLIENT_ID", saved.gid],
+      ["GOOGLE_CLIENT_SECRET", saved.gsecret],
+      ["GITHUB_CLIENT_ID", saved.hid],
+      ["GITHUB_CLIENT_SECRET", saved.hsecret],
+    ] as const) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
+test("isGithubLoginAllowed only matches bare username entries, never email/domain entries", () => {
+  const list = ["octocat", "@corp.local", "*@trusted.org", "admin@company.com"];
+  assert.equal(isGithubLoginAllowed("octocat", list), true);
+  assert.equal(isGithubLoginAllowed("OctoCat", list), true);
+  assert.equal(isGithubLoginAllowed("corp.local", list), false);
+  assert.equal(isGithubLoginAllowed("trusted.org", list), false);
+  assert.equal(isGithubLoginAllowed("admin", list), false);
+  assert.equal(isGithubLoginAllowed("someone-else", list), false);
+  assert.equal(isGithubLoginAllowed("", list), false);
+  assert.equal(isGithubLoginAllowed("octocat", []), false);
+  assert.equal(isGithubLoginAllowed("octocat", ["*"]), false);
+});
+
+test("redirect path from settings must be a same-origin absolute path (no open redirect_uri)", () => {
+  const base = {
+    authAllowedEmails: ["a@b.co"],
+    googleClientId: "id",
+    googleClientSecret: "secret",
+    githubClientId: "id",
+    githubClientSecret: "secret",
+  };
+  for (const bad of [
+    "//evil.example.net/cb",
+    "@evil.example.net",
+    "https://evil.example.net/cb",
+    "cb",
+  ]) {
+    assert.equal(
+      getGoogleOAuthConfig({ ...base, googleRedirectPath: bad }).redirectPath,
+      "/api/auth/google/callback",
+      bad
+    );
+    assert.equal(
+      getGitHubOAuthConfig({ ...base, githubRedirectPath: bad }).redirectPath,
+      "/api/auth/github/callback",
+      bad
+    );
+  }
+  assert.equal(
+    getGoogleOAuthConfig({ ...base, googleRedirectPath: "/custom/callback" }).redirectPath,
+    "/custom/callback"
+  );
 });

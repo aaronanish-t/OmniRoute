@@ -24,23 +24,25 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const err = params.get("error") || params.get("oidc_error");
-      if (err) {
-        if (err === "unauthorized_email" || err === "subject_not_allowed") {
-          setError(t("oauthEmailNotAllowed"));
-        } else if (err === "email_not_verified") {
-          setError("OAuth email address is not verified.");
-        } else if (err === "invalid_state") {
-          setError("OAuth state verification failed. Please try again.");
-        } else if (err === "not_configured") {
-          setError("OAuth provider is not configured.");
-        } else {
-          setError(t("oauthLoginFailed"));
-        }
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error") || params.get("oidc_error");
+    if (!err) return;
+    // Deferred like `setMounted` below: reading the query string needs the browser, and a
+    // synchronous setState inside the effect trips react-hooks/set-state-in-effect.
+    const raf = requestAnimationFrame(() => {
+      if (err === "unauthorized_email" || err === "subject_not_allowed") {
+        setError(t("oauthEmailNotAllowed"));
+      } else if (err === "email_not_verified") {
+        setError(t("oauthEmailNotVerified"));
+      } else if (err === "invalid_state") {
+        setError(t("oauthStateInvalid"));
+      } else if (err === "not_configured") {
+        setError(t("oauthNotConfigured"));
+      } else {
+        setError(t("oauthLoginFailed"));
       }
-    }
+    });
+    return () => cancelAnimationFrame(raf);
   }, [t]);
 
   useEffect(() => {
@@ -286,7 +288,11 @@ export default function LoginPage() {
                 {googleAuthEnabled && (
                   <Button
                     type="button"
-                    variant={disablePasswordLogin || (oidcEnabled && oidcDisablePasswordLogin) ? "primary" : "secondary"}
+                    variant={
+                      disablePasswordLogin || (oidcEnabled && oidcDisablePasswordLogin)
+                        ? "primary"
+                        : "secondary"
+                    }
                     className="w-full h-11 text-sm font-medium flex items-center justify-center gap-2 border border-border bg-surface hover:bg-surface-hover text-text-main transition-colors"
                     onClick={() => (window.location.href = "/api/auth/google/login")}
                   >
@@ -315,7 +321,11 @@ export default function LoginPage() {
                 {githubAuthEnabled && (
                   <Button
                     type="button"
-                    variant={disablePasswordLogin || (oidcEnabled && oidcDisablePasswordLogin) ? "primary" : "secondary"}
+                    variant={
+                      disablePasswordLogin || (oidcEnabled && oidcDisablePasswordLogin)
+                        ? "primary"
+                        : "secondary"
+                    }
                     className="w-full h-11 text-sm font-medium flex items-center justify-center gap-2 border border-border bg-surface hover:bg-surface-hover text-text-main transition-colors"
                     onClick={() => (window.location.href = "/api/auth/github/login")}
                   >
@@ -333,7 +343,11 @@ export default function LoginPage() {
                 {oidcEnabled && (
                   <Button
                     type="button"
-                    variant={disablePasswordLogin || (oidcEnabled && oidcDisablePasswordLogin) ? "primary" : "secondary"}
+                    variant={
+                      disablePasswordLogin || (oidcEnabled && oidcDisablePasswordLogin)
+                        ? "primary"
+                        : "secondary"
+                    }
                     className="w-full h-11 text-sm font-medium flex items-center justify-center gap-2"
                     onClick={() => (window.location.href = "/api/auth/oidc/login")}
                   >

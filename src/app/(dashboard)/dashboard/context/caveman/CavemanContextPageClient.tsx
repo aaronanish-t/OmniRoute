@@ -87,13 +87,22 @@ export default function CavemanContextPageClient() {
   };
   const masterEnabled = settings?.enabled ?? false;
 
-  const saveSettings = async (patch: Partial<CompressionSettings>) => {
+  // The server stores each nested settings object as one row, so a save carries the whole
+  // object. Each save builds it from the server's current row, not this page's copy, so a
+  // field saved elsewhere since the page loaded is not written back. No row, no save.
+  const saveSettings = async (
+    build: (current: CompressionSettings) => Partial<CompressionSettings>
+  ) => {
     setSaving(true);
     try {
+      const current: CompressionSettings | null = await fetch("/api/context/caveman/config")
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null);
+      if (!current) return;
       const res = await fetch("/api/context/caveman/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patch),
+        body: JSON.stringify(build(current)),
       });
       if (res.ok) setSettings(await res.json());
     } finally {
@@ -102,18 +111,21 @@ export default function CavemanContextPageClient() {
   };
 
   const updateLanguageConfig = (patch: Partial<LanguageConfig>) => {
-    saveSettings({ languageConfig: { ...languageConfig, ...patch } });
+    saveSettings((current) => ({ languageConfig: { ...current.languageConfig, ...patch } }));
   };
 
   const updateOutputMode = (patch: Partial<OutputModeConfig>) => {
-    saveSettings({ cavemanOutputMode: { ...outputMode, ...patch } });
+    saveSettings((current) => ({ cavemanOutputMode: { ...current.cavemanOutputMode, ...patch } }));
   };
 
   const togglePack = (language: string, enabled: boolean) => {
-    const enabledPacks = enabled
-      ? [...new Set([...languageConfig.enabledPacks, language])]
-      : languageConfig.enabledPacks.filter((pack) => pack !== language && pack !== "en");
-    updateLanguageConfig({ enabledPacks });
+    saveSettings((current) => {
+      const packs = current.languageConfig?.enabledPacks ?? [];
+      const enabledPacks = enabled
+        ? [...new Set([...packs, language])]
+        : packs.filter((pack) => pack !== language && pack !== "en");
+      return { languageConfig: { ...current.languageConfig, enabledPacks } };
+    });
   };
 
   const cavemanStats = analytics?.byEngine?.caveman ?? analytics?.byEngine?.standard;

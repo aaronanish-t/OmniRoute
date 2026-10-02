@@ -438,11 +438,13 @@ This works particularly well for:
 
 #### When to use
 
-Caveman output mode is **opt-in**. Turn it on with `cavemanOutputMode.enabled` in the
-compression config; `intensity` picks `lite`, `full` or `ultra`:
+Caveman output mode is **opt-in**. With compression on (`enabled: true`, the master toggle
+on the Compression Settings page), turn it on with `cavemanOutputMode.enabled`; `intensity`
+picks `lite`, `full` or `ultra`:
 
 ```json
 {
+  "enabled": true,
   "cavemanOutputMode": {
     "enabled": true,
     "intensity": "full"
@@ -453,8 +455,9 @@ compression config; `intensity` picks `lite`, `full` or `ultra`:
 A compression combo's **Output Mode** toggle (`outputMode`, level in `outputModeIntensity`)
 sets the same switch for the requests that combo applies to, and the
 `omniroute_set_compression_engine` MCP tool writes it through its boolean `outputMode`
-argument. In the dashboard, the **Terse prose** output style injects the same text (see
-Output Styles below).
+argument. A non-empty `outputStyles` selection takes precedence over this switch. In the
+dashboard, enabling the **Terse prose** output style injects the same block (see Output
+Styles below).
 
 ### Output Styles (catalog)
 
@@ -482,18 +485,18 @@ keeps code blocks, file paths, commands, errors and URLs exact. The `terse-prose
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) resolves
 the selection against the catalog (unknown ids and locale-mismatched styles are
 dropped, never an error), concatenates the selected instructions in catalog order,
-appends the boundaries clause **once** (plus the `SAFETY_BOUNDARIES` clause when
-`less-code` or `ponytail` is selected), and starts the block with a single idempotency
-marker (`[OmniRoute Output Styles]`), so re-applying is a no-op. When the resolved
-language (see Language selection below) has a translation, the localized instruction is
-injected instead of English.
+appends the boundaries clause **once** (plus the safety clause, `SAFETY_BOUNDARIES` or its
+translation, when `less-code` or `ponytail` is selected), and starts the block with a
+single idempotency marker (`[OmniRoute Output Styles]`), so re-applying is a no-op. When
+the resolved language (see Language selection below) has a translation, the localized
+instruction is injected instead of English.
 
 On a body with `messages`, a content bypass (`shouldBypassCavemanOutputMode()` in
 `open-sse/services/compression/outputMode.ts`) checks the last three messages and skips
 the styles for the whole turn when they match its security, irreversible-action,
 clarification, or order-sensitive keywords. The bypass runs while the **Auto-Clarity
-Bypass** toggle (`cavemanOutputMode.autoClarity`, on by default) is on; with it off, the
-styles are injected on those turns too.
+Bypass** toggle (`cavemanOutputMode.autoClarity`, on by default) is on; turning the
+toggle off skips the keyword check.
 
 When the bypass lets the turn through, `placeSystemInstruction()` (same file), which
 never creates a new `messages[0]`, places the block in the first of these it finds:
@@ -513,7 +516,8 @@ with neither `instructions` nor `input` is skipped as `no_messages`.
 
 In the dashboard: **Compression Context → Compression Settings**
 (`/dashboard/context/settings`), Output styles section: one row per style with an on/off
-toggle and a level selector. The **Auto-Clarity Bypass** toggle is on the **Caveman**
+toggle and a level selector. Styles inject while compression itself is on (the page's
+master toggle, `enabled`). The **Auto-Clarity Bypass** toggle is on the **Caveman**
 page (`/dashboard/context/caveman`), in its **Output Mode** card. Programmatically, the
 compression config persists the selection as:
 

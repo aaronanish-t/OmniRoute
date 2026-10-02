@@ -2,6 +2,7 @@ import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
+import { createByteLengthQueueStrategies } from "./byteQueueStrategy.ts";
 import {
   extractUsage,
   hasValidUsage,
@@ -160,17 +161,6 @@ type StreamCompletePayload = {
 
 /** Queue budget every provider used before `streamBufferBytes` existed. */
 const DEFAULT_STREAM_BUFFER_BYTES = 16384;
-
-export function createByteLengthQueueStrategy(
-  highWaterMark: number
-): QueuingStrategy<Uint8Array> {
-  return {
-    highWaterMark,
-    size(chunk: Uint8Array) {
-      return chunk.byteLength;
-    },
-  };
-}
 
 type StreamOptions = {
   mode?: string;
@@ -3226,8 +3216,7 @@ export function createSSEStream(options: StreamOptions = {}) {
         clearIdleTimer();
       },
     },
-    createByteLengthQueueStrategy(streamBufferBytes),
-    createByteLengthQueueStrategy(streamBufferBytes)
+    ...createByteLengthQueueStrategies(streamBufferBytes)
   );
 }
 

@@ -6,22 +6,13 @@
 // credit-balance cache itself stays in antigravity.ts; callers inject the
 // update function below so the two modules don't import each other.
 
+import { createByteLengthQueueStrategies } from "../../utils/byteQueueStrategy.ts";
+
 /** Shape of one entry in a Gemini `remainingCredits` SSE payload array. */
 export type AntigravityCreditEntry = {
   creditType?: string;
   creditAmount?: string;
 };
-
-export function createByteLengthQueueStrategy(
-  highWaterMark: number
-): QueuingStrategy<Uint8Array> {
-  return {
-    highWaterMark,
-    size(chunk: Uint8Array) {
-      return chunk.byteLength;
-    },
-  };
-}
 
 function asCreditRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -113,8 +104,7 @@ export function createCreditsExtractionTransform(
         buffer = "";
       },
     },
-    createByteLengthQueueStrategy(16 * 1024),
-    createByteLengthQueueStrategy(16 * 1024)
+    ...createByteLengthQueueStrategies(16 * 1024)
   );
 }
 

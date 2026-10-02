@@ -163,10 +163,7 @@ export class CompressionWorkerPool {
     size = positiveInteger(process.env.OMNI_COMPRESSION_WORKERS, 2),
     timeoutMs = positiveInteger(process.env.OMNI_COMPRESSION_WORKER_TIMEOUT_MS, 120_000),
     idleMs = positiveInteger(process.env.OMNI_COMPRESSION_WORKER_IDLE_MS, 60_000),
-    maxOldGenerationSizeMb = positiveInteger(
-      process.env.OMNI_COMPRESSION_WORKER_MAX_OLD_MB,
-      1024
-    ),
+    maxOldGenerationSizeMb = positiveInteger(process.env.OMNI_COMPRESSION_WORKER_MAX_OLD_MB, 1024),
     workerFactory,
   }: {
     size?: number;

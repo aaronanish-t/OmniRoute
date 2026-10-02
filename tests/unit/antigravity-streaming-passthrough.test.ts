@@ -14,10 +14,8 @@ import {
   seedAntigravityIdeVersionCache,
   seedAntigravityCliVersionCache,
 } from "../../open-sse/services/antigravityVersion.ts";
-import {
-  bindAbortLifecycle,
-  createByteLengthQueueStrategy,
-} from "../../open-sse/executors/antigravity/streamingPassthrough.ts";
+import { bindAbortLifecycle } from "../../open-sse/executors/antigravity/streamingPassthrough.ts";
+import { createByteLengthQueueStrategy } from "../../open-sse/utils/byteQueueStrategy.ts";
 
 type ChatCompletionPayload = {
   object?: string;
@@ -216,7 +214,6 @@ test("createCreditsExtractionTransform handles malformed SSE gracefully", async 
   assert.ok(collected.includes("not valid sse"));
 });
 
-
 test("Antigravity SSE queue budgets are measured in bytes, not chunk count", () => {
   const strategy = createByteLengthQueueStrategy(16 * 1024);
   assert.equal(strategy.highWaterMark, 16 * 1024);
@@ -243,5 +240,9 @@ test("bindAbortLifecycle releases the client abort listener after normal EOF", a
   }
 
   const after = getEventListeners(controller.signal, "abort").length;
-  assert.equal(after, before, "completed streams must not retain the request body via abort listeners");
+  assert.equal(
+    after,
+    before,
+    "completed streams must not retain the request body via abort listeners"
+  );
 });

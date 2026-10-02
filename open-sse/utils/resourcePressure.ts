@@ -276,8 +276,7 @@ export function createResourcePressureRuntime(
   const nowMs = options.nowMs ?? Date.now;
   const immediateHeapUsedMb =
     options.immediateHeapUsedMb ?? (() => process.memoryUsage().heapUsed / MB);
-  const immediateRssUsedMb =
-    options.immediateRssUsedMb ?? (() => process.memoryUsage().rss / MB);
+  const immediateRssUsedMb = options.immediateRssUsedMb ?? (() => process.memoryUsage().rss / MB);
   const sample = options.sample ?? (() => sampleResourceSignals(options.samplerDeps));
   const schedule =
     options.schedule ??

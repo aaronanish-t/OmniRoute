@@ -96,7 +96,11 @@ export function extractUserToken(credentials: Record<string, unknown>): string |
 function errorResponse(status: number, message: string, dsCode?: number): Response {
   return new Response(
     JSON.stringify({
-      error: { message: sanitizeErrorMessage(message), type: "upstream_error", code: dsCode ?? `HTTP_${status}` },
+      error: {
+        message: sanitizeErrorMessage(message),
+        type: "upstream_error",
+        code: dsCode ?? `HTTP_${status}`,
+      },
     }),
     { status, headers: { "Content-Type": "application/json" } }
   );
@@ -905,7 +909,7 @@ export class DeepSeekWebExecutor extends BaseExecutor {
 
     const userToken = extractUserToken(rawCreds);
     if (!userToken) {
-return {
+      return {
         response: errorResponse(
           400,
           "Missing userToken \u2014 paste it from DeepSeek localStorage " +

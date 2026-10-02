@@ -34,7 +34,10 @@ async function runWithMockedCompletion(
     }
     if (urlStr.includes("/chat_session/create")) {
       return new Response(
-        JSON.stringify({ code: 0, data: { biz_data: { chat_session: { id: "session-abc-123" } } } }),
+        JSON.stringify({
+          code: 0,
+          data: { biz_data: { chat_session: { id: "session-abc-123" } } },
+        }),
         { status: 200, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -89,7 +92,8 @@ async function runWithMockedCompletion(
 }
 
 test("E-09: deepseek-web never surfaces a raw upstream errBody.msg in the client body", async () => {
-  const raw = "upstream exploded\n    at Object.<anonymous> (/srv/app/client.ts:44:15) api_key=sk-1234567890abcdef";
+  const raw =
+    "upstream exploded\n    at Object.<anonymous> (/srv/app/client.ts:44:15) api_key=sk-1234567890abcdef";
   const result = await runWithMockedCompletion({ code: 10001, msg: raw }, 500);
   const text = await result.response.text();
   const body = JSON.parse(text) as { error: { message: string } };
@@ -104,11 +108,7 @@ test("E-09: deepseek-web never surfaces a raw upstream parsed.message in the cli
   const raw = "auth failed: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
   // HTTP 200 + application/json routes through the parseDeepSeekErrorPayload
   // branch (:1053), which is where parsed.message leaks at :1060.
-  const result = await runWithMockedCompletion(
-    { code: 40002, msg: raw },
-    200,
-    "application/json"
-  );
+  const result = await runWithMockedCompletion({ code: 40002, msg: raw }, 200, "application/json");
   const text = await result.response.text();
   const body = JSON.parse(text) as { error: { message: string } };
 

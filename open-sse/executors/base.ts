@@ -17,21 +17,14 @@ import {
 import { applyContextEditingToBody } from "../config/contextEditing.ts";
 import { createCopilotIdentityFallback } from "./copilotIdentityFallback.ts";
 import {
-  findOffendingField,
-  detectUnsupportedParam,
+  replaceRedactedAdvisorResults,
   stripGroqUnsupportedFields,
 } from "../config/providerFieldStrips.ts";
 import {
   recordLearnedThinkingCap,
   parseThinkingBudgetMax,
 } from "../services/learnedThinkingCaps.ts";
-import {
-  getParamFilterConfig,
-  addParamToBlocklist,
-  isAutoLearnGloballyEnabled,
-} from "@/lib/db/paramFilters";
 import { applyFingerprint, isCliCompatEnabled, stripInternalBodyFields } from "../config/cliFingerprints.ts"; // prettier-ignore
-import { supportsClaudeMaxEffort, supportsXHighEffort } from "../config/providerModels.ts";
 import { getThinkingBudgetConfig, ThinkingMode } from "../services/thinkingBudget.ts";
 import {
   recordFreeWindowAttempt,
@@ -46,11 +39,7 @@ import type { PoolConfig } from "../services/sessionPool/types.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { SessionPool } from "../services/sessionPool/sessionPool.ts";
 import { PoolRegistry } from "../services/sessionPool/poolRegistry.ts";
-import {
-  getRotatingApiKey,
-  getValidApiKey,
-  resolveKeyForRequest,
-} from "../services/apiKeyRotator.ts";
+import { resolveKeyForRequest } from "../services/apiKeyRotator.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import { getOpenAICompatibleType, isClaudeCodeCompatible } from "../services/provider.ts";
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
@@ -137,6 +126,8 @@ import { assertValidationCredentials, validationFetch } from "./base/validationD
 import type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 export type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
+import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
+import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
 
 function parseSerializedBody(bodyString: string): unknown {
   try {
@@ -526,6 +517,7 @@ export class BaseExecutor {
   ): Record<string, string> {
     void clientHeaders;
     void model;
+    void health;
     const { headers, effectiveKey } = this.buildHeadersPreamble(credentials, stream);
 
     if (credentials.accessToken) {
@@ -841,6 +833,7 @@ export class BaseExecutor {
     // later retry URLs (bounded per URL); also recorded via recordLearnedThinkingCap.
     let thinkingBudgetClampedMax: number | null = null;
     let reasoningEffortClamped = false; // reasoning_effort 4xx clamp-and-retry below.
+    let advisorResultsReplaced = false;
     const applyCopilotIdentityFallback = createCopilotIdentityFallback(this.provider, log);
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
@@ -909,6 +902,9 @@ export class BaseExecutor {
       // fallback URL). No-op when nothing has been learned this execute().
       if (thinkingBudgetClampedMax !== null) {
         clampNestedThinkingBudget(transformedBody, thinkingBudgetClampedMax);
+      }
+      if (advisorResultsReplaced) {
+        transformedBody = replaceRedactedAdvisorResults(transformedBody).body;
       }
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
@@ -1554,6 +1550,14 @@ export class BaseExecutor {
           }
         }
 
+        const serializeRetryBody = async (b: unknown) => {
+          let retryBody = JSON.stringify(b);
+          if (usesClaudeCodeProtocol || this.provider === "claude") {
+            retryBody = await signRequestBody(retryBody);
+          }
+          return retryBody;
+        };
+
         // Reasoning-effort enum 4xx clamp-and-retry (any provider/model without a
         // declared reasoning_effort capability — custom OpenAI-compatible
         // connections, or a registered provider the registry hasn't caught up
@@ -1577,13 +1581,7 @@ export class BaseExecutor {
             body: transformedBody,
             fetchOptions,
             fetchFn: fetchWithStartTimeout,
-            serializeBody: async (b) => {
-              let retryBody = JSON.stringify(b);
-              if (usesClaudeCodeProtocol || this.provider === "claude") {
-                retryBody = await signRequestBody(retryBody);
-              }
-              return retryBody;
-            },
+            serializeBody: serializeRetryBody,
             log,
           });
           if (recovery.attempted) reasoningEffortClamped = true;
@@ -1592,65 +1590,33 @@ export class BaseExecutor {
         }
 
         // Generic reactive 400 field-downgrade; each field is stripped at most once.
-        if (
-          response.status === HTTP_STATUS.BAD_REQUEST &&
-          transformedBody &&
-          typeof transformedBody === "object"
-        ) {
-          const errText = await response
-            .clone()
-            .text()
-            .catch(() => "");
-          const offending = findOffendingField(errText);
-          if (
-            offending &&
-            !strippedFields.has(offending) &&
-            (transformedBody as Record<string, unknown>)[offending] !== undefined
-          ) {
-            strippedFields.add(offending);
-            delete (transformedBody as Record<string, unknown>)[offending];
-            let retryBody = JSON.stringify(transformedBody);
-            if (usesClaudeCodeProtocol || this.provider === "claude") {
-              retryBody = await signRequestBody(retryBody);
-            }
-            log?.debug?.(
-              "FIELD_400",
-              `Upstream 400 rejected ${offending} on ${url} — retrying without it`
-            );
-            response = await fetchWithStartTimeout(url, { ...fetchOptions, body: retryBody });
-          } else {
-            // Auto-learn: detect "Unsupported parameter" errors and persist to DB
-            // when the provider config has autoLearn enabled (#6625).
-            const autoLearned = detectUnsupportedParam(errText);
-            if (
-              autoLearned &&
-              !strippedFields.has(autoLearned) &&
-              (transformedBody as Record<string, unknown>)[autoLearned] !== undefined
-            ) {
-              try {
-                const config = getParamFilterConfig(this.provider);
-                const shouldAutoLearn = isAutoLearnGloballyEnabled() || config?.autoLearn === true;
-                if (shouldAutoLearn) {
-                  strippedFields.add(autoLearned);
-                  addParamToBlocklist(this.provider, autoLearned, model);
-                  delete (transformedBody as Record<string, unknown>)[autoLearned];
-                  let retryBody = JSON.stringify(transformedBody);
-                  if (usesClaudeCodeProtocol || this.provider === "claude") {
-                    retryBody = await signRequestBody(retryBody);
-                  }
-                  log?.info?.(
-                    "AUTO_LEARN",
-                    `Auto-learned "${autoLearned}" for provider ${this.provider} (model: ${model}) from 400 on ${url} — retrying`
-                  );
-                  response = await fetchWithStartTimeout(url, { ...fetchOptions, body: retryBody });
-                }
-              } catch (learnError) {
-                log?.warn?.(
-                  "AUTO_LEARN",
-                  `Failed to persist auto-learned param "${autoLearned}" for ${this.provider}: ${String(learnError)}`
-                );
-              }
-            }
+        response = await applyFieldDowngradeRecovery({
+          response,
+          url,
+          provider: this.provider,
+          model,
+          body: transformedBody,
+          fetchOptions,
+          fetchFn: fetchWithStartTimeout,
+          serializeBody: serializeRetryBody,
+          strippedFields,
+          log,
+        });
+
+        if (!advisorResultsReplaced) {
+          const advisorRecovery = await applyAdvisorUndecryptableRecovery({
+            response,
+            url,
+            body: transformedBody,
+            fetchOptions,
+            fetchFn: fetchWithStartTimeout,
+            serializeBody: serializeRetryBody,
+            log,
+          });
+          if (advisorRecovery.replaced) {
+            advisorResultsReplaced = true;
+            transformedBody = advisorRecovery.body;
+            response = advisorRecovery.response;
           }
         }
 

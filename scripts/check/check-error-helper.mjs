@@ -50,9 +50,27 @@ const IS_API_ROUTE = /^src\/app\/api\/.+\/route\.tsx?$/;
 //
 // G-03 (#15159): every entry below was INVISIBLE to this gate until the
 // file-level `if (ERROR_HELPER_IMPORT.test(source)) continue` skip was replaced
-// with call-scoped trust. All 23 were real the whole time; none is a regression
-// from the fix — they are debt this gate finally reports. `assertNoStale` removes
-// an entry automatically once its violation is gone, so freezing cannot ossify.
+// with call-scoped trust. None is a regression from the fix — they are debt this
+// gate finally reports. `assertNoStale` removes an entry automatically once its
+// violation is gone, so freezing cannot ossify.
+//
+// TWO ENTRIES WERE REMOVED after re-auditing this list rather than trusting it.
+// The first freeze pass reported 23; a line-by-line audit found two were NOT
+// violations, and freezing a non-violation is how an allowlist stops meaning
+// anything:
+//   * src/app/api/v1/batches/delete-completed/route.ts — the raw `err.message` /
+//     `err.stack` is inside `log.error("BATCHES", "sweep failed", { … })`, an audit
+//     row. The client response is a static buildErrorBody. The gate's
+//     INTERNAL_SINK_CALL anchor required the opener line to END with `{`, which every
+//     message-first logger fails.
+//   * src/app/api/headroom/start/route.ts — the message sits inside a multi-line
+//     `createErrorResponse({ … })` call. That builder lives in
+//     `src/lib/api/errorResponse.ts` (not `utils/error`) and sanitizes both exports
+//     (#15159 E-13), and per-LINE trust cannot see a builder named on a previous line.
+// Both gate bugs are fixed, with regression guards in
+// tests/unit/check-error-helper-false-positives-15159.test.ts.
+//
+// The honest count is 21.
 export const KNOWN_MISSING_ERROR_HELPER = new Set([
   // --- Provider-auth import/export routes: `error: error.message` on a thrown
   // provider error. 8 sites, one shape. These leak an upstream/credential-adjacent
@@ -86,11 +104,12 @@ export const KNOWN_MISSING_ERROR_HELPER = new Set([
   "open-sse/executors/veoaifree-web.ts",
   "open-sse/executors/yuanbao-web.ts",
 
-  // --- API routes returning a caught error message directly.
-  "src/app/api/v1/batches/delete-completed/route.ts", // also forwards err.stack
+  // --- API routes returning a caught error message directly. Note
+  // grok-build-settings:230 forwards a TYPED `GrokBuildConfigConflictError` (an
+  // app-defined message, not upstream text), so it is the lowest-risk entry here;
+  // the sibling branch one line down already sanitizes.
   "src/app/api/cli-tools/grok-build-settings/route.ts",
-  "src/app/api/github-skills/route.ts",
-  "src/app/api/headroom/start/route.ts",
+  "src/app/api/github-skills/route.ts", // inner per-target catch in a results map
   "src/app/api/skills/collect/install/route.ts", // inner per-target catch
   "src/app/api/webhooks/[id]/test/route.ts",
 ]);
@@ -134,6 +153,13 @@ const CANONICAL_BUILDER_NAMES = [
   "unavailableResponse",
   "makeExecutorErrorResult",
   "errorResponseWithComboDiagnostics",
+  // `src/lib/api/errorResponse.ts` is the OTHER sanctioned builder family — it routes
+  // both of its exports through `sanitizeErrorMessage` (#15159 E-13, PR #15215), which
+  // is why ~54 route handlers are covered by editing one builder. It does NOT live
+  // under `utils/error`, so omitting these reported every compliant `createErrorResponse`
+  // call site as a leak.
+  "createErrorResponse",
+  "createErrorResponseFromUnknown",
 ];
 const CANONICAL_BUILDER = new RegExp(`\\b(?:${CANONICAL_BUILDER_NAMES.join("|")})\\s*\\(`);
 
@@ -141,10 +167,24 @@ const CANONICAL_BUILDER = new RegExp(`\\b(?:${CANONICAL_BUILDER_NAMES.join("|")}
 // rather than per file or per path. Importing `sanitizeErrorMessage` says nothing
 // about whether the file's own `errorResponse` is the canonical one — which is
 // precisely the E-09 hole.
-const ERROR_HELPER_IMPORT_STATEMENT =
-  /import\s*(?:type\s*)?\{([^}]*)\}\s*from\s*["'](?:\.{1,2}\/)*(?:open-sse\/)?utils\/error(?:\.[tj]s)?["']|import\s*(?:type\s*)?\{([^}]*)\}\s*from\s*["']@omniroute\/open-sse\/utils\/error(?:\.[tj]s)?["']/g;
+// Both sanctioned builder modules: `open-sse/utils/error.ts` and
+// `src/lib/api/errorResponse.ts`. The second exists because route handlers outside
+// open-sse (auth, proxies, services, agent-bridge …) use it, and it sanitizes too.
+//
+// The group MUST be parenthesized: an ungrouped `a|b` splices a top-level alternation
+// into the surrounding regex, the `import … from …` prefix stops applying to the second
+// branch, and the capture group comes back undefined — silently yielding zero names.
+const ERROR_HELPER_MODULES = String.raw`(?:(?:open-sse\/)?utils\/error|lib\/api\/errorResponse)`;
 
-/** @param {string} source @returns {Set<string>} names imported from a utils/error path. */
+const ERROR_HELPER_IMPORT_STATEMENT = new RegExp(
+  String.raw`import\s*(?:type\s*)?\{([^}]*)\}\s*from\s*["'][^"']*` +
+    ERROR_HELPER_MODULES +
+    String.raw`(?:\.[tj]s)?["']` +
+    String.raw`|import\s*(?:type\s*)?\{([^}]*)\}\s*from\s*["']@omniroute/open-sse/utils/error(?:\.[tj]s)?["']`,
+  "g"
+);
+
+/** @param {string} source @returns {Set<string>} names imported from a sanctioned error module. */
 function importedErrorHelperNames(source) {
   const names = new Set();
   for (const match of source.matchAll(ERROR_HELPER_IMPORT_STATEMENT)) {
@@ -180,8 +220,16 @@ const INTERNAL_SINK =
 // nearest still-unclosed call enclosing the flagged line.
 // `logToolCall` is the MCP server's audit-row writer — same class as saveCallLog: it
 // persists the value to the audit DB and returns nothing to the caller.
+//
+// The opener must END with the argument object's `{`, but a logger usually takes a
+// message FIRST — `log.error("BATCHES", "sweep failed", {` — so the previous
+// `\s*\(\s*\{?\s*$` anchor missed every message-first logger and reported a compliant
+// audit row as a client leak. Allow leading string-literal arguments before the `{`.
+// Staying anchored is load-bearing: an unanchored variant was tried and suppressed
+// EVERY violation (23 -> 0), because the enclosing-construct walk tests only the line
+// that opens the construct, so an unanchored match let incidental logger calls win.
 const INTERNAL_SINK_CALL =
-  /\b(?:saveCallLog|logToolCall|log\??\.\w+|console\.\w+|reqLogger\.\w+)\s*\(\s*\{?\s*$/;
+  /\b(?:saveCallLog|logToolCall|log\??\.\w+|console\.\w+|reqLogger\.\w+)\s*\(\s*(?:["'`][^"'`]*["'`]\s*,\s*)*\{?\s*$/;
 
 // A line that is constructing a client-facing response/result body.
 const RESPONSE_LINE =
@@ -256,8 +304,12 @@ function trustedBuilder(expression) {
 
 // A response-builder CALL that takes a message argument (client-facing). A tainted
 // local variable (assigned from a raw error) passed here is a leak.
+// `createErrorResponse` / `createErrorResponseFromUnknown` belong here for the same
+// reason they are in CANONICAL_BUILDER_NAMES: they are the sanctioned builder for
+// everything outside open-sse, so a raw error passed to one is the same defect as a raw
+// error passed to `errorResponse`.
 const RESPONSE_BUILDER_CALL =
-  /\b(?:errResp|makeErrorResponse|errorResponse)\s*\(|\bresponse\s*:\s*(?:errResp|makeErrorResponse|errorResponse|new\s+Response)\s*\(/;
+  /\b(?:errResp|makeErrorResponse|errorResponse|createErrorResponseFromUnknown|createErrorResponse)\s*\(|\bresponse\s*:\s*(?:errResp|makeErrorResponse|errorResponse|new\s+Response)\s*\(/;
 
 // A builder name in CALL position (not its declaration / definition). Keeps the
 // G-03 ternary-argument rule from matching `function errorResponse(status, message)`.
@@ -328,22 +380,34 @@ const TAINT_DECL = new RegExp(
  *    response-builder call (errResp / makeErrorResponse / errorResponse / new Response)
  *    or into any client-facing result field (G-11).
  */
+/**
+ * Is this single line routing an error value through a sanctioned builder/sanitizer?
+ *
+ * Only builders actually imported from utils/error count — a file that imports just
+ * `sanitizeErrorMessage` gets no builder trust at all, which is the whole point of
+ * resolving per symbol rather than per file (G-03).
+ *
+ * @param {string} line
+ * @param {Set<string>} importedNames names imported from a utils/error path
+ * @param {Set<string>} localBuilders file-local builders whose body sanitizes
+ * @returns {boolean}
+ */
+function isTrustedLine(line, importedNames, localBuilders) {
+  if (SANITIZED_CALL.test(line)) return true;
+  if (!CANONICAL_BUILDER.test(line)) return false;
+  return CANONICAL_BUILDER_NAMES.some(
+    (name) =>
+      (importedNames.has(name) || localBuilders.has(name)) &&
+      new RegExp(`\\b${name}\\s*\\(`).test(line)
+  );
+}
+
 function forwardsRawError(source, isMcpServer = false) {
   const lines = source.split("\n").map((l) => l.replace(/\/\/.*$/, ""));
   const importedNames = importedErrorHelperNames(source);
   const localBuilders = sanitizingLocalBuilders(source);
   const safeEnvelopes = locallySanitizedEnvelopes(source);
-  // Only builders actually imported from utils/error count. A file that imports
-  // just `sanitizeErrorMessage` gets no builder trust at all.
-  const trusted = (line) => {
-    if (SANITIZED_CALL.test(line)) return true;
-    if (!CANONICAL_BUILDER.test(line)) return false;
-    return [...CANONICAL_BUILDER_NAMES].some(
-      (name) =>
-        (importedNames.has(name) || localBuilders.has(name)) &&
-        new RegExp(`\\b${name}\\s*\\(`).test(line)
-    );
-  };
+  const trusted = (line) => isTrustedLine(line, importedNames, localBuilders);
 
   // Pass 1: collect tainted local variables (raw error, no sanitize on the line).
   const tainted = new Set();
@@ -364,7 +428,14 @@ function forwardsRawError(source, isMcpServer = false) {
     // sanctioned builder/sanitizer is clean even though it also mentions
     // err.message — the raw identifier still matches RAW_ERR here, so without
     // this guard every correct call in the repo would be reported.
-    if (trusted(line)) continue;
+    //
+    // `enclosedByTrustedBuilder` is required, not decorative: sanctioned builders are
+    // routinely called MULTI-LINE, with the message on a later line —
+    //   return createErrorResponse({ status: 400, message: error.message, ... });
+    // The `message:` line mentions err.message and contains no builder call, so a
+    // same-line-only check reported compliant `createErrorResponse` / `buildErrorBody`
+    // call sites as leaks.
+    if (trusted(line) || enclosedByTrustedBuilder(lines, i, importedNames, localBuilders)) continue;
     if (TAINT_DECL.test(line)) continue; // the assignment itself is not the leak
 
     const isMcp = isMcpServer;
@@ -459,6 +530,35 @@ function enclosedByInternalSinkCall(lines, idx) {
 
 // Field opener that is part of an OpenAI-style error envelope (`error: {` / `message:`).
 const ERROR_FIELD_OPENER = /\b(?:error|message)\s*:\s*[`{]?\s*$/;
+
+/**
+ * Walk back to the line that opens the construct enclosing `idx`, and report whether
+ * that opener is a sanctioned builder/sanitizer call.
+ *
+ * Same brace-depth walk as `enclosedByInternalSinkCall`, inverted in meaning: this one
+ * grants trust instead of suppressing. It exists because a multi-line
+ * `createErrorResponse({ ... message: err.message ... })` puts the offending field on a
+ * line that names no builder at all, so a same-line check cannot see the sanitization.
+ *
+ * @param {string[]} lines
+ * @param {number} idx
+ * @returns {boolean}
+ */
+function enclosedByTrustedBuilder(lines, idx, importedNames, localBuilders) {
+  let depth = 0;
+  for (let j = idx; j >= 0 && idx - j < 80; j--) {
+    const l = lines[j].replace(/\/\/.*$/, "");
+    for (let k = l.length - 1; k >= 0; k--) {
+      const ch = l[k];
+      if (ch === ")" || ch === "}") depth++;
+      else if (ch === "(" || ch === "{") {
+        if (depth === 0) return isTrustedLine(l.slice(0, k + 1), importedNames, localBuilders);
+        depth--;
+      }
+    }
+  }
+  return false;
+}
 
 /**
  * Walk back from `idx` to the nearest enclosing `{`/`(` opener; if it opens an error

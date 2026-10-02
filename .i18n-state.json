@@ -62774,7 +62774,7 @@
         },
         "bg": {
           "source_hash": "a8345a135d8724a4f938bb19cb2bd4385a5f78744bda09b2819f0b4b640621b9",
-          "target_hash": "41356c37ca6e4988a7d97ad0301866ff52071612626cd67fca850e5dc4e83d1e",
+          "target_hash": "7feda8fa8066522705ed3f1613c5efa8705b22c5cc0201afab97942bf84b19c1",
           "section_hashes": [
             "43598972c571",
             "9dad51c31fa3",
@@ -62786,7 +62786,7 @@
             "e19283a03c34",
             "b25789910d2d"
           ],
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "updated_at": "2026-10-02T05:45:22.632Z"
         },
         "bn": {
           "source_hash": "a8345a135d8724a4f938bb19cb2bd4385a5f78744bda09b2819f0b4b640621b9",
@@ -62838,7 +62838,7 @@
         },
         "de": {
           "source_hash": "a8345a135d8724a4f938bb19cb2bd4385a5f78744bda09b2819f0b4b640621b9",
-          "target_hash": "fdcec6a1777dd0aa1abe4505ae92455d59106a3c3863a0d43aa1f442612ffad1",
+          "target_hash": "894993be713e86d80695e2d0c71847291189164d4370843215f3155a30e4b614",
           "section_hashes": [
             "43598972c571",
             "9dad51c31fa3",
@@ -62850,7 +62850,7 @@
             "e19283a03c34",
             "b25789910d2d"
           ],
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "updated_at": "2026-10-02T05:45:15.332Z"
         },
         "es": {
           "source_hash": "a8345a135d8724a4f938bb19cb2bd4385a5f78744bda09b2819f0b4b640621b9",
@@ -63542,7 +63542,7 @@
         },
         "sv": {
           "source_hash": "a8345a135d8724a4f938bb19cb2bd4385a5f78744bda09b2819f0b4b640621b9",
-          "target_hash": "cc816ab9decad782857252154db10d0088df56dff99860abca203a921652eab9",
+          "target_hash": "9da788f0928fb19f63d03615fc4aff0cbed8b58c3dfc66f71ccf498cfcd6e779",
           "section_hashes": [
             "43598972c571",
             "9dad51c31fa3",
@@ -63554,7 +63554,7 @@
             "e19283a03c34",
             "b25789910d2d"
           ],
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "updated_at": "2026-10-02T05:45:13.053Z"
         },
         "sr": {
           "source_hash": "a8345a135d8724a4f938bb19cb2bd4385a5f78744bda09b2819f0b4b640621b9",

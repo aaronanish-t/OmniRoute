@@ -45,9 +45,9 @@ export const OUTPUT_STYLE_CATALOG: Record<string, OutputStyle> = {
     id: "terse-prose",
     label: "Terse prose",
     description: "Drop filler/articles/hedging; keep technical substance exact.",
-    // Migrated verbatim from the caveman output mode (outputMode.ts) — referenced (not
-    // re-typed) so the back-compat injection stays byte-identical across ALL languages,
-    // not just English (the legacy mode localized to en/pt-BR/ja/id).
+    // Referenced from the caveman output mode (outputMode.ts) so the back-compat injection
+    // matches the legacy text below the marker line in every language
+    // CAVEMAN_INSTRUCTION_BY_LANGUAGE covers.
     levels: CAVEMAN_INSTRUCTION_BY_LANGUAGE.en,
     i18n: {
       "pt-BR": CAVEMAN_INSTRUCTION_BY_LANGUAGE["pt-BR"],
@@ -60,6 +60,7 @@ export const OUTPUT_STYLE_CATALOG: Record<string, OutputStyle> = {
       ja: CAVEMAN_INSTRUCTION_BY_LANGUAGE.ja,
       id: CAVEMAN_INSTRUCTION_BY_LANGUAGE.id,
       vi: CAVEMAN_INSTRUCTION_BY_LANGUAGE.vi,
+      hu: CAVEMAN_INSTRUCTION_BY_LANGUAGE.hu,
     },
   },
   "less-code": {

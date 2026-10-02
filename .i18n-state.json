@@ -122600,8 +122600,24 @@
         },
         "fa": {
           "source_hash": "9fe45f59da45f7d383b9f7eaee692609066b17cd343e7c9bbed4d111c3e003d0",
-          "target_hash": "79c066f3efbc06c699b7587654e31e54fad232345059ca5aa4ee37954a112906",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "323f1db143d3f53312f75602b16bb39ada98c959540df94569001d541de1a310",
+          "section_hashes": [
+            "39fe8798e65d",
+            "8ab33a31d2cb",
+            "247045a88cfc",
+            "1d9fdc4d6404",
+            "e4f4bde7cc3d",
+            "0e60ea14e093",
+            "5a0dd732ec60",
+            "abb3e114751a",
+            "5b129d0710da",
+            "e109021091b6",
+            "aa9a5592bf18",
+            "a87282570abe",
+            "7d6dfe6f4cd6",
+            "c071fec914c6"
+          ],
+          "updated_at": "2026-10-02T06:59:14.154Z"
         },
         "fi": {
           "source_hash": "9fe45f59da45f7d383b9f7eaee692609066b17cd343e7c9bbed4d111c3e003d0",
@@ -122675,8 +122691,24 @@
         },
         "ko": {
           "source_hash": "9fe45f59da45f7d383b9f7eaee692609066b17cd343e7c9bbed4d111c3e003d0",
-          "target_hash": "ea645021019da9bbfda161ebede2de18487272d76c5c5de2739a6de4836f28a3",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "c0105fed8e6f2b4f82fe270641af61e947be01677c06005041e0a5eb5691cbd6",
+          "section_hashes": [
+            "39fe8798e65d",
+            "8ab33a31d2cb",
+            "247045a88cfc",
+            "1d9fdc4d6404",
+            "e4f4bde7cc3d",
+            "0e60ea14e093",
+            "5a0dd732ec60",
+            "abb3e114751a",
+            "5b129d0710da",
+            "e109021091b6",
+            "aa9a5592bf18",
+            "a87282570abe",
+            "7d6dfe6f4cd6",
+            "c071fec914c6"
+          ],
+          "updated_at": "2026-10-02T06:58:49.846Z"
         },
         "kn": {
           "source_hash": "9fe45f59da45f7d383b9f7eaee692609066b17cd343e7c9bbed4d111c3e003d0",
@@ -122745,8 +122777,24 @@
         },
         "phi": {
           "source_hash": "9fe45f59da45f7d383b9f7eaee692609066b17cd343e7c9bbed4d111c3e003d0",
-          "target_hash": "89349e1fd1a15ddf8d6123d076301f40d4ebbf4e359b64a9a26359eb8e811333",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "3c021b222cf7dddae08441ed8a8a99b6b306338bda132805ffc087a1d2651df0",
+          "section_hashes": [
+            "39fe8798e65d",
+            "8ab33a31d2cb",
+            "247045a88cfc",
+            "1d9fdc4d6404",
+            "e4f4bde7cc3d",
+            "0e60ea14e093",
+            "5a0dd732ec60",
+            "abb3e114751a",
+            "5b129d0710da",
+            "e109021091b6",
+            "aa9a5592bf18",
+            "a87282570abe",
+            "7d6dfe6f4cd6",
+            "c071fec914c6"
+          ],
+          "updated_at": "2026-10-02T06:58:46.087Z"
         },
         "pt-BR": {
           "source_hash": "9fe45f59da45f7d383b9f7eaee692609066b17cd343e7c9bbed4d111c3e003d0",

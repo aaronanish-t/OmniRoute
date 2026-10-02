@@ -101,6 +101,8 @@ describe("ExclusionsPanel reports failed saves and loads", () => {
 
       expectShown("saveFailed");
       expect(textarea.value).toBe(TYPED);
+      // Screen readers skip the icon's ligature text and read only the message.
+      expect(screen.getByText("error").getAttribute("aria-hidden")).toBe("true");
     }
   );
 
@@ -124,6 +126,39 @@ describe("ExclusionsPanel reports failed saves and loads", () => {
     expectShown("saveFailed");
   });
 
+  it("keeps a second save's saved message up for its full time", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    startServer();
+    const { textarea, save } = await renderPanel();
+    fireEvent.change(textarea, { target: { value: TYPED } });
+
+    fireEvent.click(save);
+    await settle();
+    await act(() => vi.advanceTimersByTimeAsync(1500));
+    fireEvent.click(save);
+    await settle();
+
+    // Past the point where the first save's message would have gone.
+    await act(() => vi.advanceTimersByTimeAsync(1000));
+    expectShown("compressionExclusionsSaved");
+
+    await act(() => vi.advanceTimersByTimeAsync(2000));
+    expect(screen.queryAllByText(/\bcompressionExclusionsSaved\b/)).toHaveLength(0);
+  });
+
+  it("announces the saved message in a status region that is there before the save", async () => {
+    startServer();
+    const { textarea, save } = await renderPanel();
+    const status = screen.getByRole("status");
+    expect(status.textContent).toBe("");
+
+    fireEvent.change(textarea, { target: { value: TYPED } });
+    fireEvent.click(save);
+    await settle();
+
+    expect(status.textContent).toBe("compressionExclusionsSaved");
+  });
+
   it.each<[string, ServerOptions]>([
     ["returns 500", { load: 500 }],
     ["cannot reach the server", { load: "offline" }],
@@ -135,6 +170,7 @@ describe("ExclusionsPanel reports failed saves and loads", () => {
       const { textarea, save } = await renderPanel();
 
       expectShown("failedLoadWithStatus");
+      expect(screen.getByText("error").getAttribute("aria-hidden")).toBe("true");
       expect(textarea.disabled, "textarea disabled after a failed load").toBe(true);
       expect(save.disabled, "Save disabled after a failed load").toBe(true);
 

@@ -94,15 +94,20 @@ async function settle() {
 // Stands in for /api/context/rtk/config (plus the page's other GETs). Like the route, a PUT
 // that fails rtkConfigSchema gets a 400 and stores nothing; a valid one is merged into the
 // stored config when it arrives, and its reply is a snapshot taken at that moment. With
-// `hold`, replies wait until the test releases them, like a slow network.
+// `hold`, replies wait until the test releases them, like a slow network. `drop` stores the
+// change and then loses the reply; `hang` never answers until the request is aborted.
 function startServer({
   hold = false,
   fail = () => false,
   reject = () => false,
+  drop = () => false,
+  hang = () => false,
 }: {
   hold?: boolean;
   fail?: (body: Json) => boolean;
   reject?: (body: Json) => boolean;
+  drop?: (body: Json) => boolean;
+  hang?: (body: Json) => boolean;
 } = {}) {
   let stored: Json = { ...STORED_CONFIG };
   const puts: Json[] = [];
@@ -114,6 +119,7 @@ function startServer({
     const parsed = rtkConfigSchema.safeParse(body);
     if (!parsed.success) return respond({ error: "Invalid rtkConfig" }, 400);
     stored = { ...stored, ...parsed.data };
+    if (drop(body)) return new TypeError("Failed to fetch");
     return respond(stored);
   };
 
@@ -129,6 +135,12 @@ function startServer({
 
       const body = JSON.parse(String(init.body)) as Json;
       puts.push(body);
+      if (hang(body)) {
+        // Like fetch, a request that never gets a reply rejects once its signal aborts.
+        return new Promise<Response>((_, rejectReply) =>
+          init.signal?.addEventListener("abort", () => rejectReply(init.signal?.reason))
+        );
+      }
       const reply = receive(body);
       return new Promise<Response>((resolve, rejectReply) => {
         const send = () => (reply instanceof TypeError ? rejectReply(reply) : resolve(reply));
@@ -155,7 +167,7 @@ function startServer({
     }
   };
 
-  return {
+  const server = {
     get stored() {
       return stored;
     },
@@ -167,7 +179,13 @@ function startServer({
     releaseNewestFirst: () => releaseUntilIdle(() => waiting.pop()),
     releaseAll: () => releaseUntilIdle(() => waiting.shift()),
   };
+  activeServer = server;
+  return server;
 }
+
+// Every copy of the page sends its saves through one queue, so a reply a test leaves waiting
+// would hold up the next test's page.
+let activeServer: ReturnType<typeof startServer> | undefined;
 
 // The control the label names, whether it sits inside the label or is tied to it by htmlFor.
 function inputFor(labelKey: string): HTMLInputElement {
@@ -182,6 +200,17 @@ function filterCheckbox(name: string): HTMLInputElement {
   const checkbox = row?.querySelector<HTMLInputElement>('input[type="checkbox"]');
   if (!checkbox) throw new Error(`no checkbox in the ${name} row`);
   return checkbox;
+}
+
+function retentionSelect(): HTMLSelectElement {
+  const select = screen.getByText("rawOutputRetention").closest("label")?.control;
+  if (!(select instanceof HTMLSelectElement)) throw new Error("no raw output retention select");
+  return select;
+}
+
+async function chooseRetention(value: string) {
+  fireEvent.change(retentionSelect(), { target: { value } });
+  await settle();
 }
 
 // Wherever the page shows it, the message counts.
@@ -210,7 +239,10 @@ async function renderPage() {
   await settle();
 }
 
-afterEach(() => {
+afterEach(async () => {
+  await activeServer?.releaseAll();
+  activeServer = undefined;
+  vi.restoreAllMocks();
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
@@ -246,6 +278,8 @@ describe("RTK page config saves", { timeout: 20_000 }, () => {
 
     expect(inputFor("maxChars").value).toBe("20000");
     expect(pageText()).toContain("saveFailed");
+    // Screen readers skip the icon's ligature text and read only the message.
+    expect(screen.getByText("error").getAttribute("aria-hidden")).toBe("true");
   });
 
   it("when a save cannot reach the server, max chars shows the stored value again and says the save failed", async () => {
@@ -381,6 +415,82 @@ describe("RTK page config saves", { timeout: 20_000 }, () => {
     expect(inputFor("maxChars").value).toBe("20000");
     expect(inputFor("maxLines").value).toBe("150");
     await server.releaseAll();
+    expect(server.stored.maxLinesPerResult).toBe(150);
+  });
+
+  it("a filter change that failed is not saved by a later filter change", async () => {
+    const server = startServer({
+      hold: true,
+      fail: (body) => JSON.stringify(body.disabledFilters) === JSON.stringify(["git-status"]),
+    });
+    await renderPage();
+    fireEvent.click(filterCheckbox("Git status"));
+    await settle();
+    fireEvent.click(filterCheckbox("npm install"));
+    await settle();
+
+    await server.releaseAll();
+
+    expect(server.stored.disabledFilters).toEqual(["npm-install"]);
+    expect(filterCheckbox("Git status").checked).toBe(true);
+    expect(filterCheckbox("npm install").checked).toBe(false);
+    expect(pageText()).toContain("saveFailed");
+  });
+
+  it("edits still waiting to save when the page closes are saved, and reopening the page shows them", async () => {
+    const server = startServer({ hold: true });
+    const firstVisit = render(<RtkContextPageClient />);
+    await settle();
+    await commit("maxLines", ["12"]);
+    await chooseRetention("always");
+    firstVisit.unmount();
+
+    await renderPage();
+    await server.releaseAll();
+
+    expect(server.stored).toMatchObject({ maxLinesPerResult: 12, rawOutputRetention: "always" });
+    expect(inputFor("maxLines").value).toBe("12");
+    expect(retentionSelect().value).toBe("always");
+
+    // An edit on the reopened page is the one the server keeps.
+    await chooseRetention("never");
+    await server.releaseAll();
+    expect(server.stored.rawOutputRetention).toBe("never");
+    expect(retentionSelect().value).toBe("never");
+  });
+
+  it("when the reply to a stored save is lost, max chars keeps the new value and shows no error", async () => {
+    const server = startServer({ drop: (body) => "maxCharsPerResult" in body });
+    await renderPage();
+
+    await commit("maxChars", ["5000"]);
+
+    expect(server.stored.maxCharsPerResult).toBe(5000);
+    expect(inputFor("maxChars").value).toBe("5000");
+    expect(pageText()).not.toContain("saveFailed");
+  });
+
+  it("a save that never gets a reply gives up, rolls back, and lets the next edit save", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    // AbortSignal.timeout runs on a timer the fake clock cannot reach, so route it through
+    // setTimeout, which the fake clock controls.
+    vi.spyOn(AbortSignal, "timeout").mockImplementation((ms) => {
+      const controller = new AbortController();
+      setTimeout(() => controller.abort(new DOMException("Timed out", "TimeoutError")), ms);
+      return controller.signal;
+    });
+    const server = startServer({ hang: (body) => "maxCharsPerResult" in body });
+    await renderPage();
+    await commit("maxChars", ["5000"]);
+    await commit("maxLines", ["150"]);
+    expect(server.puts).toHaveLength(1);
+
+    // A minute is far past any wait for a dashboard save.
+    await act(() => vi.advanceTimersByTimeAsync(60_000));
+    await settle();
+
+    expect(inputFor("maxChars").value).toBe("20000");
+    expect(pageText()).toContain("saveFailed");
     expect(server.stored.maxLinesPerResult).toBe(150);
   });
 });

@@ -84,7 +84,9 @@ test("POST /cert: returns 404 when no cert file", async () => {
     new Request("http://localhost/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ sudoPassword: "" }),
+      // The authorization gate runs first. This unused synthetic value reaches
+      // the missing-file check without executing any OS trust operation.
+      body: JSON.stringify({ sudoPassword: "synthetic-unused-password" }),
     })
   );
   assert.equal(res.status, 404);

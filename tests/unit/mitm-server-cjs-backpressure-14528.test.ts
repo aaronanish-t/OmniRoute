@@ -91,6 +91,6 @@ test("a write loop against a slow client keeps the queue bounded (#14528)", asyn
 test("server.cjs SSE loop goes through writeWithBackpressure (#14528)", () => {
   const src = fs.readFileSync(path.resolve(here, "../../src/mitm/server.cjs"), "utf8");
   assert.match(src, /require\("\.\/_internal\/writeBackpressure\.cjs"\)/);
-  assert.match(src, /await\s+writeBackpressureShim\.writeWithBackpressure\(res,\s*text\)/);
+  assert.match(src, /await\s+writeBackpressureShim\.writeWithBackpressure\(res,\s*value\)/);
   assert.doesNotMatch(src, /^\s*res\.write\(text\);/m, "no unchecked res.write(text) may remain");
 });

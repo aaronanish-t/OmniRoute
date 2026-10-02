@@ -465,6 +465,7 @@ async function passthrough(req, res, bodyBuffer) {
   // in controlled local environments where the target uses a self-signed cert.
   const rejectUnauthorized = process.env.MITM_DISABLE_TLS_VERIFY !== "1";
 
+  let upstreamResponse;
   const forwardReq = https.request(
     {
       hostname: targetIP,
@@ -476,6 +477,13 @@ async function passthrough(req, res, bodyBuffer) {
       rejectUnauthorized,
     },
     (forwardRes) => {
+      upstreamResponse = forwardRes;
+      forwardRes.on("error", () => res.destroy());
+      forwardRes.on("aborted", () => res.destroy());
+      if (res.destroyed) {
+        forwardRes.destroy();
+        return;
+      }
       res.writeHead(forwardRes.statusCode, forwardRes.headers);
       forwardRes.pipe(res);
     }
@@ -483,8 +491,22 @@ async function passthrough(req, res, bodyBuffer) {
 
   forwardReq.on("error", (err) => {
     console.error(`❌ Passthrough error: ${err.message}`);
-    if (!res.headersSent) res.writeHead(502);
+    if (res.destroyed || res.writableEnded) return;
+    if (res.headersSent) {
+      res.destroy();
+      return;
+    }
+    res.writeHead(502);
     res.end("Bad Gateway");
+  });
+  forwardReq.setTimeout(MITM_IDLE_TIMEOUT_MS, () => {
+    forwardReq.destroy(new Error("Passthrough idle timeout"));
+  });
+  res.once("close", () => {
+    if (!res.writableFinished) {
+      forwardReq.destroy();
+      upstreamResponse?.destroy();
+    }
   });
 
   if (bodyBuffer.length > 0) forwardReq.write(bodyBuffer);
@@ -643,10 +665,15 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
       clientHeaders["x-accel-buffering"] = "no";
       res.writeHead(response.status, clientHeaders);
       if (!response.ok) {
-        const errText = await response.text().catch(() => "");
-        respBody = errText.slice(0, INGEST_MAX_BODY);
-        respSize = Buffer.byteLength(errText);
-        res.end(errText);
+        const errorBytes = Buffer.from(await response.arrayBuffer());
+        respBody = errorBytes.toString("utf8").slice(0, INGEST_MAX_BODY);
+        respSize = errorBytes.length;
+        res.end(errorBytes);
+        return;
+      }
+
+      if (!response.body) {
+        res.end();
         return;
       }
 
@@ -669,7 +696,7 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
         // #14528: a slow client must drain before the next upstream read,
         // otherwise the socket write queue grows without bound. A close
         // during the wait is caught by the downstreamClosed check above.
-        await writeBackpressureShim.writeWithBackpressure(res, text);
+        await writeBackpressureShim.writeWithBackpressure(res, value);
       }
     } finally {
       res.off("close", onDownstreamClose);
@@ -691,6 +718,13 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
     // in the response body. Hard Rule #12 — sanitize before sending.
     captureError = sanitizeErrorMessage(error && error.message);
     console.error(`❌ ${error.message}`);
+    if (res.destroyed || res.writableEnded) return;
+    // A partial native response must stay a transport failure. Appending a
+    // different JSON protocol would disguise truncation as successful EOF.
+    if (res.headersSent) {
+      res.destroy();
+      return;
+    }
     if (!res.headersSent) res.writeHead(500, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({

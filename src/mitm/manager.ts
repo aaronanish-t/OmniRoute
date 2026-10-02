@@ -2,7 +2,14 @@ import { spawn, type ChildProcess } from "child_process";
 import path from "path";
 import fs from "fs";
 import { resolveMitmDataDir } from "./dataDir.ts";
-import { getBridgeProcessState, releaseExitedBridgeChild } from "./processLifecycle.ts";
+import {
+  getBridgeProcessState,
+  releaseExitedBridgeChild,
+  waitForBridgeReady,
+  terminateBridgeChild,
+  isOwnedBridgePid,
+  removeOwnedBridgePid,
+} from "./processLifecycle.ts";
 import {
   removeDNSEntry,
   removeDNSEntries,
@@ -385,14 +392,18 @@ export async function getMitmStatus(agentId?: string): Promise<{
     try {
       if (fs.existsSync(PID_FILE)) {
         const savedPid = parseInt(fs.readFileSync(PID_FILE, "utf-8").trim(), 10);
-        if (savedPid && isProcessAlive(savedPid)) {
+        if (
+          savedPid &&
+          isProcessAlive(savedPid) &&
+          isOwnedBridgePid(savedPid, resolveMitmServerPath())
+        ) {
           running = true;
           pid = savedPid;
         } else {
           // Stale PID file: the server died without clean teardown. We cannot
           // run privileged cleanup here (no sudo password in a status read),
           // so flag it for the dashboard to offer a one-click Repair. (Gap 7.)
-          fs.unlinkSync(PID_FILE);
+          removeOwnedBridgePid(PID_FILE, savedPid);
           _orphanedStateDetected = true;
           log.warn("Stale MITM PID file found — system state may be orphaned (offer Repair).");
         }
@@ -655,40 +666,16 @@ async function startMitmInternal(
     log.info({ exitCode: code }, "MITM server exited");
     releaseExitedBridgeChild(lifecycle, proc, PID_FILE);
   });
-
-  // Wait and verify server actually started
-  const started = await new Promise<boolean>((resolve) => {
-    let resolved = false;
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        resolve(true);
-      }
-    }, 2000);
-
-    proc.on("exit", () => {
-      clearTimeout(timeout);
-      if (!resolved) {
-        resolved = true;
-        resolve(false);
-      }
-    });
-
-    // Fail fast on any "❌" diagnostic line from server.cjs (covers EADDRINUSE,
-    // EACCES, missing ROUTER_API_KEY, and any other server.on("error") cause).
-    proc.stderr?.on("data", (data) => {
-      const msg = data.toString();
-      if (msg.includes("❌")) {
-        clearTimeout(timeout);
-        if (!resolved) {
-          resolved = true;
-          resolve(false);
-        }
-      }
-    });
+  proc.on("error", (error) => {
+    log.error({ err: error }, "MITM child could not be spawned");
+    releaseExitedBridgeChild(lifecycle, proc, PID_FILE);
   });
 
+  // Wait and verify server actually started
+  const started = await waitForBridgeReady(proc, port);
+
   if (!started) {
+    await terminateBridgeChild(proc);
     // Step 3 above already wrote the /etc/hosts entries. Leaving them behind
     // points every AgentBridge target hostname at 127.0.0.1:<port>, where the
     // service that actually owns the port answers with a TLS alert — so the
@@ -733,11 +720,7 @@ async function killMitmServerProcessOnStop(): Promise<void> {
   const proc = lifecycle.serverProcess;
   if (proc && !proc.killed) {
     log.info("Stopping MITM server...");
-    proc.kill("SIGTERM");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    if (!proc.killed) {
-      proc.kill("SIGKILL");
-    }
+    await terminateBridgeChild(proc);
     lifecycle.serverProcess = null;
     lifecycle.serverPid = null;
     return;
@@ -747,11 +730,15 @@ async function killMitmServerProcessOnStop(): Promise<void> {
   try {
     if (fs.existsSync(PID_FILE)) {
       const savedPid = parseInt(fs.readFileSync(PID_FILE, "utf-8").trim(), 10);
-      if (savedPid && isProcessAlive(savedPid)) {
+      if (
+        savedPid &&
+        isProcessAlive(savedPid) &&
+        isOwnedBridgePid(savedPid, resolveMitmServerPath())
+      ) {
         log.info({ pid: savedPid }, "Killing MITM server by PID...");
         process.kill(savedPid, "SIGTERM");
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        if (isProcessAlive(savedPid)) {
+        if (isProcessAlive(savedPid) && isOwnedBridgePid(savedPid, resolveMitmServerPath())) {
           process.kill(savedPid, "SIGKILL");
         }
       }

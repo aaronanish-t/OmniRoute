@@ -29,8 +29,8 @@ interface NamedCombo {
   pipeline: { engine: string; intensity?: string }[];
 }
 
-// A settings PUT that has not answered by then counts as failed, so one stalled request cannot
-// hold the saves queued behind it forever.
+// A settings PUT with no answer within this time counts as failed, so one stalled request cannot
+// hold up the saves queued behind it.
 const SAVE_TIMEOUT_MS = 15_000;
 
 const FALLBACK_SETTINGS: CompressionSettings = {
@@ -85,8 +85,8 @@ export default function CompressionHub() {
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Saves go out one at a time. The Hub shows the last saved settings plus the saves still
-  // queued, so a failed save rolls back only its own fields and never undoes a newer save.
+  // The Hub shows the last saved settings plus its saves still queued, so a failed save rolls
+  // back only its own fields and never undoes a newer save.
   const savedRef = useRef(FALLBACK_SETTINGS);
   const queuedRef = useRef<Partial<CompressionSettings>[]>([]);
 
@@ -133,7 +133,8 @@ export default function CompressionHub() {
       showQueued();
       setError(null);
       saveQueue = saveQueue.then(async () => {
-        // A later queued save that carries every key of this one replaces it on the server.
+        // A later queued save that carries every key of this one replaces it on the server, so
+        // skip this one.
         const replaced = queuedRef.current
           .slice(1)
           .some((later) => Object.keys(patch).every((key) => key in later));

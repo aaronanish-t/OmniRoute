@@ -146,6 +146,7 @@ export default function QuotaCard({
         hasStaleData={hasStaleData}
         onToggleActive={onToggleActive}
         togglingActive={togglingActive}
+        onTestSent={onRefresh}
       />
       <QuotaCardExpanded
         quotas={quotas}

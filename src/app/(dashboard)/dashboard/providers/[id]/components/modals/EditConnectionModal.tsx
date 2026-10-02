@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import ConnectionTestModelField from "@/shared/components/ConnectionTestModelField";
 import { Button, Badge, Input, Modal, Toggle, Select } from "@/shared/components";
 import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
@@ -168,6 +169,7 @@ export default function EditConnectionModal({
     m365Tier: normalizeM365TierValue(connectionProviderSpecificData?.tier) as M365TierValue,
     peakHourProtection: { ...EMPTY_PEAK_HOUR_PROTECTION, windows: [] } as PeakHourProtectionConfig,
   });
+  const [testModelDraft, setTestModelDraft] = useState<string | undefined>();
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
   const [validating, setValidating] = useState(false);
@@ -279,6 +281,7 @@ export default function EditConnectionModal({
   if (isOpen && connection) {
     if (initializedFor?.connection !== connection || initializedFor.providerId !== providerId) {
       setInitializedFor({ connection, providerId });
+      setTestModelDraft(undefined);
       const effectiveProvider = connection.provider || providerId;
       const existingBaseUrl = stringField(connection.providerSpecificData?.baseUrl);
       const existingTargetFormat = stringField(connection.providerSpecificData?.targetFormat);
@@ -756,6 +759,12 @@ export default function EditConnectionModal({
         // previously-saved `true` and unchecking would never take effect.
         updates.providerSpecificData.importFreeModelsOnly = formData.importFreeModelsOnly === true;
       }
+      // Omit unchanged values: the test dialog may have saved a newer model
+      // since this connection snapshot was loaded. The API merges current data.
+      delete updates.providerSpecificData.connectionTestModel;
+      if (testModelDraft !== undefined) {
+        updates.providerSpecificData.connectionTestModel = testModelDraft || null;
+      }
       const error = (await onSave(updates)) as void | unknown;
       if (error) {
         setSaveError(typeof error === "string" ? error : t("failedSaveConnection"));
@@ -804,6 +813,14 @@ export default function EditConnectionModal({
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           placeholder={isOAuth ? t("accountName") : t("productionKey")}
         />
+        {isOpen && connection.id && (
+          <ConnectionTestModelField
+            key={connection.id}
+            connectionId={connection.id}
+            disabled={saving}
+            onChange={setTestModelDraft}
+          />
+        )}
         <Input
           label={t("tagGroupLabel")}
           value={formData.tag}

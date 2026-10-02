@@ -5,7 +5,7 @@
  * 1. Sampling params under extended thinking: temperature=1 and top_p>=0.95
  *    (or unset) when thinking is enabled/adaptive
  * 2. Disable thinking when tool_choice forces a specific tool
- * 3. Enforce max 4 cache_control breakpoints
+ * 3. Enforce max 4 cache_control breakpoints, or 3 for native threads
  * 4. Normalize cache_control TTL ordering
  * 5. Default missing cache_control.ttl to "1h" on the native Claude OAuth path
  */
@@ -37,6 +37,7 @@ export function finalizeClaudeBodyConstraints(body: Record<string, unknown>): vo
   hoistLeadingSystemMessages(body);
   relocateDirectiveOnlyMessages(body);
   enforceThinkingTemperature(body);
+  enforceCacheControlLimit(body);
 }
 
 function isSystemRole(role: unknown): boolean {
@@ -190,6 +191,11 @@ export function disableThinkingIfToolChoiceForced(body: Record<string, unknown>)
 
 const MAX_CACHE_CONTROL_BLOCKS = 4;
 
+function getCacheControlBudget(body: Record<string, unknown>): number {
+  // The thread server adds its own marker to the final cache-eligible block.
+  return MAX_CACHE_CONTROL_BLOCKS - (body.thread != null ? 1 : 0);
+}
+
 export function enforceCacheControlLimit(body: Record<string, unknown>): void {
   let count = 0;
 
@@ -221,10 +227,11 @@ export function enforceCacheControlLimit(body: Record<string, unknown>): void {
     }
   }
 
-  if (count <= MAX_CACHE_CONTROL_BLOCKS) return;
+  const budget = getCacheControlBudget(body);
+  if (count <= budget) return;
 
-  // Strip excess cache_control blocks from the end (keep first 4)
-  let remaining = MAX_CACHE_CONTROL_BLOCKS;
+  // Keep the existing prefix markers within the available client budget.
+  let remaining = budget;
 
   if (Array.isArray(system)) {
     for (const block of system) {
@@ -281,6 +288,14 @@ export function ensureCacheControlOnLastUserMessage(body: Record<string, unknown
       )
     : false;
 
+  const tools = body.tools as Array<Record<string, unknown>> | undefined;
+  if (Array.isArray(tools)) {
+    cacheControlCount += tools.filter((tool) => tool.cache_control).length;
+    hasFiveMinuteCacheControl ||= tools.some(
+      (tool) => (tool.cache_control as Record<string, unknown> | undefined)?.ttl === "5m"
+    );
+  }
+
   for (const message of messages) {
     const content = message.content as Array<Record<string, unknown>> | undefined;
     if (!Array.isArray(content)) continue;
@@ -296,7 +311,7 @@ export function ensureCacheControlOnLastUserMessage(body: Record<string, unknown
       const content = messages[i].content;
       if (Array.isArray(content) && content.length > 0) {
         const lastBlock = content[content.length - 1] as Record<string, unknown>;
-        if (!lastBlock.cache_control && cacheControlCount < MAX_CACHE_CONTROL_BLOCKS) {
+        if (!lastBlock.cache_control && cacheControlCount < getCacheControlBudget(body)) {
           lastBlock.cache_control = hasFiveMinuteCacheControl
             ? { type: "ephemeral", ttl: "5m" }
             : { type: "ephemeral" };

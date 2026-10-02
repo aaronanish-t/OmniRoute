@@ -137,7 +137,7 @@ jobs:
           path: .artifacts/eslint-results.json
           if-no-files-found: warn
           retention-days: 7
-      - run: npm run check:cycles
+      - run: npm run check:cycles:ratchet
       - run: npm run check:route-validation:t06
       - run: npm run check:any-budget:t11
       - run: npm run check:provider-consistency
@@ -359,8 +359,9 @@ jobs:
         run: npm run check:circular-deps
       # BLOCKING ratchet (Etapa 2): bundleSize must not regress vs the baseline
       # (gzip via @size-limit/file, installed by `npm ci`). --ratchet exits 1 on a
-      # measured regression; it SKIPs (exit 0) when the size-limit plugin/build is
-      # absent (a non-comparable measurement never blocks).
+      # measured regression AND on an unmeasurable one (#15159 G-04): "could not
+      # measure" is not "no regression". A missing @size-limit/file or a missing
+      # CLI entrypoint now fails loudly here instead of reporting a silent pass.
       - name: Bundle size (ratchet, blocking)
         run: npm run check:bundle-size -- --ratchet
       # CodeQL ratchet foi PROMOVIDO a BLOQUEANTE no job quality-gate (v3.8.26) —

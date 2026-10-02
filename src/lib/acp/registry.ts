@@ -204,6 +204,10 @@ export function resolveVersionProbe(
   }
 
   if (requireBinaryMatch) {
+    // An escaped space/quote inside an untrusted probe is never a real binary path.
+    if (/\\[\s"']/.test(versionCommand)) {
+      return null;
+    }
     const normalizedCommand = normalizeCommandToken(command);
     const allowed = new Set([
       normalizeCommandToken(binary),
@@ -221,6 +225,16 @@ export function resolveVersionProbe(
   }
 
   return { command, args };
+}
+
+/**
+ * A command that may be handed to a shell: no whitespace and none of the characters cmd.exe
+ * or sh treat specially. The tokenizer lets a backslash escape whitespace, so
+ * `node\\ -e\\ <code>` folds into ONE token that passes the argument allowlist; once that
+ * token reaches `shell: true` it runs as a command line (GHSA-jw7m-33xr-hmhj).
+ */
+export function isShellSafeCommand(command: string): boolean {
+  return /^[A-Za-z0-9._+@:/\\-]+$/.test(command);
 }
 
 export function shouldUseShellForVersionProbe(
@@ -253,11 +267,17 @@ function detectAgent(
       return { ...def, version, installed, isCustom };
     }
 
+    const useShell = shouldUseShellForVersionProbe(probe.command);
+    // Never put a command with whitespace or shell metacharacters on a shell command line.
+    if (useShell && !isShellSafeCommand(probe.command)) {
+      return { ...def, version, installed, isCustom };
+    }
+
     const output = execFileSync(probe.command, probe.args, {
       timeout: 5000,
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"],
-      ...(shouldUseShellForVersionProbe(probe.command) ? { shell: true } : {}),
+      ...(useShell ? { shell: true } : {}),
     }).trim();
 
     // Extract version number from output

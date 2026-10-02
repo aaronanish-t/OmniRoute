@@ -82777,8 +82777,15 @@
         },
         "mt": {
           "source_hash": "82afaf3a1ea599529fe30f558ea2f1477677a8c269adfe7d95054b1c95de57c4",
-          "target_hash": "07bad007b871bb561a2e64b68d0d6c4d3b0f840e21d45dcbeac48b9302fa77a7",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "b7ff76c6c115be041d704f541a1623743ffe0e838697bd6882c7373b4015e740",
+          "section_hashes": [
+            "3f4b2db42802",
+            "c98a5cc1ad5c",
+            "bb88e6e6895d",
+            "61d53d9c4c97",
+            "85fb5e897f2f"
+          ],
+          "updated_at": "2026-10-02T06:04:48.070Z"
         },
         "ga": {
           "source_hash": "82afaf3a1ea599529fe30f558ea2f1477677a8c269adfe7d95054b1c95de57c4",

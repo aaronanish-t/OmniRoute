@@ -6,6 +6,8 @@ import type { EngineConfigField } from "@omniroute/open-sse/services/compression
 import { EngineConfigForm } from "@/shared/components/compression/EngineConfigForm";
 import {
   buildEngineDetailUpdate,
+  forgetSentEdits,
+  formAfterSave,
   seedEngineForm,
   withoutEmptyText,
 } from "@/shared/components/compression/engineConfigSave";
@@ -124,7 +126,8 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
   // ── Data state ──────────────────────────────────────────────────────────
   const [engine, setEngine] = useState<EngineEntry | null>(null);
   const [configState, setConfigState] = useState<Record<string, unknown>>({});
-  // Form values as last loaded or saved. A save sends only the fields changed since.
+  // The stored values as of the last load or save, in form shape. A save sends the fields
+  // changed since.
   const [savedConfig, setSavedConfig] = useState<Record<string, unknown>>({});
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -171,9 +174,12 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       }
 
       // Detailed config lives in the engine's settings sub-object (when it has one);
-      // the on/off + level moved to the panel. 404/null/missing = schema defaults.
+      // the on/off + level moved to the panel. A missing sub-object means schema defaults.
       const subKey = SETTINGS_SUBOBJECT[engineId];
       const stored = subKey ? settingsData?.[subKey] : undefined;
+      // Without the stored settings the form would show defaults as saved values, so the page
+      // reports the load error and Save stays off.
+      if (subKey && !settingsData) setLoadError(t("loadFailed"));
 
       if (!cancelled) {
         if (analyticsData) setAnalytics(analyticsData);
@@ -203,51 +209,55 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       setSaveError(null);
       return;
     }
-    // Lite sends its two fields as they are; its server write merges with the stored row.
-    let detail: Record<string, unknown> | null = null;
-    if (engineId === "lite") {
-      const raw = configState.maxToolLength;
-      const compressToolResults = configState.compressToolResults !== false;
-      if (!Object.prototype.hasOwnProperty.call(configState, "maxToolLength")) {
-        detail = { compressToolResults };
-      } else if (typeof raw === "number" && Number.isFinite(raw)) {
-        const n = Math.floor(raw);
-        if (n < 256 || n > 1_000_000) {
-          setSaveError(t("saveFailed"));
-          return;
-        }
-        detail = { compressToolResults, maxToolLength: n };
-      } else {
-        detail = { compressToolResults, maxToolLength: null };
-      }
+    // Lite's cap must be a whole number in range before anything is sent.
+    const cap = engineId === "lite" ? configState.maxToolLength : undefined;
+    if (
+      typeof cap === "number" &&
+      Number.isFinite(cap) &&
+      (Math.floor(cap) < 256 || Math.floor(cap) > 1_000_000)
+    ) {
+      setSaveError(t("saveFailed"));
+      return;
     }
+    const sent = configState;
     setSaving(true);
     setSaveError(null);
     try {
-      if (!detail) {
-        // The server replaces the whole sub-object, so the body starts from the copy stored
-        // now and changes only the fields edited here. A copy this page loaded earlier would
-        // write back fields another page saved since.
-        const current = (await fetch("/api/settings/compression").then((r) =>
-          r.ok ? r.json() : null
-        )) as CompressionSettings | null;
-        if (!current) {
-          setSaveError(t("saveFailed"));
-          return;
-        }
-        detail = buildEngineDetailUpdate(savedConfig, configState, current[subKey]);
+      // The server replaces the whole sub-object, so the body starts from the copy stored
+      // now and changes only the fields edited here. A copy this page loaded earlier would
+      // write back fields another page saved since.
+      const current = (await fetch("/api/settings/compression").then((r) =>
+        r.ok ? r.json() : null
+      )) as CompressionSettings | null;
+      if (!current) {
+        setSaveError(t("saveFailed"));
+        return;
       }
+      const detail = buildEngineDetailUpdate(engineId, savedConfig, sent, current[subKey]);
       const res = await fetch("/api/settings/compression", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [subKey]: detail }),
       });
-      if (res.ok) {
-        setSavedConfig(configState);
-      } else {
+      if (!res.ok) {
+        setSavedConfig((saved) => forgetSentEdits(saved, sent));
         setSaveError(t("saveFailed"));
+        return;
       }
+      // Show what the server now holds, which can include fields another page changed, and
+      // keep anything typed while the save was out.
+      const settings = (await res.json().catch(() => null)) as CompressionSettings | null;
+      const written = seedEngineForm(
+        engineId,
+        engine?.configSchema ?? [],
+        settings?.[subKey] ?? detail
+      );
+      setSavedConfig(written);
+      setConfigState((now) => formAfterSave(written, sent, now));
     } catch {
+      // The save may have reached the server before the request failed, so the next save
+      // sends these fields again.
+      setSavedConfig((saved) => forgetSentEdits(saved, sent));
       setSaveError(t("saveFailed"));
     } finally {
       setSaving(false);
@@ -397,7 +407,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
           {persistable ? (
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || Boolean(loadError)}
               className="px-4 py-1.5 rounded bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50"
             >
               {saving ? t("saving") : t("save")}

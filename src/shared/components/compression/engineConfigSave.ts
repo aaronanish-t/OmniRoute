@@ -11,7 +11,7 @@ function isEmptyText(value: unknown): boolean {
   return typeof value === "string" && value.trim() === "";
 }
 
-/** Form values an engine page shows on load: schema defaults, then the stored sub-object. */
+/** Form values an engine page shows: schema defaults, then the stored sub-object. */
 export function seedEngineForm(
   engineId: string,
   schema: EngineConfigField[],
@@ -31,22 +31,53 @@ export function seedEngineForm(
 /**
  * The sub-object an engine page PUTs on save. The server replaces the whole sub-object row, so
  * the body starts from the copy stored at save time and applies only the fields edited since
- * `loaded`. `enabled` belongs to the compression panel and is never written here. An emptied
- * text field removes its key.
+ * `saved`. The page hides `enabled`, so the form never writes it and the stored value passes
+ * through. An emptied text field removes its key.
  */
 export function buildEngineDetailUpdate(
-  loaded: FormValues,
+  engineId: string,
+  saved: FormValues,
   edited: FormValues,
   stored: unknown
 ): FormValues {
   const next = { ...asRecord(stored) };
   for (const [key, value] of Object.entries(edited)) {
-    if (key === "enabled" || Object.is(value, loaded[key])) continue;
+    if (key === "enabled" || Object.is(value, saved[key])) continue;
     if (isEmptyText(value)) {
       delete next[key];
     } else {
       next[key] = value;
     }
+  }
+  if (engineId !== "lite") return next;
+  // The lite settings schema accepts only these two fields. A cleared cap input holds NaN, and
+  // null tells the server to drop the stored cap.
+  const cap = next.maxToolLength;
+  return {
+    compressToolResults: next.compressToolResults !== false,
+    ...("maxToolLength" in next
+      ? { maxToolLength: typeof cap === "number" && Number.isFinite(cap) ? Math.floor(cap) : null }
+      : {}),
+  };
+}
+
+/** The form after a successful save: what the server now holds, plus edits made meanwhile. */
+export function formAfterSave(written: FormValues, sent: FormValues, now: FormValues): FormValues {
+  const next = { ...written };
+  for (const [key, value] of Object.entries(now)) {
+    if (!Object.is(value, sent[key])) next[key] = value;
+  }
+  return next;
+}
+
+/**
+ * The baseline after a failed save. The server may have applied the save before the request
+ * failed, so the fields it carried leave the baseline and the next save sends them again.
+ */
+export function forgetSentEdits(saved: FormValues, sent: FormValues): FormValues {
+  const next = { ...saved };
+  for (const [key, value] of Object.entries(sent)) {
+    if (!Object.is(value, saved[key])) delete next[key];
   }
   return next;
 }

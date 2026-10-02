@@ -2,7 +2,8 @@
  * Idempotency Layer — Phase 9.2
  *
  * In-memory deduplication of requests with the same idempotency key.
- * If a request with the same key arrives within 5 seconds, returns
+ * If a request with the same key arrives within the idempotency window (5 seconds by
+ * default, configurable via the `idempotencyWindowMs` setting), returns
  * the cached response instead of making a new API call.
  *
  * Headers: X-Request-Id or Idempotency-Key

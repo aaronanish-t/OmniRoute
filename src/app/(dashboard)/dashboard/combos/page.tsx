@@ -833,7 +833,6 @@ function formatComboEntryDisplay(
 function CombosPageContent() {
   const t = useTranslations("combos");
   const tc = useTranslations("common");
-  const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [combos, setCombos] = useState([]);
@@ -973,7 +972,7 @@ function CombosPageContent() {
         const err = await res.json();
         notify.error(err.error?.message || err.error || t("failedCreate"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("errorCreating"));
     }
   };
@@ -993,7 +992,7 @@ function CombosPageContent() {
         const err = await res.json();
         notify.error(err.error?.message || err.error || t("failedUpdate"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("errorUpdating"));
     }
   };
@@ -1018,7 +1017,7 @@ function CombosPageContent() {
         const err = await res.json().catch(() => null);
         notify.error(err?.error?.message || err?.error || t("errorDeleting"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("errorDeleting"));
     }
   };
@@ -1066,7 +1065,7 @@ function CombosPageContent() {
       });
       const data = await res.json();
       setTestResults(data);
-    } catch (error) {
+    } catch {
       setTestResults({ error: t("testFailed") });
       notify.error(t("testFailed"));
     }
@@ -1092,7 +1091,7 @@ function CombosPageContent() {
         );
         notify.error(resolveServerErrorMessage(errorBody, t("failedToggle")));
       }
-    } catch (error) {
+    } catch {
       // Revert on network error
       setCombos((prev) =>
         prev.map((c) => (c.id === combo.id ? { ...c, isActive: previousActive } : c))
@@ -1236,7 +1235,11 @@ function CombosPageContent() {
         </div>
       </div>
 
-      <AutoComboCatalog onComboCreated={handleComboCreated} />
+      <AutoComboCatalog
+        onComboCreated={handleComboCreated}
+        onTestCombo={handleTestCombo}
+        testingName={testingCombo}
+      />
 
       <KimiComboPresetCard
         alreadyCreated={hasKimiCodingPreset(combos)}
@@ -2012,6 +2015,7 @@ function ComboCardInner({
 const ComboCard = memo(ComboCardInner);
 
 function TestResultsView({ results }) {
+  const t = useTranslations("combos");
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
 
   if (results.error) {
@@ -2029,6 +2033,19 @@ function TestResultsView({ results }) {
         Targets are tested independently. This checks model health, not the combo’s routing strategy
         or fallback order.
       </p>
+      {results.comboType === "auto" &&
+        typeof results.totalCandidates === "number" &&
+        Array.isArray(results.results) &&
+        results.totalCandidates > results.results.length && (
+          <p className="text-xs text-text-muted">
+            {getI18nOrFallback(
+              t,
+              "autoComboTestTruncated",
+              `Tested ${results.results.length} of ${results.totalCandidates} live candidates (highest weights first).`,
+              { tested: results.results.length, total: results.totalCandidates }
+            )}
+          </p>
+        )}
       {results.resolvedBy && (
         <div className="flex items-center gap-2 text-sm">
           <span className="material-symbols-outlined text-emerald-500 text-[18px]">

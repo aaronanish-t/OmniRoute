@@ -16,9 +16,17 @@ import { testComboSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { isAutoComboId, materializeAutoCombo } from "@/lib/combos/autoVirtual";
 
 export const COMBO_TEST_TIMEOUT_MS = 60_000;
 export const COMBO_TEST_TOTAL_TIMEOUT_MS = 180_000;
+/**
+ * Virtual auto combos can hold every connected model in the pool — probing all
+ * of them would run far past the total budget. Cap the smoke test at the
+ * highest-weighted candidates; `totalCandidates` in the response reports the
+ * unbounded pool size so the UI can explain the truncation.
+ */
+export const AUTO_COMBO_TEST_MAX_PROBES = 8;
 
 async function getInternalApiKey(): Promise<string | null> {
   // Combo health-check probes hit /v1/chat/completions, which enforces
@@ -227,9 +235,34 @@ export async function POST(request) {
     }
     const { comboName } = validation.data;
 
-    const combo = await getComboByName(comboName);
+    let combo = await getComboByName(comboName);
+    let totalAutoCandidates: number | null = null;
     if (!combo) {
-      return NextResponse.json({ error: "Combo not found" }, { status: 404 });
+      // Built-in auto/* combos have no persisted row — materialize the virtual
+      // combo the same way request-time routing does, then probe a bounded
+      // slice of its candidate pool instead of the (potentially huge) full set.
+      if (!isAutoComboId(comboName)) {
+        return NextResponse.json({ error: "Combo not found" }, { status: 404 });
+      }
+      try {
+        combo = await materializeAutoCombo(comboName);
+      } catch {
+        return NextResponse.json({ error: "Combo not found" }, { status: 404 });
+      }
+      const pool = Array.isArray(combo.models) ? combo.models : [];
+      totalAutoCandidates = pool.length;
+      if (pool.length === 0) {
+        return NextResponse.json(
+          { error: `Auto combo has no connected candidates matching "${comboName}"` },
+          { status: 400 }
+        );
+      }
+      combo = {
+        ...combo,
+        models: [...pool]
+          .sort((a, b) => (b?.weight ?? 0) - (a?.weight ?? 0))
+          .slice(0, AUTO_COMBO_TEST_MAX_PROBES),
+      };
     }
 
     const allCombos = await getCombos();
@@ -280,6 +313,9 @@ export async function POST(request) {
             label: resolvedResult.label,
           }
         : null,
+      ...(totalAutoCandidates !== null
+        ? { comboType: "auto", totalCandidates: totalAutoCandidates }
+        : {}),
       results,
       testedAt: new Date().toISOString(),
     });

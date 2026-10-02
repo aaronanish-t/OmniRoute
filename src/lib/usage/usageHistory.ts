@@ -819,10 +819,10 @@ export async function saveRequestUsage(entry: UsageEntry) {
       reasoning: getReasoningTokens(entry.tokens),
     };
     const agentSessionUsage = await buildAgentSessionUsage(entry, tokens, timestamp, serviceTier);
-    // Only /v1/me key holders read turns: no keyless or env-key rows, and the call-log noLog source.
-    const turnReadable = entry.apiKeyId && !isSyntheticApiKeyId(entry.apiKeyId);
     const sessionTurn =
-      turnReadable && !isNoLog(entry.apiKeyId) ? await redactSessionTurn(entry.sessionTurn) : null;
+      entry.apiKeyId && !isSyntheticApiKeyId(entry.apiKeyId) && !isNoLog(entry.apiKeyId)
+        ? await redactSessionTurn(entry.sessionTurn)
+        : null;
     const connection = entry.connectionId
       ? (db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(entry.connectionId) as
           Record<string, unknown> | undefined)
@@ -1078,6 +1078,7 @@ export async function getModelLatencyStats(
     latency_ms: number | null;
     ttft_ms: number | null;
     tokens_output: number | null;
+    tokens_reasoning: number | null;
   };
 
   const conditions = ["timestamp >= @sinceIso", "provider IS NOT NULL", "model IS NOT NULL"];
@@ -1094,7 +1095,7 @@ export async function getModelLatencyStats(
   const rows = db
     .prepare(
       `
-      SELECT provider, model, success, latency_ms, ttft_ms, tokens_output
+      SELECT provider, model, success, latency_ms, ttft_ms, tokens_output, tokens_reasoning
       FROM usage_history
       WHERE ${conditions.join(" AND ")}
       ORDER BY timestamp DESC
@@ -1124,7 +1125,8 @@ export async function getModelLatencyStats(
       toNumber(row.latency_ms),
       toNumber(row.ttft_ms),
       toNumber(row.tokens_output),
-      isSuccess
+      isSuccess,
+      toNumber(row.tokens_reasoning)
     );
   }
 

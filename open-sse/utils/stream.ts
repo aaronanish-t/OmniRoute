@@ -87,13 +87,10 @@ import {
 import { restoreClaudeToolName } from "../services/claudeCodeToolRemapper.ts";
 import { normalizeFinalOpenAIStreamChunk } from "./openAIStreamChunk.ts";
 import { collectClaudeDelta, collectToolUseName, withToolUseNames } from "./streamClaudeDelta.ts";
-import { createStreamTiming, type StreamTiming } from "./streamTiming.ts";
+import { createStreamTiming, registerStreamTiming, type StreamTiming } from "./streamTiming.ts";
 import { buildUsageOnlyChunk } from "./usageOnlyChunk.ts";
 
-/**
- * Race a response body read against a timeout.
- * Prevents indefinite hangs when the upstream sends headers but stalls on the body.
- */
+/** Race a body read against a timeout to prevent hanging after upstream headers arrive. */
 export function withBodyTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number = FETCH_BODY_TIMEOUT_MS
@@ -142,6 +139,7 @@ type StreamCompletePayload = {
    * NOT token-level TTFT — see open-sse/utils/streamTiming.ts for what is measured.
    */
   ttft?: number | null;
+  firstOutputMs?: number | null; // StreamTiming.firstOutputMs(); the caller adds pre-stream time
   /** Mean inter-chunk gap in ms (chunk-latency proxy for ITL), or null. */
   itlMs?: number | null;
   /** True when the stream was interrupted (timeout/abort/error) before a clean finish. */
@@ -789,6 +787,7 @@ export function createSSEStream(options: StreamOptions = {}) {
   /** Forward a pre-encoded SSE chunk, marking TTFT/ITL on the way. */
   const forward = (controller: TransformStreamDefaultController<Uint8Array>, bytes: Uint8Array) => {
     timing.markForward();
+    timing.observeOutput(bytes);
     controller.enqueue(bytes);
   };
 
@@ -1357,7 +1356,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     return true;
   };
 
-  return new TransformStream(
+  const sseStream = new TransformStream(
     {
       start(controller) {
         // Start idle watchdog — checks every 10s if provider has stopped sending
@@ -2876,9 +2875,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   usage,
                   responseBody,
                   reasoningMeta: reasoningObserver.take(),
-                  ttft: timing.ttftMs(),
-                  itlMs: timing.avgItlMs(),
-                  interrupted: timing.interrupted,
+                  ...timing.completionTiming(),
                   // #9315 switched the summary to the accumulated responseBody to avoid
                   // stale/truncated event data — but responseBody here is synthesized in
                   // chat-completion shape, which loses the Responses API `response` object.
@@ -3165,6 +3162,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 status: 200,
                 usage: state?.usage,
                 responseBody,
+                ...timing.completionTiming(),
                 reasoningMeta: reasoningObserver.take(),
                 // Same OPENAI_RESPONSES carve-out as the passthrough branch above —
                 // the synthesized chat-shaped responseBody drops the `response` object,
@@ -3221,6 +3219,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     { highWaterMark: streamBufferBytes },
     { highWaterMark: streamBufferBytes }
   );
+  return registerStreamTiming(sseStream, timing);
 }
 
 export default createSSEStream;

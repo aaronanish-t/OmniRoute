@@ -4676,6 +4676,13 @@
     "installSkill": "Nainštalovať Skill"
   },
   "health": {
+    "queuesTitle": "Brány súbežnosti",
+    "queuesScope": "Iba tento proces. Brány combo zahŕňajú len ciele round-robin, nie všetky požiadavky combo. Počty sa medzi bránami prekrývajú; nesčítavajte ich.",
+    "queuesCombo": "Brány cieľov combo (round-robin)",
+    "queuesAdmission": "Globálne brány / brány poskytovateľa / účtu",
+    "queuesEmpty": "V tejto snímke nie sú sledované žiadne brány.",
+    "queuesStale": "Zastaraná snímka",
+    "queuesError": "Snímka frontov nie je dostupná. Pokus sa automaticky opakuje.",
     "title": "Zdravie systému",
     "description": "Monitorovanie vašej inštancie OmniRoute v reálnom čase",
     "healthy": "Zdravý",

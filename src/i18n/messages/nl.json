@@ -4676,6 +4676,13 @@
     "installSkill": "Vaardigheid installeren"
   },
   "health": {
+    "queuesTitle": "Gelijktijdigheidsbegrenzingen",
+    "queuesScope": "Alleen dit proces. Combo-begrenzingen omvatten alleen round-robin-doelen, niet alle combo-aanvragen. Tellingen overlappen tussen begrenzingen; tel ze niet bij elkaar op.",
+    "queuesCombo": "Combo-doelbegrenzingen (round-robin)",
+    "queuesAdmission": "Globale / provider- / accountbegrenzingen",
+    "queuesEmpty": "Geen begrenzingen bijgehouden in deze momentopname.",
+    "queuesStale": "Verouderde momentopname",
+    "queuesError": "Wachtrijmomentopname niet beschikbaar. Automatisch opnieuw proberen.",
     "title": "Systeemgezondheid",
     "description": "Realtime monitoring van uw OmniRoute-instantie",
     "healthy": "Gezond",

@@ -4676,6 +4676,13 @@
     "installSkill": "Installer Skill"
   },
   "health": {
+    "queuesTitle": "Samtidighedsbegrænsninger",
+    "queuesScope": "Kun denne proces. Combo-begrænsninger dækker kun round-robin-mål, ikke alle combo-anmodninger. Tællinger overlapper mellem begrænsninger; læg dem ikke sammen.",
+    "queuesCombo": "Combo-målbegrænsninger (round-robin)",
+    "queuesAdmission": "Globale / udbyder- / kontobegrænsninger",
+    "queuesEmpty": "Ingen begrænsninger spores i dette øjebliksbillede.",
+    "queuesStale": "Forældet øjebliksbillede",
+    "queuesError": "Køens øjebliksbillede er utilgængeligt. Prøver automatisk igen.",
     "title": "Systemsundhed",
     "description": "Realtidsovervågning af din OmniRoute-instans",
     "healthy": "Sundt",

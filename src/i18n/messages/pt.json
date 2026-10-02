@@ -4676,6 +4676,13 @@
     "installSkill": "Instalar habilidade"
   },
   "health": {
+    "queuesTitle": "Controlos de concorrência",
+    "queuesScope": "Apenas este processo. Os controlos de combo abrangem apenas destinos round-robin, não todos os pedidos do combo. As contagens sobrepõem-se entre controlos; não as some.",
+    "queuesCombo": "Controlos de destinos de combo (round-robin)",
+    "queuesAdmission": "Controlos globais / de fornecedor / de conta",
+    "queuesEmpty": "Nenhum controlo monitorizado neste instantâneo.",
+    "queuesStale": "Instantâneo desatualizado",
+    "queuesError": "Instantâneo das filas indisponível. A tentar novamente automaticamente.",
     "title": "Saúde do sistema",
     "description": "Monitoramento em tempo real da sua instância OmniRoute",
     "healthy": "Saudável",

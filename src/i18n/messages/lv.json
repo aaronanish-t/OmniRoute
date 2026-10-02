@@ -4676,6 +4676,13 @@
     "installSkill": "Instalēt prasmi"
   },
   "health": {
+    "queuesTitle": "Vienlaicīguma ierobežotāji",
+    "queuesScope": "Tikai šis process. Combo ierobežotāji aptver tikai round-robin mērķus, nevis visus combo pieprasījumus. Skaitītāji starp ierobežotājiem pārklājas; nesummējiet tos.",
+    "queuesCombo": "Combo mērķu ierobežotāji (round-robin)",
+    "queuesAdmission": "Globālie / pakalpojumu sniedzēja / konta ierobežotāji",
+    "queuesEmpty": "Šajā momentuzņēmumā nav izsekotu ierobežotāju.",
+    "queuesStale": "Novecojis momentuzņēmums",
+    "queuesError": "Rindu momentuzņēmums nav pieejams. Automātiski mēģina vēlreiz.",
     "title": "Sistēmas stāvoklis",
     "description": "Jūsu OmniRoute instances pārraudzība reāllaikā",
     "healthy": "Darbojas",

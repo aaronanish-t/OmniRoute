@@ -4676,6 +4676,13 @@
     "installSkill": "安装技巧"
   },
   "health": {
+    "queuesTitle": "并发门控",
+    "queuesScope": "仅限当前进程。组合门控仅覆盖轮询策略的目标，并非所有组合请求。各门控计数存在重叠，请勿相加。",
+    "queuesCombo": "组合目标门控（轮询）",
+    "queuesAdmission": "全局 / 提供者 / 账号门控",
+    "queuesEmpty": "此快照中没有被跟踪的门控。",
+    "queuesStale": "快照已过时",
+    "queuesError": "队列快照不可用，正在自动重试。",
     "title": "系统健康状况",
     "description": "实时监控您的 OmniRoute 实例",
     "healthy": "健康",

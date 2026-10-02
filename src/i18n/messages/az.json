@@ -4676,6 +4676,13 @@
     "installSkill": "Bacarıq quraşdırın"
   },
   "health": {
+    "queuesTitle": "Paralellik keçidləri",
+    "queuesScope": "Yalnız bu proses. Combo keçidləri bütün combo sorğularını deyil, yalnız round-robin hədəflərini əhatə edir. Sayğaclar keçidlər arasında üst-üstə düşür; onları toplamayın.",
+    "queuesCombo": "Combo hədəf keçidləri (round-robin)",
+    "queuesAdmission": "Qlobal / provayder / hesab keçidləri",
+    "queuesEmpty": "Bu anlıq görüntüdə izlənən keçid yoxdur.",
+    "queuesStale": "Köhnəlmiş anlıq görüntü",
+    "queuesError": "Növbələrin anlıq görüntüsü əlçatan deyil. Avtomatik yenidən cəhd edilir.",
     "title": "Sistemin vəziyyəti",
     "description": "OmniRoute instansiyanızın real vaxt rejimində monitorinqi",
     "healthy": "Sağlam",

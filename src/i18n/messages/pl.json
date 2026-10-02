@@ -4676,6 +4676,13 @@
     "installSkill": "Zainstaluj umiejętność"
   },
   "health": {
+    "queuesTitle": "Bramki współbieżności",
+    "queuesScope": "Tylko ten proces. Bramki combo obejmują tylko cele round-robin, nie wszystkie żądania combo. Liczniki nakładają się między bramkami; nie sumuj ich.",
+    "queuesCombo": "Bramki celów combo (round-robin)",
+    "queuesAdmission": "Bramki globalne / dostawcy / konta",
+    "queuesEmpty": "Brak śledzonych bramek w tej migawce.",
+    "queuesStale": "Nieaktualna migawka",
+    "queuesError": "Migawka kolejek niedostępna. Automatyczne ponawianie.",
     "title": "Stan systemu",
     "description": "Monitorowanie instancji OmniRoute w czasie rzeczywistym",
     "healthy": "Sprawny",

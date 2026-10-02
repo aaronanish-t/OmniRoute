@@ -4676,6 +4676,13 @@
     "installSkill": "Instalați Skill"
   },
   "health": {
+    "queuesTitle": "Porți de concurență",
+    "queuesScope": "Doar acest proces. Porțile combo acoperă doar țintele round-robin, nu toate cererile combo. Numărătorile se suprapun între porți; nu le adunați.",
+    "queuesCombo": "Porți pentru țintele combo (round-robin)",
+    "queuesAdmission": "Porți globale / de furnizor / de cont",
+    "queuesEmpty": "Nicio poartă urmărită în acest instantaneu.",
+    "queuesStale": "Instantaneu învechit",
+    "queuesError": "Instantaneul cozilor nu este disponibil. Se reîncearcă automat.",
     "title": "Sănătatea sistemului",
     "description": "Monitorizarea în timp real a instanței dvs. OmniRoute",
     "healthy": "Sănătos",

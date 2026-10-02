@@ -4676,6 +4676,13 @@
     "installSkill": "Pasang Kemahiran"
   },
   "health": {
+    "queuesTitle": "Gerbang keserentakan",
+    "queuesScope": "Proses ini sahaja. Gerbang combo hanya meliputi sasaran round-robin, bukan semua permintaan combo. Kiraan bertindih antara gerbang; jangan jumlahkannya.",
+    "queuesCombo": "Gerbang sasaran combo (round-robin)",
+    "queuesAdmission": "Gerbang global / penyedia / akaun",
+    "queuesEmpty": "Tiada gerbang dijejaki dalam petikan ini.",
+    "queuesStale": "Petikan lapuk",
+    "queuesError": "Petikan baris gilir tidak tersedia. Mencuba semula secara automatik.",
     "title": "Kesihatan Sistem",
     "description": "Pemantauan masa nyata bagi tika OmniRoute anda",
     "healthy": "Sihat",

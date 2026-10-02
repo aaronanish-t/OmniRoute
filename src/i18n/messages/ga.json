@@ -4676,6 +4676,13 @@
     "installSkill": "Suiteáil Scil"
   },
   "health": {
+    "queuesTitle": "Geataí comhthráthachta",
+    "queuesScope": "An próiseas seo amháin. Ní chlúdaíonn geataí combo ach spriocanna round-robin, ní gach iarratas combo. Tá forluí sna comhairimh idir geataí; ná suimigh iad.",
+    "queuesCombo": "Geataí spriocanna combo (round-robin)",
+    "queuesAdmission": "Geataí domhanda / soláthraí / cuntais",
+    "queuesEmpty": "Níl aon gheata á rianú sa léargas seo.",
+    "queuesStale": "Léargas as dáta",
+    "queuesError": "Níl léargas na scuainí ar fáil. Triail eile go huathoibríoch.",
     "title": "Sláinte an Chórais",
     "description": "Monatóireacht fíor-ama ar d'ásc OmniRoute",
     "healthy": "Sláintiúil",

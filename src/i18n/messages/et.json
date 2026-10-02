@@ -4676,6 +4676,13 @@
     "installSkill": "Installi oskus"
   },
   "health": {
+    "queuesTitle": "Samaaegsuse piirajad",
+    "queuesScope": "Ainult see protsess. Combo-piirajad hõlmavad ainult round-robin-sihtmärke, mitte kõiki combo-päringuid. Loendurid kattuvad piirajate vahel; ärge liitke neid.",
+    "queuesCombo": "Combo-sihtmärkide piirajad (round-robin)",
+    "queuesAdmission": "Globaalsed / pakkuja / konto piirajad",
+    "queuesEmpty": "Selles hetktõmmises pole jälgitavaid piirajaid.",
+    "queuesStale": "Aegunud hetktõmmis",
+    "queuesError": "Järjekordade hetktõmmis pole saadaval. Proovitakse automaatselt uuesti.",
     "title": "Süsteemi seisund",
     "description": "Teie OmniRoute'i eksemplari reaalajas jälgimine",
     "healthy": "Töökorras",

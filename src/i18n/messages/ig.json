@@ -4676,6 +4676,13 @@
     "installSkill": "Wụnye Nkà"
   },
   "health": {
+    "queuesTitle": "Ọnụ ụzọ ọrụ n’otu oge",
+    "queuesScope": "Naanị usoro a. Ọnụ ụzọ combo na-ekpuchi naanị ebe a na-achọ iru nke round-robin, ọ bụghị arịrịọ combo niile. Ọnụọgụ na-emegharị n’etiti ọnụ ụzọ; etinyekọtala ha.",
+    "queuesCombo": "Ọnụ ụzọ ebe combo na-aga (round-robin)",
+    "queuesAdmission": "Ọnụ ụzọ zuru ụwa ọnụ / onye na-eweta / akaụntụ",
+    "queuesEmpty": "Enweghị ọnụ ụzọ a na-enyocha na foto ọnọdụ a.",
+    "queuesStale": "Foto ọnọdụ ochie",
+    "queuesError": "Foto ọnọdụ ahịrị nchere adịghị. A na-anwale ọzọ na-akpaghị aka.",
     "title": "Ahụike Sistemu",
     "description": "Nlekota ozugbo nke instance OmniRoute gị",
     "healthy": "Dị mma",

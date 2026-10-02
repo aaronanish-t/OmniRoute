@@ -4676,6 +4676,13 @@
     "installSkill": "התקן את מיומנות"
   },
   "health": {
+    "queuesTitle": "שערי מקביליות",
+    "queuesScope": "תהליך זה בלבד. שערי combo מכסים רק יעדי round-robin, לא את כל בקשות ה-combo. הספירות חופפות בין השערים; אין לחבר אותן.",
+    "queuesCombo": "שערי יעדי combo ‏(round-robin)",
+    "queuesAdmission": "שערים כלליים / ספק / חשבון",
+    "queuesEmpty": "אין שערים במעקב בתמונת מצב זו.",
+    "queuesStale": "תמונת מצב מיושנת",
+    "queuesError": "תמונת מצב התורים אינה זמינה. מתבצע ניסיון חוזר אוטומטי.",
     "title": "בריאות המערכת",
     "description": "ניטור בזמן אמת של מופע OmniRoute שלך",
     "healthy": "בריא",

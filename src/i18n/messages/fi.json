@@ -4676,6 +4676,13 @@
     "installSkill": "Asenna Skill"
   },
   "health": {
+    "queuesTitle": "Rinnakkaisuusrajoittimet",
+    "queuesScope": "Vain tämä prosessi. Combo-rajoittimet kattavat vain round-robin-kohteet, eivät kaikkia combo-pyyntöjä. Laskurit ovat päällekkäisiä eri rajoittimissa; älä laske niitä yhteen.",
+    "queuesCombo": "Combo-kohderajoittimet (round-robin)",
+    "queuesAdmission": "Globaalit / palveluntarjoaja- / tilirajoittimet",
+    "queuesEmpty": "Tässä tilannekuvassa ei seurata rajoittimia.",
+    "queuesStale": "Vanhentunut tilannekuva",
+    "queuesError": "Jonojen tilannekuva ei ole saatavilla. Yritetään automaattisesti uudelleen.",
     "title": "Järjestelmän terveys",
     "description": "OmniRoute-instanssisi reaaliaikainen seuranta",
     "healthy": "Terve",

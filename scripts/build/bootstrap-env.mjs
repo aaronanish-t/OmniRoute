@@ -295,11 +295,12 @@ export function bootstrapEnv({ dataDirOverride, quiet = false } = {}) {
   if (initialPassword === "CHANGEME") {
     log("⚠️  INITIAL_PASSWORD is the .env.example placeholder 'CHANGEME', a publicly known");
     log("   password. If no dashboard password is saved yet, CHANGEME becomes the password.");
-    log("   Set your own INITIAL_PASSWORD before first boot (in Docker, before the container's");
-    log("   first start), or change the password right away: sign in from localhost and use");
-    log("   Dashboard → Settings → Security, or run `omniroute reset-password`");
-    log("   (`node bin/reset-password.mjs` in a source checkout) with DATA_DIR set to this");
-    log("   server's data directory.");
+    log("   Set your own INITIAL_PASSWORD before first boot. In Docker, do it before the");
+    log("   container's first start: a host browser reaches the container as a remote client,");
+    log("   and the login refuses CHANGEME from remote clients. Elsewhere, change the password");
+    log("   right away: sign in from localhost and use Dashboard → Settings → Security, or run");
+    log("   `omniroute reset-password` (`node bin/reset-password.mjs` in a source checkout)");
+    log("   with DATA_DIR set to this server's data directory.");
   } else if (!initialPassword) {
     log("ℹ️  INITIAL_PASSWORD is unset here. Unless a .env file that Next.js loads sets it,");
     log("   a fresh install asks you to create the dashboard password in the onboarding wizard.");

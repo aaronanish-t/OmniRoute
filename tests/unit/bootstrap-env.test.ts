@@ -196,6 +196,7 @@ test("bootstrapEnv warns that the CHANGEME placeholder becomes the password", ()
     const output = captureStderr(() => bootstrapEnv());
 
     assert.match(output, /placeholder 'CHANGEME', a publicly known/);
+    assert.match(output, /In Docker, do it before the/);
     assert.match(output, /reset-password/);
     assert.doesNotMatch(output, /is unset here/);
   });

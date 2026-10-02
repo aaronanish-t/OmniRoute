@@ -23,6 +23,7 @@ import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
+import { readAddedWait } from "../../utils/proxyFetch.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
 
@@ -250,6 +251,13 @@ export type PersistAttemptLogsArgs = {
   claudeCacheUsageMeta?: Record<string, unknown>;
   cacheSource?: "upstream" | "semantic";
   /**
+   * #13130: time to the first forwarded stream chunk (ms), as measured by
+   * streamTiming for THIS attempt. Persisted to call_logs.ttft_ms so the
+   * dashboard TPS divides by generation time (duration - TTFT). Streaming
+   * completions pass it; non-streaming paths leave it undefined (column NULL).
+   */
+  ttft?: number | null;
+  /**
    * Encrypted-reasoning observation from the stream loops (flag + wall-clock
    * duration only). Efforts are read at the sink from the request bodies.
    */
@@ -398,6 +406,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     claudeCacheMeta,
     claudeCacheUsageMeta,
     cacheSource,
+    ttft,
   } = args;
   const {
     traceId,
@@ -549,6 +558,10 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   // pendingRequestId and must not share the row key. correlationId still
   // pairs the row with request.started. pendingRequestId is NOT the row key: it only
   // routes token usage to the live in-memory request row (#14324).
+  // Late read of the per-request added wait published on the ALS
+  // capture sink by the executor. Fail-soft: null outside a capture or when
+  // nothing was published — the row stores NULL (no wait), never throws.
+  const addedWait = readAddedWait();
   saveCallLog({
     pendingRequestId: ctx.pendingRequestId,
     method: "POST",
@@ -559,6 +572,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     provider,
     connectionId: finalConnectionId || undefined,
     duration: Date.now() - startTime,
+    ttftMs: typeof ttft === "number" && Number.isFinite(ttft) && ttft >= 0 ? ttft : null,
     tokens: tokens || {},
     // Estimated-token flag, computed here where tokens still carry the marker
     // (it does not survive spreads or JSON round-trips to the sink).
@@ -608,6 +622,8 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     sessionTag: sessionTag || null,
     responseId: extractResponsesId(sourceFormat, clientResponse),
     videoContentRemoved: videoContentRemoved || false,
+    addedWaitMs: addedWait?.ms ?? null,
+    addedWaitCause: addedWait?.cause ?? null,
   }).catch(() => {});
 
   // Emit the terminal request-lifecycle event to the live dashboard bus. `request.started`

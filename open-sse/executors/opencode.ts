@@ -5,17 +5,20 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
-import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
+import { getModelTargetFormat, stripOpencodeModelPrefix } from "../config/providerModels.ts";
 import {
   injectReasoningContentForThinkingModel,
   isThinkingMessageModel,
 } from "../utils/reasoningContentInjector.ts";
 import {
   hasAmbientProxyContext,
+  currentAppliedProxySink,
   runWithDirectFetchContext,
   runWithProxyContext,
   noteRotationAccount,
+  noteAddedWait,
   resolveProxyForRequest,
+  type AddedWaitCause,
 } from "../utils/proxyFetch.ts";
 import {
   createServedAccountTracker,
@@ -29,12 +32,9 @@ import {
   resolveOpencodeCliDefaults,
 } from "../utils/opencodeHeaders.ts";
 import { projectOpencodeSessionBody } from "../utils/opencodeSessionIdentity.ts";
-import {
-  listForRequest,
-  releaseRequestList,
-  type ScopedAccount,
-  type ScopedAccountHealth,
-} from "./opencodeAccountScope.ts";
+import { listForRequest, releaseRequestList } from "./opencodeAccountScope.ts";
+import type { ScopedAccount, ScopedAccountHealth } from "./opencodeAccountScope.ts";
+import { guardRequiredAccountProxies } from "./opencodeRequiredProxy.ts";
 import {
   type AccountProxyConfig,
   type RotationAccountSnapshot,
@@ -55,6 +55,7 @@ import {
   isOpencodeFreeTierRefusal,
   isOpencodeGeoBlocked,
   proxyKeyOf,
+  poolReselectKeyOf,
   isOpencodeUserBlocked,
 } from "./opencodeGeoBlock.ts";
 import {
@@ -85,7 +86,7 @@ export { isPremiumOpencodeModel };
 import {
   guardResponsesStall,
   isResponsesFirstByteTimeout,
-  resolveResponsesStallWindowMs,
+  setupStallGuard,
 } from "./opencodeResponsesStall.ts";
 import { discardResponseBody } from "./opencodeResponseBody.ts";
 import { headersWaitDispatch, headersWaitState } from "./opencodeHeadersWait.ts";
@@ -105,7 +106,9 @@ import {
   isOpencodeTransientFailoverBackoffEnabled,
   isOpencodeRateLimited429EarlyStopEnabled,
   isOpencodeParkAndResumeEnabled,
+  isOpencodePoolReselectEnabled,
 } from "@/shared/utils/featureFlags";
+import { isEgressBucketedLockScope } from "../config/providerErrorRules.ts";
 import {
   BURST_PARK_THRESHOLD,
   parkWaitMs,
@@ -196,8 +199,7 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
  * Exported for testability.
  */
 export function resolveOpencodeTargetFormat(provider: string, model: string): string {
-  const alias = PROVIDER_ID_TO_ALIAS[provider] || provider;
-  return getModelTargetFormat(alias, model) || "openai";
+  return getModelTargetFormat(provider, model) || "openai";
 }
 
 export {
@@ -440,8 +442,7 @@ export class OpencodeExecutor extends BaseExecutor {
               if (isResponsesTerminalLine(line)) {
                 // OpenCode Zen sends a ping after response.completed and may keep
                 // the HTTP connection alive. The Responses terminal event is
-                // authoritative; do not let those post-completion pings hold Chat
-                // Completions open.
+                // authoritative; do not let those post-completion pings hold Chat Completions open.
                 closed = true;
                 void reader.cancel().catch(() => undefined);
                 controller.close();
@@ -473,9 +474,16 @@ export class OpencodeExecutor extends BaseExecutor {
 
   async execute(input: ExecuteInput) {
     try {
-      return await runInRequestContext(() =>
-        withRequestShapeRetry(input, (i) => this.executeOnce(i))
-      );
+      return await runInRequestContext(() => {
+        // Pool re-selection resolver published by the chat layer on the
+        // applied-proxy capture sink (present only when the resolved egress
+        // came from a live connection pool). Copied once per request so the
+        // 429 arm below reads a synchronous field, never the ALS in a loop.
+        const reselect = currentAppliedProxySink()?.reselectPoolMember;
+        const ctx = currentRequestContext();
+        if (ctx && typeof reselect === "function") ctx.reselectPoolMember = reselect;
+        return withRequestShapeRetry(input, (i) => this.executeOnce(i));
+      });
     } finally {
       releaseRequestList(input.body, this.accountHealth);
     }
@@ -530,16 +538,30 @@ export class OpencodeExecutor extends BaseExecutor {
       // empty when absent (never n/a/none/fabricated). The existing motif
       // stays byte-identical after the prefix.
       const cid = input.correlationId ? `correlationId=${input.correlationId} ` : "";
+      const proxyGuard = guardRequiredAccountProxies(input.credentials, accounts, log, cid);
+      if (proxyGuard) return proxyGuard;
       // Rotation attribution diagnostics (single flag read per request — the DB
       // override lookup is synchronous SQLite, never in the attempt loop).
       const attributionOn = isRotationAttributionEnabled();
+      // Opt-in pool re-selection on a per-address 429 (default off): one flag
+      // read per request, like the attribution flag above — never in the loop.
+      const poolReselectOn = isOpencodePoolReselectEnabled();
+      // Resolver published by the chat layer when the ambient egress came from
+      // a live connection pool (undefined otherwise). Read once per request.
+      const poolReselect =
+        poolReselectOn && isEgressBucketedLockScope(this.provider) && hasAmbientProxyContext()
+          ? (currentRequestContext()?.reselectPoolMember ?? null)
+          : null;
+      // Key of the ambient pool member this request egressed through (null when
+      // direct): a resolver answer for the same member is ignored silently.
+      let lastPoolKey = poolReselectKeyOf(currentAppliedProxySink()?.proxy);
       // Cooldown-skipped accounts seen this request, keyed by fingerprint (a
       // mask prefix could theoretically collide; masking happens at write).
       const skippedCooldown = new Map<string, number>();
 
       const hasProxies = accounts.some((a) => a.proxy !== null);
-      // Opt-in Responses first-byte stall guard (#13484); a no-op when the window is 0.
-      const stallWindowMs = resolveResponsesStallWindowMs(input.stream, this._requestFormat);
+      // Opt-in Responses first-byte stall guard; 0 = no-op.
+      const stallWindowMs = setupStallGuard(input.stream, this._requestFormat, log, cid).windowMs;
       const guardStall = <T>(r: T) => guardResponsesStall(r, stallWindowMs, input.signal);
       const headersWait = headersWaitState(
         input,
@@ -651,8 +673,34 @@ export class OpencodeExecutor extends BaseExecutor {
       let burstStreak = 0,
         parked = false;
       const requestPacing = egressPacing.initEgressPacingForRequest(); // Off by default.
+      // Pool re-selection cell: a member the 429 arm asked the pool for, served
+      // at the next dispatch instead of the account's own proxy (or, for a
+      // proxy-less account, instead of inheriting the ambient member). Written
+      // once per 429 on the plain-rotation path, read at every dispatch below.
+      let reselectedProxy: ScopedAccount["proxy"] | undefined;
       // served-account changes (effective-change counting) live in the leaf tracker.
       const noteServedAccount = createServedAccountTracker();
+      // Cumulative wait imposed before dispatch (egress pacing + park),
+      // published as snapshots to the ALS capture sink. A stopwatch, never a
+      // key attribute — no egress-key read here.
+      const addedWait = { ms: 0, causes: new Set<AddedWaitCause>() };
+      const publishAddedWait = (): void => noteAddedWait(addedWait.ms, addedWait.causes);
+      // Single park counter (wrapper alone, no hook in the park
+      // module). parkWithHeartbeat calls driver.sleep per elapsed step in both
+      // stream (closure start()) and non-stream paths, so wrapping this one
+      // sleep counts every parked step exactly once. Monotone += only.
+      const parkSleepCounting = async (
+        ms: number,
+        signal?: AbortSignal | null
+      ): Promise<boolean> => {
+        const elapsed = await this.parkSleep(ms, signal);
+        if (elapsed) {
+          addedWait.ms += ms;
+          addedWait.causes.add("park");
+          publishAddedWait();
+        }
+        return elapsed;
+      };
       const appliedEgress = egressPacing.createAppliedEgressTracker(
         this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
         resolveProxyForRequest
@@ -764,6 +812,10 @@ export class OpencodeExecutor extends BaseExecutor {
         // Pin egress to this account's proxy for the whole BaseExecutor dispatch
         // (incl. its intra-URL 429 retries). skipUpstreamRetry lets THIS loop own
         // the cross-account 429 fallback instead of BaseExecutor's same-key retry.
+        // Wall-clock around the paced acquire (sync repick included —
+        // µs against waits in seconds). Time endured in queue counts on every
+        // outcome: slot granted, fail-open null, or repick.
+        const throttleStart = Date.now();
         const paced = await egressPacing.startPacedDispatch(
           requestPacing,
           account,
@@ -774,6 +826,12 @@ export class OpencodeExecutor extends BaseExecutor {
         );
         const egressRelease = paced.release;
         account = paced.account;
+        const throttleDelta = Math.max(0, Date.now() - throttleStart);
+        if (throttleDelta > 0) {
+          addedWait.ms += throttleDelta;
+          addedWait.causes.add("throttle");
+          publishAddedWait();
+        }
         appliedEgress.rememberServed(account); // Served (post repick), never acquire-time.
         let result: HttpExecuteResult;
         try {
@@ -786,7 +844,7 @@ export class OpencodeExecutor extends BaseExecutor {
             (attemptSignal) =>
               (async () =>
                 guardStall(
-                  await runWithProxyContext(account.proxy, () =>
+                  await runWithProxyContext(account.proxy ?? reselectedProxy, () =>
                     super.execute({
                       ...input,
                       skipUpstreamRetry: true,
@@ -804,6 +862,7 @@ export class OpencodeExecutor extends BaseExecutor {
               stalled: headersWait.spent,
               cooldown: markCooldown,
               markDirect: () => (directTried = true),
+              slow: { account, enabled: skipRecentlyFailed, read: readAppliedKey },
             }); // same settle as the stall arm
             log?.warn?.(
               "OPENCODE",
@@ -923,7 +982,7 @@ export class OpencodeExecutor extends BaseExecutor {
                     execute: (i: ExecuteInput) =>
                       super.execute(i) as Promise<ExecutorExecuteResult & { response: Response }>,
                     markSuccess: (a: ScopedAccount) => markSuccess(a),
-                    sleep: this.parkSleep,
+                    sleep: parkSleepCounting,
                     accounts,
                     replayKeyOfMember: keyOfMember,
                   },
@@ -949,6 +1008,32 @@ export class OpencodeExecutor extends BaseExecutor {
                   noteStoredFallback();
                   return this.normalizeMuseSparkResponse(input, result);
                 }
+              }
+            }
+            // Pool re-selection (opt-in, flag read once per request above): the
+            // account that just took this 429 has no proxy of its own, so the
+            // attempt egressed through the ambient pool member — and this
+            // provider buckets quota by egress address. Ask the pool for
+            // another member for the next attempt instead of retrying the
+            // refused address. Orders, never excludes: a null resolver result
+            // (exhausted or held back) keeps the current behavior. Placed
+            // after every stop/park exit above so a wave-ending verdict never
+            // consumes a rotation step.
+            if (poolReselect && account.proxy === null) {
+              const next = await poolReselect().catch(() => null);
+              if (
+                next !== null &&
+                typeof next === "object" &&
+                typeof (next as { host?: unknown }).host === "string" &&
+                typeof (next as { port?: unknown }).port === "number" &&
+                poolReselectKeyOf(next) !== lastPoolKey
+              ) {
+                reselectedProxy = next as ScopedAccount["proxy"];
+                lastPoolKey = poolReselectKeyOf(next);
+                log?.warn?.(
+                  "OPENCODE",
+                  `${cid}pool re-selected egress for account ${masked} after 429, retrying on another member…`
+                );
               }
             }
             continue;
@@ -1332,6 +1417,7 @@ export class OpencodeExecutor extends BaseExecutor {
     }
     if (modifiedBody && typeof modifiedBody === "object" && !Array.isArray(modifiedBody)) {
       const mb = modifiedBody as Record<string, unknown>;
+      mb.model = stripOpencodeModelPrefix(mb.model); // see providerModels.ts
       // OpenCode accepts stream_options only on streaming Chat Completions (#13699).
       const format = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
       if (format !== "openai" || mb.stream !== true) {

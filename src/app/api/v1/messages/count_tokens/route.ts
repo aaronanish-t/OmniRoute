@@ -83,6 +83,8 @@ export async function POST(request) {
         model: modelInfo.model,
         body,
         credentials,
+        clientHeaders: Object.fromEntries(request.headers.entries()),
+        signal: request.signal,
         log,
       })
     );

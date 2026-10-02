@@ -76,7 +76,7 @@ test("native protocol passthrough still gates model and body-dependent betas", (
 });
 class NativeBetaExecutor extends BaseExecutor {
   constructor() {
-    super("claude", { baseUrls: ["https://api.anthropic.com/v1/messages"] });
+    super("claude", { format: "claude", baseUrls: ["https://api.anthropic.com/v1/messages"] });
   }
   needsRefresh() {
     return false;
@@ -117,6 +117,46 @@ for (const native of [true, false])
     }
     assert.ok(outgoing);
     const beta = outgoing.get("anthropic-beta") || "";
+    assert.ok(beta.includes("inline-tools-2026-09-15"));
+    assert.ok(beta.includes("advisor-tool-2026-03-01"));
+    assert.equal(beta.includes("native-future-fixture-2026-10-02"), native);
+  });
+
+for (const native of [true, false])
+  test(`count_tokens preserves negotiated tool protocol and provider credentials: ${native}`, async () => {
+    const original = globalThis.fetch;
+    let outgoing: Headers | undefined;
+    let outgoingBody: Record<string, unknown> | undefined;
+    globalThis.fetch = async (_url: string | URL | Request, init: RequestInit = {}) => {
+      outgoing = new Headers(init.headers);
+      outgoingBody = JSON.parse(String(init.body));
+      return new Response('{"input_tokens":42}', { status: 200 });
+    };
+    const body = {
+      messages: [{ role: "user", content: "hi" }],
+      tools: [{ type: "advisor_20260301", name: "advisor" }],
+    };
+    let result;
+    try {
+      result = await new NativeBetaExecutor().countTokens({
+        model: "claude-sonnet-5-5",
+        body,
+        credentials: { accessToken: "sk-ant-oat-fixture" },
+        clientHeaders: {
+          ...(native ? { "x-app": "cli" } : {}),
+          authorization: "Bearer original-client-credential",
+          "anthropic-beta":
+            "inline-tools-2026-09-15,advisor-tool-2026-03-01,native-future-fixture-2026-10-02",
+        },
+      });
+    } finally {
+      globalThis.fetch = original;
+    }
+    assert.equal(result?.source, "provider");
+    assert.equal(result?.input_tokens, 42);
+    assert.equal(outgoing?.get("authorization"), "Bearer sk-ant-oat-fixture");
+    assert.deepEqual(outgoingBody?.tools, body.tools);
+    const beta = outgoing?.get("anthropic-beta") || "";
     assert.ok(beta.includes("inline-tools-2026-09-15"));
     assert.ok(beta.includes("advisor-tool-2026-03-01"));
     assert.equal(beta.includes("native-future-fixture-2026-10-02"), native);

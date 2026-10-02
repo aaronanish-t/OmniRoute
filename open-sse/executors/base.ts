@@ -226,6 +226,7 @@ export type ExecuteInput = {
 };
 
 export type CountTokensInput = {
+  clientHeaders?: Record<string, string> | null;
   body: Record<string, unknown>;
   credentials: ProviderCredentials;
   log?: ExecutorLog | null;
@@ -656,12 +657,12 @@ export class BaseExecutor {
     return query ? `${normalizedPath}?${query}` : normalizedPath;
   }
 
-  async countTokens({ model, body, credentials, signal, log }: CountTokensInput) {
+  async countTokens({ model, body, credentials, signal, log, clientHeaders }: CountTokensInput) {
     const url = this.buildCountTokensUrl(model, credentials);
     if (!url) return null;
     this.assertOutboundUrlAllowed(url); // GHSA-4f49
 
-    const headers = this.buildHeaders(credentials, false);
+    const headers = this.buildHeaders(credentials, false, clientHeaders, model);
     const requestBody =
       body && typeof body === "object"
         ? {
@@ -669,6 +670,22 @@ export class BaseExecutor {
             model,
           }
         : { model };
+
+    if (this.provider === "claude") {
+      const nativeClient =
+        clientHeaders?.["x-app"] === "cli" ||
+        /claude-(?:code|cli)/i.test(clientHeaders?.["user-agent"] || "");
+      const clientBeta =
+        clientHeaders?.["anthropic-beta"] ?? clientHeaders?.["Anthropic-Beta"] ?? null;
+      headers["anthropic-beta"] = mergeClientAnthropicBeta(
+        headers["anthropic-beta"] || "",
+        clientBeta,
+        undefined,
+        model,
+        requestBody,
+        nativeClient
+      );
+    }
 
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let activeSignal = signal || null;

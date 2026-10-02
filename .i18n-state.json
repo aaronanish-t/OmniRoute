@@ -25304,8 +25304,19 @@
       "locales": {
         "pl": {
           "source_hash": "a86e0a8b88711283623c64d053fadf8959feb198db4504f402d87bf6eb9dbc67",
-          "target_hash": "3a7b2e0bc83c41c15a0a0397a9ac4efe848579346d88d94f6e44195541b90714",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "09e0b3ce8f29e16f92df7db181538c761ec4583d26ddab65e67fac6a27d20cdb",
+          "section_hashes": [
+            "dce12939b182",
+            "9d9fbf269685",
+            "7c3d7b27e8c5",
+            "78500f44709b",
+            "9994a3224801",
+            "3f6a293a84df",
+            "621f99258f99",
+            "9c18a09154ae",
+            "d1071fec39fd"
+          ],
+          "updated_at": "2026-10-02T05:25:53.220Z"
         },
         "ar": {
           "source_hash": "a86e0a8b88711283623c64d053fadf8959feb198db4504f402d87bf6eb9dbc67",

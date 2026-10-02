@@ -271,13 +271,11 @@ export function detectTestKind(modelStr: string, customModel: any, nodeApiType?:
   // "All AI backends exhausted for chat".
   const nodeType = typeof nodeApiType === "string" ? nodeApiType : "";
   const lowerModel = modelStr.toLowerCase();
+  // Only the model's own endpoint metadata counts as an explicit chat signal. The node
+  // apiType / apiFormat are fallbacks and must not override per-model detection or the
+  // name heuristics below (an embedding model can live on a chat-typed node).
   const isExplicitChat =
-    apiFormat === "chat-completions" ||
-    apiFormat === "responses" ||
-    nodeType === "chat" ||
-    nodeType === "responses" ||
-    supportedEndpoints.includes("chat") ||
-    supportedEndpoints.includes("responses");
+    supportedEndpoints.includes("chat") || supportedEndpoints.includes("responses");
   const isAudioTranscription =
     !isExplicitChat &&
     (apiFormat === "audio-transcriptions" ||

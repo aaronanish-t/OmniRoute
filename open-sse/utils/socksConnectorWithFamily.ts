@@ -99,6 +99,9 @@ export function createSocksDispatcherWithFamily(
   };
   return new Agent({
     ...rest,
+    // Undici 8 negotiates HTTP/2 by default; its h2 client over SOCKS reset streams
+    // (ERR_HTTP2_STREAM_ERROR) and emitted listener-less stream errors that crashed the process.
+    allowH2: false,
     connect: socksConnectorWithFamily(proxy, family, connect, connectTimeout),
   });
 }

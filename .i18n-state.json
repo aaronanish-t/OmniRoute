@@ -61665,8 +61665,19 @@
       "locales": {
         "pl": {
           "source_hash": "ee65b3f0ec8185f56eb4a73c32d4fd54330ae340430fdb7783790c73b8937492",
-          "target_hash": "1df32ebf5851fa5ad0e195b5d4a3f6623e70e7fef3312eee709a09aecdd5cef5",
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "target_hash": "90841cfcda8ba835e7cf049bb0096a5949d4d6360b9003d9b08d1be84a7658ed",
+          "section_hashes": [
+            "b5c5133871df",
+            "0cf13963d8c6",
+            "d8e764ac6492",
+            "a873df269934",
+            "dea0690f5551",
+            "c4090193a0c8",
+            "6e74bb58bf03",
+            "477a489925d4",
+            "21bab737a900"
+          ],
+          "updated_at": "2026-10-02T05:44:15.941Z"
         },
         "ar": {
           "source_hash": "ee65b3f0ec8185f56eb4a73c32d4fd54330ae340430fdb7783790c73b8937492",

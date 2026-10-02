@@ -998,16 +998,19 @@ async function startMitmServer() {
     console.log(`🚀 MITM ready on :${LOCAL_PORT} → ${ROUTER_URL}`);
   });
 
+  const sockets = new Set();
   server.on("connection", (socket) => {
     // Guard against double-counting: a CONNECT "target" tunnel re-emits an
     // already-counted socket into the TLS layer via emit("connection") above.
     if (socket.__mitmCounted) return;
     socket.__mitmCounted = true;
+    sockets.add(socket);
     // Reap idle sockets so hung connections cannot exhaust fds (Gap 10).
     socket.setTimeout(MITM_IDLE_TIMEOUT_MS, () => socket.destroy());
     stats.activeConnections++;
     writeStats();
     socket.on("close", () => {
+      sockets.delete(socket);
       stats.activeConnections = Math.max(0, stats.activeConnections - 1);
       writeStats();
     });
@@ -1024,12 +1027,25 @@ async function startMitmServer() {
     process.exit(1);
   });
 
-  process.on("SIGTERM", () => {
-    server.close(() => process.exit(0));
-  });
-  process.on("SIGINT", () => {
-    server.close(() => process.exit(0));
-  });
+  let stopping = false;
+  const shutdown = () => {
+    if (stopping) return;
+    stopping = true;
+    // Incomplete TLS handshakes and CONNECT tunnels can retain a live PID
+    // after the listening socket closes, blocking recovery after a restart.
+    const deadline = setTimeout(() => {
+      for (const socket of sockets) socket.destroy();
+      process.exit(0);
+    }, 1000);
+    deadline.unref();
+    server.close(() => {
+      clearTimeout(deadline);
+      process.exit(0);
+    });
+    server.closeIdleConnections?.();
+  };
+  process.once("SIGTERM", shutdown);
+  process.once("SIGINT", shutdown);
 }
 
 startMitmServer().catch((err) => {

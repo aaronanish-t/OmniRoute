@@ -322,4 +322,27 @@ test("native messages retain protocol, compressed bodies, status and selected ho
       targetAgent: "claude-code",
     });
   });
+  await t.test("shutdown exits with an unfinished TLS client connection", async () => {
+    const socket = net.connect(port, "127.0.0.1");
+    socket.on("error", () => {});
+    await new Promise<void>((resolve) => socket.once("connect", resolve));
+    // An incomplete ClientHello remains outside closeIdleConnections().
+    socket.write(Buffer.from([22, 3, 3, 0, 255]));
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    const exited = new Promise<void>((resolve) => child.once("exit", () => resolve()));
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    child.kill("SIGTERM");
+    try {
+      await Promise.race([
+        exited,
+        new Promise<void>((_, reject) => {
+          timer = setTimeout(() => reject(new Error("Bridge shutdown retained a live PID")), 2000);
+        }),
+      ]);
+      assert.equal(child.exitCode, 0);
+    } finally {
+      clearTimeout(timer);
+      socket.destroy();
+    }
+  });
 });

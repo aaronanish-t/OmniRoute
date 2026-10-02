@@ -55,6 +55,11 @@ test("native Bridge survives concurrency, cancellation and broken upstream respo
     for await (const chunk of req) raw += chunk;
     const body = JSON.parse(raw);
     const mode = body.messages[0].content;
+    if (req.url === "/v1/messages/count_tokens?beta=true") {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ input_tokens: 123 }));
+      return;
+    }
     if (mode === "cancel") {
       res.writeHead(200, { "content-type": "text/event-stream" });
       res.write("event: message_start\ndata: {}\n\n");
@@ -217,7 +222,7 @@ test("native Bridge survives concurrency, cancellation and broken upstream respo
           servername: "api.anthropic.com",
           ca,
           path: pathname,
-          method: pathname === "/v1/messages" ? "POST" : "GET",
+          method: pathname.startsWith("/v1/messages") ? "POST" : "GET",
           headers: { host: "api.anthropic.com", authorization: "Bearer native-fixture-token" },
           timeout: 5000,
         },
@@ -251,7 +256,7 @@ test("native Bridge survives concurrency, cancellation and broken upstream respo
       req.on("timeout", () => req.destroy(new Error("Fixture request timeout")));
       req.on("error", reject);
       req.end(
-        pathname === "/v1/messages"
+        pathname.startsWith("/v1/messages")
           ? JSON.stringify({
               model,
               max_tokens: 32,
@@ -278,6 +283,11 @@ test("native Bridge survives concurrency, cancellation and broken upstream respo
       assert.match(res.body.toString(), /event: message_stop/);
       assert.match(res.body.toString(), new RegExp(`\"marker\":\"stream-${i}\"`));
     });
+  });
+  await t.test("native token counting keeps its own endpoint and query", async () => {
+    const res = await request("token-count", "/v1/messages/count_tokens?beta=true");
+    assert.equal(res.status, 200);
+    assert.deepEqual(JSON.parse(res.body.toString()), { input_tokens: 123 });
   });
   await t.test("upstream error statuses and retry metadata survive", async () => {
     for (const status of [400, 401, 403, 429, 500, 502, 503, 529]) {

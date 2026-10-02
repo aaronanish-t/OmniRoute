@@ -607,8 +607,12 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
     let reader = null;
     try {
       const forwardUrl = new URL(forward.url);
-      if (agentId === "claude-code")
-        forwardUrl.search = new URL(req.url, "https://api.anthropic.com").search;
+      if (agentId === "claude-code") {
+        const nativeUrl = new URL(req.url, "https://api.anthropic.com");
+        if (nativeUrl.pathname === "/v1/messages/count_tokens")
+          forwardUrl.pathname = nativeUrl.pathname;
+        forwardUrl.search = nativeUrl.search;
+      }
       const retainedHeaders = {};
       const excludedHeaders = new Set([
         "host",

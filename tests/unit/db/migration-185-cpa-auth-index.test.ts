@@ -55,29 +55,37 @@ function openDb(withColumn: boolean): Database.Database {
   return db;
 }
 
-test("an older usage_history gains cpa_auth_index and a second run is a no-op", { skip: skipReason }, () => {
-  const db = openDb(false);
-  try {
-    assert.equal(runMigrations(db, { isNewDb: true }), 1);
-    assert.ok(columns(db).includes("cpa_auth_index"));
-    assert.equal(runMigrations(db, { isNewDb: true }), 0);
-    assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
-      { version: "185", name: "usage_history_cpa_auth_index" },
-    ]);
-  } finally {
-    db.close();
+test(
+  "an older usage_history gains cpa_auth_index and a second run is a no-op",
+  { skip: skipReason },
+  () => {
+    const db = openDb(false);
+    try {
+      assert.equal(runMigrations(db, { isNewDb: true }), 1);
+      assert.ok(columns(db).includes("cpa_auth_index"));
+      assert.equal(runMigrations(db, { isNewDb: true }), 0);
+      assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
+        { version: "185", name: "usage_history_cpa_auth_index" },
+      ]);
+    } finally {
+      db.close();
+    }
   }
-});
+);
 
-test("a database that already has cpa_auth_index still records migration 185", { skip: skipReason }, () => {
-  const db = openDb(true);
-  try {
-    assert.equal(runMigrations(db, { isNewDb: true }), 1);
-    assert.equal(columns(db).filter((name) => name === "cpa_auth_index").length, 1);
-    assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
-      { version: "185", name: "usage_history_cpa_auth_index" },
-    ]);
-  } finally {
-    db.close();
+test(
+  "a database that already has cpa_auth_index still records migration 185",
+  { skip: skipReason },
+  () => {
+    const db = openDb(true);
+    try {
+      assert.equal(runMigrations(db, { isNewDb: true }), 1);
+      assert.equal(columns(db).filter((name) => name === "cpa_auth_index").length, 1);
+      assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
+        { version: "185", name: "usage_history_cpa_auth_index" },
+      ]);
+    } finally {
+      db.close();
+    }
   }
-});
+);

@@ -135,24 +135,28 @@ test("CASE A — a managed key's budget and history survive repair", { skip: ski
   }
 });
 
-test("CASE B — the synthetic env key's budget and history survive repair", { skip: skipReason }, () => {
-  const h = makeHarness({
-    budgets: [SYNTHETIC_ENV_API_KEY_ID],
-    history: [SYNTHETIC_ENV_API_KEY_ID],
-  });
-  try {
-    const result = h.run();
-    assert.deepEqual(h.budgetIds(), [SYNTHETIC_ENV_API_KEY_ID]);
-    assert.deepEqual(h.historyIds(), [SYNTHETIC_ENV_API_KEY_ID]);
-    assert.equal(
-      result.issues.filter((i) => i.type === "broken_reference").length,
-      0,
-      "a synthetic owner must not even be reported as a broken reference"
-    );
-  } finally {
-    h.cleanup();
+test(
+  "CASE B — the synthetic env key's budget and history survive repair",
+  { skip: skipReason },
+  () => {
+    const h = makeHarness({
+      budgets: [SYNTHETIC_ENV_API_KEY_ID],
+      history: [SYNTHETIC_ENV_API_KEY_ID],
+    });
+    try {
+      const result = h.run();
+      assert.deepEqual(h.budgetIds(), [SYNTHETIC_ENV_API_KEY_ID]);
+      assert.deepEqual(h.historyIds(), [SYNTHETIC_ENV_API_KEY_ID]);
+      assert.equal(
+        result.issues.filter((i) => i.type === "broken_reference").length,
+        0,
+        "a synthetic owner must not even be reported as a broken reference"
+      );
+    } finally {
+      h.cleanup();
+    }
   }
-});
+);
 
 test("CASE C — a genuine orphan is still removed", { skip: skipReason }, () => {
   const h = makeHarness({ budgets: [REAL_ORPHAN_ID], history: [REAL_ORPHAN_ID] });

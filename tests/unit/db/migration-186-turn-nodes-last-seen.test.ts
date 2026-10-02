@@ -68,19 +68,23 @@ function indexes(db: Database.Database): string[] {
   ).map((row) => row.name);
 }
 
-test("migration 186 creates idx_turn_nodes_last_seen and a second run is a no-op", { skip: skipReason }, () => {
-  const db = openDb();
-  try {
-    assert.equal(runMigrations(db, { isNewDb: true }), 1);
-    assert.ok(indexes(db).includes("idx_turn_nodes_last_seen"));
-    assert.equal(runMigrations(db, { isNewDb: true }), 0);
-    assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
-      { version: "186", name: "conversation_turn_nodes_last_seen_index" },
-    ]);
-  } finally {
-    db.close();
+test(
+  "migration 186 creates idx_turn_nodes_last_seen and a second run is a no-op",
+  { skip: skipReason },
+  () => {
+    const db = openDb();
+    try {
+      assert.equal(runMigrations(db, { isNewDb: true }), 1);
+      assert.ok(indexes(db).includes("idx_turn_nodes_last_seen"));
+      assert.equal(runMigrations(db, { isNewDb: true }), 0);
+      assert.deepEqual(db.prepare("SELECT version, name FROM _omniroute_migrations").all(), [
+        { version: "186", name: "conversation_turn_nodes_last_seen_index" },
+      ]);
+    } finally {
+      db.close();
+    }
   }
-});
+);
 
 test("the retention predicate uses the index (no full scan)", { skip: skipReason }, () => {
   const db = openDb();

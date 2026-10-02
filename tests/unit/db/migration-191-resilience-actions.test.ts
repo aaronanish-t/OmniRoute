@@ -55,17 +55,21 @@ function openDb(withColumn: boolean): Database.Database {
   return db;
 }
 
-test("an older call_logs gains resilience_actions and a second run is a no-op", { skip: skipReason }, () => {
-  const db = openDb(false);
-  try {
-    runMigrations(db);
-    assert.ok(columns(db).includes("resilience_actions"));
-    runMigrations(db);
-    assert.ok(columns(db).includes("resilience_actions"));
-  } finally {
-    db.close();
+test(
+  "an older call_logs gains resilience_actions and a second run is a no-op",
+  { skip: skipReason },
+  () => {
+    const db = openDb(false);
+    try {
+      runMigrations(db);
+      assert.ok(columns(db).includes("resilience_actions"));
+      runMigrations(db);
+      assert.ok(columns(db).includes("resilience_actions"));
+    } finally {
+      db.close();
+    }
   }
-});
+);
 
 test("a fresh call_logs keeps its column and stays idempotent", { skip: skipReason }, () => {
   const db = openDb(true);

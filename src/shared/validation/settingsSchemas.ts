@@ -239,6 +239,12 @@ export const updateSettingsSchema = z.object({
     .nullable()
     .optional(),
   comboConfigMode: z.enum(COMBO_CONFIG_MODES).optional(),
+  // Opt-in combo sticky promote (#4852). Stored/read by getSettings + autoPromote.ts,
+  // but was never listed here — Zod silently strips unknown keys on PATCH /api/settings,
+  // so clients got HTTP 200 while comboAutoPromoteEnabled never persisted (same class of
+  // bug as hideAutoCombos in #13562 / #13800). Without this, operators cannot turn the
+  // flag off via API once it is true, and priority combos keep promoting last-success to #1.
+  comboAutoPromoteEnabled: z.boolean().optional(),
   codexServiceTier: z
     .object({
       enabled: z.boolean().optional(),

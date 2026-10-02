@@ -8,6 +8,7 @@ import {
 } from "@/shared/validation/compressionConfigSchemas";
 import {
   aggressiveEngine,
+  liteEngine,
   ultraEngine,
 } from "@omniroute/open-sse/services/compression/engines/cavemanAdapter.ts";
 import {
@@ -19,7 +20,7 @@ type Settings = Record<string, unknown>;
 
 // The same fields GET /api/compression/engines returns, taken from the real engines.
 const ENGINES = {
-  engines: [aggressiveEngine, ultraEngine].map((engine) => ({
+  engines: [aggressiveEngine, ultraEngine, liteEngine].map((engine) => ({
     id: engine.id,
     name: engine.name,
     description: engine.description,
@@ -31,14 +32,26 @@ const ENGINES = {
   })),
 };
 
+// Lite rows merge with the stored row, as mergeLiteSettingsForWrite does: an omitted cap stays,
+// and a null cap is cleared.
+function mergeLite(existing: unknown, incoming: Settings): Settings {
+  const merged: Settings = { ...(existing as Settings), ...incoming };
+  if (merged.maxToolLength === null) delete merged.maxToolLength;
+  return merged;
+}
+
 // Stands in for /api/settings/compression. A PUT is checked against the real update schema,
 // and each key in its body replaces the stored sub-object whole, as updateCompressionSettings
-// does. `readsFail` makes later GETs fail. A preview's config is checked against the preview
+// does, except lite, which merges. `readsFail` makes GETs fail. `loseNextResponse` applies the
+// next PUT and then fails the request, as a dropped connection would. `holdWrites` keeps PUTs
+// waiting until the returned function runs. A preview's config is checked against the preview
 // route's schema.
 function startServer(initial: Settings) {
   let stored: Settings = JSON.parse(JSON.stringify(initial));
+  let held: Promise<void> | null = null;
   const server = {
     readsFail: false,
+    loseNextResponse: false,
     puts: [] as { body: Settings; status: number }[],
     previews: [] as { config: unknown; status: number }[],
     get stored() {
@@ -47,6 +60,16 @@ function startServer(initial: Settings) {
     // A save made on another page, such as the compression settings tab.
     write(patch: Settings) {
       stored = { ...stored, ...patch };
+    },
+    holdWrites() {
+      let release = () => {};
+      held = new Promise((resolve) => {
+        release = () => {
+          held = null;
+          resolve();
+        };
+      });
+      return release;
     },
   };
   const respond = (data: unknown, status = 200) =>
@@ -70,7 +93,14 @@ function startServer(initial: Settings) {
         const parsed = compressionSettingsUpdateSchema.safeParse(body);
         server.puts.push({ body, status: parsed.success ? 200 : 400 });
         if (!parsed.success) return respond({ error: "Invalid request" }, 400);
-        stored = { ...stored, ...parsed.data };
+        if (held) await held;
+        const { lite, ...rest } = parsed.data as Settings;
+        stored = { ...stored, ...rest };
+        if (lite) stored.lite = mergeLite(stored.lite, lite as Settings);
+        if (server.loseNextResponse) {
+          server.loseNextResponse = false;
+          throw new TypeError("Failed to fetch");
+        }
         return respond(stored);
       }
       if (pathname === "/api/compression/preview") {
@@ -210,6 +240,91 @@ describe("EngineConfigPage saves only what the operator changed", () => {
       maxTokensPerMessage: 1024,
       minSavingsThreshold: 0.2,
     });
+  });
+
+  it("shows the stored values after a save, so a value typed back afterwards is sent", async () => {
+    const server = startServer({ aggressive: DEFAULT_AGGRESSIVE_CONFIG });
+    await renderPage("aggressive");
+    // Another page changes a field this page shows, after it loaded.
+    server.write({ aggressive: { ...DEFAULT_AGGRESSIVE_CONFIG, maxTokensPerMessage: 1024 } });
+
+    fireEvent.change(inputFor("Minimum savings threshold"), { target: { value: "0.2" } });
+    await save();
+
+    expect(inputFor("Maximum tokens per message").value).toBe("1024");
+
+    fireEvent.change(inputFor("Maximum tokens per message"), {
+      target: { value: String(DEFAULT_AGGRESSIVE_CONFIG.maxTokensPerMessage) },
+    });
+    await save();
+
+    expect(server.stored.aggressive).toEqual({
+      ...DEFAULT_AGGRESSIVE_CONFIG,
+      minSavingsThreshold: 0.2,
+    });
+  });
+
+  it("sends a field again after a save whose response was lost", async () => {
+    const server = startServer({ ultra: DEFAULT_ULTRA_CONFIG });
+    await renderPage("ultra");
+
+    // The server applies the write, but the response never arrives.
+    server.loseNextResponse = true;
+    fireEvent.change(inputFor("Compression rate"), { target: { value: "0.4" } });
+    await save();
+    expect(screen.getByText("Failed to save configuration.")).toBeTruthy();
+    expect((server.stored.ultra as Settings).compressionRate).toBe(0.4);
+
+    // The operator puts the loaded value back and saves again.
+    fireEvent.change(inputFor("Compression rate"), {
+      target: { value: String(DEFAULT_ULTRA_CONFIG.compressionRate) },
+    });
+    await save();
+
+    expect(server.puts.at(-1)?.status).toBe(200);
+    expect(server.stored.ultra).toEqual(DEFAULT_ULTRA_CONFIG);
+  });
+
+  it("keeps an edit typed while a save is in flight", async () => {
+    const server = startServer({ aggressive: DEFAULT_AGGRESSIVE_CONFIG });
+    await renderPage("aggressive");
+    const release = server.holdWrites();
+
+    fireEvent.change(inputFor("Maximum tokens per message"), { target: { value: "4096" } });
+    await save();
+    fireEvent.change(inputFor("Minimum savings threshold"), { target: { value: "0.2" } });
+    release();
+    await settle();
+
+    expect(inputFor("Minimum savings threshold").value).toBe("0.2");
+    await save();
+
+    expect(server.stored.aggressive).toEqual({
+      ...DEFAULT_AGGRESSIVE_CONFIG,
+      maxTokensPerMessage: 4096,
+      minSavingsThreshold: 0.2,
+    });
+  });
+
+  it("keeps the Lite switch another page changed when this page edits the cap", async () => {
+    const server = startServer({ lite: { compressToolResults: true, maxToolLength: 8000 } });
+    await renderPage("lite");
+    server.write({ lite: { compressToolResults: false, maxToolLength: 8000 } });
+
+    fireEvent.change(inputFor("Maximum tool-result length"), { target: { value: "9000" } });
+    await save();
+
+    expect(server.puts.at(-1)?.status).toBe(200);
+    expect(server.stored.lite).toEqual({ compressToolResults: false, maxToolLength: 9000 });
+  });
+
+  it("turns Save off when the stored settings cannot be loaded", async () => {
+    const server = startServer({ aggressive: DEFAULT_AGGRESSIVE_CONFIG });
+    server.readsFail = true;
+    await renderPage("aggressive");
+
+    expect(screen.getByText("Failed to load engine information.")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("previews the Ultra engine on a default install that has no model path", async () => {

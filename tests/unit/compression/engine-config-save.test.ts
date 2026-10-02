@@ -13,10 +13,15 @@ const { getCompressionSettings, updateCompressionSettings } =
   await import("../../../src/lib/db/compression.ts");
 const { compressionPreviewConfigSchema, compressionSettingsUpdateSchema } =
   await import("../../../src/shared/validation/compressionConfigSchemas.ts");
-const { aggressiveEngine, ultraEngine } =
+const { aggressiveEngine, liteEngine, ultraEngine } =
   await import("../../../open-sse/services/compression/engines/cavemanAdapter.ts");
-const { seedEngineForm, buildEngineDetailUpdate, withoutEmptyText } =
-  await import("../../../src/shared/components/compression/engineConfigSave.ts");
+const {
+  seedEngineForm,
+  buildEngineDetailUpdate,
+  formAfterSave,
+  forgetSentEdits,
+  withoutEmptyText,
+} = await import("../../../src/shared/components/compression/engineConfigSave.ts");
 
 type Settings = Record<string, unknown>;
 type Engine = typeof aggressiveEngine;
@@ -61,7 +66,7 @@ async function pageSave(
   const loaded = seedEngineForm(engine.id, engine.getConfigSchema(), loadedSettings[subKey]);
   const current = await readSettings();
   return put({
-    [subKey]: buildEngineDetailUpdate(loaded, { ...loaded, ...edits }, current[subKey]),
+    [subKey]: buildEngineDetailUpdate(engine.id, loaded, { ...loaded, ...edits }, current[subKey]),
   });
 }
 
@@ -149,9 +154,123 @@ describe("engine config page save", () => {
     );
 
     assert.deepEqual(
-      buildEngineDetailUpdate(loaded, loaded, settings.aggressive),
+      buildEngineDetailUpdate(aggressiveEngine.id, loaded, loaded, settings.aggressive),
       settings.aggressive
     );
+  });
+
+  it("keeps the lite switch another page changed when the lite page edits the cap", async () => {
+    assert.equal(await put({ lite: { compressToolResults: true, maxToolLength: 8000 } }), 200);
+    const loadedSettings = await readSettings();
+    assert.equal(await put({ lite: { compressToolResults: false } }), 200);
+
+    const status = await pageSave(liteEngine, "lite", loadedSettings, { maxToolLength: 9000 });
+
+    assert.equal(status, 200);
+    assert.deepEqual((await readSettings()).lite, {
+      compressToolResults: false,
+      maxToolLength: 9000,
+    });
+  });
+
+  it("clears the stored lite cap when the cap input is emptied", async () => {
+    assert.equal(await put({ lite: { compressToolResults: true, maxToolLength: 8000 } }), 200);
+    const loadedSettings = await readSettings();
+
+    // A cleared number input holds NaN.
+    const status = await pageSave(liteEngine, "lite", loadedSettings, {
+      maxToolLength: Number.NaN,
+    });
+
+    assert.equal(status, 200);
+    assert.deepEqual((await readSettings()).lite, { compressToolResults: true });
+  });
+
+  it("leaves the lite cap unset when the lite page saves the switch", async () => {
+    const loadedSettings = await readSettings();
+    const form = seedEngineForm(liteEngine.id, liteEngine.getConfigSchema(), loadedSettings.lite);
+    assert.equal("maxToolLength" in form, false);
+
+    const status = await pageSave(liteEngine, "lite", loadedSettings, {
+      compressToolResults: false,
+    });
+
+    assert.equal(status, 200);
+    assert.deepEqual((await readSettings()).lite, { compressToolResults: false });
+  });
+
+  it("sends a field again after a save whose response was lost", async () => {
+    const loadedSettings = await readSettings();
+    const loaded = seedEngineForm(
+      ultraEngine.id,
+      ultraEngine.getConfigSchema(),
+      loadedSettings.ultra
+    );
+    const sent = { ...loaded, compressionRate: 0.4 };
+    // The server applies this save, but the response is lost, so the page reports a failure.
+    const current = (await readSettings()).ultra;
+    assert.equal(
+      await put({ ultra: buildEngineDetailUpdate(ultraEngine.id, loaded, sent, current) }),
+      200
+    );
+    const baseline = forgetSentEdits(loaded, sent);
+
+    // The operator puts the loaded value back and saves again.
+    const restored = { ...sent, compressionRate: loaded.compressionRate };
+    const afterLostSave = (await readSettings()).ultra;
+    assert.equal(
+      await put({
+        ultra: buildEngineDetailUpdate(ultraEngine.id, baseline, restored, afterLostSave),
+      }),
+      200
+    );
+
+    assert.deepEqual((await readSettings()).ultra, loadedSettings.ultra);
+  });
+
+  it("shows another page's value after a save, so typing the loaded value back sends it", async () => {
+    const loadedSettings = await readSettings();
+    const schema = ultraEngine.getConfigSchema();
+    const loaded = seedEngineForm(ultraEngine.id, schema, loadedSettings.ultra);
+    assert.equal(
+      await put({ ultra: { ...(loadedSettings.ultra as Settings), compressionRate: 0.9 } }),
+      200
+    );
+
+    // The page saves a different field. The PUT response is the settings read after the write.
+    const sent = { ...loaded, minScoreThreshold: 0.6 };
+    const current = (await readSettings()).ultra;
+    assert.equal(
+      await put({ ultra: buildEngineDetailUpdate(ultraEngine.id, loaded, sent, current) }),
+      200
+    );
+    const written = seedEngineForm(ultraEngine.id, schema, (await readSettings()).ultra);
+    const shown = formAfterSave(written, sent, sent);
+    assert.equal(shown.compressionRate, 0.9);
+
+    const retyped = { ...shown, compressionRate: loaded.compressionRate };
+    const afterSave = (await readSettings()).ultra;
+    assert.equal(
+      await put({ ultra: buildEngineDetailUpdate(ultraEngine.id, written, retyped, afterSave) }),
+      200
+    );
+
+    assert.deepEqual((await readSettings()).ultra, {
+      ...(loadedSettings.ultra as Settings),
+      minScoreThreshold: 0.6,
+    });
+  });
+
+  it("keeps an edit typed while a save was in flight", () => {
+    const sent = { compressionRate: 0.4, modelPath: "" };
+    const now = { compressionRate: 0.4, modelPath: "/models/ultra" };
+    const written = { compressionRate: 0.4, modelPath: "", enabled: true };
+
+    assert.deepEqual(formAfterSave(written, sent, now), {
+      compressionRate: 0.4,
+      modelPath: "/models/ultra",
+      enabled: true,
+    });
   });
 
   it("builds an ultra preview config that the preview schema accepts on a default install", async () => {

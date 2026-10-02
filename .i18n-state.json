@@ -4205,7 +4205,7 @@
         },
         "bs": {
           "source_hash": "66fac7b0f9f34ac357594dd3c394616281d5c0cb31ffaf96d2722ea277a3971d",
-          "target_hash": "5cb7c099bdd8b359d4c17ad04d871463c7ffa352c2d8658f484f2d22bd981244",
+          "target_hash": "8bbebf381e421c582665258b0be61da0a5e7e80156267dfe457a2fa267b9456c",
           "section_hashes": [
             "8b7d0d2d9f1b",
             "53a1fdad5161",
@@ -4218,7 +4218,7 @@
             "62b1ad888029",
             "9ddd813b41e7"
           ],
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "updated_at": "2026-10-02T05:03:20.355Z"
         }
       }
     },

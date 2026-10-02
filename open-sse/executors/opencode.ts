@@ -5,7 +5,7 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
-import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
+import { getModelTargetFormat, stripOpencodeModelPrefix } from "../config/providerModels.ts";
 import {
   injectReasoningContentForThinkingModel,
   isThinkingMessageModel,
@@ -32,12 +32,9 @@ import {
   resolveOpencodeCliDefaults,
 } from "../utils/opencodeHeaders.ts";
 import { projectOpencodeSessionBody } from "../utils/opencodeSessionIdentity.ts";
-import {
-  listForRequest,
-  releaseRequestList,
-  type ScopedAccount,
-  type ScopedAccountHealth,
-} from "./opencodeAccountScope.ts";
+import { listForRequest, releaseRequestList } from "./opencodeAccountScope.ts";
+import type { ScopedAccount, ScopedAccountHealth } from "./opencodeAccountScope.ts";
+import { guardRequiredAccountProxies } from "./opencodeRequiredProxy.ts";
 import {
   type AccountProxyConfig,
   type RotationAccountSnapshot,
@@ -89,7 +86,7 @@ export { isPremiumOpencodeModel };
 import {
   guardResponsesStall,
   isResponsesFirstByteTimeout,
-  resolveResponsesStallWindowMs,
+  setupStallGuard,
 } from "./opencodeResponsesStall.ts";
 import { discardResponseBody } from "./opencodeResponseBody.ts";
 import { headersWaitDispatch, headersWaitState } from "./opencodeHeadersWait.ts";
@@ -202,8 +199,7 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
  * Exported for testability.
  */
 export function resolveOpencodeTargetFormat(provider: string, model: string): string {
-  const alias = PROVIDER_ID_TO_ALIAS[provider] || provider;
-  return getModelTargetFormat(alias, model) || "openai";
+  return getModelTargetFormat(provider, model) || "openai";
 }
 
 export {
@@ -446,8 +442,7 @@ export class OpencodeExecutor extends BaseExecutor {
               if (isResponsesTerminalLine(line)) {
                 // OpenCode Zen sends a ping after response.completed and may keep
                 // the HTTP connection alive. The Responses terminal event is
-                // authoritative; do not let those post-completion pings hold Chat
-                // Completions open.
+                // authoritative; do not let those post-completion pings hold Chat Completions open.
                 closed = true;
                 void reader.cancel().catch(() => undefined);
                 controller.close();
@@ -543,6 +538,8 @@ export class OpencodeExecutor extends BaseExecutor {
       // empty when absent (never n/a/none/fabricated). The existing motif
       // stays byte-identical after the prefix.
       const cid = input.correlationId ? `correlationId=${input.correlationId} ` : "";
+      const proxyGuard = guardRequiredAccountProxies(input.credentials, accounts, log, cid);
+      if (proxyGuard) return proxyGuard;
       // Rotation attribution diagnostics (single flag read per request — the DB
       // override lookup is synchronous SQLite, never in the attempt loop).
       const attributionOn = isRotationAttributionEnabled();
@@ -563,8 +560,8 @@ export class OpencodeExecutor extends BaseExecutor {
       const skippedCooldown = new Map<string, number>();
 
       const hasProxies = accounts.some((a) => a.proxy !== null);
-      // Opt-in Responses first-byte stall guard (#13484); a no-op when the window is 0.
-      const stallWindowMs = resolveResponsesStallWindowMs(input.stream, this._requestFormat);
+      // Opt-in Responses first-byte stall guard; 0 = no-op.
+      const stallWindowMs = setupStallGuard(input.stream, this._requestFormat, log, cid).windowMs;
       const guardStall = <T>(r: T) => guardResponsesStall(r, stallWindowMs, input.signal);
       const headersWait = headersWaitState(
         input,
@@ -865,6 +862,7 @@ export class OpencodeExecutor extends BaseExecutor {
               stalled: headersWait.spent,
               cooldown: markCooldown,
               markDirect: () => (directTried = true),
+              slow: { account, enabled: skipRecentlyFailed, read: readAppliedKey },
             }); // same settle as the stall arm
             log?.warn?.(
               "OPENCODE",
@@ -1419,6 +1417,7 @@ export class OpencodeExecutor extends BaseExecutor {
     }
     if (modifiedBody && typeof modifiedBody === "object" && !Array.isArray(modifiedBody)) {
       const mb = modifiedBody as Record<string, unknown>;
+      mb.model = stripOpencodeModelPrefix(mb.model); // see providerModels.ts
       // OpenCode accepts stream_options only on streaming Chat Completions (#13699).
       const format = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
       if (format !== "openai" || mb.stream !== true) {

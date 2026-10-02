@@ -642,18 +642,25 @@ async function handleKieAudioTranscription(providerConfig, file, modelId, token)
       typeof err === "object" && err !== null && "status" in err
         ? Number((err as { status?: unknown }).status) || 502
         : 502;
-    return Response.json(
-      {
-        error: {
-          message: err instanceof Error ? err.message : "Kie transcription createTask failed",
-          code: status,
-        },
-      },
-      {
-        status,
-        headers: { ...CORS_HEADERS },
-      }
+    // E-02 (#15159): the caught error is the RAW upstream body text —
+    // `kieExecutor.createTask` throws `new Error(await res.text())`
+    // (open-sse/executors/kie.ts:57-61) — so building the body by hand put
+    // upstream stack frames and credential-shaped substrings straight into the
+    // client response. Route it through the canonical builder instead; the
+    // sanitizing `errorResponse` is already imported by this file and the Kie
+    // poll path below already uses it.
+    //
+    // CORS headers are merged back on because this route only sets them on the
+    // OPTIONS preflight (src/app/api/v1/audio/transcriptions/route.ts:75-82),
+    // never on the POST response, so dropping them would break browser clients.
+    const response = errorResponse(
+      status,
+      err instanceof Error ? err.message : "Kie transcription createTask failed"
     );
+    for (const [header, value] of Object.entries(CORS_HEADERS)) {
+      response.headers.set(header, value);
+    }
+    return response;
   }
   const taskId = data?.data?.taskId || data?.taskId;
 

@@ -320,7 +320,9 @@ export default function CompressionPanel() {
   // that touch an engine pass the full engines map to avoid dropping the other engines.
   // Every save goes out at once. The server stores each save just before it answers, so a
   // confirmed save applies its fields whatever its age, and a failed save drops out of the
-  // saves in flight, which rolls back only its own fields. "Save failed" shows from the first
+  // saves in flight, which rolls back only its own fields. Two overlapping saves of one field
+  // can answer in a different order than the server stored them; the panel then shows the
+  // value that answered last until the page reloads. "Save failed" shows from the first
   // failure until a save starts with no other save in flight.
   const save = async (updates: Partial<CompressionConfig>) => {
     saveGenRef.current += 1;

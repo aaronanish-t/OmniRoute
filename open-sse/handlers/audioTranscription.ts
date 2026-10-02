@@ -1,4 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
+import { upstreamErrorResponse } from "../utils/audioResponse.ts";
 import { Buffer } from "node:buffer";
 /**
  * Audio Transcription Handler
@@ -34,34 +35,21 @@ type TranscriptionCredentials = {
 };
 
 /**
- * Return a CORS error response from an upstream fetch failure
+ * Return a CORS error response from an upstream fetch failure.
+ *
+ * #15159: re-exported from `open-sse/utils/audioResponse.ts` instead of being defined
+ * here a second time. Two identical helpers is how the raw upstream passthrough
+ * survived in BOTH files unnoticed while ~35 call sites depended on it; the single
+ * definition is what makes the next fix a one-place change.
+ *
+ * Re-exported rather than re-pointed at the importers so
+ * `open-sse/handlers/openrouterTranscription.ts`, which imports this path, keeps
+ * working unchanged.
+ *
+ * Imported AND re-exported: a bare `export … from` does not create a local binding, and
+ * the transcription providers below call `upstreamErrorResponse` by name.
  */
-export function upstreamErrorResponse(res, errText) {
-  // Always return JSON so the client can parse the error reliably
-  let errorMessage: string;
-  try {
-    const parsed = JSON.parse(errText);
-    // Guard against `parsed.error` or `parsed.detail` being objects
-    const raw =
-      parsed?.err_msg ||
-      parsed?.error?.message ||
-      (typeof parsed?.error === "string" ? parsed.error : null) ||
-      parsed?.message ||
-      (typeof parsed?.detail === "string" ? parsed.detail : parsed?.detail?.message) ||
-      null;
-    errorMessage = raw ? String(raw) : errText || `Upstream error (${res.status})`;
-  } catch {
-    errorMessage = errText || `Upstream error (${res.status})`;
-  }
-
-  return Response.json(
-    { error: { message: errorMessage, code: res.status } },
-    {
-      status: res.status,
-      headers: { ...CORS_HEADERS },
-    }
-  );
-}
+export { upstreamErrorResponse };
 
 /**
  * Validate a path segment to prevent path traversal / SSRF.

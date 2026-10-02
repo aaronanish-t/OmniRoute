@@ -5360,6 +5360,7 @@
     "modelsImported": "Đã nhập {count} mô hình",
     "allModelsAlreadyImported": "Tất cả mô hình đã được nhập",
     "noNewModelsToImport": "Không có mô hình mới để nhập — tất cả mô hình đã có trong sổ đăng ký hoặc danh sách mô hình tùy chỉnh",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Bỏ qua {count} mô hình đã tồn tại",
     "autoSync": "Tự động đồng bộ hóa",
     "autoSyncShort": "Đồng bộ",

@@ -5360,6 +5360,7 @@
     "modelsImported": "იმპორტირებულია {count} მოდელი",
     "allModelsAlreadyImported": "ყველა მოდელი უკვე იმპორტირებულია",
     "noNewModelsToImport": "იმპორტირებისთვის ახალი მოდელები არ არის — ყველა მოდელი უკვე რეესტრში ან მორგებული მოდელების სიაშია",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "გამოტოვებულია {count} არსებული მოდელი",
     "autoSync": "ავტომატური სინქრონიზაცია",
     "autoSyncShort": "სინქრონიზაცია",

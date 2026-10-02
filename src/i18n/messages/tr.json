@@ -5360,6 +5360,7 @@
     "modelsImported": "{count} model içe aktarıldı",
     "allModelsAlreadyImported": "Tüm modeller zaten içe aktarıldı",
     "noNewModelsToImport": "İçe aktarılacak yeni model yok — tüm modeller zaten kayıt defterinde veya özel modeller listesinde",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "{count} mevcut model atlanıyor",
     "autoSync": "Otomatik Senkronizasyon",
     "autoSyncShort": "Senkronize Et",

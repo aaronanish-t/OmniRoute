@@ -5360,6 +5360,7 @@
     "modelsImported": "Zaimportowano {count} models",
     "allModelsAlreadyImported": "Wszystkie models zostały już zaimportowane",
     "noNewModelsToImport": "Brak nowych models do zaimportowania — wszystkie models znajdują się już w rejestrze lub na liście niestandardowych models",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Pomijanie {count} istniejących models",
     "autoSync": "Automatyczna synchronizacja",
     "autoSyncShort": "Synchronizuj",

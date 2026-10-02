@@ -5360,6 +5360,7 @@
     "modelsImported": "Імпортовано моделей: {count}",
     "allModelsAlreadyImported": "Усі моделі вже імпортовано",
     "noNewModelsToImport": "Немає нових моделей для імпорту — усі моделі вже є в реєстрі або списку користувацьких моделей",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Пропуск {count} наявних моделей",
     "autoSync": "Автоматична синхронізація",
     "autoSyncShort": "Синхронізувати",

@@ -5360,6 +5360,7 @@
     "modelsImported": "{count} મોડલ આયાત કર્યાં",
     "allModelsAlreadyImported": "બધાં મોડલ પહેલેથી આયાત થયેલાં છે",
     "noNewModelsToImport": "આયાત કરવા માટે કોઈ નવાં મોડલ નથી — બધાં મોડલ પહેલેથી રજિસ્ટ્રી અથવા કસ્ટમ મોડલની સૂચિમાં છે",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "હાલનાં {count} મોડલ છોડી રહ્યાં છીએ",
     "autoSync": "ઑટો-સિંક",
     "autoSyncShort": "સિંક કરો",

@@ -5360,6 +5360,7 @@
     "modelsImported": "Iompórtáladh {count} múnla",
     "allModelsAlreadyImported": "Tá na múnlaí go léir iompórtáilte cheana",
     "noNewModelsToImport": "Níl aon mhúnla nua le hiompórtáil — tá na múnlaí go léir sa chlárlann nó ar liosta na múnlaí saincheaptha",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Ag scipeáil {count} múnla atá ann cheana",
     "autoSync": "Sioncronú Uathoibríoch",
     "autoSyncShort": "Sioncronaigh",

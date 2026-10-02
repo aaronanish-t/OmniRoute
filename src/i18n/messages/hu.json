@@ -5360,6 +5360,7 @@
     "modelsImported": "{count} modell importálva",
     "allModelsAlreadyImported": "Minden modell már importálva van",
     "noNewModelsToImport": "Nincs új modell az importáláshoz — minden modell már a nyilvántartásban vagy az egyéni modellek listájában van",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "{count} meglévő modell kihagyása",
     "autoSync": "Automatikus szinkronizálás",
     "autoSyncShort": "Szinkronizálás",

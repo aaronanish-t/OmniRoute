@@ -5360,6 +5360,7 @@
     "modelsImported": "Imporditud {count} mudelit",
     "allModelsAlreadyImported": "Kõik mudelid on juba imporditud",
     "noNewModelsToImport": "Uusi imporditavaid mudeleid pole — kõik mudelid on juba registris või kohandatud mudelite loendis",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "Jäetakse vahele {count} olemasolevat mudelit",
     "autoSync": "Automaatne sünkroonimine",
     "autoSyncShort": "Sünkrooni",

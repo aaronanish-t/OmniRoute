@@ -5360,6 +5360,7 @@
     "modelsImported": "تم استيراد {count} نموذج",
     "allModelsAlreadyImported": "جميع النماذج مستوردة بالفعل",
     "noNewModelsToImport": "لا توجد نماذج جديدة لاستيرادها — جميعها موجودة في السجل أو قائمة النماذج المخصصة",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "تخطي {count} نموذج موجود",
     "autoSync": "المزامنة التلقائية",
     "autoSyncShort": "المزامنة",

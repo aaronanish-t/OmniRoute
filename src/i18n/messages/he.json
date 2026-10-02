@@ -5360,6 +5360,7 @@
     "modelsImported": "יובאו {count} מודלים",
     "allModelsAlreadyImported": "כל הדגמים כבר מיובאים",
     "noNewModelsToImport": "אין דגמים חדשים לייבוא — כל הדגמים כבר קיימים ברישום או ברשימת הדגמים המותאמים",
+    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "skippingExistingModels": "מדלג על {count} דגמים קיימים",
     "autoSync": "סנכרון אוטומטי",
     "autoSyncShort": "סנכרון",

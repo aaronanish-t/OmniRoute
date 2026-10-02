@@ -1651,11 +1651,6 @@
       "count": 1
     }
   },
-  "src/lib/telegram/initData.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/lib/usage/apiKeySelfService.ts": {
     "no-restricted-syntax": {
       "count": 1
@@ -3042,11 +3037,6 @@
     }
   },
   "tests/unit/cli/alias-resolver-7791.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "tests/unit/cli/cli-manifest-drift.test.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     }

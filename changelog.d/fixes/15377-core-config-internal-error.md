@@ -1,0 +1,1 @@
+- **fix(proxy-subscription):** report an internal core config failure with its own reason instead of a write error ([#15377](https://github.com/diegosouzapw/OmniRoute/pull/15377)) — thanks @maxmad64bis

@@ -551,7 +551,7 @@ function mergeEnginesForWrite(
   const incoming = toRecord(value);
   const merged: JsonRecord = {};
   for (const id of ENGINE_IDS) {
-    merged[id] = Object.prototype.hasOwnProperty.call(incoming, id)
+    merged[id] = Object.hasOwn(incoming, id)
       ? { ...base[id], ...toRecord(incoming[id]) }
       : base[id];
   }

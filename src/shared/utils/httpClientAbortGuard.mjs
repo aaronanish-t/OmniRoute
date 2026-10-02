@@ -191,6 +191,7 @@ export function isUpstreamNetworkError(err) {
   if (e.name === "TypeError" && e.message === "fetch failed") return true;
   switch (e.code) {
     case "PROXY_UNREACHABLE":
+    case "PROXY_REQUEST_FAILED":
     case "UND_ERR_SOCKET":
     case "UND_ERR_CONNECT_TIMEOUT":
     case "UND_ERR_HEADERS_TIMEOUT":

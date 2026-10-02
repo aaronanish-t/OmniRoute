@@ -12,7 +12,7 @@ import {
 } from "../services/claudeCodeCompatible.ts";
 import { getGigachatAccessToken } from "../services/gigachatAuth.ts";
 import { getRegistryEntry, requireCompatibleBaseUrl } from "../config/providerRegistry.ts";
-import { getModelTargetFormat } from "../config/providerModels.ts";
+import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
 import {
   applyClientAnthropicBeta,
   normalizeAnthropicHeaderVariants,
@@ -461,7 +461,17 @@ export class DefaultExecutor extends BaseExecutor {
             : null;
         const isOpenAIFormat = !this.config.format || this.config.format === "openai";
         if (customBaseUrl && isOpenAIFormat) {
-          return normalizeOpenAIChatUrl(customBaseUrl);
+          // PROVIDER_MODELS is keyed by the public alias ("mc"), not the raw
+          // registry id — alias first (mirrors resolveChatCoreTargetFormat), so a
+          // responses-target model on a custom-base connection routes to
+          // /responses instead of carrying a Responses body to /chat/completions
+          // (Meta muse-code 400s with "unknown parameter `input`" there).
+          const alias = PROVIDER_ID_TO_ALIAS[this.provider] || this.provider;
+          const chatUrl = normalizeOpenAIChatUrl(customBaseUrl);
+          if (getModelTargetFormat(alias, model) === "openai-responses") {
+            return chatUrl.replace(/\/chat\/completions\/?$/, "/responses");
+          }
+          return chatUrl;
         }
         const url = this.config.baseUrl;
         const entry = getRegistryEntry(this.provider);

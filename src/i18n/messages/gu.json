@@ -6526,7 +6526,14 @@
     "savedModelEndpointSettings": "સાચવેલ મોડેલ અંતિમ બિંદુની સેટિંગ્સ",
     "searchByModelAria": "મોડલ દ્વારા શોધો",
     "selectSupportedEndpoint": "કમથી કમ એક સમર્થિત અંતિમ બિંદુ પસંદ કરો",
-    "antigravityClientProfileHarness": "હાર્નેસ / CLI"
+    "antigravityClientProfileHarness": "હાર્નેસ / CLI",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
   },
   "settings": {
     "title": "સેટિંગ્સ",
@@ -9795,7 +9802,11 @@
     "updatedShort": "અપડેટ કરેલ",
     "lastRefreshed": "છેલ્લે રિફ્રેશ કરેલ",
     "providerQuota": "પ્રદાતા ક્વોટા",
-    "providerQuotaHomeHint": "કનેક્ટેડ એકાઉન્ટ્સમાં લાઇવ સ્થિતિ"
+    "providerQuotaHomeHint": "કનેક્ટેડ એકાઉન્ટ્સમાં લાઇવ સ્થિતિ",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited"
   },
   "modals": {
     "waitingAuth": "અધિકૃતતાની રાહ જોઈ રહ્યું છે",

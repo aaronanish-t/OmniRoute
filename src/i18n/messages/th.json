@@ -6526,7 +6526,14 @@
     "savedModelEndpointSettings": "การตั้งค่า endpoint ของโมเดลที่บันทึกไว้",
     "searchByModelAria": "ค้นหาตามรุ่น",
     "selectSupportedEndpoint": "เลือกจุดสิ้นสุดที่รองรับอย่างน้อยหนึ่งจุด",
-    "antigravityClientProfileHarness": "Harness / CLI"
+    "antigravityClientProfileHarness": "Harness / CLI",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
   },
   "settings": {
     "title": "การตั้งค่า",
@@ -9795,7 +9802,11 @@
     "updatedShort": "อัปเดตแล้ว",
     "lastRefreshed": "รีเฟรชล่าสุดเมื่อ",
     "providerQuota": "โควตาผู้ให้บริการ",
-    "providerQuotaHomeHint": "สถานะแบบเรียลไทม์ของบัญชีที่เชื่อมต่อทั้งหมด"
+    "providerQuotaHomeHint": "สถานะแบบเรียลไทม์ของบัญชีที่เชื่อมต่อทั้งหมด",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited"
   },
   "modals": {
     "waitingAuth": "รอการอนุญาต",

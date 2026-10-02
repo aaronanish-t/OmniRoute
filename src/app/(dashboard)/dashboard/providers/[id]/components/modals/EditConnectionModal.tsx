@@ -157,6 +157,7 @@ export default function EditConnectionModal({
     cloudCodeProjectId: "",
     antigravityClientProfile: "ide",
     ...claudeConnectionFieldValues(provider, connectionProviderSpecificData),
+    allowPaidCredits: connectionProviderSpecificData?.allowPaidCredits === true,
     passthroughModels: connectionProviderSpecificData?.passthroughModels === true,
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
@@ -395,6 +396,7 @@ export default function EditConnectionModal({
           connection.providerSpecificData?.clientProfile
         ),
         ...claudeConnectionFieldValues(effectiveProvider, connection.providerSpecificData),
+        allowPaidCredits: connection.providerSpecificData?.allowPaidCredits === true,
         passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
         disableCooling: connection?.providerSpecificData?.disableCooling === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
@@ -695,6 +697,7 @@ export default function EditConnectionModal({
           Object.assign(updates.providerSpecificData, claudeConnectionFieldPatch(formData));
         }
         if (isCodex) {
+          updates.providerSpecificData.allowPaidCredits = formData.allowPaidCredits;
           updates.providerSpecificData.requestDefaults = {
             reasoningEffort: formData.codexReasoningEffort,
             ...(formData.codexServiceTier !== "default"
@@ -832,6 +835,7 @@ export default function EditConnectionModal({
             serviceTier={formData.codexServiceTier}
             fingerprintMode={formData.codexFingerprintMode}
             openaiStoreEnabled={formData.codexOpenaiStoreEnabled}
+            allowPaidCredits={formData.allowPaidCredits}
             showFingerprintMode={isOAuth}
             onChange={(patch) => setFormData({ ...formData, ...patch })}
           />

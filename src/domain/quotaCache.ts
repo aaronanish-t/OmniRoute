@@ -56,6 +56,7 @@ import {
   unmarkQuotaHealthy,
   isQuotaHealthy,
 } from "./quotaCacheState";
+import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 
 // #14359 — re-exported so existing callers (chat.ts, tests) keep importing from here. Only
 // markQuotaHealthy has outside callers; the rest are internal and stay unexported (dead-code gate).
@@ -607,6 +608,9 @@ export function isQuotaExhaustedForRequest(
   // #14359 — a recent successful dispatch stands the predicates down for a park window.
   if (isQuotaHealthy(connectionId)) return false;
   if (isClaudeExtraUsageAllowed(provider, providerSpecificData)) return false;
+  // Subscription snapshots cannot decide paid-credit eligibility. The mandatory
+  // Codex preflight checks the credit balance before dispatch; cooldowns remain separate.
+  if (isCodexPaidCreditsEnabled(provider, providerSpecificData, requestedModel)) return false;
   const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
   if (!entry) return false;
 

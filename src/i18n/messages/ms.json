@@ -6526,7 +6526,14 @@
     "savedModelEndpointSettings": "Tetapan titik akhir model yang disimpan",
     "searchByModelAria": "Cari mengikut model",
     "selectSupportedEndpoint": "Pilih sekurang-kurangnya satu titik akhir yang disokong",
-    "antigravityClientProfileHarness": "Harness / CLI"
+    "antigravityClientProfileHarness": "Harness / CLI",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
   },
   "settings": {
     "title": "tetapan",
@@ -9795,7 +9802,11 @@
     "updatedShort": "Dikemas kini",
     "lastRefreshed": "Terakhir disegarkan",
     "providerQuota": "Kuota Penyedia",
-    "providerQuotaHomeHint": "Status langsung merentas akaun yang disambungkan"
+    "providerQuotaHomeHint": "Status langsung merentas akaun yang disambungkan",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited"
   },
   "modals": {
     "waitingAuth": "Menunggu Keizinan",

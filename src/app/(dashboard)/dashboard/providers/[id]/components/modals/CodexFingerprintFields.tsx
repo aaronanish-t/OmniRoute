@@ -12,28 +12,33 @@ import {
 
 type Translator = Parameters<typeof getCodexFingerprintModeLabel>[0];
 
-export function CodexConnectionFields({
-  t,
-  reasoningEffort,
-  serviceTier,
-  fingerprintMode,
-  openaiStoreEnabled,
-  showFingerprintMode,
-  onChange,
-}: {
+type CodexConnectionFieldsProps = {
   t: Translator;
   reasoningEffort: string;
   serviceTier: CodexServiceTier;
   fingerprintMode: CodexFingerprintModeValue;
   openaiStoreEnabled: boolean;
+  allowPaidCredits: boolean;
   showFingerprintMode: boolean;
   onChange: (patch: {
     codexReasoningEffort?: string;
     codexServiceTier?: CodexServiceTier;
     codexFingerprintMode?: CodexFingerprintModeValue;
     codexOpenaiStoreEnabled?: boolean;
+    allowPaidCredits?: boolean;
   }) => void;
-}) {
+};
+
+export function CodexConnectionFields({
+  t,
+  reasoningEffort,
+  serviceTier,
+  fingerprintMode,
+  openaiStoreEnabled,
+  allowPaidCredits,
+  showFingerprintMode,
+  onChange,
+}: CodexConnectionFieldsProps) {
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
       <Select
@@ -80,6 +85,12 @@ export function CodexConnectionFields({
         onChange={(checked) => onChange({ codexOpenaiStoreEnabled: checked })}
         label={t("openaiResponsesStoreLabel")}
         description={t("openaiResponsesStoreDescription")}
+      />
+      <Toggle
+        checked={allowPaidCredits}
+        onChange={(checked) => onChange({ allowPaidCredits: checked })}
+        label={t("allowCodexPaidCreditsLabel")}
+        description={t("allowCodexPaidCreditsDescription")}
       />
     </div>
   );

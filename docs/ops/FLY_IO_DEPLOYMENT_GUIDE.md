@@ -154,8 +154,8 @@ The current project does not set `INITIAL_PASSWORD` because this deployment does
 
 If it is not set:
 
-- You create the dashboard password in the onboarding wizard on first visit
-- Fly's proxy reaches the app from a non-loopback address, so the wizard asks for a one-time bootstrap token that the app prints to its log: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. If that line has scrolled out of the log, restart the app and submit the wizard again to print a new token
+- You create the dashboard password in the onboarding wizard on first visit. Complete the password step: skipping it turns dashboard login off, which leaves the dashboard open to anyone who can reach the app URL
+- Fly's proxy reaches the app from a non-loopback address, so after you submit the password the wizard asks for a one-time bootstrap token, which the app prints to its log at that moment: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. If that line has scrolled out of the log, restart the app and submit the wizard again to print a new token
 
 To set the password unattended instead, add it before the first dashboard visit (once a password is saved, `INITIAL_PASSWORD` is ignored):
 
@@ -453,7 +453,7 @@ Verify both of the following:
 
 ### 12.5 Can It Run Without `INITIAL_PASSWORD`?
 
-Yes. With `INITIAL_PASSWORD` unset, you create the dashboard password in the onboarding wizard on first visit (section 5.2 covers the one-time bootstrap token).
+Yes. With `INITIAL_PASSWORD` unset, you create the dashboard password in the onboarding wizard on first visit (section 5.2 covers the one-time bootstrap token and the password step).
 
 ---
 

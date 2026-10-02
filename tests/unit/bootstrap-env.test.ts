@@ -202,7 +202,8 @@ test("bootstrapEnv warns that the CHANGEME placeholder becomes the password", ()
 });
 
 test("bootstrapEnv leaves ./.env to Next.js when another .env is preferred", () => {
-  // A directory at ./.env (a Docker bind-mount of a missing file) must not stop startup.
+  // With DATA_DIR/.env preferred, bootstrap leaves ./.env to Next.js, so a directory there
+  // (a Docker bind-mount of a missing file) cannot stop startup.
   withTempEnv(({ tempCwd, dataDir }) => {
     process.env.DATA_DIR = dataDir;
     fs.mkdirSync(dataDir, { recursive: true });
@@ -224,6 +225,8 @@ test("bootstrapEnv warns that a whitespace-only INITIAL_PASSWORD becomes the pas
     const output = captureStderr(() => bootstrapEnv());
 
     assert.match(output, /only whitespace/);
+    assert.match(output, /works from any address/);
+    assert.match(output, /Set a real/);
     assert.doesNotMatch(output, /CHANGEME|is unset here/);
   });
 });

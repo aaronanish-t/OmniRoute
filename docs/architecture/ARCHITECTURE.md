@@ -299,7 +299,7 @@ Services (business logic):
 - Codex quota fetcher: `open-sse/services/codexQuotaFetcher.ts` — fetches Codex quota for context-relay handoff decisions
 - Cooldown-aware retry: `src/sse/services/cooldownAwareRetry.ts` — per-model cooldown retries with configurable `requestRetry` / `maxRetryIntervalSec`
 - Safe outbound fetch: `src/shared/network/safeOutboundFetch.ts` — guarded provider/model fetch with SSRF guard, private-URL blocking, retry, and timeout
-- Outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — blocks cloud-metadata hosts on provider URLs, and private/localhost ranges too when `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` turns the checks off on validation and discovery, and chat dispatch still blocks cloud-metadata hosts (modes chosen in `src/shared/network/outboundUrlGuardPolicy.ts`)
+- Outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — host checks on provider URLs; `src/shared/network/outboundUrlGuardPolicy.ts` picks the mode from `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, and their dashboard toggles (see `docs/reference/ENVIRONMENT.md`)
 - Provider request defaults: `open-sse/services/providerRequestDefaults.ts` — provider-level `maxTokens`, `temperature`, `thinkingBudgetTokens` defaults
 - GLM provider constants: `open-sse/config/glmProvider.ts` — shared GLM models, quota URLs, GLMT timeout/defaults
 - Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — base URL and discovery path constants
@@ -541,7 +541,7 @@ Domain State DB (SQLite):
 - API key generation/verification: `src/shared/utils/apiKey.ts`
 - Provider secrets persisted in `providerConnections` entries
 - Outbound proxy support via `open-sse/utils/proxyFetch.ts` (env vars) and `open-sse/utils/networkProxy.ts` (configurable per-provider or global)
-- SSRF / outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — blocks cloud-metadata endpoints on provider calls, and private/loopback ranges too when `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` removes the checks on validation and discovery (modes chosen in `src/shared/network/outboundUrlGuardPolicy.ts`)
+- SSRF / outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — host checks on provider calls and webhook targets; the mode comes from `src/shared/network/outboundUrlGuardPolicy.ts` (flags in `docs/reference/ENVIRONMENT.md`)
 - Runtime env validation: `src/lib/env/runtimeEnv.ts` — Zod schema for all environment variables, surfaced as startup errors/warnings
 - Sync tokens: `src/lib/db/syncTokens.ts` — scoped tokens for config bundle download endpoints; backed by `sync_tokens` SQLite table (migration `024_create_sync_tokens.sql`)
 - WebSocket handshake auth: `src/lib/ws/handshake.ts` — validates WS upgrade requests via API key or session cookie
@@ -1095,7 +1095,7 @@ legacy compatibility. The current runtime contract uses:
 
 ## 6) SSRF / Outbound URL Guard
 
-- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) uses `src/shared/network/outboundUrlGuard.ts` to block cloud-metadata target URLs (169.254.0.0/16, metadata.google.internal) on chat requests, even when `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true`. It blocks private/loopback URLs too when `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` and the private flag is off. It checks the hostname or IP literal as written, before any DNS lookup. Built-in local providers skip the check.
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) applies `src/shared/network/outboundUrlGuard.ts` to chat requests dispatched through `BaseExecutor.execute()`. In public-only mode (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` with the private flag off) it blocks private, loopback, and link-local hosts; in every other mode it blocks cloud-metadata hosts. It checks the hostname or IP literal as written, before any DNS lookup. Built-in local providers skip it.
 - Provider model discovery and validation routes use `src/shared/network/safeOutboundFetch.ts` which applies the guard before every outbound request
 - Guard errors surface as `URL_GUARD_BLOCKED` with HTTP 422 and are logged to the compliance audit trail via `providerAudit.ts`
 

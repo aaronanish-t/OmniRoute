@@ -21,13 +21,12 @@
 // every lookup misses and the test reports green while the gate is red. The first
 // draft of this suite had exactly that bug; `SHAPE-SANITY` below pins it.
 //
-// A full `eslint . --prune-suppressions` run is far too slow for the unit suite,
-// so the cheap tests here pin the *invariant* and one slow test runs the real gate.
+// A full `eslint .` run is far too slow for the unit suite (the CI `lint` job is the
+// real gate), so the cheap tests here only pin the *invariant*.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
-import { join, resolve } from "node:path";
-import { execFileSync } from "node:child_process";
+import { join } from "node:path";
 
 const ROOT = process.cwd();
 const SUPPRESSIONS = join(ROOT, "config/quality/eslint-suppressions.json");
@@ -122,39 +121,3 @@ test("G-05: every suppressed file path uses forward slashes", () => {
   const bad = Object.keys(readSuppressions()).filter((file) => file.includes("\\"));
   assert.deepEqual(bad, [], `suppression keys must be POSIX-relative: ${bad.join(", ")}`);
 });
-
-test(
-  "G-05: eslint on the real repo does not exit 2 (suppressions are pruned)",
-  { timeout: 1_500_000 },
-  () => {
-    let status = 0;
-    let output = "";
-    try {
-      output = execFileSync(
-        process.execPath,
-        [
-          resolve(ROOT, "node_modules/eslint/bin/eslint.js"),
-          ".",
-          "--suppressions-location",
-          "config/quality/eslint-suppressions.json",
-        ],
-        { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], timeout: 1_400_000 }
-      );
-    } catch (err) {
-      const e = err as { status?: number; stdout?: string; stderr?: string };
-      status = e.status ?? 1;
-      output = (e.stdout ?? "") + (e.stderr ?? "");
-    }
-
-    assert.notEqual(
-      status,
-      2,
-      `eslint exited 2 — the suppressions file is unpruned:\n${output.slice(-2000)}`
-    );
-    assert.doesNotMatch(
-      output,
-      /suppressions left that do not occur anymore/i,
-      "ESLint must not report unused suppressions"
-    );
-  }
-);

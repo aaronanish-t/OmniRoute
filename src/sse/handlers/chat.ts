@@ -117,6 +117,7 @@ import { reanchorVideoBridgeRedaction } from "@/lib/guardrails/videoBridge";
 import { resolveConversationId } from "@omniroute/open-sse/services/conversationTracker.ts";
 import {
   classifyProviderBreakerResult,
+  isChatGptWebBridgeFailure,
   isAntigravityMissingProjectError,
   isProviderBreakerFailureStatus,
   resolveStreamReadinessClassificationError,
@@ -2099,7 +2100,9 @@ async function handleSingleModelChat(
         markQuotaHealthy(credentials.connectionId);
         // #12254: exactly-once breaker accounting — combo successes are recorded by
         // combo.ts (recordProviderSuccess); live combo tests never touch the breaker.
-        if (classifyProviderBreakerResult(result, isCombo, forceLiveComboTest) === "success") {
+        if (
+          classifyProviderBreakerResult(result, isCombo, forceLiveComboTest, provider) === "success"
+        ) {
           breaker._onSuccess();
         }
         if (injectedHandoff && runtimeOptions.sessionId && comboName) {
@@ -2514,25 +2517,31 @@ async function handleSingleModelChat(
       const is401 = result.status === 401;
       const skipConnectionDisable = shouldSkipConnDisable(result, is401, hasExtraKeys, provider);
 
-      const { shouldFallback, cooldownMs } = skipConnectionDisable
-        ? { shouldFallback: false, cooldownMs: 0 }
-        : await markAccountUnavailable(
-            credentials.connectionId,
-            result.status,
-            errorStr,
-            provider,
-            model,
-            providerProfile,
-            buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
-              persistUnavailableState: !(
-                isCombo &&
-                result.status === 429 &&
-                (failureKind === "rate_limit" || failureKind === "transient")
-              ),
-              isCombo,
-              headers: result.response.headers,
-            })
-          );
+      // Browser bridge/integration failures are synthetic 502s. Keep the
+      // connection selectable so an operator can retry after the page bridge
+      // recovers; they are not credential or upstream-account failures.
+      const skipBridgeConnectionDisable = isChatGptWebBridgeFailure(provider, result.error);
+
+      const { shouldFallback, cooldownMs } =
+        skipConnectionDisable || skipBridgeConnectionDisable
+          ? { shouldFallback: false, cooldownMs: 0 }
+          : await markAccountUnavailable(
+              credentials.connectionId,
+              result.status,
+              errorStr,
+              provider,
+              model,
+              providerProfile,
+              buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
+                persistUnavailableState: !(
+                  isCombo &&
+                  result.status === 429 &&
+                  (failureKind === "rate_limit" || failureKind === "transient")
+                ),
+                isCombo,
+                headers: result.response.headers,
+              })
+            );
 
       // An explicit pin (combo step `connectionId` / `x-omniroute-connection`) is an
       // operator instruction, not a suggestion: the account cooldown above is still
@@ -2574,7 +2583,7 @@ async function handleSingleModelChat(
       // breaker for real traffic (#9817).
       if (
         !(await shouldIsolateProbeFailures()) &&
-        classifyProviderBreakerResult(result, isCombo, forceLiveComboTest) === "failure"
+        classifyProviderBreakerResult(result, isCombo, forceLiveComboTest, provider) === "failure"
       ) {
         breaker._onFailure();
       }

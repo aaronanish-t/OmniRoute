@@ -73,8 +73,20 @@ const IS_API_ROUTE = /^src\/app\/api\/.+\/route\.tsx?$/;
 // The honest count is 21.
 export const KNOWN_MISSING_ERROR_HELPER = new Set([
   // --- Provider-auth import/export routes: `error: error.message` on a thrown
-  // provider error. 8 sites, one shape. These leak an upstream/credential-adjacent
-  // message verbatim. Fix: createErrorResponse(status, sanitizeErrorMessage(msg)).
+  // provider error. 8 sites, one shape.
+  //
+  // LATENT, NOT LIVE — corrected after a second audit. An earlier version of this
+  // comment claimed these "leak an upstream/credential-adjacent message verbatim", which
+  // was wrong. Each route's GENERIC branch already routes through `sanitizeErrorMessage`;
+  // only the TYPED branch forwards `error.message` raw, and every one of the 34
+  // `new (Agy|Claude|Codex)AuthFileError(...)` throw sites across
+  // `src/lib/oauth/utils/{agy,claude,codex}Auth*.ts` passes a STATIC app-authored
+  // literal — zero interpolation, so no upstream body, token or path can arrive.
+  // They stay frozen because the guarantee is a maintenance invariant, not a property of
+  // the routes: a new `throw new CodexAuthFileError(`refresh failed: ${upstream.body}`)`
+  // would leak through all eight, and this gate cannot see it (these files DO import the
+  // sanitizer). Guarded by tests/unit/provider-auth-error-message-literals-15159.test.ts,
+  // which fails and names the site. The right fix for such a site is the throw site.
   "src/app/api/providers/agy-auth/apply-local/route.ts",
   "src/app/api/providers/agy-auth/import/route.ts",
   "src/app/api/providers/claude-auth/import/route.ts",
@@ -106,8 +118,8 @@ export const KNOWN_MISSING_ERROR_HELPER = new Set([
 
   // --- API routes returning a caught error message directly. Note
   // grok-build-settings:230 forwards a TYPED `GrokBuildConfigConflictError` (an
-  // app-defined message, not upstream text), so it is the lowest-risk entry here;
-  // the sibling branch one line down already sanitizes.
+  // app-defined message, not upstream text) and is latent for the same reason as the
+  // provider-auth block above; the sibling branch one line down already sanitizes.
   "src/app/api/cli-tools/grok-build-settings/route.ts",
   "src/app/api/github-skills/route.ts", // inner per-target catch in a results map
   "src/app/api/skills/collect/install/route.ts", // inner per-target catch

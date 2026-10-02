@@ -59345,7 +59345,7 @@
       "locales": {
         "pl": {
           "source_hash": "f60be16d7b8a96d812a8286b0547323d57585c1dd8666ffd922dc3da967e7ca0",
-          "target_hash": "791be6ba0fa05f3cee17e85f5916ff720e950135f0b753150ed093fabb2d8ca8",
+          "target_hash": "ea10e5b12b5e0d1d8b703e5b9813b9ef95604f554d5edfe4aaa34504f60df97d",
           "section_hashes": [
             "6731c82dc06c",
             "dc8ef357bfa4",
@@ -59358,7 +59358,7 @@
             "485d9591da7f",
             "e1a7bb007ec2"
           ],
-          "updated_at": "2026-09-29T16:42:44.982Z"
+          "updated_at": "2026-10-02T05:43:09.966Z"
         },
         "ar": {
           "source_hash": "f60be16d7b8a96d812a8286b0547323d57585c1dd8666ffd922dc3da967e7ca0",

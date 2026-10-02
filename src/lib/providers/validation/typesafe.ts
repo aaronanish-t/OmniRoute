@@ -6,7 +6,10 @@
  * as unavailable (credentials may still be fine).
  */
 
-import { evaluateSystemOneChoice } from "@omniroute/open-sse/services/typesafe/systemOne.ts";
+import {
+  evaluateSystemOneChoice,
+  type SystemOneChoiceUnavailable,
+} from "@omniroute/open-sse/services/typesafe/systemOne.ts";
 
 export async function validateTypesafeProvider({
   apiKey,
@@ -30,16 +33,18 @@ export async function validateTypesafeProvider({
   if (result.ok) {
     return { valid: true, error: null, method: "typesafe_systemone" };
   }
+  // `strict: false` does not narrow the union by the boolean `ok`; past the early return it is the failure arm.
+  const failure = result as SystemOneChoiceUnavailable;
 
-  if (result.reason === "missing_api_key") {
+  if (failure.reason === "missing_api_key") {
     return { valid: false, error: "API key is required" };
   }
 
-  if (result.reason === "http_error" && (result.status === 401 || result.status === 403)) {
+  if (failure.reason === "http_error" && (failure.status === 401 || failure.status === 403)) {
     return { valid: false, error: "Invalid API key" };
   }
 
-  if (result.reason === "http_error" && result.status === 429) {
+  if (failure.reason === "http_error" && failure.status === 429) {
     return {
       valid: true,
       error: null,
@@ -48,15 +53,15 @@ export async function validateTypesafeProvider({
     };
   }
 
-  if (result.reason === "timeout" || result.reason === "network_error") {
+  if (failure.reason === "timeout" || failure.reason === "network_error") {
     return {
       valid: false,
-      error: `TypeSafe unreachable (${result.reason})`,
+      error: `TypeSafe unreachable (${failure.reason})`,
     };
   }
 
   return {
     valid: false,
-    error: result.detail || `TypeSafe validation failed (${result.reason})`,
+    error: failure.detail || `TypeSafe validation failed (${failure.reason})`,
   };
 }

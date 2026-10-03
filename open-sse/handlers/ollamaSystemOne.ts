@@ -26,6 +26,8 @@ import { saveCallLog } from "@/lib/usageDb";
 export const OLLAMA_SYSTEMONE_PROVIDER = "ollama-local";
 export const OLLAMA_SYSTEMONE_DEFAULT_BASE_URL = "http://localhost:11434/v1";
 export const OLLAMA_SYSTEMONE_MAX_BODY_BYTES = 64 * 1024;
+// Bodies carrying `images` (Clef / Clef Flash vision weights) may be up to 32 MiB.
+export const OLLAMA_SYSTEMONE_MAX_IMAGE_BODY_BYTES = 32 * 1024 * 1024;
 export const OLLAMA_SYSTEMONE_MAX_QUESTIONS = 64;
 export const OLLAMA_SYSTEMONE_MIN_CRITERIA = 2;
 export const OLLAMA_SYSTEMONE_MAX_CRITERIA = 26;
@@ -75,6 +77,15 @@ const scoreQuestionSchema = z
   })
   .passthrough();
 
+// Ollama takes raw base64 only: "URLs and data URLs are not supported".
+const imageSchema = z
+  .string()
+  .min(1, "images must be non-empty base64 strings")
+  .refine(
+    (value) => !/^(?:https?:|data:)/i.test(value.trim()),
+    "images must be raw base64; URLs and data URLs are not supported"
+  );
+
 const questionSchema = z.discriminatedUnion("type", [
   choiceQuestionSchema,
   noulQuestionSchema,
@@ -88,6 +99,7 @@ export const ollamaSystemOneRequestSchema = z.object({
     const count = Object.keys(questions).length;
     return count >= 1 && count <= OLLAMA_SYSTEMONE_MAX_QUESTIONS;
   }, `questions must contain 1–${OLLAMA_SYSTEMONE_MAX_QUESTIONS} fields`),
+  images: z.array(imageSchema).optional(),
   keep_alive: z.union([z.string().min(1), z.number()]).optional(),
 });
 
@@ -107,7 +119,12 @@ export function validateOllamaSystemOneRequest(raw: unknown): OllamaSystemOneVal
   } catch {
     return { ok: false, status: 400, message: "Invalid JSON body" };
   }
-  if (serializedBytes > OLLAMA_SYSTEMONE_MAX_BODY_BYTES) {
+  const images = (raw as { images?: unknown } | null)?.images;
+  const hasImages = Array.isArray(images) && images.length > 0;
+  if (hasImages && serializedBytes > OLLAMA_SYSTEMONE_MAX_IMAGE_BODY_BYTES) {
+    return { ok: false, status: 413, message: "request body with images must not exceed 32 MiB" };
+  }
+  if (!hasImages && serializedBytes > OLLAMA_SYSTEMONE_MAX_BODY_BYTES) {
     return { ok: false, status: 413, message: "request body must not exceed 64 KiB" };
   }
 
@@ -241,6 +258,7 @@ export async function handleOllamaSystemOne(options: OllamaSystemOneOptions): Pr
     model: upstreamModel,
     state: options.body.state,
     questions: options.body.questions,
+    ...(options.body.images?.length ? { images: options.body.images } : {}),
     ...(options.body.keep_alive !== undefined ? { keep_alive: options.body.keep_alive } : {}),
   };
 

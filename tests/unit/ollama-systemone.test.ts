@@ -437,3 +437,75 @@ test("a 404 through the real markAccountUnavailable locks only that model", asyn
   const stored = await providersDb.getProviderConnectionById(connectionId);
   assert.notEqual(stored?.testStatus, "unavailable");
 });
+
+// ── Clef / Clef Flash: vision System One models (Ollama >= 0.35.1) ──────────
+// ollama.com/library/clef and /clef-flash tag both models `vision` + `decision`; the
+// System One API takes base64 `images` shared by all questions (URLs and data URLs are
+// not supported) and allows 32 MiB bodies when images are present (docs.ollama.com/api/systemone).
+
+// 1×1 transparent PNG.
+const PNG_B64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
+test("Clef: a vision + decision model advertises systemone and vision, not chat", () => {
+  const model = applyOllamaShowCapabilities(
+    { id: "clef-flash:9b" },
+    {
+      capabilities: ["vision", "decision"],
+    }
+  );
+  assert.deepEqual(model.supportedEndpoints, ["systemone"]);
+  assert.equal(model.supportsVision, true);
+  assert.equal("apiFormat" in model, false);
+});
+
+test("Clef: base64 images are validated and forwarded to Ollama", async () => {
+  const calls: FetchCall[] = [];
+  const rec = recorder();
+  const response = await handleOllamaSystemOne({
+    body: validBody({ model: "clef-flash", images: [PNG_B64, PNG_B64] }),
+    requestedModel: "ollama-local/clef-flash",
+    credentials: CREDENTIALS,
+    fetchImpl: jsonFetch(200, { ...TEV_RESPONSE, model: "clef-flash" }, calls),
+    ...rec.deps,
+  });
+  assert.equal(response.status, 200);
+  const sent = JSON.parse(String(calls[0].init.body));
+  assert.deepEqual(sent.images, [PNG_B64, PNG_B64]);
+  assert.deepEqual(Object.keys(sent).sort(), ["images", "model", "questions", "state"]);
+});
+
+test("Clef: image URLs, data URLs and non-string images are rejected with 400", () => {
+  for (const images of [
+    ["https://example.com/cat.png"],
+    ["http://example.com/cat.png"],
+    [`data:image/png;base64,${PNG_B64}`],
+    [""],
+    [42],
+    PNG_B64,
+  ]) {
+    const result = validateOllamaSystemOneRequest({ ...VALID_BODY, images });
+    assert.equal(result.ok, false, `images=${JSON.stringify(images).slice(0, 40)} must fail`);
+    if (result.ok) continue;
+    assert.equal(result.status, 400);
+  }
+});
+
+test("Clef: a body with images may exceed 64 KiB, up to Ollama's 32 MiB limit", () => {
+  const largeImage = "A".repeat(2 * 1024 * 1024); // ~2 MiB of base64
+  const accepted = validateOllamaSystemOneRequest({ ...VALID_BODY, images: [largeImage] });
+  assert.equal(accepted.ok, true);
+
+  const tooLarge = validateOllamaSystemOneRequest({
+    ...VALID_BODY,
+    images: ["A".repeat(33 * 1024 * 1024)],
+  });
+  assert.equal(tooLarge.ok, false);
+  if (tooLarge.ok) return;
+  assert.equal(tooLarge.status, 413);
+  assert.match(tooLarge.message, /32 MiB/);
+
+  // Without images the 64 KiB limit still applies.
+  const textOnly = validateOllamaSystemOneRequest({ ...VALID_BODY, state: "x".repeat(70_000) });
+  assert.equal(textOnly.ok, false);
+});

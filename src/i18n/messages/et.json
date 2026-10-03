@@ -6526,7 +6526,11 @@
     "savedModelEndpointSettings": "Mudeli lõpp-punkti seaded salvestatud",
     "searchByModelAria": "Otsi mudeli järgi",
     "selectSupportedEndpoint": "Valige vähemalt üks toetatud lõpp-punkt",
-    "antigravityClientProfileHarness": "Rakendusraamistik / CLI"
+    "antigravityClientProfileHarness": "Rakendusraamistik / CLI",
+    "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
+    "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
+    "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Seaded",

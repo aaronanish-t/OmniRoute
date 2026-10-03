@@ -87,6 +87,7 @@ export { clearCombosCache, clearUpstreamProxyConfigCache } from "./chatCore/comb
 import {
   resolveAccountSemaphoreKey,
   resolveAccountSemaphoreMaxConcurrency,
+  resolveModelSemaphore,
   buildClaudePromptCacheLogMeta,
 } from "./chatCore/executorHelpers.ts";
 import {
@@ -3182,6 +3183,13 @@ async function handleChatCoreInner({
               connectionId: attemptConnectionId,
               credentials: execCreds,
             });
+            // Opt-in per-model ceiling; joins the composite gate below.
+            const modelGate = resolveModelSemaphore({
+              provider,
+              model: modelToCall,
+              connectionId: attemptConnectionId,
+              credentials: execCreds,
+            });
             const canonicalProviderKey = resolveProviderId(String(provider).trim().toLowerCase());
             const providerConcurrency =
               resilienceSettings.providerQuotaOverrides[canonicalProviderKey]
@@ -3190,6 +3198,8 @@ async function handleChatCoreInner({
             trace("pre_semaphore", {
               semaphoreKey: accountSemaphoreKey,
               max: accountSemaphoreMaxConcurrency,
+              modelSemaphoreKey: modelGate.key,
+              modelMax: modelGate.maxConcurrency,
             });
             if (accountSemaphoreKey && accountSemaphoreMaxConcurrency != null) {
               updatePendingScope(pendingScope, {
@@ -3215,6 +3225,10 @@ async function handleChatCoreInner({
                 {
                   key: accountSemaphoreKey || "",
                   maxConcurrency: accountSemaphoreKey ? accountSemaphoreMaxConcurrency : null,
+                },
+                {
+                  key: modelGate.key || "",
+                  maxConcurrency: modelGate.key ? modelGate.maxConcurrency : null,
                 },
               ],
               {

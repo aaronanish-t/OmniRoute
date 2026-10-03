@@ -64,7 +64,7 @@ test("isQuotaExhaustedForRequest isolates Claude and Gemini quota families for a
     "Gemini Pro should share Gemini family quota and NOT be exhausted"
   );
 
-  // The removed agy provider id must not map onto the Antigravity quota family.
+  // Existing agy request aliases retain Antigravity family-scoped quota behavior.
   const connectionIdLegacy = "conn-agy-test";
   quotaCache.setQuotaCache(connectionIdLegacy, "agy", {
     "claude-opus-4-6-thinking": { remainingPercentage: 0, resetAt: null },
@@ -77,8 +77,8 @@ test("isQuotaExhaustedForRequest isolates Claude and Gemini quota families for a
       "agy",
       "agy/claude-opus-4-6-thinking"
     ),
-    false,
-    "the removed agy provider is not family-scoped anymore"
+    true,
+    "the legacy agy alias keeps exhausted Claude quota separate from available Gemini quota"
   );
 
   // Test that unknown models (family 'other') preserve exact-model scoping.

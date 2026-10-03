@@ -32,6 +32,26 @@ function seed(provider: string, remaining: number, fractionReported = true) {
   });
 }
 
+test("legacy agy request aliases use canonical Antigravity quota families", () => {
+  seed("antigravity", 0.94);
+  assert.equal(
+    cache.isQuotaExhaustedForRequest("threshold-account", "agy", "agy/gemini-3.8-flash-high"),
+    false
+  );
+  assert.equal(
+    cache.isQuotaExhaustedForRequest("threshold-account", "agy", "agy/claude-opus-4-6-thinking"),
+    true
+  );
+});
+
+test("legacy agy requests keep unreported canonical quota unknown", () => {
+  seed("antigravity", 0, false);
+  assert.equal(
+    cache.isQuotaExhaustedForRequest("threshold-account", "agy", "agy/gemini-3.8-flash-high"),
+    false
+  );
+});
+
 for (const provider of ["agy", "antigravity"]) {
   for (const remaining of [0.01, 0.94, 1, 1.01]) {
     test(`${provider}: positive ${remaining}% is not automatic exhaustion`, () => {

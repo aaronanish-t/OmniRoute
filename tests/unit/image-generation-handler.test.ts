@@ -4,6 +4,7 @@ import dns from "node:dns";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { seedAntigravityCliVersionCache } from "../../open-sse/services/antigravityVersion.ts";
 
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-images-"));
 
@@ -713,6 +714,7 @@ test("handleImageGeneration uploads source images to Topaz and returns base64 ou
 
 test("handleImageGeneration sends Antigravity image requests with native image_gen envelope", async () => {
   const originalFetch = globalThis.fetch;
+  seedAntigravityCliVersionCache("1.2.3");
   let captured;
 
   globalThis.fetch = async (url, options = {}) => {
@@ -765,7 +767,7 @@ test("handleImageGeneration sends Antigravity image requests with native image_g
     assert.equal(captured.headers.Authorization, "Bearer ag-token");
     assert.equal(captured.headers["x-client-name"], undefined);
     assert.equal(captured.headers["x-goog-user-project"], undefined);
-    assert.match(captured.headers["User-Agent"], /^antigravity\/ide\/2\.1\.1 /);
+    assert.match(captured.headers["User-Agent"], /^antigravity\/cli\/1\.2\.3 /);
     assert.equal(captured.headers["x-goog-api-client"], undefined);
     assert.equal(captured.body.project, "project-123");
     assert.match(captured.body.requestId, /^image_gen\//);

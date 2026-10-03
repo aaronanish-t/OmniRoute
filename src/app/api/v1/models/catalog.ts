@@ -1991,7 +1991,9 @@ async function buildUnifiedModelsResponseCore(
     const apiKey = extractApiKey(request);
     let finalModels = models;
     if (apiKey) {
-      const { isModelAllowedForKey, getApiKeyMetadata } = await import("@/lib/db/apiKeys");
+      const { isModelAllowedForKey, isModelBlockedByPatterns, getApiKeyMetadata } =
+        await import("@/lib/db/apiKeys");
+      const { isCatalogModelAllowedForKey } = await import("./catalogKeyFilter");
 
       // Quota-exclusive keys (allowedQuotas non-empty): list ONLY the pool's qtSd/*
       // virtual models. #4806: build from the hidden qtSd/* combos directly — the base
@@ -2036,11 +2038,13 @@ async function buildUnifiedModelsResponseCore(
             }
             continue;
           }
-          // m.id is the full identifier (e.g. openai/gpt-4o), m.root is the raw model string
-          // check either one as the config could use either patterns
+          // m.id is the full identifier (e.g. openai/gpt-4o); a bare m.root also matches
+          // so a bare allowlist entry works, but a namespaced root never does (#15409).
           if (
-            (await isModelAllowedForKey(apiKey, m.id)) ||
-            (await isModelAllowedForKey(apiKey, m.root))
+            await isCatalogModelAllowedForKey(apiKey, m, keyMeta.blockedModels, {
+              isModelAllowedForKey,
+              isModelBlockedByPatterns,
+            })
           ) {
             filtered.push(m);
           }

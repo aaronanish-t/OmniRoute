@@ -243,6 +243,33 @@ function finalPrompt(draft: string): string {
     .join("\n\n");
 }
 
+async function readPlannerDecision(
+  response: Response,
+  model: string,
+  continuation: boolean,
+  log: ComboLogger
+): Promise<RouteDecision | Response> {
+  let decisionText = "";
+  try {
+    decisionText = extractPanelText(await response.clone().json());
+  } catch {
+    return errorResponse(502, `Agentic planner (${model}) returned an unparseable response`);
+  }
+  if (!decisionText.trim()) {
+    return errorResponse(502, `Agentic planner (${model}) returned an empty decision`);
+  }
+
+  const decision = parseDecision(decisionText, continuation);
+  if (!decision.explicit) {
+    log.warn(
+      "AGENTIC_PIPELINE",
+      `Planner ${model} omitted OMNIROUTE_ROUTE; using safe ${decision.route.toUpperCase()} fallback`
+    );
+  }
+
+  return decision;
+}
+
 export async function handleAgenticPipelineChat({
   body,
   steps,
@@ -297,23 +324,8 @@ export async function handleAgenticPipelineChat({
   const decisionResponse = await handleSingleModel(decisionBody, plannerModel, stepTarget(planner));
   if (!decisionResponse.ok) return decisionResponse;
 
-  let decisionText = "";
-  try {
-    decisionText = extractPanelText(await decisionResponse.clone().json());
-  } catch {
-    return errorResponse(502, `Agentic planner (${plannerModel}) returned an unparseable response`);
-  }
-  if (!decisionText.trim()) {
-    return errorResponse(502, `Agentic planner (${plannerModel}) returned an empty decision`);
-  }
-
-  const decision = parseDecision(decisionText, continuation);
-  if (!decision.explicit) {
-    log.warn(
-      "AGENTIC_PIPELINE",
-      `Planner ${plannerModel} omitted OMNIROUTE_ROUTE; using safe ${decision.route.toUpperCase()} fallback`
-    );
-  }
+  const decision = await readPlannerDecision(decisionResponse, plannerModel, continuation, log);
+  if (decision instanceof Response) return decision;
 
   if (decision.route === "tools" && !maxRoundsReached && !stalledReason) {
     const executorBody = prependSystemInstruction(

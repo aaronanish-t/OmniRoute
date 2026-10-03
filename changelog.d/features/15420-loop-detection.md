@@ -1,0 +1,1 @@
+- **feat(sse):** Agentic pipelines detect repeated tool rounds with unchanged results and consecutive failed rounds across native protocols, then return control to the planner ([#15420](https://github.com/diegosouzapw/OmniRoute/pull/15420)) — thanks @potatosips.

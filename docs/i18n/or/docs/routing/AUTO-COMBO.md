@@ -4,6 +4,10 @@
 
 ---
 
+🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇪🇹 [am](../../../am/docs/routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇧🇦 [bs](../../../bs/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇪 [ga](../../../ga/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ha](../../../ha/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇰🇷 [ko](../../../ko/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇳🇴 [no](../../../no/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
+
+---
+
 > **ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ**: ଶୀଘ୍ର ଆରମ୍ଭ କରିବାକୁ ଚାହୁଁଛନ୍ତି କି? ସରଳ ବ୍ୟାଖ୍ୟା ଏବଂ ଉଦାହରଣ ପାଇଁ [ଅଟୋ-କମ୍ବୋ ଉପଯୋଗକର୍ତ୍ତା ମାର୍ଗଦର୍ଶିକା](../getting-started/AUTO-COMBO-GUIDE.md) ଦେଖନ୍ତୁ।
 
 > ଅନୁକୂଳନଶୀଳ ସ୍କୋରିଂ + ଶୂନ୍ୟ-କନଫିଗ୍ ସ୍ୱୟଂଚାଳିତ ରାଉଟିଂ ସହିତ ସ୍ୱୟଂ-ପରିଚାଳିତ ମଡେଲ୍ ଶୃଙ୍ଖଳଗୁଡ଼ିକ
@@ -275,55 +279,59 @@ curl -sS http://localhost:20128/v1/chat/completions \
 `config.budgetFallback` ଇନ୍ପୁଟ୍ଗୁଡ଼ିକୁ ଯୋଗାଇ ଦିଆଯାଏ। ଏକ କମ୍ବୋରେ ସଞ୍ଚିତ `config.budgetFallback` ("strict" |
 "cheapest") ସ୍ଥାୟୀ ନୀତି ନିର୍ଦ୍ଧାରଣ କରେ; ହେଡର୍ ଗୋଟିଏ ଅନୁରୋଧ ପାଇଁ ଏହାକୁ ଓଭର୍ରାଇଡ୍ କରେ।
 
-## ସମସ୍ତ ରାଉଟିଂ କୌଶଳ
+## ସମସ୍ତ Routing Strategies
 
-OmniRouteର କମ୍ବୋ ଇଞ୍ଜିନ୍ **19ଟି ରାଉଟିଂ କୌଶଳ** ସମର୍ଥନ କରେ (`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`ରେ ଘୋଷିତ)। Auto Combo ଇଞ୍ଜିନ୍ ନିଜେ `auto` କୌଶଳ ଅଧୀନରେ ଉପଲବ୍ଧ; ଅନ୍ୟଗୁଡ଼ିକ ସଂରକ୍ଷିତ କମ୍ବୋଗୁଡ଼ିକ ପାଇଁ ଉପଲବ୍ଧ।
+OmniRoute ର combo engine **19 routing strategies** ସମର୍ଥନ କରେ (`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` ରେ ଘୋଷିତ)। Auto Combo engine ନିଜେ `auto` strategy ଅଧୀନରେ ଉପଲବ୍ଧ; ଅନ୍ୟଗୁଡ଼ିକ persisted combos ପାଇଁ ଉପଲବ୍ଧ।
 
-| କୌଶଳ                | ବର୍ଣ୍ଣନା                                                                                                                                                                                                                                      |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | ସ୍ପଷ୍ଟ ପ୍ରାଥମିକତା ସହିତ ପ୍ରଥମ-ଟାର୍ଗେଟ୍ କ୍ରମବଦ୍ଧ ତାଲିକା                                                                                                                                                                                         |
-| `weighted`          | ପ୍ରତି-ଟାର୍ଗେଟ୍ ଓଜନ ଆଧାରିତ ଭାରିତ ଯାଦୃଚ୍ଛିକ ଚୟନ                                                                                                                                                                                                 |
-| `round-robin`       | କ୍ରମାନୁସାରେ ଟାର୍ଗେଟ୍ଗୁଡ଼ିକ ମଧ୍ୟରେ ଚକ୍ରାକାର ଭାବେ ଯାଆନ୍ତୁ (ବ୍ୟାଚ୍ଭିତ୍ତିକ; ତଳେ ଦେଖନ୍ତୁ)                                                                                                                                                          |
-| `context-relay`     | ଟାର୍ଗେଟ୍ଗୁଡ଼ିକ ମଧ୍ୟରେ ପ୍ରସଙ୍ଗ ହସ୍ତାନ୍ତର କରନ୍ତୁ (ଦୀର୍ଘ ବାର୍ତ୍ତାଳାପ)                                                                                                                                                                            |
-| `fill-first`        | ପରବର୍ତ୍ତୀକୁ ଯିବା ପୂର୍ବରୁ ପ୍ରତ୍ୟେକ ଟାର୍ଗେଟ୍ର କୋଟା ପୂରଣ କରନ୍ତୁ                                                                                                                                                                                  |
-| `p2c`               | Power-of-2-choices ଯାଦୃଚ୍ଛିକ ଲୋଡ୍ ବାଲାନ୍ସିଂ                                                                                                                                                                                                   |
-| `random`            | ସମବିତରିତ ଯାଦୃଚ୍ଛିକ ଚୟନ                                                                                                                                                                                                                        |
-| `least-used`        | ସର୍ବନିମ୍ନ ବର୍ତ୍ତମାନ ଲୋଡ୍ ଥିବା ଟାର୍ଗେଟ୍ ବାଛନ୍ତୁ                                                                                                                                                                                                |
-| `cost-optimized`    | କ୍ୟାଟାଲଗ୍ ମୂଲ୍ୟ ଆଧାରରେ ପ୍ରତି ଅନୁରୋଧର $ ଖର୍ଚ୍ଚ ସର୍ବନିମ୍ନ କରନ୍ତୁ                                                                                                                                                                                |
-| `reset-aware` ⭐    | କୋଟା ରିସେଟ୍ ସମୟ ଅନୁସାରେ ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ — ଛୋଟ ରିସେଟ୍ ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ଉଚ୍ଚ ସ୍ଥାନ ଦିଆଯାଏ                                                                                                                                                       |
-| `reset-window`      | ଯେଉଁ ଟାର୍ଗେଟ୍ଗୁଡ଼ିକର କୋଟା ୱିଣ୍ଡୋ ସବୁଠାରୁ ଶୀଘ୍ର ରିସେଟ୍ ହୁଏ, ସେଗୁଡ଼ିକୁ ପସନ୍ଦ କରନ୍ତୁ                                                                                                                                                             |
-| `headroom`          | ସର୍ବାଧିକ ଅବଶିଷ୍ଟ କୋଟା ହେଡ୍ରୁମ୍ ଥିବା ଟାର୍ଗେଟ୍ ବାଛନ୍ତୁ                                                                                                                                                                                          |
-| `strict-random`     | ପୁନରାବୃତ୍ତିର ଡିଡୁପ୍ଲିକେସନ୍ ବିନା ଯାଦୃଚ୍ଛିକ ଚୟନ                                                                                                                                                                                                 |
-| `auto`              | Auto Combo ସ୍କୋରିଂ (16-ଫ୍ୟାକ୍ଟର୍) ବ୍ୟବହାର କରନ୍ତୁ — **ସୁପାରିଶକୃତ**                                                                                                                                                                             |
-| `lkgp`              | Last-Known-Good Path (ଶେଷ ସଫଳ ପ୍ରଦାନକାରୀକୁ ପିନ୍ କରେ, ତା’ପରେ ନିୟମଗୁଡ଼ିକୁ ଫଲ୍ବ୍ୟାକ୍ କରେ)                                                                                                                                                        |
-| `context-optimized` | ବର୍ତ୍ତମାନ ପ୍ରସଙ୍ଗ ଆକାର ପାଇଁ ସର୍ବୋତ୍ତମ ଉପଯୁକ୍ତ ଟାର୍ଗେଟ୍ ବାଛନ୍ତୁ                                                                                                                                                                                |
-| `cache-optimized`   | ପ୍ରମ୍ପ୍ଟ୍-କ୍ୟାଶ୍ ସାଦୃଶ୍ୟ ଅନୁସାରେ ଟାର୍ଗେଟ୍ଗୁଡ଼ିକୁ ପୁନଃକ୍ରମିତ କରନ୍ତୁ — ଏହି ଅନୁରୋଧର କ୍ୟାଶ୍ ହୋଇଥିବା ପ୍ରିଫିକ୍ସ ପୂର୍ବରୁ ଧାରଣ କରିଥିବାର ସର୍ବାଧିକ ସମ୍ଭାବନା ଥିବା ସଂଯୋଗକୁ ପ୍ରଥମେ ଚେଷ୍ଟା କରାଯାଏ (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | ସମାନ୍ତରାଳ ଭାବେ ମଡେଲ୍ଗୁଡ଼ିକର ଏକ ପ୍ୟାନେଲ୍କୁ ଅନୁରୋଧ ପଠାନ୍ତୁ, ତା’ପରେ ଏକ ବିଚାରକ ମାଧ୍ୟମରେ ଗୋଟିଏ ଉତ୍ତର ସଂଶ୍ଳେଷଣ କରନ୍ତୁ (ତଳେ ଦେଖନ୍ତୁ)                                                                                                                 |
-| `pipeline`          | ଟାର୍ଗେଟ୍ଗୁଡ଼ିକୁ କ୍ରମାନୁସାରେ ଚଲାନ୍ତୁ, ପ୍ରତ୍ୟେକ ପଦକ୍ଷେପର ଆଉଟ୍ପୁଟ୍କୁ ପରବର୍ତ୍ତୀ ପଦକ୍ଷେପର ଇନ୍ପୁଟ୍ରେ ପ୍ରବାହିତ କରନ୍ତୁ; କେବଳ ଅନ୍ତିମ ଉତ୍ତର ଫେରାଯାଏ (#6396)                                                                                             |
+| Strategy            | ବିବରଣୀ                                                                                                                                                                                                                   |
+| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | ସ୍ପଷ୍ଟ ପ୍ରାଥମିକତା ସହିତ ପ୍ରଥମ-target କ୍ରମବଦ୍ଧ ତାଲିକା                                                                                                                                                                      |
+| `weighted`          | ପ୍ରତି-target weight ଅନୁସାରେ Weighted random                                                                                                                                                                              |
+| `round-robin`       | କ୍ରମାନୁସାରେ targets ମାଧ୍ୟମରେ cycle କରନ୍ତୁ (batched; ତଳେ ଦେଖନ୍ତୁ)                                                                                                                                                         |
+| `context-relay`     | Targets ମଧ୍ୟରେ context ହସ୍ତାନ୍ତର କରନ୍ତୁ (ଦୀର୍ଘ କଥାବାର୍ତ୍ତା)                                                                                                                                                              |
+| `fill-first`        | ପରବର୍ତ୍ତୀକୁ ଯିବା ପୂର୍ବରୁ ପ୍ରତ୍ୟେକ target ର quota ପୂରଣ କରନ୍ତୁ                                                                                                                                                             |
+| `p2c`               | Power-of-2-choices random load balancing                                                                                                                                                                                 |
+| `random`            | ଏକସମାନ random ଚୟନ                                                                                                                                                                                                        |
+| `least-used`        | ସର୍ବନିମ୍ନ ବର୍ତ୍ତମାନର load ଥିବା target ବାଛନ୍ତୁ                                                                                                                                                                            |
+| `cost-optimized`    | କାଟାଲଗ୍ ମୂଲ୍ୟ ନିର୍ଦ୍ଧାରଣ ଅନୁଯାୟୀ ପ୍ରତି request ପାଇଁ $ କୁ କମ୍ କରନ୍ତୁ                                                                                                                                                      |
+| `reset-aware` ⭐    | Quota reset ସମୟ ଅନୁସାରେ ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ — ଛୋଟ reset windows କୁ ଉଚ୍ଚ ମାନ୍ୟତା ଦିଆଯାଏ                                                                                                                                    |
+| `reset-window`      | ଯେଉଁ targets ର quota window ଶୀଘ୍ର reset ହୁଏ ସେଗୁଡ଼ିକୁ ପସନ୍ଦ କରନ୍ତୁ                                                                                                                                                       |
+| `headroom`          | ସର୍ବାଧିକ ଅବଶିଷ୍ଟ quota headroom ଥିବା target ବାଛନ୍ତୁ                                                                                                                                                                      |
+| `strict-random`     | ପୁନରାବୃତ୍ତିର deduplication ବିନା Random                                                                                                                                                                                   |
+| `auto`              | Auto Combo scoring (16-factor) ବ୍ୟବହାର କରନ୍ତୁ — **ପରାମର୍ଶିତ**                                                                                                                                                            |
+| `lkgp`              | Last-Known-Good Path (ଶେଷ ସଫଳ provider ସହିତ pin କରେ, ତା’ପରେ rules କୁ fallback କରେ)                                                                                                                                       |
+| `context-optimized` | ବର୍ତ୍ତମାନର context size ପାଇଁ ସର୍ବୋତ୍ତମ ଉପଯୁକ୍ତ target ବାଛନ୍ତୁ                                                                                                                                                            |
+| `cache-optimized`   | Prompt-cache affinity ଅନୁଯାୟୀ targets କୁ ପୁନଃକ୍ରମିତ କରନ୍ତୁ — ଏହି request ର cached prefix ଧାରଣ କରିବାର ସର୍ବାଧିକ ସମ୍ଭାବନା ଥିବା connection କୁ ପ୍ରଥମେ ଚେଷ୍ଟା କରାଯାଏ (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | ସମାନ୍ତରାଳ ଭାବରେ ମଡେଲଗୁଡ଼ିକର ଏକ panel କୁ fan out କରନ୍ତୁ, ତା’ପରେ ଏକ judge ମାଧ୍ୟମରେ ଗୋଟିଏ ଉତ୍ତର ସିନ୍ଥେସାଇଜ୍ କରନ୍ତୁ (ତଳେ ଦେଖନ୍ତୁ)                                                                                            |
+| `pipeline`          | Targets କୁ କ୍ରମାନ୍ୱୟରେ ଚଲାନ୍ତୁ, ପ୍ରତ୍ୟେକ step ର output କୁ ପରବର୍ତ୍ତୀ step ର input ରେ thread କରନ୍ତୁ; କେବଳ ଅନ୍ତିମ ଉତ୍ତର ଫେରସ୍ତ କରାଯାଏ (#6396)                                                                               |
 
-⭐ = v3.8.0ରେ ନୂଆ · 🧬 = v3.8.36ରେ ନୂଆ
+⭐ = v3.8.0 ରେ ନୂତନ · 🧬 = v3.8.36 ରେ ନୂତନ
 
-### `weighted`ର ଅର୍ଥବିଧି
+### `weighted` semantics
 
-`weighted` ହେଉଛି **ପ୍ରତି ଅନୁରୋଧ ପାଇଁ ଏକ ଆନୁପାତିକ ଯାଦୃଚ୍ଛିକ ଚୟନ**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ସମାନୀକରଣକାରୀ ନୁହେଁ:
+`weighted` ହେଉଛି **ପ୍ରତି request ରେ ଏକ ଆନୁପାତିକ random draw**
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ଏକ equalizer ନୁହେଁ:
 
-- ପ୍ରତ୍ୟେକ ଅନୁରୋଧ `weight / totalWeight` ସମ୍ଭାବନା ସହିତ **ଗୋଟିଏ** ପଦକ୍ଷେପ ଚୟନ କରେ; ଅବଶିଷ୍ଟ ପଦକ୍ଷେପଗୁଡ଼ିକୁ ସେହି ଅନୁରୋଧ ପାଇଁ ଫଲ୍ବ୍ୟାକ୍ ଶୃଙ୍ଖଳା ଭାବେ ଓଜନର ଅବରୋହୀ କ୍ରମରେ ସଜାଯାଏ।
-- ଯେଉଁ ପଦକ୍ଷେପର ଓଜନ `0` (କିମ୍ବା ଅନୁପସ୍ଥିତ), ଅନ୍ୟ କୌଣସି ପଦକ୍ଷେପର ଓଜନ > 0 ଥିବା ପର୍ଯ୍ୟନ୍ତ ତାହା **କେବେ ବି ଚୟନ ହୁଏ ନାହିଁ** — ଚୟନିତ ପଦକ୍ଷେପ ବିଫଳ ହେବା ପରେ ମାତ୍ର ଏହା ଫଲ୍ବ୍ୟାକ୍ ଭାବେ କାର୍ଯ୍ୟ କରିପାରେ। କେବଳ **ସମସ୍ତ** ଓଜନ 0 ହେଲେ ଚୟନ ସମବିତରିତ ହୁଏ।
-- ଯେଉଁ ପଦକ୍ଷେପଗୁଡ଼ିକର ସମସ୍ତ ଟାର୍ଗେଟ୍ ଅନୁପଲବ୍ଧ — ପ୍ରଦାନକାରୀ ସର୍କିଟ୍ ବ୍ରେକର୍ `OPEN`, ସଂଯୋଗ କୁଲ୍ଡାଉନ୍, ମଡେଲ୍ ଲକ୍ଆଉଟ୍ — ଚୟନ ହେବା ପୂର୍ବରୁ ସେଗୁଡ଼ିକୁ ବାଦ ଦିଆଯାଏ
-  (`open-sse/services/combo/targetResolution.ts`), ତେଣୁ ଗୋଟିଏ ସୁସ୍ଥ ପଦକ୍ଷେପ ସାମୟିକ ଭାବେ ପ୍ରତ୍ୟେକ ଅନୁରୋଧରେ ଜିତିପାରେ।
-- `stickyWeightedLimit` (କମ୍ବୋ କନଫିଗ୍, ଡିଫଲ୍ଟ `1` = ବନ୍ଦ) ପୁନଃଚୟନ ପୂର୍ବରୁ ସେତିକି କ୍ରମାଗତ ସଫଳତା ପାଇଁ ଚୟନିତ ପଦକ୍ଷେପକୁ ପିନ୍ କରିରଖେ।
+- ପ୍ରତ୍ୟେକ request `weight / totalWeight` ସମ୍ଭାବନା ସହିତ **ଗୋଟିଏ** step ଡ୍ର କରେ; ଅବଶିଷ୍ଟ steps
+  ଗୁଡ଼ିକ ସେହି request ପାଇଁ fallback chain ଭାବରେ ଅବତରଣକାରୀ weight ଅନୁସାରେ ସଜାଯାଇଥାଏ।
+- ଏକ step ଯାହାର weight `0` (କିମ୍ବା ଅନୁପସ୍ଥିତ), ଅନ୍ୟ କୌଣସି step ର weight > 0 ଥିବା ପର୍ଯ୍ୟନ୍ତ ତାହା **କଦାପି ଡ୍ର ହୁଏ ନାହିଁ** —
+  ଡ୍ର ହୋଇଥିବା step ବିଫଳ ହେବା ପରେ ଏହା କେବଳ ଏକ fallback ଭାବରେ କାର୍ଯ୍ୟ କରିପାରିବ। କେବଳ ଯେତେବେଳେ **ସମସ୍ତ**
+  weights 0 ହୋଇଯାଏ, ସେତେବେଳେ ଚୟନ ଏକସମାନ ହୋଇଯାଏ।
+- ଯେଉଁ steps ର ସମସ୍ତ targets ଅନୁପଲବ୍ଧ ଥାଏ — provider circuit breaker `OPEN`, connection
+  cooldown, model lockout — ସେଗୁଡ଼ିକ ଡ୍ର ହେବା ପୂର୍ବରୁ ହଟାଇ ଦିଆଯାଏ
+  (`open-sse/services/combo/targetResolution.ts`), ତେଣୁ ଗୋଟିଏ ସୁସ୍ଥ step ଅସ୍ଥାୟୀ ଭାବରେ
+  ପ୍ରତ୍ୟେକ request ଜିତିପାରିବ।
+- `stickyWeightedLimit` (combo config, default `1` = off) ପୁନର୍ବାର ଡ୍ର କରିବା ପୂର୍ବରୁ ସେହି ସଂଖ୍ୟକ
+  କ୍ରମାଗତ ସଫଳତା ପାଇଁ ଡ୍ର ହୋଇଥିବା step କୁ pin କରି ରଖେ।
 
-କଠୋର ଆବର୍ତ୍ତନ ପାଇଁ `round-robin` ବ୍ୟବହାର କରନ୍ତୁ; `weighted`ରେ ସମାନ ଓଜନ ପରିସଂଖ୍ୟାନଗତ — କଠୋର ନୁହେଁ — ସନ୍ତୁଳନ ପ୍ରଦାନ କରେ।
+କଠୋର ଘୂର୍ଣ୍ଣନ (rotation) ପାଇଁ `round-robin` ବ୍ୟବହାର କରନ୍ତୁ; `weighted` ଉପରେ ସମାନ weights ପରିସଂଖ୍ୟାନଗତ — କଠୋର ନୁହେଁ —
+ଭାରସାମ୍ୟ ପ୍ରଦାନ କରେ।
 
-### ଏଜେଣ୍ଟିକ୍ ପାଇପ୍ଲାଇନ୍ ମୋଡ୍
+### Agentic pipeline mode
 
-ଦୁଇ-ପଦକ୍ଷେପ ବିଶିଷ୍ଟ `pipeline` କମ୍ବୋ
-`config.agenticOrchestration.enabled` ସହିତ planner/executor ରାଉଟିଂକୁ ବାଛିପାରିବ। ପ୍ରଥମ target ପ୍ଲାନିଂ ଏବଂ ଅନ୍ତିମ ଉତ୍ତରଗୁଡ଼ିକର ଦାୟିତ୍ୱ ନିଏ;
-ଦ୍ୱିତୀୟ target କ୍ଲାଏଣ୍ଟ-ନେଟିଭ୍ tool call ନିର୍ଗତ କରେ। OmniRoute ଅନୁରୋଧ ପ୍ରୋଟୋକଲରୁ tool-result
-continuation ଚିହ୍ନଟ କରେ, ଆଉ ଏକ tool round ଆବଶ୍ୟକ କି ନାହିଁ plannerକୁ ପଚାରେ,
-ଏବଂ executor କିମ୍ବା planner ମଧ୍ୟରୁ ଯେକୌଣସି ଗୋଟିଏକୁ ଗତିଶୀଳ ଭାବରେ କ୍ଲାଏଣ୍ଟ-ସମ୍ମୁଖୀନ ଅନ୍ତିମ
-ପଦକ୍ଷେପ କରେ।
+ଏକ ଦୁଇ-ପଦକ୍ଷେପ ବିଶିଷ୍ଟ `pipeline` କମ୍ବୋ `config.agenticOrchestration.enabled` ସହିତ planner/executor ରାଉଟିଂକୁ ବାଛିପାରିବ। ପ୍ରଥମ ଟାର୍ଗେଟ୍ ଯୋଜନା (planning) ଏବଂ ଅନ୍ତିମ ଉତ୍ତରଗୁଡ଼ିକର ଦାୟିତ୍ୱ ନିଏ; ଦ୍ୱିତୀୟ ଟାର୍ଗେଟ୍ client-native ଟୁଲ୍ କଲ୍ (tool calls) ନିର୍ଗତ କରେ। OmniRoute ଅନୁରୋଧ ପ୍ରୋଟୋକଲରୁ tool-result ନିରନ୍ତରତା (continuations) ଚିହ୍ନଟ କରେ, ଅନ୍ୟ ଏକ ଟୁଲ୍ ରାଉଣ୍ଡ ଆବଶ୍ୟକ କି ନାହିଁ ତାହା planner କୁ ପଚାରେ, ଏବଂ ଗତିଶୀଳ ଭାବରେ (dynamically) executor କିମ୍ବା planner କୁ କ୍ଲାଏଣ୍ଟ-ମୁହାଁ ଅନ୍ତିମ ପଦକ୍ଷେପ କରେ।
+
+Tool-result ନିରନ୍ତରତା ଉପରେ, ଯେତେବେଳେ ଦୁଇଟି କ୍ରମାଗତ ସମ୍ପୂର୍ଣ୍ଣ ରାଉଣ୍ଡ ଅପରିବର୍ତ୍ତିତ ଫଳାଫଳ ସହିତ ସମାନ ଟୁଲ୍ କଲ୍‌ଗୁଡ଼ିକୁ ପୁନରାବୃତ୍ତି କରେ, କିମ୍ବା ଯେତେବେଳେ ଦୁଇଟି କ୍ରମାଗତ ରାଉଣ୍ଡରେ ପ୍ରତ୍ୟେକ ସ୍ପଷ୍ଟ ଭାବରେ ଚିହ୍ନିତ ଫଳାଫଳ ବିଫଳ ହୁଏ, ସେତେବେଳେ OmniRoute ଏକ୍ସିକ୍ୟୁସନ୍ ମଧ୍ୟ ବନ୍ଦ କରିଦିଏ। ପରିବର୍ତ୍ତିତ ଫଳାଫଳଗୁଡ଼ିକ ପୁନରାବୃତ୍ତି କଲ୍‌ଗୁଡ଼ିକୁ ଅନୁମତି ଦିଏ (ଉଦାହରଣ ସ୍ୱରୂପ, ପୋଲିଂ)। ଗାର୍ଡ ଏକ ନୂତନ ଉପଭୋକ୍ତା ଅନୁରୋଧରେ ପୁନଃସେଟ୍ ହୁଏ, ସମାନ୍ତରାଳ କଲ୍‌ଗୁଡ଼ିକୁ ଗୋଟିଏ ରାଉଣ୍ଡରେ ଗୋଷ୍ଠୀଭୁକ୍ତ କରେ, ଏବଂ Anthropic, Chat Completions, Responses ଏବଂ Gemini ଇତିହାସଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ। ଯଦିଓ ଏହା ଅନ୍ୟ ଏକ ଟୁଲ୍ ରାଉଣ୍ଡ ଅନୁରୋଧ କରେ, planner କାରଣ ପ୍ରାପ୍ତ କରେ ଏବଂ ଅନ୍ତିମ ଉତ୍ତରର ମାଲିକାନା ନିଏ।
 
 ```json
 {
@@ -335,36 +343,17 @@ continuation ଚିହ୍ନଟ କରେ, ଆଉ ଏକ tool round ଆବଶ୍
 }
 ```
 
-executor ଗୋଟିଏ responseରେ ଏକାଧିକ ସ୍ୱାଧୀନ call ନିର୍ଗତ କରିପାରେ। ନିର୍ଭରଶୀଳ callଗୁଡ଼ିକୁ
-ପରବର୍ତ୍ତୀ କ୍ଲାଏଣ୍ଟ tool-result turnରେ ପରିଚାଳନା କରାଯାଏ, ଏବଂ planner ପ୍ରତ୍ୟେକ result ସମୀକ୍ଷା କରେ।
-`maxToolRounds`ର ଡିଫଲ୍ଟ ମୂଲ୍ୟ `8` ଏବଂ ଏହା `1`–`32` ଗ୍ରହଣ କରେ; ସୀମାରେ ପହଞ୍ଚିବା ପରେ plannerକୁ
-ଉପଲବ୍ଧ ସର୍ବୋତ୍ତମ ଅନ୍ତିମ ଉତ୍ତର ଦେବାକୁ ହେବ। ଆଭ୍ୟନ୍ତରୀଣ planner ନିଷ୍ପତ୍ତିଗୁଡ଼ିକ buffer କରାଯାଏ, ଯେତେବେଳେ
-ଚୟନିତ କ୍ଲାଏଣ୍ଟ-ସମ୍ମୁଖୀନ response ମୂଳ streaming ପସନ୍ଦକୁ ଅପରିବର୍ତ୍ତିତ ରଖେ।
+Executor ଗୋଟିଏ ପ୍ରତିକ୍ରିୟାରେ ଏକାଧିକ ସ୍ୱାଧୀନ କଲ୍ ନିର୍ଗତ କରିପାରେ। ନିର୍ଭରଶୀଳ କଲ୍‌ଗୁଡ଼ିକ ପରବର୍ତ୍ତୀ କ୍ଲାଏଣ୍ଟ tool-result ଟର୍ଣ୍ଣଗୁଡ଼ିକରେ ପରିଚାଳିତ ହୁଏ, ଯେଉଁଥିରେ planner ପ୍ରତ୍ୟେକ ଫଳାଫଳର ସମୀକ୍ଷା କରେ। `maxToolRounds` ଡିଫଲ୍ଟ ଭାବରେ `8` ହୋଇଥାଏ ଏବଂ `1`–`32` ଗ୍ରହଣ କରେ; ଥରେ ପହଞ୍ଚିବା ପରେ, planner ନିଶ୍ଚିତ ଭାବରେ ସର୍ବୋତ୍ତମ ଉପଲବ୍ଧ ଅନ୍ତିମ ଉତ୍ତର ଉତ୍ପାଦନ କରିବ। ଆଭ୍ୟନ୍ତରୀଣ planner ନିଷ୍ପତ୍ତିଗୁଡ଼ିକ ବଫର୍ ହୋଇ ରହିଥାଏ, ଯେତେବେଳେ କି ଚୟନିତ କ୍ଲାଏଣ୍ଟ-ମୁହାଁ ପ୍ରତିକ୍ରିୟା ମୂଳ ଷ୍ଟ୍ରିମିଂ ପସନ୍ଦକୁ ସଂରକ୍ଷଣ କରେ।
 
-### `round-robin` sticky batch ଏବଂ account ବିସ୍ତାର
+### `round-robin` sticky ବ୍ୟାଚ୍ ଏବଂ ଆକାଉଣ୍ଟ ସମ୍ପ୍ରସାରଣ
 
-Round-robin batch ଆକାରରେ କାମ କରେ, ପ୍ରତି ପଦକ୍ଷେପରେ ଗୋଟିଏ ଅନୁରୋଧ ଭାବରେ ନୁହେଁ:
+Round-robin ବ୍ୟାଚ୍ ହୋଇଥାଏ, ପ୍ରତି-ପଦକ୍ଷେପ-ପ୍ରତି-ଗୋଟିଏ-ଅନୁରୋଧ ନୁହେଁ:
 
-- `stickyRoundRobinLimit` (ପ୍ରଥମେ combo config, ତା’ପରେ `comboStickyRoundRobinLimit`, ତା’ପରେ
-  `settings.stickyRoundRobinLimit`, ଡିଫଲ୍ଟ **3**) rotation ପୂର୍ବରୁ ସେହି targetକୁ ଏତିକି
-  କ୍ରମାଗତ ସଫଳତା ପାଇଁ ରଖେ। ପ୍ରତି-ଅନୁରୋଧ rotation ପାଇଁ combo overrideକୁ `1`ରେ
-  ସେଟ୍ କରନ୍ତୁ। combo editor ପ୍ରଭାବୀ ମୂଲ୍ୟ ଏବଂ ଏହା କେଉଁ layerରୁ ଆସିଛି ତାହା ଦର୍ଶାଏ।
-- `connectionAwareExpansion` (ପ୍ରଥମେ combo config, ତା’ପରେ settings, ଡିଫଲ୍ଟ **false**) rotation ପୂର୍ବରୁ
-  ପ୍ରତ୍ୟେକ provider-level stepକୁ per-account targetରେ ବିସ୍ତାର କରେ। Group-B strategyଗୁଡ଼ିକ
-  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
-  fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) ଏହା ସକ୍ରିୟ ନହେବା ପର୍ଯ୍ୟନ୍ତ provider-level ଦୃଶ୍ୟକୁ ବଜାୟ ରଖେ। combo editor
-  inherit / on / off ଉପଲବ୍ଧ କରାଏ; inherit ଗ୍ଲୋବାଲ୍ ଡିଫଲ୍ଟ (off) ବ୍ୟବହାର କରେ।
-- Prompt-cache locality routing (`promptCacheAffinityEnabled`, ଡିଫଲ୍ଟ **true**)
-  pinned connectionଗୁଡ଼ିକୁ ପୁନଃକ୍ରମବଦ୍ଧ କରେ, ଯାହାଦ୍ୱାରା ମେଳ ଖାଉଥିବା cache keyଗୁଡ଼ିକ ଗୋଟିଏ accountରେ ରହେ। pinned per-account stepଗୁଡ଼ିକ ମଧ୍ୟରେ
-  round-robin ଏବଂ weighted rotation ଅପେକ୍ଷା ଏହାର ଅଗ୍ରାଧିକାର ରହେ। କଠୋର rotation ଆବଶ୍ୟକ ହେଲେ
-  ସେଟିଂସ୍ → କମ୍ବୋ ଡିଫଲ୍ଟ ଅଧୀନରେ ଏହାକୁ off କରନ୍ତୁ। ଏଥିପାଇଁ କୌଣସି per-combo override ନାହିଁ।
+- `stickyRoundRobinLimit` (combo config, ତା'ପରେ `comboStickyRoundRobinLimit`, ତା'ପରେ `settings.stickyRoundRobinLimit`, ଡିଫଲ୍ଟ **3**) ଘୂର୍ଣ୍ଣନ (rotating) ପୂର୍ବରୁ ସେହି ସଂଖ୍ୟକ କ୍ରମାଗତ ସଫଳତା ପାଇଁ ସମାନ ଟାର୍ଗେଟ୍ ରଖେ। ଗୋଟିଏ-ଅନୁରୋଧ ଘୂର୍ଣ୍ଣନ ପାଇଁ କମ୍ବୋ ଓଭରରାଇଡ୍‌କୁ `1` ରେ ସେଟ୍ କରନ୍ତୁ। କମ୍ବୋ ଏଡିଟର୍ ପ୍ରଭାବଶାଳୀ ମୂଲ୍ୟ ଏବଂ ଏହା କେଉଁ ସ୍ତରରୁ ଆସିଛି ତାହା ଦର୍ଶାଏ।
+- `connectionAwareExpansion` (combo config, ତା'ପରେ settings, ଡିଫଲ୍ଟ **false**) ଘୂର୍ଣ୍ଣନ ପୂର୍ବରୁ ପ୍ରତ୍ୟେକ ପ୍ରଦାନକାରୀ-ସ୍ତରର ପଦକ୍ଷେପକୁ ପ୍ରତି-ଆକାଉଣ୍ଟ ଟାର୍ଗେଟ୍‌ରେ ବିସ୍ତାର କରେ। Group-B କୌଶଳଗୁଡ଼ିକ (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline) ଏହା ଚାଲୁ ନହେବା ପର୍ଯ୍ୟନ୍ତ ଏକ ପ୍ରଦାନକାରୀ-ସ୍ତରର ଦୃଶ୍ୟ ରଖନ୍ତି। କମ୍ବୋ ଏଡିଟର୍ inherit / on / off ପ୍ରକାଶ କରେ; inherit ବିଶ୍ୱବ୍ୟାପୀ ଡିଫଲ୍ଟ (off) ବ୍ୟବହାର କରେ।
+- Prompt-cache ଲୋକାଲିଟି ରାଉଟିଂ (`promptCacheAffinityEnabled`, ଡିଫଲ୍ଟ **true**) ପିନ୍ ହୋଇଥିବା ସଂଯୋଗଗୁଡ଼ିକୁ ପୁନଃକ୍ରମିତ କରେ ଯାହାଫଳରେ ମେଳ ଖାଉଥିବା କ୍ୟାଚ୍ କି'ଗୁଡ଼ିକ ଗୋଟିଏ ଆକାଉଣ୍ଟରେ ରହିବ। ଏହା ପିନ୍ ହୋଇଥିବା ପ୍ରତି-ଆକାଉଣ୍ଟ ପଦକ୍ଷେପଗୁଡ଼ିକରେ round-robin ଏବଂ weighted ଘୂର୍ଣ୍ଣନ ଉପରେ ପ୍ରାଥମିକତା ନିଏ। ଯଦି ଆପଣଙ୍କୁ କଠୋର ଘୂର୍ଣ୍ଣନ ଆବଶ୍ୟକ ହୁଏ, ତେବେ ଏହାକୁ Settings → Combo defaults ଅଧୀନରେ ବନ୍ଦ କରନ୍ତୁ। କୌଣସି ପ୍ରତି-କମ୍ବୋ ଓଭରରାଇଡ୍ ନାହିଁ।
 
-ଗୋଟିଏ modelରେ multi-account rotation ପାଇଁ, ତିନୋଟି pinned `connectionId` ବଦଳରେ
-sticky limit `1` ସହିତ **ଗୋଟିଏ dynamic-account step** (ଖାଲି
-`connectionId`, ସମ୍ପୂର୍ଣ୍ଣ pool)କୁ ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ।
-RR counter ଆଗକୁ ବଢ଼ୁଥିବା ସମୟରେ ମଧ୍ୟ pinned step ସହିତ affinity ସେହି ଏକ account ଉପରେ
-ଏକତ୍ରିତ ହୋଇଯାଏ।
+ଗୋଟିଏ ମଡେଲରେ ବହୁ-ଆକାଉଣ୍ଟ ଘୂର୍ଣ୍ଣନ ପାଇଁ, ତିନୋଟି ପିନ୍ ହୋଇଥିବା `connectionId` ପରିବର୍ତ୍ତେ sticky ସୀମା `1` ସହିତ **ଗୋଟିଏ ଗତିଶୀଳ-ଆକାଉଣ୍ଟ ପଦକ୍ଷେପ** (ଖାଲି `connectionId`, ସମ୍ପୂର୍ଣ୍ଣ ପୁଲ୍) କୁ ପସନ୍ଦ କରନ୍ତୁ। RR କାଉଣ୍ଟର୍ ଆଗକୁ ବଢ଼ୁଥିବା ସମୟରେ ମଧ୍ୟ ପିନ୍ ହୋଇଥିବା ପଦକ୍ଷେପ ଏବଂ affinity ସମାନ ଆକାଉଣ୍ଟ ଉପରେ ଏକତ୍ରିତ (collapse) ହୋଇଯାଏ।
 
 ## ଫ୍ୟୁଜନ୍ କୌଶଳ
 

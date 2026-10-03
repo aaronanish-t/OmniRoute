@@ -21,8 +21,9 @@ export async function isCatalogModelAllowedForKey(
   apiKey: string,
   model: { id?: unknown; root?: unknown },
   blockedModels: string[] | null | undefined,
-  deps: CatalogKeyFilterDeps
+  deps?: CatalogKeyFilterDeps
 ): Promise<boolean> {
+  deps ??= await import("@/lib/db/apiKeys");
   const id = typeof model.id === "string" ? model.id : "";
   if (await deps.isModelAllowedForKey(apiKey, id)) return true;
 

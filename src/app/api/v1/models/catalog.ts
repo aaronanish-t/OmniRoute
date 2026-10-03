@@ -1991,8 +1991,7 @@ async function buildUnifiedModelsResponseCore(
     const apiKey = extractApiKey(request);
     let finalModels = models;
     if (apiKey) {
-      const { isModelAllowedForKey, isModelBlockedByPatterns, getApiKeyMetadata } =
-        await import("@/lib/db/apiKeys");
+      const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
       const { isCatalogModelAllowedForKey } = await import("./catalogKeyFilter");
 
       // Quota-exclusive keys (allowedQuotas non-empty): list ONLY the pool's qtSd/*
@@ -2038,16 +2037,8 @@ async function buildUnifiedModelsResponseCore(
             }
             continue;
           }
-          // m.id is the full identifier (e.g. openai/gpt-4o); a bare m.root also matches
-          // so a bare allowlist entry works, but a namespaced root never does (#15409).
-          if (
-            await isCatalogModelAllowedForKey(apiKey, m, keyMeta.blockedModels, {
-              isModelAllowedForKey,
-              isModelBlockedByPatterns,
-            })
-          ) {
-            filtered.push(m);
-          }
+          // m.id decides; a bare m.root also matches a bare allowlist entry (#781, #15409).
+          if (await isCatalogModelAllowedForKey(apiKey, m, keyMeta.blockedModels)) filtered.push(m);
         }
         finalModels = filtered;
       }

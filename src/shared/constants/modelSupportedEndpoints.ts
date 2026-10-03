@@ -35,6 +35,12 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
   return normalized;
 }
 
+/** A System One model that does not also serve chat is a decision model (Clef, Clef Flash). */
+function isDecisionOnly(endpoints: readonly string[]): boolean {
+  if (!endpoints.includes("systemone")) return false;
+  return !endpoints.includes("chat") && !endpoints.includes("responses");
+}
+
 export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
   type?: "embedding" | "rerank" | "image" | "video" | "audio" | "decision";
   subtype?: "speech" | "transcription";
@@ -43,9 +49,7 @@ export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
   if (endpoints.includes("rerank")) return { type: "rerank" };
   if (endpoints.includes("images")) return { type: "image" };
   if (endpoints.includes("videos") || endpoints.includes("video")) return { type: "video" };
-  // A System One model that does not also serve chat is a decision model (Clef, Clef Flash).
-  const servesChat = endpoints.includes("chat") || endpoints.includes("responses");
-  if (endpoints.includes("systemone") && !servesChat) return { type: "decision" };
+  if (isDecisionOnly(endpoints)) return { type: "decision" };
 
   const supportsSpeech = endpoints.includes("audio-speech");
   const supportsTranscription =

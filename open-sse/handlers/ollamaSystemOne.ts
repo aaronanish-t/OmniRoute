@@ -241,26 +241,111 @@ function readUsage(parsed: Record<string, unknown>): { input: number; output: nu
   return { input: asCount(usage.input_tokens), output: asCount(usage.output_tokens) };
 }
 
+function buildUpstreamBody(body: OllamaSystemOneRequest): Record<string, unknown> {
+  return {
+    model: body.model,
+    state: body.state,
+    questions: body.questions,
+    ...(body.images?.length ? { images: body.images } : {}),
+    ...(body.keep_alive !== undefined ? { keep_alive: body.keep_alive } : {}),
+  };
+}
+
+function buildUpstreamHeaders(credentials: OllamaSystemOneCredentials | null) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+  // Ollama itself has no auth; a key is only meaningful behind an auth proxy.
+  if (credentials?.apiKey) headers.Authorization = `Bearer ${credentials.apiKey}`;
+  return headers;
+}
+
+function resolveUpstreamUrl(credentials: OllamaSystemOneCredentials | null): string {
+  const configuredBaseUrl = credentials?.providerSpecificData?.baseUrl;
+  return buildOllamaSystemOneUrl(typeof configuredBaseUrl === "string" ? configuredBaseUrl : null);
+}
+
+type FetchFailure =
+  { kind: "aborted" } | { kind: OllamaSystemOneFailureKind; status: number; message: string };
+
+/** Why the fetch threw: the caller left, the timeout fired, or the host is unreachable. */
+function classifyFetchFailure(
+  clientSignal: AbortSignal | null | undefined,
+  timeoutSignal: AbortSignal,
+  timeoutMs: number
+): FetchFailure {
+  // The caller going away says nothing about the connection.
+  if (clientSignal?.aborted) return { kind: "aborted" };
+  if (timeoutSignal.aborted) {
+    const seconds = Math.round(timeoutMs / 1000);
+    return {
+      kind: "timeout",
+      status: 504,
+      message: `Ollama System One did not answer within ${seconds}s`,
+    };
+  }
+  return { kind: "unreachable", status: 503, message: "Ollama System One upstream is unreachable" };
+}
+
+function parseJsonText(text: string): unknown {
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The answers payload, or the reason a 200 is not a usable System One response. */
+function readAnswersPayload(
+  parsed: unknown
+): { record: Record<string, unknown> } | { error: string } {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { error: "Ollama System One returned an invalid response" };
+  }
+  const record = parsed as Record<string, unknown>;
+  if (!record.answers || typeof record.answers !== "object") {
+    return { error: "Ollama System One response is missing answers" };
+  }
+  return { record };
+}
+
+async function clearRecoveredConnection(options: OllamaSystemOneOptions): Promise<void> {
+  if (!options.credentials?.connectionId) return;
+  try {
+    await (options.clearRecoveredState ?? defaultClearRecoveredState)(options.credentials);
+  } catch {
+    // Best effort, same as the other non-chat proxies.
+  }
+}
+
+function buildSuccessResponse(
+  record: Record<string, unknown>,
+  provider: string,
+  requestedModel: string,
+  startTime: number
+): Response {
+  const responseHeaders = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
+  attachOmniRouteMetaHeaders(responseHeaders, {
+    provider,
+    model: requestedModel,
+    costUsd: 0,
+    latencyMs: Date.now() - startTime,
+    requestId: generateRequestId(),
+  });
+  // Ollama echoes `nimble` for `nimble:latest`; report the id the caller routed with.
+  return new Response(JSON.stringify({ ...record, model: requestedModel }), {
+    status: 200,
+    headers: responseHeaders,
+  });
+}
+
 export async function handleOllamaSystemOne(options: OllamaSystemOneOptions): Promise<Response> {
   const startTime = Date.now();
   const provider = options.provider || OLLAMA_SYSTEMONE_PROVIDER;
   const connectionId = options.credentials?.connectionId || null;
-  const fetchImpl = options.fetchImpl ?? fetch;
   const markUnavailable = options.markAccountUnavailable ?? defaultMarkAccountUnavailable;
   const logCall = options.logCall ?? saveCallLog;
-  const configuredBaseUrl = options.credentials?.providerSpecificData?.baseUrl;
-  const url = buildOllamaSystemOneUrl(
-    typeof configuredBaseUrl === "string" ? configuredBaseUrl : null
-  );
-  const upstreamModel = options.body.model;
-
-  const upstreamBody: Record<string, unknown> = {
-    model: upstreamModel,
-    state: options.body.state,
-    questions: options.body.questions,
-    ...(options.body.images?.length ? { images: options.body.images } : {}),
-    ...(options.body.keep_alive !== undefined ? { keep_alive: options.body.keep_alive } : {}),
-  };
 
   const log = (status: number, extra: Record<string, unknown> = {}) => {
     logCall({
@@ -281,7 +366,7 @@ export async function handleOllamaSystemOne(options: OllamaSystemOneOptions): Pr
     log(status, { error: message.slice(0, 500) });
     if (connectionId && shouldMarkUnavailable(kind)) {
       try {
-        await markUnavailable(connectionId, status, message, provider, upstreamModel);
+        await markUnavailable(connectionId, status, message, provider, options.body.model);
       } catch {
         // Resilience bookkeeping must never mask the upstream answer.
       }
@@ -293,80 +378,35 @@ export async function handleOllamaSystemOne(options: OllamaSystemOneOptions): Pr
   const timeoutSignal = AbortSignal.timeout(timeoutMs);
   const signal = options.signal ? AbortSignal.any([options.signal, timeoutSignal]) : timeoutSignal;
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-  // Ollama itself has no auth; a key is only meaningful behind an auth proxy.
-  if (options.credentials?.apiKey) headers.Authorization = `Bearer ${options.credentials.apiKey}`;
-
   let res: Response;
   try {
-    res = await fetchImpl(url, {
+    res = await (options.fetchImpl ?? fetch)(resolveUpstreamUrl(options.credentials), {
       method: "POST",
-      headers,
-      body: JSON.stringify(upstreamBody),
+      headers: buildUpstreamHeaders(options.credentials),
+      body: JSON.stringify(buildUpstreamBody(options.body)),
       signal,
     });
   } catch {
-    if (options.signal?.aborted) {
-      // The caller went away; that says nothing about the connection.
+    const failure = classifyFetchFailure(options.signal, timeoutSignal, timeoutMs);
+    if (failure.kind === "aborted") {
       log(499, { error: "client aborted" });
       return errorResponse(499, "Request aborted by client");
     }
-    if (timeoutSignal.aborted) {
-      return fail(
-        "timeout",
-        504,
-        `Ollama System One did not answer within ${Math.round(timeoutMs / 1000)}s`
-      );
-    }
-    return fail("unreachable", 503, "Ollama System One upstream is unreachable");
+    return fail(failure.kind, failure.status, failure.message);
   }
 
   const text = await res.text().catch(() => "");
-  let parsed: unknown = null;
-  try {
-    parsed = text ? JSON.parse(text) : null;
-  } catch {
-    parsed = null;
-  }
-
+  const parsed = parseJsonText(text);
   if (!res.ok) {
     const message = readUpstreamError(parsed, text, res.status);
     return fail(classifyOllamaSystemOneFailure(res.status, message), res.status, message);
   }
 
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    return fail("upstream_error", 502, "Ollama System One returned an invalid response");
-  }
-  const record = parsed as Record<string, unknown>;
-  if (!record.answers || typeof record.answers !== "object") {
-    return fail("upstream_error", 502, "Ollama System One response is missing answers");
-  }
+  const payload = readAnswersPayload(parsed);
+  if ("error" in payload) return fail("upstream_error", 502, payload.error);
 
-  const usage = readUsage(record);
+  const usage = readUsage(payload.record);
   log(200, { tokens: { prompt_tokens: usage.input, completion_tokens: usage.output } });
-
-  if (connectionId && options.credentials) {
-    try {
-      await (options.clearRecoveredState ?? defaultClearRecoveredState)(options.credentials);
-    } catch {
-      // Best effort, same as the other non-chat proxies.
-    }
-  }
-
-  const responseHeaders = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
-  attachOmniRouteMetaHeaders(responseHeaders, {
-    provider,
-    model: options.requestedModel,
-    costUsd: 0,
-    latencyMs: Date.now() - startTime,
-    requestId: generateRequestId(),
-  });
-  // Ollama echoes `nimble` for `nimble:latest`; report the id the caller routed with.
-  return new Response(JSON.stringify({ ...record, model: options.requestedModel }), {
-    status: 200,
-    headers: responseHeaders,
-  });
+  await clearRecoveredConnection(options);
+  return buildSuccessResponse(payload.record, provider, options.requestedModel, startTime);
 }

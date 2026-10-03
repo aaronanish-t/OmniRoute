@@ -36,13 +36,16 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
 }
 
 export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
-  type?: "embedding" | "rerank" | "image" | "video" | "audio";
+  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "decision";
   subtype?: "speech" | "transcription";
 } {
   if (endpoints.includes("embeddings")) return { type: "embedding" };
   if (endpoints.includes("rerank")) return { type: "rerank" };
   if (endpoints.includes("images")) return { type: "image" };
   if (endpoints.includes("videos") || endpoints.includes("video")) return { type: "video" };
+  // A System One model that does not also serve chat is a decision model (Clef, Clef Flash).
+  const servesChat = endpoints.includes("chat") || endpoints.includes("responses");
+  if (endpoints.includes("systemone") && !servesChat) return { type: "decision" };
 
   const supportsSpeech = endpoints.includes("audio-speech");
   const supportsTranscription =

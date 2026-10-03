@@ -48,8 +48,6 @@ import {
   resolveCallerScopeContext,
   type McpToolExtraLike,
 } from "./scopeEnforcement.ts";
-import { getMcpHttpAuthHeadersForInternalFetch } from "./httpAuthContext.ts";
-import { getInternalServiceAuthHeaders } from "../../src/lib/api/internalServiceAuth.ts";
 import {
   handleSimulateRoute,
   handleSetBudgetGuard,
@@ -92,7 +90,6 @@ import {
 } from "../services/compression/engines/mcpAccessibility/constants.ts";
 import { getDbInstance, ensureDbInitialized } from "../../src/lib/db/core.ts";
 import { normalizeQuotaResponse } from "../../src/shared/contracts/quota.ts";
-import { resolveOmniRouteBaseUrl } from "../../src/shared/utils/resolveOmniRouteBaseUrl.ts";
 import { isMcpScopeEnforcementEnabled } from "../../src/shared/utils/featureFlags.ts";
 import { toSafeMcpErrorMessage } from "./errorMessage.ts";
 import { mcpFetchTimeoutSignal } from "./fetchTimeout.ts";
@@ -101,7 +98,6 @@ import { registerRadarCatalogTool } from "./radarCatalog.ts";
 import type { TextToolResult } from "./toolResult.ts";
 export { getMcpModelsCatalog } from "./catalog.ts";
 
-const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
 const MCP_ALLOWED_SCOPES = new Set(
   (process.env.OMNIROUTE_MCP_SCOPES || "")
     .split(",")
@@ -192,35 +188,17 @@ function normalizeComboModels(
   });
 }
 
-function getOmniRouteApiKey(): string {
-  return process.env.OMNIROUTE_API_KEY || "";
-}
+/**
+ * Re-exported rather than defined here, and imported (not just re-exported) because the
+ * tool handlers below call it by name — a bare `export … from` creates no local binding.
+ *
+ * #15159 M-06: the hop moved to its own leaf module so that `catalog.ts` and
+ * `radarCatalog.ts` can import it directly instead of reaching back into this file
+ * through `import("./server.ts")`, which closed two cycles in the dependency graph.
+ */
+import { omniRouteFetch } from "./internalFetch.ts";
 
-export async function omniRouteFetch(path: string, options: RequestInit = {}): Promise<unknown> {
-  const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const apiKey = getOmniRouteApiKey();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    // Static env key is only a fallback; the per-caller MCP identity forwarded via
-    // withMcpHttpAuthContext must win over it (#5819).
-    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-    ...getMcpHttpAuthHeadersForInternalFetch(),
-    ...((options.headers as Record<string, string>) || {}),
-    // Authenticate only the server-to-server hop. This does not replace or
-    // weaken the caller identity forwarded above.
-    ...getInternalServiceAuthHeaders(),
-  };
-
-  const signal = options.signal || mcpFetchTimeoutSignal("management");
-  const response = await fetch(url, { ...options, headers, signal });
-
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => "Unknown error");
-    throw new Error(`OmniRoute API error [${response.status}]: ${errorText}`);
-  }
-
-  return response.json();
-}
+export { omniRouteFetch };
 
 function withScopeEnforcement(
   toolName: string,

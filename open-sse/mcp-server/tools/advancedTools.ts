@@ -18,10 +18,12 @@
 
 import { logToolCall } from "../audit.ts";
 import { toSafeMcpErrorMessage } from "../errorMessage.ts";
-import { getMcpHttpAuthHeadersForInternalFetch } from "../httpAuthContext.ts";
-import { getInternalServiceAuthHeaders } from "../../../src/lib/api/internalServiceAuth.ts";
+// #15159 M-06: the hop lives in one place now. The private copy this replaced read
+// OMNIROUTE_API_KEY and the base URL at module load, so a key configured after import was
+// silently dropped; it also hardcoded a 30s timeout that ignored OMNIROUTE_MCP_FETCH_TIMEOUT_MS.
+import { omniRouteFetch as apiFetch } from "../internalFetch.ts";
+import { mcpFetchTimeoutSignal } from "../fetchTimeout.ts";
 import { normalizeQuotaResponse } from "../../../src/shared/contracts/quota.ts";
-import { resolveOmniRouteBaseUrl } from "../../../src/shared/utils/resolveOmniRouteBaseUrl.ts";
 import {
   getComboModelProvider,
   getComboModelString,
@@ -32,28 +34,6 @@ import type {
   RoutingStrategyValue,
 } from "../../../src/shared/constants/routingStrategies.ts";
 import { normalizeRoutingStrategy } from "../../../src/shared/constants/routingStrategies.ts";
-
-const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
-const OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY || "";
-
-async function apiFetch(path: string, options: RequestInit = {}): Promise<unknown> {
-  const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    // Static env key is only a fallback; the per-caller MCP identity forwarded via
-    // withMcpHttpAuthContext must win over it (#5819).
-    ...(OMNIROUTE_API_KEY ? { Authorization: `Bearer ${OMNIROUTE_API_KEY}` } : {}),
-    ...getMcpHttpAuthHeadersForInternalFetch(),
-    ...((options.headers as Record<string, string>) || {}),
-    ...getInternalServiceAuthHeaders(),
-  };
-  const response = await fetch(url, { ...options, headers, signal: AbortSignal.timeout(30000) });
-  if (!response.ok) {
-    const text = await response.text().catch(() => "Unknown error");
-    throw new Error(`API [${response.status}]: ${text}`);
-  }
-  return response.json();
-}
 
 type JsonRecord = Record<string, unknown>;
 
@@ -552,6 +532,13 @@ export async function handleTestCombo(args: { comboId: string; testPrompt: strin
                 max_tokens: 50,
                 stream: false,
               }),
+              // #15159 M-06 + #9717: this is the one hop in this module that waits on an
+              // upstream provider — every provider in the combo is probed in parallel, so a
+              // cold or slow one easily outlives the management-read budget. The module's
+              // deleted private copy hardcoded 30s; inheriting the shared hop would have
+              // silently dropped it to MCP_FETCH_TIMEOUT_MS (10s) and aborted live probes,
+              // which is exactly the failure #9717 was filed for on `route_request`.
+              signal: mcpFetchTimeoutSignal("upstream"),
             })
           );
           const usage = toRecord(resp.usage);

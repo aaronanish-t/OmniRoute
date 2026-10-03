@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — 免费的 AI 网关
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停歇地编码。所有 AI 工具 → 358 家提供者 — 150+ 免费 — 通过一个端点。将 Claude Code、Codex、Cursor、Cline、Copilot 和 Antigravity 转换为免费的 Claude / GPT / Gemini，并带有自动回退功能。RTK + Caveman 堆叠压缩可节省 15–95% 的 token（平均约 89%）— 永不触及限制。358 家 AI 提供者 · 150+ 免费套餐 · 每月约 16.2 亿免费 token · 19 种路由策略 · 0 美元起步。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停歇地编码。所有 AI 工具 → 357 家提供者 — 150+ 免费 — 通过一个端点。将 Claude Code、Codex、Cursor、Cline、Copilot 和 Antigravity 转换为免费的 Claude / GPT / Gemini，并带有自动回退功能。RTK + Caveman 堆叠压缩可节省 15–95% 的 token（平均约 89%）— 永不触及限制。357 家 AI 提供者 · 150+ 免费套餐 · 每月约 16.2 亿免费 token · 19 种路由策略 · 0 美元起步。"/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="承诺 — 一个端点，358 个提供者。自动回退可在有其他健康目标可用时保持路由。六大支柱：跨 358 个提供者的弹性回退 · 符合条件的工作负载可节省高达 95% 的令牌 · 150 多个免费层级和 54 个循环/无密钥永久免费提供者，0 美元即可开始使用 · 通过一个配置实现 36 个 CLI/代理集成 · 在 /v1 处兼容 OpenAI、Claude、Gemini 和 Responses API · 生产控制，包括断路器、TLS 隐身、MCP 110 工具、A2A、内存、护栏、评估以及跨 5,100 多个跟踪测试文件的 39,000 多个静态测试声明。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="承诺 — 一个端点，357 个提供者。自动回退可在有其他健康目标可用时保持路由。六大支柱：跨 357 个提供者的弹性回退 · 符合条件的工作负载可节省高达 95% 的令牌 · 150 多个免费层级和 54 个循环/无密钥永久免费提供者，0 美元即可开始使用 · 通过一个配置实现 36 个 CLI/代理集成 · 在 /v1 处兼容 OpenAI、Claude、Gemini 和 Responses API · 生产控制，包括断路器、TLS 隐身、MCP 110 工具、A2A、内存、护栏、评估以及跨 5,100 多个跟踪测试文件的 39,000 多个静态测试声明。"/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 358 providers, 150+ free tiers built in, 19 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 42 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 357 providers, 150+ free tiers built in, 19 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 42 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 完整方法论及与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 的逐项功能对比详情 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1264,7 +1264,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
   <tr><td nowrap><b>运行时</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>语言</b></td><td>TypeScript 6.0 — <code>src/</code> 和 <code>open-sse/</code> 中使用 <b>100% TypeScript</b>（自 v2.0 起，核心中零 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>数据库</b></td><td>better-sqlite3（SQLite、WAL 日志模式）+ LowDB（旧版 JSON）— 137 个领域模块，193 次迁移</td></tr>
+  <tr><td nowrap><b>数据库</b></td><td>better-sqlite3（SQLite、WAL 日志模式）+ LowDB（旧版 JSON）— 137 个领域模块，194 次迁移</td></tr>
   <tr><td nowrap><b>记忆</b></td><td>SQLite FTS5 全文检索 + int8 量化向量嵌入，类型化衰减</td></tr>
   <tr><td nowrap><b>模式</b></td><td>Zod 4 — MCP 工具输入/输出验证 + API 契约</td></tr>
   <tr><td nowrap><b>协议</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>

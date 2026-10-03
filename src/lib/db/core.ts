@@ -58,10 +58,9 @@ import { isNativeSqliteLoadError, isSqliteDriverUnavailableError } from "./sqlit
 export { toSnakeCase, toCamelCase, objToSnake, rowToCamel, cleanNulls } from "./caseMapping";
 export { isNativeSqliteLoadError, isSqliteDriverUnavailableError };
 import {
-  ensureProviderConnectionsColumns,
   ensureUsageHistoryAccountIndex,
-  ensureUsageHistoryColumns,
-  ensureCallLogsColumns,
+  ensureCoreSchemaColumns,
+  ensureMemoryCoreSchemaColumns,
   hasTable,
   quoteIdentifier,
   getTableColumns,
@@ -1019,10 +1018,7 @@ export function getDbInstance(): SqliteDatabase {
     const memoryDb = openSqliteDatabase(":memory:");
     memoryDb.pragma("journal_mode = WAL");
     memoryDb.exec(SCHEMA_SQL);
-    ensureUsageHistoryColumns(memoryDb);
-    ensureUsageHistoryAccountIndex(memoryDb);
-    ensureCallLogsColumns(memoryDb);
-    ensureProviderConnectionsColumns(memoryDb);
+    ensureMemoryCoreSchemaColumns(memoryDb);
     setDb(memoryDb);
     return memoryDb;
   }
@@ -1276,9 +1272,7 @@ export function getDbInstance(): SqliteDatabase {
     // column set, where the CREATE TABLE is a no-op but the indexes still reference columns
     // the healers below are the ones adding.
     db.exec(SCHEMA_TABLES_SQL);
-    ensureProviderConnectionsColumns(db);
-    ensureUsageHistoryColumns(db);
-    ensureCallLogsColumns(db);
+    ensureCoreSchemaColumns(db);
     db.exec(SCHEMA_INDEXES_SQL);
 
     // ── Versioned Migrations ──
@@ -1609,8 +1603,7 @@ function migrateFromJson(db: SqliteDatabase, jsonPath: string) {
         let rateLimitOverridesJson = serializeJsonField(conn.rateLimitOverrides);
         if (!hasOverrides && typeof conn.id === "string") {
           const existing = selectExistingOverrides.get(conn.id) as
-            | { rate_limit_overrides_json: string | null }
-            | undefined;
+            { rate_limit_overrides_json: string | null } | undefined;
           if (existing) rateLimitOverridesJson = existing.rate_limit_overrides_json;
         }
         insertConn.run({

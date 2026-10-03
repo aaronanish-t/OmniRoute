@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Bepul AI Shlyuzi
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kodlashni hech qachon to'xtatmang. Har bir AI vositasi → 358 provayder — 150+ bepul — bitta yakuniy nuqta orqali. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity-ni BEPUL Claude / GPT / Gemini-ga avtomatik zaxira bilan. RTK + Caveman qatlamli siqish 15–95% tokenlarni tejaydi (~89% oʻrtacha) — hech qachon chegaralarga duch kelmaysiz. 358 AI provayderlari · 150+ bepul darajalar · ~1.62B bepul tokenlar/oy · 19 marshrutlash strategiyasi · boshlash uchun $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kodlashni hech qachon to'xtatmang. Har bir AI vositasi → 357 provayder — 150+ bepul — bitta yakuniy nuqta orqali. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity-ni BEPUL Claude / GPT / Gemini-ga avtomatik zaxira bilan. RTK + Caveman qatlamli siqish 15–95% tokenlarni tejaydi (~89% oʻrtacha) — hech qachon chegaralarga duch kelmaysiz. 357 AI provayderlari · 150+ bepul darajalar · ~1.62B bepul tokenlar/oy · 19 marshrutlash strategiyasi · boshlash uchun $0."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaʼda — Bitta yakuniy nuqta va 358 provayder. Avtomatik zaxira boshqa sogʻlom maqsad mavjud boʻlganda marshrutizatsiyani davom ettiradi. Oltita ustun: 358 provayder boʻylab chidamli zaxira · mos ish yuklarida 95% gacha token tejash · 150+ bepul darajalar va 54 ta takrorlanuvchi/kalitsiz abadiy bepul provayderlar bilan boshlash uchun $0 · bitta konfiguratsiya orqali 36 ta CLI/agent integratsiyasi · /v1 da OpenAI, Claude, Gemini va Responses API mosligi · ishlab chiqarish nazorati, shu jumladan oʻchirgichlar, TLS yashirinligi, MCP 110 asboblari, A2A, xotira, himoya toʻsiqlari, baholashlar va 5,100+ kuzatilgan test fayllari boʻylab 39,000+ statik test deklaratsiyalari."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaʼda — Bitta yakuniy nuqta va 357 provayder. Avtomatik zaxira boshqa sogʻlom maqsad mavjud boʻlganda marshrutizatsiyani davom ettiradi. Oltita ustun: 357 provayder boʻylab chidamli zaxira · mos ish yuklarida 95% gacha token tejash · 150+ bepul darajalar va 54 ta takrorlanuvchi/kalitsiz abadiy bepul provayderlar bilan boshlash uchun $0 · bitta konfiguratsiya orqali 36 ta CLI/agent integratsiyasi · /v1 da OpenAI, Claude, Gemini va Responses API mosligi · ishlab chiqarish nazorati, shu jumladan oʻchirgichlar, TLS yashirinligi, MCP 110 asboblari, A2A, xotira, himoya toʻsiqlari, baholashlar va 5,100+ kuzatilgan test fayllari boʻylab 39,000+ statik test deklaratsiyalari."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Barcha **19 ta** strategiya — har bir kombo bosqichida aralashtirib moslashtir
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'ni nima ajratib turadi — 9router, OpenRouter, CLIProxyAPI va LiteLLM ga qarshi 13 ta imkoniyat bo'yicha eskirgan xususiyatlar surati. OmniRoute: 358 provayder, 150+ bepul darajalar o'rnatilgan, 19 marshrutlash strategiyasi, 12 dvigatelli token siqish, 110 ta vositaga ega o'rnatilgan MCP serveri, A2A agent protokoli, doimiy xotira, himoya vositalari, bulutli agentlar, TLS barmoq izi yashirinligi, Desktop/Termux/PWA va 42 ta i18n UI lokalizatsiyasi. OmniRoute MIT litsenziyasiga ega va o'z-o'zidan joylashtirilishi mumkin. Raqobatchilarning imkoniyatlari va soni o'zgarishi mumkin; bog'langan metodologiyaga qarang."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'ni nima ajratib turadi — 9router, OpenRouter, CLIProxyAPI va LiteLLM ga qarshi 13 ta imkoniyat bo'yicha eskirgan xususiyatlar surati. OmniRoute: 357 provayder, 150+ bepul darajalar o'rnatilgan, 19 marshrutlash strategiyasi, 12 dvigatelli token siqish, 110 ta vositaga ega o'rnatilgan MCP serveri, A2A agent protokoli, doimiy xotira, himoya vositalari, bulutli agentlar, TLS barmoq izi yashirinligi, Desktop/Termux/PWA va 42 ta i18n UI lokalizatsiyasi. OmniRoute MIT litsenziyasiga ega va o'z-o'zidan joylashtirilishi mumkin. Raqobatchilarning imkoniyatlari va soni o'zgarishi mumkin; bog'langan metodologiyaga qarang."/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI va LiteLLM ga qarshi to'liq metodologiya &amp; har bir xususiyat bo'yicha batafsil ma'lumot → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
   <tr><td nowrap><b>Ishlash muhiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Til</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (v2.0 dan beri yadroda <code>any</code> umuman yo‘q)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (eski JSON) — 137 ta domen moduli, 193 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (eski JSON) — 137 ta domen moduli, 194 ta migratsiya</td></tr>
   <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruv + int8-kvantlangan vektorli embeddinglar, tiplashtirilgan susayish</td></tr>
   <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalarining kirish/chiqishini tekshirish + API shartnomalari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — O Gateway de IA Gratuito
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 358 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 358 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 19 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 357 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 357 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 19 routing strategies · $0 to start."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A Promessa — Um endpoint e 358 fornecedores. O fallback automático mantém o encaminhamento enquanto houver outro alvo saudável disponível. Seis pilares: fallback resiliente em 358 fornecedores · até 95% de poupança de tokens em cargas de trabalho elegíveis · 0€ para começar com mais de 150 níveis gratuitos e 54 fornecedores recorrentes/sem chave gratuitos para sempre · 36 integrações CLI/agente através de uma configuração · compatibilidade com OpenAI, Claude, Gemini e Responses API em /v1 · controlos de produção incluindo disjuntores, stealth TLS, ferramentas MCP 110, A2A, memória, guardrails, avaliações e mais de 39.000 declarações de teste estáticas em mais de 5.100 ficheiros de teste rastreados."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A Promessa — Um endpoint e 357 fornecedores. O fallback automático mantém o encaminhamento enquanto houver outro alvo saudável disponível. Seis pilares: fallback resiliente em 357 fornecedores · até 95% de poupança de tokens em cargas de trabalho elegíveis · 0€ para começar com mais de 150 níveis gratuitos e 54 fornecedores recorrentes/sem chave gratuitos para sempre · 36 integrações CLI/agente através de uma configuração · compatibilidade com OpenAI, Claude, Gemini e Responses API em /v1 · controlos de produção incluindo disjuntores, stealth TLS, ferramentas MCP 110, A2A, memória, guardrails, avaliações e mais de 39.000 declarações de teste estáticas em mais de 5.100 ficheiros de teste rastreados."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Todas as **19** estratégias — combine-as livremente em cada passo do combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="O que distingue o OmniRoute — um instantâneo de funcionalidades desatualizado vs 9router, OpenRouter, CLIProxyAPI e LiteLLM em 13 capacidades. OmniRoute: 358 fornecedores, mais de 150 níveis gratuitos incorporados, 19 estratégias de encaminhamento, compressão de tokens de 12 motores, servidor MCP integrado com 110 ferramentas, protocolo de agente A2A, memória persistente, guardrails, agentes na nuvem, furtividade de impressão digital TLS, Desktop/Termux/PWA e 42 localizações de UI i18n. O OmniRoute tem licença MIT e é auto-hospedável. As capacidades e contagens dos concorrentes podem mudar; consulte a metodologia associada."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="O que distingue o OmniRoute — um instantâneo de funcionalidades desatualizado vs 9router, OpenRouter, CLIProxyAPI e LiteLLM em 13 capacidades. OmniRoute: 357 fornecedores, mais de 150 níveis gratuitos incorporados, 19 estratégias de encaminhamento, compressão de tokens de 12 motores, servidor MCP integrado com 110 ferramentas, protocolo de agente A2A, memória persistente, guardrails, agentes na nuvem, furtividade de impressão digital TLS, Desktop/Termux/PWA e 42 localizações de UI i18n. O OmniRoute tem licença MIT e é auto-hospedável. As capacidades e contagens dos concorrentes podem mudar; consulte a metodologia associada."/>
 
 <sub>📊 Metodologia completa &amp; detalhes por funcionalidade vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Métricas canónicas em 2026-08-24: **1.029 vídeos únicos** · **11.132.922 vi
   <tr><td nowrap><b>Ambiente de execução</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Linguagem</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> em <code>src/</code> e <code>open-sse/</code> (zero <code>any</code> no núcleo desde a v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Base de dados</b></td><td>better-sqlite3 (SQLite, registo WAL) + LowDB (JSON legado) — 137 módulos de domínio, 193 migrações</td></tr>
+  <tr><td nowrap><b>Base de dados</b></td><td>better-sqlite3 (SQLite, registo WAL) + LowDB (JSON legado) — 137 módulos de domínio, 194 migrações</td></tr>
   <tr><td nowrap><b>Memória</b></td><td>Texto integral SQLite FTS5 + embeddings vetoriais quantizados em int8, decaimento tipado</td></tr>
   <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validação de E/S de ferramentas MCP + contratos de API</td></tr>
   <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

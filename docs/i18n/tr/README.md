@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ücretsiz Yapay Zeka Ağ Geçidi
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kodlamayı asla bırakmayın. Her yapay zeka aracı → 358 sağlayıcı — 150'den fazlası ücretsiz — tek bir uç nokta üzerinden. Claude Code, Codex, Cursor, Cline, Copilot ve Antigravity'yi otomatik geri dönüş ile ÜCRETSİZ Claude / GPT / Gemini'ye dönüştürün. RTK + Caveman yığılmış sıkıştırma %15-95 token tasarrufu sağlar (ortalama ~%89) — asla limitlere takılmazsınız. 358 yapay zeka sağlayıcısı · 150'den fazla ücretsiz katman · ayda ~1.62 milyar ücretsiz token · 19 yönlendirme stratejisi · başlamak için 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kodlamayı asla bırakmayın. Her yapay zeka aracı → 357 sağlayıcı — 150'den fazlası ücretsiz — tek bir uç nokta üzerinden. Claude Code, Codex, Cursor, Cline, Copilot ve Antigravity'yi otomatik geri dönüş ile ÜCRETSİZ Claude / GPT / Gemini'ye dönüştürün. RTK + Caveman yığılmış sıkıştırma %15-95 token tasarrufu sağlar (ortalama ~%89) — asla limitlere takılmazsınız. 357 yapay zeka sağlayıcısı · 150'den fazla ücretsiz katman · ayda ~1.62 milyar ücretsiz token · 19 yönlendirme stratejisi · başlamak için 0 $."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaat — Tek bir uç nokta ve 358 sağlayıcı. Başka sağlıklı bir hedef mevcutken otomatik geri dönüş yönlendirmeyi sürdürür. Altı temel ilke: 358 sağlayıcı arasında esnek geri dönüş · uygun iş yüklerinde %95'e varan token tasarrufu · 150'den fazla ücretsiz katman ve 54 tekrarlayan/anahtarsız sonsuza dek ücretsiz sağlayıcı ile başlamak için 0 $ · tek bir yapılandırma ile 36 CLI/ajan entegrasyonu · /v1 adresinde OpenAI, Claude, Gemini ve Responses API uyumluluğu · devre kesiciler, TLS gizliliği, MCP 110 araçları, A2A, bellek, koruma kalkanları, değerlendirmeler ve 5.100'den fazla takip edilen test dosyasında 39.000'den fazla statik test bildirimi dahil üretim kontrolleri."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaat — Tek bir uç nokta ve 357 sağlayıcı. Başka sağlıklı bir hedef mevcutken otomatik geri dönüş yönlendirmeyi sürdürür. Altı temel ilke: 357 sağlayıcı arasında esnek geri dönüş · uygun iş yüklerinde %95'e varan token tasarrufu · 150'den fazla ücretsiz katman ve 54 tekrarlayan/anahtarsız sonsuza dek ücretsiz sağlayıcı ile başlamak için 0 $ · tek bir yapılandırma ile 36 CLI/ajan entegrasyonu · /v1 adresinde OpenAI, Claude, Gemini ve Responses API uyumluluğu · devre kesiciler, TLS gizliliği, MCP 110 araçları, A2A, bellek, koruma kalkanları, değerlendirmeler ve 5.100'den fazla takip edilen test dosyasında 39.000'den fazla statik test bildirimi dahil üretim kontrolleri."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Kombo oluşturmanız gerekmez. Modelinizi `auto` (veya bir varyantı) olarak aya
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'u farklı kılan nedir — 9router, OpenRouter, CLIProxyAPI ve LiteLLM'e karşı 13 yetenek üzerinden eski tarihli bir özellik anlık görüntüsü. OmniRoute: 358 sağlayıcı, 150'den fazla yerleşik ücretsiz katman, 19 yönlendirme stratejisi, 12 motorlu token sıkıştırma, 110 araçlı yerleşik MCP sunucusu, A2A aracı protokolü, kalıcı bellek, güvenlik önlemleri, bulut aracıları, TLS parmak izi gizliliği, Masaüstü/Termux/PWA ve 42 uluslararası kullanıcı arayüzü yerel ayarı. OmniRoute MIT lisanslıdır ve kendi kendine barındırılabilir. Rakip yetenekleri ve sayıları değişebilir; bağlantılı metodolojiye bakın."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'u farklı kılan nedir — 9router, OpenRouter, CLIProxyAPI ve LiteLLM'e karşı 13 yetenek üzerinden eski tarihli bir özellik anlık görüntüsü. OmniRoute: 357 sağlayıcı, 150'den fazla yerleşik ücretsiz katman, 19 yönlendirme stratejisi, 12 motorlu token sıkıştırma, 110 araçlı yerleşik MCP sunucusu, A2A aracı protokolü, kalıcı bellek, güvenlik önlemleri, bulut aracıları, TLS parmak izi gizliliği, Masaüstü/Termux/PWA ve 42 uluslararası kullanıcı arayüzü yerel ayarı. OmniRoute MIT lisanslıdır ve kendi kendine barındırılabilir. Rakip yetenekleri ve sayıları değişebilir; bağlantılı metodolojiye bakın."/>
 
 <sub>📊 Tam metodoloji ve özellik bazında detay vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1260,7 +1260,7 @@ Doğrulama metrikleri: 1002 takip edilen video · 7.069.190 bilinen görüntüle
   <tr><td nowrap><b>Çalışma Zamanı</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Dil</b></td><td>TypeScript 6.0 — <code>src/</code> ve <code>open-sse/</code> genelinde <b>%100 TypeScript</b> (v2.0'dan beri çekirdekte sıfır <code>any</code>)</td></tr>
   <tr><td nowrap><b>Çatı</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Veritabanı</b></td><td>better-sqlite3 (SQLite, WAL günlükleme) + LowDB (eski JSON) — 137 etki alanı modülü, 193 geçiş</td></tr>
+  <tr><td nowrap><b>Veritabanı</b></td><td>better-sqlite3 (SQLite, WAL günlükleme) + LowDB (eski JSON) — 137 etki alanı modülü, 194 geçiş</td></tr>
   <tr><td nowrap><b>Bellek</b></td><td>SQLite FTS5 tam metin + int8 nicemlenmiş vektör gömmeleri, türü belirlenmiş azalma</td></tr>
   <tr><td nowrap><b>Şemalar</b></td><td>Zod 4 — MCP aracı G/Ç doğrulaması + API sözleşmeleri</td></tr>
   <tr><td nowrap><b>Protokoller</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

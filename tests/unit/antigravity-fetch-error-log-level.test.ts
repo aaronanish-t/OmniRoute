@@ -10,7 +10,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { AntigravityExecutor } from "../../open-sse/executors/antigravity.ts";
-import { seedAntigravityIdeVersionCache } from "../../open-sse/services/antigravityVersion.ts";
+import { seedAntigravityCliVersionCache } from "../../open-sse/services/antigravityVersion.ts";
 
 type Levels = { error: string[]; warn: string[] };
 
@@ -54,7 +54,7 @@ const input = {
 test("a fetch failure with a fallback URL left logs warn, names the cause, and the request still succeeds", async () => {
   const executor = new AntigravityExecutor();
   const originalFetch = globalThis.fetch;
-  seedAntigravityIdeVersionCache("2.1.1");
+  seedAntigravityCliVersionCache("1.2.3");
   let calls = 0;
   globalThis.fetch = (async () => {
     calls += 1;
@@ -78,7 +78,7 @@ test("a fetch failure with a fallback URL left logs warn, names the cause, and t
 test("a fetch failure on the last URL logs error and still names the cause", async () => {
   const executor = new AntigravityExecutor();
   const originalFetch = globalThis.fetch;
-  seedAntigravityIdeVersionCache("2.1.1");
+  seedAntigravityCliVersionCache("1.2.3");
   globalThis.fetch = (async () => {
     throw fetchFailed("ECONNRESET");
   }) as typeof fetch;

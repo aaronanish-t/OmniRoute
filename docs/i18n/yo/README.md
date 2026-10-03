@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ẹnu-ọ̀nà AI Ọfẹ́
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Máṣe dẹ́kun kíkọ koodu. Gbogbo ohun èlò AI → àwọn olùpèsè 358 — 150+ ọfẹ́ — nípasẹ̀ ààyè kan ṣoṣo. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity sínú Claude / GPT / Gemini ỌFẸ́ pẹ̀lú ìpadàsẹ́yìn aládàáṣe. Ìfúnpọ̀ RTK + Caveman tí a kó jọpọ̀ ń fi 15–95% àmì pamọ́ (~89% ní àpapọ̀) — kò ní dé àwọn ààlà rárá. Àwọn olùpèsè AI 358 · Àwọn ìpele ọfẹ́ 150+ · ~1.62B àmì ọfẹ́/oṣù · Àwọn ìlànà ìdarí 19 · $0 láti bẹ̀rẹ̀."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Máṣe dẹ́kun kíkọ koodu. Gbogbo ohun èlò AI → àwọn olùpèsè 357 — 150+ ọfẹ́ — nípasẹ̀ ààyè kan ṣoṣo. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity sínú Claude / GPT / Gemini ỌFẸ́ pẹ̀lú ìpadàsẹ́yìn aládàáṣe. Ìfúnpọ̀ RTK + Caveman tí a kó jọpọ̀ ń fi 15–95% àmì pamọ́ (~89% ní àpapọ̀) — kò ní dé àwọn ààlà rárá. Àwọn olùpèsè AI 357 · Àwọn ìpele ọfẹ́ 150+ · ~1.62B àmì ọfẹ́/oṣù · Àwọn ìlànà ìdarí 19 · $0 láti bẹ̀rẹ̀."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ìlérí Náà — Ojúami kan àti àwọn olùpèsè 358. Ìpadàsẹ́yìn aládàáṣe máa ń jẹ́ kí ìtọ́nisọ́nà máa lọ níwọ̀n ìgbà tí ibi àfojúsùn mìíràn tí ó wà ní àlàáfíà bá wà. Òpó mẹ́fà: ìpadàsẹ́yìn tó lágbára kọjá àwọn olùpèsè 358 · títí di ìfipamọ́ àmì-ìdámọ̀ 95% lórí àwọn iṣẹ́ tó yẹ · $0 láti bẹ̀rẹ̀ pẹ̀lú àwọn ìpele ọ̀fẹ́ 150+ àti àwọn olùpèsè ọ̀fẹ́-títí-láé 54 tí ó máa ń padà wá/láìsí kókó · Àwọn ìṣepọ̀ CLI/aṣojú 36 nípasẹ̀ ìṣètò kan · Ìbámu API OpenAI, Claude, Gemini àti Responses ní /v1 · àwọn ìdarí ìṣelọ́pọ̀ pẹ̀lú àwọn onígbàgbọ́ àgbékalẹ̀, ìfipamọ́ TLS, àwọn ohun èlò MCP 110, A2A, ìrántí, àwọn ìdènà, àwọn ìṣàyẹ̀wò àti àwọn ìpolongo ìdánwò tí kò yípadà 39,000+ kọjá àwọn faili ìdánwò tí a tọ́pa 5,100+."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ìlérí Náà — Ojúami kan àti àwọn olùpèsè 357. Ìpadàsẹ́yìn aládàáṣe máa ń jẹ́ kí ìtọ́nisọ́nà máa lọ níwọ̀n ìgbà tí ibi àfojúsùn mìíràn tí ó wà ní àlàáfíà bá wà. Òpó mẹ́fà: ìpadàsẹ́yìn tó lágbára kọjá àwọn olùpèsè 357 · títí di ìfipamọ́ àmì-ìdámọ̀ 95% lórí àwọn iṣẹ́ tó yẹ · $0 láti bẹ̀rẹ̀ pẹ̀lú àwọn ìpele ọ̀fẹ́ 150+ àti àwọn olùpèsè ọ̀fẹ́-títí-láé 54 tí ó máa ń padà wá/láìsí kókó · Àwọn ìṣepọ̀ CLI/aṣojú 36 nípasẹ̀ ìṣètò kan · Ìbámu API OpenAI, Claude, Gemini àti Responses ní /v1 · àwọn ìdarí ìṣelọ́pọ̀ pẹ̀lú àwọn onígbàgbọ́ àgbékalẹ̀, ìfipamọ́ TLS, àwọn ohun èlò MCP 110, A2A, ìrántí, àwọn ìdènà, àwọn ìṣàyẹ̀wò àti àwọn ìpolongo ìdánwò tí kò yípadà 39,000+ kọjá àwọn faili ìdánwò tí a tọ́pa 5,100+."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Gbogbo ọgbọ́n **19** — dapọ̀ wọn bí o ṣe fẹ́ fún ìgbésẹ̀
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kí ni ó mú OmniRoute yàtọ̀ — àtúnyẹ̀wò àwọn ànímọ́ tó ti pẹ́ tí a fi wé 9router, OpenRouter, CLIProxyAPI àti LiteLLM lórí àwọn agbára 13. OmniRoute: 358 àwọn olùpèsè, 150+ àwọn ìpele ọ̀fẹ́ tí a kọ́ sínú rẹ̀, 19 àwọn ìlànà ìdarí ọ̀nà, ìfúnpọ̀ àmì-ọ̀rọ̀ ẹ̀rọ-ìṣiṣẹ́ 12, olùpèsè MCP tí a kọ́ sínú rẹ̀ pẹ̀lú àwọn irinṣẹ́ 110, ìlànà aṣojú A2A, ìrántí tí kò lè parẹ́, àwọn ààlà ààbò, àwọn aṣojú àwọsánmà, ìfipamọ́ ìka-ìtẹ̀wọ́ TLS, Ojú-ìwé Ojú-iṣẹ́/Termux/PWA àti àwọn èdè ìbílẹ̀ UI i18n 42. OmniRoute jẹ́ ìwé-àṣẹ MIT àti pé ó lè gbàlejò ara rẹ̀. Àwọn agbára àti iye àwọn olùdíje lè yí padà; wo ọ̀nà ìṣiṣẹ́ tí a so mọ́."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kí ni ó mú OmniRoute yàtọ̀ — àtúnyẹ̀wò àwọn ànímọ́ tó ti pẹ́ tí a fi wé 9router, OpenRouter, CLIProxyAPI àti LiteLLM lórí àwọn agbára 13. OmniRoute: 357 àwọn olùpèsè, 150+ àwọn ìpele ọ̀fẹ́ tí a kọ́ sínú rẹ̀, 19 àwọn ìlànà ìdarí ọ̀nà, ìfúnpọ̀ àmì-ọ̀rọ̀ ẹ̀rọ-ìṣiṣẹ́ 12, olùpèsè MCP tí a kọ́ sínú rẹ̀ pẹ̀lú àwọn irinṣẹ́ 110, ìlànà aṣojú A2A, ìrántí tí kò lè parẹ́, àwọn ààlà ààbò, àwọn aṣojú àwọsánmà, ìfipamọ́ ìka-ìtẹ̀wọ́ TLS, Ojú-ìwé Ojú-iṣẹ́/Termux/PWA àti àwọn èdè ìbílẹ̀ UI i18n 42. OmniRoute jẹ́ ìwé-àṣẹ MIT àti pé ó lè gbàlejò ara rẹ̀. Àwọn agbára àti iye àwọn olùdíje lè yí padà; wo ọ̀nà ìṣiṣẹ́ tí a so mọ́."/>
 
 <sub>📊 Ọ̀nà ìṣiṣẹ́ kíkún &amp; àlàyé àwọn ànímọ́ kọ̀ọ̀kan ní wíwé 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1273,7 +1273,7 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
   <tr><td nowrap><b>Àyíká ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> káàkiri <code>src/</code> àti <code>open-sse/</code> (kò sí <code>any</code> nínú apá pàtàkì láti v2.0)</td></tr>
   <tr><td nowrap><b>Ètò-iṣẹ́</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ìpamọ́ dátà</b></td><td>better-sqlite3 (SQLite, ìforúkọsílẹ̀ WAL) + LowDB (ogún JSON) — àwọn módù 137 fún àwọn àgbègbè iṣẹ́, àwọn ìṣíkiri 193</td></tr>
+  <tr><td nowrap><b>Ìpamọ́ dátà</b></td><td>better-sqlite3 (SQLite, ìforúkọsílẹ̀ WAL) + LowDB (ogún JSON) — àwọn módù 137 fún àwọn àgbègbè iṣẹ́, àwọn ìṣíkiri 194</td></tr>
   <tr><td nowrap><b>Ìrántí</b></td><td>Ìṣàwárí ọ̀rọ̀-kíkún SQLite FTS5 + àwọn àfihàn fekito tí a dín sí int8, ìdínkù onírú</td></tr>
   <tr><td nowrap><b>Àwọn àwòṣe</b></td><td>Zod 4 — ìfọwọ́sí I/O irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
   <tr><td nowrap><b>Àwọn ìlànà</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

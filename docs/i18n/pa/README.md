@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — ਮੁਫ਼ਤ AI ਗੇਟਵੇ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ਕੋਡਿੰਗ ਕਰਨਾ ਕਦੇ ਨਾ ਛੱਡੋ। ਹਰ AI ਟੂਲ → 358 ਪ੍ਰਦਾਤਾ — 150+ ਮੁਫ਼ਤ — ਇੱਕ ਐਂਡਪੁਆਇੰਟ ਰਾਹੀਂ। Claude Code, Codex, Cursor, Cline, Copilot ਅਤੇ Antigravity ਨੂੰ ਮੁਫ਼ਤ Claude / GPT / Gemini ਵਿੱਚ ਆਟੋ-ਫਾਲਬੈਕ ਨਾਲ। RTK + Caveman ਸਟੈਕਡ ਕੰਪਰੈਸ਼ਨ 15–95% ਟੋਕਨਾਂ ਦੀ ਬਚਤ ਕਰਦਾ ਹੈ (~89% ਔਸਤ) — ਕਦੇ ਸੀਮਾਵਾਂ 'ਤੇ ਨਾ ਪਹੁੰਚੋ। 358 AI ਪ੍ਰਦਾਤਾ · 150+ ਮੁਫ਼ਤ ਟਾਇਰ · ~1.62B ਮੁਫ਼ਤ ਟੋਕਨ/ਮਹੀਨਾ · 19 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ · ਸ਼ੁਰੂ ਕਰਨ ਲਈ $0।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ਕੋਡਿੰਗ ਕਰਨਾ ਕਦੇ ਨਾ ਛੱਡੋ। ਹਰ AI ਟੂਲ → 357 ਪ੍ਰਦਾਤਾ — 150+ ਮੁਫ਼ਤ — ਇੱਕ ਐਂਡਪੁਆਇੰਟ ਰਾਹੀਂ। Claude Code, Codex, Cursor, Cline, Copilot ਅਤੇ Antigravity ਨੂੰ ਮੁਫ਼ਤ Claude / GPT / Gemini ਵਿੱਚ ਆਟੋ-ਫਾਲਬੈਕ ਨਾਲ। RTK + Caveman ਸਟੈਕਡ ਕੰਪਰੈਸ਼ਨ 15–95% ਟੋਕਨਾਂ ਦੀ ਬਚਤ ਕਰਦਾ ਹੈ (~89% ਔਸਤ) — ਕਦੇ ਸੀਮਾਵਾਂ 'ਤੇ ਨਾ ਪਹੁੰਚੋ। 357 AI ਪ੍ਰਦਾਤਾ · 150+ ਮੁਫ਼ਤ ਟਾਇਰ · ~1.62B ਮੁਫ਼ਤ ਟੋਕਨ/ਮਹੀਨਾ · 19 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ · ਸ਼ੁਰੂ ਕਰਨ ਲਈ $0।"/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ਵਾਅਦਾ — ਇੱਕ ਐਂਡਪੁਆਇੰਟ ਅਤੇ 358 ਪ੍ਰਦਾਤਾ। ਆਟੋਮੈਟਿਕ ਫਾਲਬੈਕ ਰੂਟਿੰਗ ਨੂੰ ਜਾਰੀ ਰੱਖਦਾ ਹੈ ਜਦੋਂ ਕਿ ਕੋਈ ਹੋਰ ਸਿਹਤਮੰਦ ਟੀਚਾ ਉਪਲਬਧ ਹੁੰਦਾ ਹੈ। ਛੇ ਥੰਮ੍ਹ: 358 ਪ੍ਰਦਾਤਾਵਾਂ ਵਿੱਚ ਲਚਕਦਾਰ ਫਾਲਬੈਕ · ਯੋਗ ਵਰਕਲੋਡਾਂ 'ਤੇ 95% ਤੱਕ ਟੋਕਨ ਬਚਤ · 150+ ਮੁਫਤ ਟੀਅਰਾਂ ਅਤੇ 54 ਆਵਰਤੀ/ਕੁੰਜੀ ਰਹਿਤ ਸਦਾ ਲਈ ਮੁਫਤ ਪ੍ਰਦਾਤਾਵਾਂ ਨਾਲ ਸ਼ੁਰੂ ਕਰਨ ਲਈ $0 · ਇੱਕ ਕੌਂਫਿਗ ਰਾਹੀਂ 36 CLI/ਏਜੰਟ ਏਕੀਕਰਣ · OpenAI, Claude, Gemini ਅਤੇ /v1 'ਤੇ ਜਵਾਬ API ਅਨੁਕੂਲਤਾ · ਉਤਪਾਦਨ ਨਿਯੰਤਰਣ ਜਿਸ ਵਿੱਚ ਸਰਕਟ ਬ੍ਰੇਕਰ, TLS ਸਟੀਲਥ, MCP 110 ਟੂਲ, A2A, ਮੈਮੋਰੀ, ਗਾਰਡਰੇਲ, ਇਵੈਲ ਅਤੇ 5,100+ ਟਰੈਕ ਕੀਤੇ ਟੈਸਟ ਫਾਈਲਾਂ ਵਿੱਚ 39,000+ ਸਥਿਰ ਟੈਸਟ ਘੋਸ਼ਣਾਵਾਂ ਸ਼ਾਮਲ ਹਨ।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ਵਾਅਦਾ — ਇੱਕ ਐਂਡਪੁਆਇੰਟ ਅਤੇ 357 ਪ੍ਰਦਾਤਾ। ਆਟੋਮੈਟਿਕ ਫਾਲਬੈਕ ਰੂਟਿੰਗ ਨੂੰ ਜਾਰੀ ਰੱਖਦਾ ਹੈ ਜਦੋਂ ਕਿ ਕੋਈ ਹੋਰ ਸਿਹਤਮੰਦ ਟੀਚਾ ਉਪਲਬਧ ਹੁੰਦਾ ਹੈ। ਛੇ ਥੰਮ੍ਹ: 357 ਪ੍ਰਦਾਤਾਵਾਂ ਵਿੱਚ ਲਚਕਦਾਰ ਫਾਲਬੈਕ · ਯੋਗ ਵਰਕਲੋਡਾਂ 'ਤੇ 95% ਤੱਕ ਟੋਕਨ ਬਚਤ · 150+ ਮੁਫਤ ਟੀਅਰਾਂ ਅਤੇ 54 ਆਵਰਤੀ/ਕੁੰਜੀ ਰਹਿਤ ਸਦਾ ਲਈ ਮੁਫਤ ਪ੍ਰਦਾਤਾਵਾਂ ਨਾਲ ਸ਼ੁਰੂ ਕਰਨ ਲਈ $0 · ਇੱਕ ਕੌਂਫਿਗ ਰਾਹੀਂ 36 CLI/ਏਜੰਟ ਏਕੀਕਰਣ · OpenAI, Claude, Gemini ਅਤੇ /v1 'ਤੇ ਜਵਾਬ API ਅਨੁਕੂਲਤਾ · ਉਤਪਾਦਨ ਨਿਯੰਤਰਣ ਜਿਸ ਵਿੱਚ ਸਰਕਟ ਬ੍ਰੇਕਰ, TLS ਸਟੀਲਥ, MCP 110 ਟੂਲ, A2A, ਮੈਮੋਰੀ, ਗਾਰਡਰੇਲ, ਇਵੈਲ ਅਤੇ 5,100+ ਟਰੈਕ ਕੀਤੇ ਟੈਸਟ ਫਾਈਲਾਂ ਵਿੱਚ 39,000+ ਸਥਿਰ ਟੈਸਟ ਘੋਸ਼ਣਾਵਾਂ ਸ਼ਾਮਲ ਹਨ।"/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ਕੀ ਚੀਜ਼ OmniRoute ਨੂੰ ਵੱਖਰਾ ਬਣਾਉਂਦੀ ਹੈ — 9router, OpenRouter, CLIProxyAPI ਅਤੇ LiteLLM ਦੇ ਮੁਕਾਬਲੇ 13 ਸਮਰੱਥਾਵਾਂ ਵਿੱਚ ਇੱਕ ਪੁਰਾਣਾ ਫੀਚਰ ਸਨੈਪਸ਼ਾਟ। OmniRoute: 358 ਪ੍ਰਦਾਤਾ, 150+ ਮੁਫਤ ਟਾਇਰ ਬਿਲਟ-ਇਨ, 19 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ, 12-ਇੰਜਣ ਟੋਕਨ ਕੰਪਰੈਸ਼ਨ, 110 ਟੂਲਸ ਦੇ ਨਾਲ ਬਿਲਟ-ਇਨ MCP ਸਰਵਰ, A2A ਏਜੰਟ ਪ੍ਰੋਟੋਕੋਲ, ਸਥਾਈ ਮੈਮੋਰੀ, ਗਾਰਡਰੇਲ, ਕਲਾਉਡ ਏਜੰਟ, TLS ਫਿੰਗਰਪ੍ਰਿੰਟ ਸਟੀਲਥ, ਡੈਸਕਟਾਪ/ਟਰਮਕਸ/PWA ਅਤੇ 42 i18n UI ਲੋਕੇਲ। OmniRoute MIT-ਲਾਇਸੰਸਸ਼ੁਦਾ ਹੈ ਅਤੇ ਸਵੈ-ਹੋਸਟ ਕਰਨ ਯੋਗ ਹੈ। ਪ੍ਰਤੀਯੋਗੀ ਸਮਰੱਥਾਵਾਂ ਅਤੇ ਗਿਣਤੀ ਬਦਲ ਸਕਦੀ ਹੈ; ਲਿੰਕ ਕੀਤੀ ਵਿਧੀ ਵੇਖੋ।"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ਕੀ ਚੀਜ਼ OmniRoute ਨੂੰ ਵੱਖਰਾ ਬਣਾਉਂਦੀ ਹੈ — 9router, OpenRouter, CLIProxyAPI ਅਤੇ LiteLLM ਦੇ ਮੁਕਾਬਲੇ 13 ਸਮਰੱਥਾਵਾਂ ਵਿੱਚ ਇੱਕ ਪੁਰਾਣਾ ਫੀਚਰ ਸਨੈਪਸ਼ਾਟ। OmniRoute: 357 ਪ੍ਰਦਾਤਾ, 150+ ਮੁਫਤ ਟਾਇਰ ਬਿਲਟ-ਇਨ, 19 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ, 12-ਇੰਜਣ ਟੋਕਨ ਕੰਪਰੈਸ਼ਨ, 110 ਟੂਲਸ ਦੇ ਨਾਲ ਬਿਲਟ-ਇਨ MCP ਸਰਵਰ, A2A ਏਜੰਟ ਪ੍ਰੋਟੋਕੋਲ, ਸਥਾਈ ਮੈਮੋਰੀ, ਗਾਰਡਰੇਲ, ਕਲਾਉਡ ਏਜੰਟ, TLS ਫਿੰਗਰਪ੍ਰਿੰਟ ਸਟੀਲਥ, ਡੈਸਕਟਾਪ/ਟਰਮਕਸ/PWA ਅਤੇ 42 i18n UI ਲੋਕੇਲ। OmniRoute MIT-ਲਾਇਸੰਸਸ਼ੁਦਾ ਹੈ ਅਤੇ ਸਵੈ-ਹੋਸਟ ਕਰਨ ਯੋਗ ਹੈ। ਪ੍ਰਤੀਯੋਗੀ ਸਮਰੱਥਾਵਾਂ ਅਤੇ ਗਿਣਤੀ ਬਦਲ ਸਕਦੀ ਹੈ; ਲਿੰਕ ਕੀਤੀ ਵਿਧੀ ਵੇਖੋ।"/>
 
 <sub>📊 ਪੂਰੀ ਵਿਧੀ ਅਤੇ ਪ੍ਰਤੀ-ਵਿਸ਼ੇਸ਼ਤਾ ਵੇਰਵਾ ਬਨਾਮ 9router, OpenRouter, CLIProxyAPI ਅਤੇ LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ਵੀ ਇਸਨ�
   <tr><td nowrap><b>ਰਨਟਾਈਮ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ਭਾਸ਼ਾ</b></td><td>TypeScript 6.0 — <code>src/</code> ਅਤੇ <code>open-sse/</code> ਵਿੱਚ ਹਰ ਥਾਂ <b>100% TypeScript</b> (v2.0 ਤੋਂ ਕੋਰ ਵਿੱਚ ਇੱਕ ਵੀ <code>any</code> ਨਹੀਂ)</td></tr>
   <tr><td nowrap><b>ਫਰੇਮਵਰਕ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ਡੇਟਾਬੇਸ</b></td><td>better-sqlite3 (SQLite, WAL ਜਰਨਲਿੰਗ) + LowDB (JSON ਵਿਰਾਸਤੀ) — 137 ਡੋਮੇਨ ਮੋਡੀਊਲ, 193 ਮਾਈਗ੍ਰੇਸ਼ਨ</td></tr>
+  <tr><td nowrap><b>ਡੇਟਾਬੇਸ</b></td><td>better-sqlite3 (SQLite, WAL ਜਰਨਲਿੰਗ) + LowDB (JSON ਵਿਰਾਸਤੀ) — 137 ਡੋਮੇਨ ਮੋਡੀਊਲ, 194 ਮਾਈਗ੍ਰੇਸ਼ਨ</td></tr>
   <tr><td nowrap><b>ਮੈਮੋਰੀ</b></td><td>SQLite FTS5 ਪੂਰਾ-ਟੈਕਸਟ + int8-ਕਵਾਂਟਾਈਜ਼ਡ ਵੈਕਟਰ ਐਮਬੈਡਿੰਗਜ਼, ਟਾਈਪਡ ਡਿਕੇ</td></tr>
   <tr><td nowrap><b>ਸਕੀਮਾਵਾਂ</b></td><td>Zod 4 — MCP ਟੂਲ I/O ਪ੍ਰਮਾਣਿਕਤਾ + API ਇਕਰਾਰਨਾਮੇ</td></tr>
   <tr><td nowrap><b>ਪ੍ਰੋਟੋਕੋਲ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

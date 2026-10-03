@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Besplatni AI prolaz (Gateway)
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikada ne prekidajte kodiranje. Svaki AI alat → 358 provajdera — 150+ besplatnih — kroz jednu tačku (endpoint). Claude Code, Codex, Cursor, Cline, Copilot i Antigravity u BESPLATNI Claude / GPT / Gemini sa automatskim vraćanjem na rezervnu opciju (fallback). RTK + Caveman složena kompresija štedi 15–95% tokena (~89% prosječno) — nikada ne dostižite limite. 358 AI provajdera · 150+ besplatnih paketa · ~1.62B besplatnih tokena/mj · 19 strategija usmjeravanja · 0 $ za početak."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikada ne prekidajte kodiranje. Svaki AI alat → 357 provajdera — 150+ besplatnih — kroz jednu tačku (endpoint). Claude Code, Codex, Cursor, Cline, Copilot i Antigravity u BESPLATNI Claude / GPT / Gemini sa automatskim vraćanjem na rezervnu opciju (fallback). RTK + Caveman složena kompresija štedi 15–95% tokena (~89% prosječno) — nikada ne dostižite limite. 357 AI provajdera · 150+ besplatnih paketa · ~1.62B besplatnih tokena/mj · 19 strategija usmjeravanja · 0 $ za početak."/>
 
 </div>
 
@@ -240,7 +240,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 358 provajdera. Automatski povratak nastavlja rutiranje dok je dostupan drugi zdravi cilj. Šest stubova: otporan povratak preko 358 provajdera · do 95% uštede tokena na prihvatljivim radnim opterećenjima · 0 USD za početak sa 150+ besplatnih nivoa i 54 ponavljajuća/bez ključa besplatna provajdera zauvijek · 36 CLI/agent integracija kroz jednu konfiguraciju · OpenAI, Claude, Gemini i Responses API kompatibilnost na /v1 · kontrole proizvodnje uključujući prekidače, TLS stealth, MCP 110 alate, A2A, memoriju, zaštitne ograde, evaluacije i 39.000+ statičkih test deklaracija preko 5.100+ praćenih test datoteka."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 357 provajdera. Automatski povratak nastavlja rutiranje dok je dostupan drugi zdravi cilj. Šest stubova: otporan povratak preko 357 provajdera · do 95% uštede tokena na prihvatljivim radnim opterećenjima · 0 USD za početak sa 150+ besplatnih nivoa i 54 ponavljajuća/bez ključa besplatna provajdera zauvijek · 36 CLI/agent integracija kroz jednu konfiguraciju · OpenAI, Claude, Gemini i Responses API kompatibilnost na /v1 · kontrole proizvodnje uključujući prekidače, TLS stealth, MCP 110 alate, A2A, memoriju, zaštitne ograde, evaluacije i 39.000+ statičkih test deklaracija preko 5.100+ praćenih test datoteka."/>
 
 <br/>
 <br/>
@@ -493,7 +493,7 @@ Svih **19** strategija — kombinirajte ih po svakom koraku kombinacije:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Po čemu se OmniRoute ističe — zastarjeli snimak funkcija u poređenju sa 9router, OpenRouter, CLIProxyAPI i LiteLLM kroz 13 mogućnosti. OmniRoute: 358 provajdera, 150+ besplatnih nivoa ugrađenih, 19 strategija rutiranja, kompresija tokena sa 12 motora, ugrađeni MCP server sa 110 alata, A2A agent protokol, trajna memorija, zaštitne ograde, cloud agenti, TLS fingerprint stealth, Desktop/Termux/PWA i 42 i18n UI lokalizacije. OmniRoute je licenciran pod MIT licencom i može se samostalno hostovati. Mogućnosti i brojke konkurenata se mogu promijeniti; pogledajte povezanu metodologiju."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Po čemu se OmniRoute ističe — zastarjeli snimak funkcija u poređenju sa 9router, OpenRouter, CLIProxyAPI i LiteLLM kroz 13 mogućnosti. OmniRoute: 357 provajdera, 150+ besplatnih nivoa ugrađenih, 19 strategija rutiranja, kompresija tokena sa 12 motora, ugrađeni MCP server sa 110 alata, A2A agent protokol, trajna memorija, zaštitne ograde, cloud agenti, TLS fingerprint stealth, Desktop/Termux/PWA i 42 i18n UI lokalizacije. OmniRoute je licenciran pod MIT licencom i može se samostalno hostovati. Mogućnosti i brojke konkurenata se mogu promijeniti; pogledajte povezanu metodologiju."/>
 
 <sub>📊 Potpuna metodologija &amp; detalji po funkciji u poređenju sa 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1280,7 +1280,7 @@ Kanonske metrike na dan 2026-08-24: **1.029 jedinstvenih videozapisa** · **11.1
   <tr><td nowrap><b>Izvršno okruženje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> u <code>src/</code> i <code>open-sse/</code> (bez ijednog <code>any</code> u jezgri od v2.0)</td></tr>
   <tr><td nowrap><b>Radni okvir</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL vođenje dnevnika) + LowDB (naslijeđeni JSON) — 137 domenskih modula, 193 migracije</td></tr>
+  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL vođenje dnevnika) + LowDB (naslijeđeni JSON) — 137 domenskih modula, 194 migracije</td></tr>
   <tr><td nowrap><b>Memorija</b></td><td>SQLite FTS5 pretraga punog teksta + int8-kvantizirani vektorski ugrađeni prikazi, tipizirano slabljenje</td></tr>
   <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — validacija ulaza/izlaza MCP alata + API ugovori</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

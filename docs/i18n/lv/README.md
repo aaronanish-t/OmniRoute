@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Bezmaksas AI vārteja
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nekad nepārtrauciet kodēšanu. Katrs AI rīks → 358 pakalpojumu sniedzēji — 150+ bezmaksas — caur vienu galapunktu. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity uz BEZMAKSAS Claude / GPT / Gemini ar automātisku atgriešanos. RTK + Caveman sakrautā kompresija ietaupa 15–95% žetonu (~89% vidēji) — nekad nesasniedziet ierobežojumus. 358 AI pakalpojumu sniedzēji · 150+ bezmaksas līmeņi · ~1.62B bezmaksas žetonu/mēn. · 19 maršrutēšanas stratēģijas · $0, lai sāktu."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nekad nepārtrauciet kodēšanu. Katrs AI rīks → 357 pakalpojumu sniedzēji — 150+ bezmaksas — caur vienu galapunktu. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity uz BEZMAKSAS Claude / GPT / Gemini ar automātisku atgriešanos. RTK + Caveman sakrautā kompresija ietaupa 15–95% žetonu (~89% vidēji) — nekad nesasniedziet ierobežojumus. 357 AI pakalpojumu sniedzēji · 150+ bezmaksas līmeņi · ~1.62B bezmaksas žetonu/mēn. · 19 maršrutēšanas stratēģijas · $0, lai sāktu."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Solījums — Viens galapunkts un 358 nodrošinātāji. Automātiska atgriešanās nodrošina maršrutēšanu, kamēr ir pieejams cits vesels mērķis. Seši pīlāri: elastīga atgriešanās starp 358 nodrošinātājiem · līdz pat 95% marķieru ietaupījums piemērotām darba slodzēm · 0 $ sākšanai ar 150+ bezmaksas līmeņiem un 54 atkārtotiem/bezatslēgu mūžīgi bezmaksas nodrošinātājiem · 36 CLI/aģentu integrācijas caur vienu konfigurāciju · OpenAI, Claude, Gemini un Responses API saderība pie /v1 · ražošanas kontroles, tostarp circuit breakers, TLS stealth, MCP 110 rīki, A2A, atmiņa, guardrails, evals un 39 000+ statisku testu deklarācijas vairāk nekā 5 100+ izsekotos testa failos."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Solījums — Viens galapunkts un 357 nodrošinātāji. Automātiska atgriešanās nodrošina maršrutēšanu, kamēr ir pieejams cits vesels mērķis. Seši pīlāri: elastīga atgriešanās starp 357 nodrošinātājiem · līdz pat 95% marķieru ietaupījums piemērotām darba slodzēm · 0 $ sākšanai ar 150+ bezmaksas līmeņiem un 54 atkārtotiem/bezatslēgu mūžīgi bezmaksas nodrošinātājiem · 36 CLI/aģentu integrācijas caur vienu konfigurāciju · OpenAI, Claude, Gemini un Responses API saderība pie /v1 · ražošanas kontroles, tostarp circuit breakers, TLS stealth, MCP 110 rīki, A2A, atmiņa, guardrails, evals un 39 000+ statisku testu deklarācijas vairāk nekā 5 100+ izsekotos testa failos."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Visas **19** stratēģijas — brīvi kombinējiet tās katrā kombinācijas sol
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ar ko OmniRoute atšķiras — novecojis funkciju momentuzņēmums salīdzinājumā ar 9router, OpenRouter, CLIProxyAPI un LiteLLM 13 iespējās. OmniRoute: 358 pakalpojumu sniedzēji, 150+ iebūvēti bezmaksas līmeņi, 19 maršrutēšanas stratēģijas, 12 dzinēju marķieru kompresija, iebūvēts MCP serveris ar 110 rīkiem, A2A aģentu protokols, pastāvīga atmiņa, aizsargmehānismi, mākoņa aģenti, TLS pirkstu nospiedumu slēpšana, Desktop/Termux/PWA un 42 i18n UI lokalizācijas. OmniRoute ir licencēts ar MIT licenci un ir pašmitināms. Konkurentu iespējas un skaits var mainīties; skatiet saistīto metodoloģiju."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ar ko OmniRoute atšķiras — novecojis funkciju momentuzņēmums salīdzinājumā ar 9router, OpenRouter, CLIProxyAPI un LiteLLM 13 iespējās. OmniRoute: 357 pakalpojumu sniedzēji, 150+ iebūvēti bezmaksas līmeņi, 19 maršrutēšanas stratēģijas, 12 dzinēju marķieru kompresija, iebūvēts MCP serveris ar 110 rīkiem, A2A aģentu protokols, pastāvīga atmiņa, aizsargmehānismi, mākoņa aģenti, TLS pirkstu nospiedumu slēpšana, Desktop/Termux/PWA un 42 i18n UI lokalizācijas. OmniRoute ir licencēts ar MIT licenci un ir pašmitināms. Konkurentu iespējas un skaits var mainīties; skatiet saistīto metodoloģiju."/>
 
 <sub>📊 Pilna metodoloģija un detalizēta informācija par funkcijām salīdzinājumā ar 9router, OpenRouter, CLIProxyAPI un LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Kanoniskie rādītāji 2026-08-24: **1.029 unikāli videoklipi** · **11.132.922
   <tr><td nowrap><b>Izpildvide</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Valoda</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> visā <code>src/</code> un <code>open-sse/</code> (pamatkodā nav neviena <code>any</code> kopš v2.0)</td></tr>
   <tr><td nowrap><b>Ietvars</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantotais JSON formāts) — 137 domēna moduļi, 193 migrācijas</td></tr>
+  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantotais JSON formāts) — 137 domēna moduļi, 194 migrācijas</td></tr>
   <tr><td nowrap><b>Atmiņa</b></td><td>SQLite FTS5 pilnteksta meklēšana + int8 kvantizēti vektoru iegultie attēlojumi, tipizēta vājināšanās</td></tr>
   <tr><td nowrap><b>Shēmas</b></td><td>Zod 4 — MCP rīku ievades/izvades validācija + API līgumi</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

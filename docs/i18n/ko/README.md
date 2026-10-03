@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — 무료 AI 게이트웨이
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 코딩을 멈추지 마세요. 모든 AI 도구 → 358개 공급자 — 150개 이상 무료 — 단일 엔드포인트를 통해. Claude Code, Codex, Cursor, Cline, Copilot 및 Antigravity를 자동 대체 기능으로 무료 Claude / GPT / Gemini로. RTK + Caveman 스택 압축으로 15–95% 토큰 절약 (평균 ~89%) — 한도에 도달할 일이 없습니다. 358개 AI 공급자 · 150개 이상 무료 티어 · 월 ~16.2억 무료 토큰 · 19가지 라우팅 전략 · 시작 비용 $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 코딩을 멈추지 마세요. 모든 AI 도구 → 357개 공급자 — 150개 이상 무료 — 단일 엔드포인트를 통해. Claude Code, Codex, Cursor, Cline, Copilot 및 Antigravity를 자동 대체 기능으로 무료 Claude / GPT / Gemini로. RTK + Caveman 스택 압축으로 15–95% 토큰 절약 (평균 ~89%) — 한도에 도달할 일이 없습니다. 357개 AI 공급자 · 150개 이상 무료 티어 · 월 ~16.2억 무료 토큰 · 19가지 라우팅 전략 · 시작 비용 $0."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="약속 — 하나의 엔드포인트와 358개의 제공업체. 자동 대체 기능은 다른 정상적인 대상이 사용 가능한 동안 라우팅을 유지합니다. 여섯 가지 핵심 요소: 358개 제공업체에 걸친 탄력적인 대체 기능 · 적격 워크로드에서 최대 95% 토큰 절약 · 150개 이상의 무료 티어와 54개의 반복/키리스 영구 무료 제공업체로 $0부터 시작 · 하나의 설정을 통해 36개의 CLI/에이전트 통합 · /v1에서 OpenAI, Claude, Gemini 및 Responses API 호환성 · 회로 차단기, TLS 스텔스, MCP 110 도구, A2A, 메모리, 가드레일, 평가 및 5,100개 이상의 추적된 테스트 파일에 걸친 39,000개 이상의 정적 테스트 선언을 포함한 프로덕션 제어."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="약속 — 하나의 엔드포인트와 357개의 제공업체. 자동 대체 기능은 다른 정상적인 대상이 사용 가능한 동안 라우팅을 유지합니다. 여섯 가지 핵심 요소: 357개 제공업체에 걸친 탄력적인 대체 기능 · 적격 워크로드에서 최대 95% 토큰 절약 · 150개 이상의 무료 티어와 54개의 반복/키리스 영구 무료 제공업체로 $0부터 시작 · 하나의 설정을 통해 36개의 CLI/에이전트 통합 · /v1에서 OpenAI, Claude, Gemini 및 Responses API 호환성 · 회로 차단기, TLS 스텔스, MCP 110 도구, A2A, 메모리, 가드레일, 평가 및 5,100개 이상의 추적된 테스트 파일에 걸친 39,000개 이상의 정적 테스트 선언을 포함한 프로덕션 제어."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute가 차별화되는 점 — 9router, OpenRouter, CLIProxyAPI 및 LiteLLM과 비교한 13가지 기능에 대한 최신 기능 스냅샷. OmniRoute: 358개 공급자, 150개 이상의 무료 티어 내장, 19가지 라우팅 전략, 12개 엔진 토큰 압축, 110개 도구가 포함된 내장 MCP 서버, A2A 에이전트 프로토콜, 영구 메모리, 가드레일, 클라우드 에이전트, TLS 지문 스텔스, Desktop/Termux/PWA 및 42개 i18n UI 로케일. OmniRoute는 MIT 라이선스이며 자체 호스팅 가능합니다. 경쟁사 기능 및 개수는 변경될 수 있습니다. 연결된 방법론을 참조하십시오."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute가 차별화되는 점 — 9router, OpenRouter, CLIProxyAPI 및 LiteLLM과 비교한 13가지 기능에 대한 최신 기능 스냅샷. OmniRoute: 357개 공급자, 150개 이상의 무료 티어 내장, 19가지 라우팅 전략, 12개 엔진 토큰 압축, 110개 도구가 포함된 내장 MCP 서버, A2A 에이전트 프로토콜, 영구 메모리, 가드레일, 클라우드 에이전트, TLS 지문 스텔스, Desktop/Termux/PWA 및 42개 i18n UI 로케일. OmniRoute는 MIT 라이선스이며 자체 호스팅 가능합니다. 경쟁사 기능 및 개수는 변경될 수 있습니다. 연결된 방법론을 참조하십시오."/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI 및 LiteLLM과 비교한 전체 방법론 및 기능별 세부 정보 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1264,7 +1264,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
   <tr><td nowrap><b>런타임</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>언어</b></td><td>TypeScript 6.0 — <code>src/</code> 및 <code>open-sse/</code> 전체에 걸쳐 <b>100% TypeScript</b> 사용(v2.0부터 코어의 <code>any</code> 사용 0건)</td></tr>
   <tr><td nowrap><b>프레임워크</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>데이터베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (레거시 JSON) — 137개 도메인 모듈, 193개 마이그레이션</td></tr>
+  <tr><td nowrap><b>데이터베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (레거시 JSON) — 137개 도메인 모듈, 194개 마이그레이션</td></tr>
   <tr><td nowrap><b>메모리</b></td><td>SQLite FTS5 전문 검색 + int8 양자화 벡터 임베딩, 유형화된 감쇠</td></tr>
   <tr><td nowrap><b>스키마</b></td><td>Zod 4 — MCP 도구 입출력 검증 + API 계약</td></tr>
   <tr><td nowrap><b>프로토콜</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

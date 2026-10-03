@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — 無料のAIゲートウェイ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 358 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 358 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 19 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 357 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 357 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 19 routing strategies · $0 to start."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="約束 — 1つのエンドポイントと358のプロバイダー。自動フォールバックにより、健全なターゲットが利用可能な限りルーティングを維持します。6つの柱：358のプロバイダーにわたる回復力のあるフォールバック · 対象となるワークロードで最大95%のトークン節約 · 150以上の無料ティアと54の定期/キーレス永久無料プロバイダーで$0から開始 · 1つの設定で36のCLI/エージェント統合 · /v1でのOpenAI、Claude、GeminiおよびResponses API互換性 · サーキットブレーカー、TLSステルス、MCP 110ツール、A2A、メモリ、ガードレール、評価、5,100以上の追跡されたテストファイルにわたる39,000以上の静的テスト宣言を含む本番環境制御。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="約束 — 1つのエンドポイントと357のプロバイダー。自動フォールバックにより、健全なターゲットが利用可能な限りルーティングを維持します。6つの柱：357のプロバイダーにわたる回復力のあるフォールバック · 対象となるワークロードで最大95%のトークン節約 · 150以上の無料ティアと54の定期/キーレス永久無料プロバイダーで$0から開始 · 1つの設定で36のCLI/エージェント統合 · /v1でのOpenAI、Claude、GeminiおよびResponses API互換性 · サーキットブレーカー、TLSステルス、MCP 110ツール、A2A、メモリ、ガードレール、評価、5,100以上の追跡されたテストファイルにわたる39,000以上の静的テスト宣言を含む本番環境制御。"/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute の特徴 — 9router、OpenRouter、CLIProxyAPI、LiteLLM との13の機能における最新の機能スナップショット。OmniRoute: 358のプロバイダー、150以上の無料ティアを内蔵、19のルーティング戦略、12エンジンのトークン圧縮、110のツールを備えた内蔵MCPサーバー、A2Aエージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLSフィンガープリントステルス、デスクトップ/Termux/PWA、42のi18n UIロケール。OmniRoute は MIT ライセンスで自己ホスト可能です。競合の機能と数は変更される可能性があります。リンクされた方法論を参照してください。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute の特徴 — 9router、OpenRouter、CLIProxyAPI、LiteLLM との13の機能における最新の機能スナップショット。OmniRoute: 357のプロバイダー、150以上の無料ティアを内蔵、19のルーティング戦略、12エンジンのトークン圧縮、110のツールを備えた内蔵MCPサーバー、A2Aエージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLSフィンガープリントステルス、デスクトップ/Termux/PWA、42のi18n UIロケール。OmniRoute は MIT ライセンスで自己ホスト可能です。競合の機能と数は変更される可能性があります。リンクされた方法論を参照してください。"/>
 
 <sub>📊 9router、OpenRouter、CLIProxyAPI、LiteLLM との比較における完全な方法論と機能ごとの詳細 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
   <tr><td nowrap><b>ランタイム</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>言語</b></td><td>TypeScript 6.0 — <code>src/</code>および<code>open-sse/</code>の全体で<b>100% TypeScript</b>（v2.0以降、コアでの<code>any</code>使用はゼロ）</td></tr>
   <tr><td nowrap><b>フレームワーク</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（従来のJSON）— 137個のドメインモジュール、193件のマイグレーション</td></tr>
+  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（従来のJSON）— 137個のドメインモジュール、194件のマイグレーション</td></tr>
   <tr><td nowrap><b>メモリ</b></td><td>SQLite FTS5全文検索 + int8量子化ベクトル埋め込み、型付き減衰</td></tr>
   <tr><td nowrap><b>スキーマ</b></td><td>Zod 4 — MCPツールの入出力検証 + APIコントラクト</td></tr>
   <tr><td nowrap><b>プロトコル</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>

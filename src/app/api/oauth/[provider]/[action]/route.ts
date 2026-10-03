@@ -7,6 +7,7 @@ import {
   finalizeTokens,
   requestDeviceCode,
   pollForToken,
+  resolveOAuthProviderName,
   resolveBrowserOAuthRedirectUri,
 } from "@/lib/oauth/providers";
 import {
@@ -162,7 +163,8 @@ export async function GET(
   if (authResponse) return authResponse;
 
   try {
-    const { provider, action } = await params;
+    const { provider: requestedProvider, action } = await params;
+    const provider = resolveOAuthProviderName(requestedProvider);
     const { searchParams } = new URL(request.url);
 
     if (action === "authorize") {
@@ -422,7 +424,8 @@ export async function POST(
   if (authResponse) return authResponse;
 
   try {
-    const { provider, action } = await params;
+    const { provider: requestedProvider, action } = await params;
+    const provider = resolveOAuthProviderName(requestedProvider);
 
     // Phase 1 hotfix (2026-05-29): retired PKCE flows return 410 Gone before
     // body parsing. Devin Desktop/CLI `poll-callback` is permanently retired;

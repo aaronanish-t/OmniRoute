@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Den Gratis AI-Gatewayen
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Aldri slutt å kode. Hvert AI-verktøy → 358 leverandører — 150+ gratis — gjennom ett endepunkt. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity til GRATIS Claude / GPT / Gemini med automatisk tilbakefall. RTK + Caveman stablet komprimering sparer 15–95 % tokens (~89 % i snitt) — aldri nå grenser. 358 AI-leverandører · 150+ gratisnivåer · ~1.62B gratis tokens/måned · 19 rutingstrategier · $0 å starte."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Aldri slutt å kode. Hvert AI-verktøy → 357 leverandører — 150+ gratis — gjennom ett endepunkt. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity til GRATIS Claude / GPT / Gemini med automatisk tilbakefall. RTK + Caveman stablet komprimering sparer 15–95 % tokens (~89 % i snitt) — aldri nå grenser. 357 AI-leverandører · 150+ gratisnivåer · ~1.62B gratis tokens/måned · 19 rutingstrategier · $0 å starte."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ett endepunkt og 358 leverandører. Automatisk tilbakefall opprettholder ruting så lenge et annet sunt mål er tilgjengelig. Seks pilarer: robust tilbakefall på tvers av 358 leverandører · opptil 95 % token-besparelser på kvalifiserte arbeidsmengder · $0 for å starte med 150+ gratis nivåer og 54 gjentakende/nøkkelfrie gratis-for-alltid-leverandører · 36 CLI/agent-integrasjoner gjennom én konfigurasjon · OpenAI, Claude, Gemini og Responses API-kompatibilitet på /v1 · produksjonskontroller inkludert strømbrytere, TLS-stealth, MCP 110-verktøy, A2A, minne, guardrails, evalueringer og 39 000+ statiske testdeklarasjoner på tvers av 5 100+ sporede testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ett endepunkt og 357 leverandører. Automatisk tilbakefall opprettholder ruting så lenge et annet sunt mål er tilgjengelig. Seks pilarer: robust tilbakefall på tvers av 357 leverandører · opptil 95 % token-besparelser på kvalifiserte arbeidsmengder · $0 for å starte med 150+ gratis nivåer og 54 gjentakende/nøkkelfrie gratis-for-alltid-leverandører · 36 CLI/agent-integrasjoner gjennom én konfigurasjon · OpenAI, Claude, Gemini og Responses API-kompatibilitet på /v1 · produksjonskontroller inkludert strømbrytere, TLS-stealth, MCP 110-verktøy, A2A, minne, guardrails, evalueringer og 39 000+ statiske testdeklarasjoner på tvers av 5 100+ sporede testfiler."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Alle **19** strategiene — bland og kombiner per kombinasjonstrinn:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Hva skiller OmniRoute ut – et datert funksjonsøyeblikksbilde vs 9router, OpenRouter, CLIProxyAPI og LiteLLM fordelt på 13 kapasiteter. OmniRoute: 358 leverandører, 150+ innebygde gratisnivåer, 19 rutingstrategier, 12-motorers token-komprimering, innebygd MCP-server med 110 verktøy, A2A agentprotokoll, vedvarende minne, sikkerhetsbarrierer, skyagenter, TLS fingeravtrykk-stealth, Desktop/Termux/PWA og 42 i18n UI-lokaliteter. OmniRoute er MIT-lisensiert og selvhostbar. Konkurrentenes kapasiteter og antall kan endres; se den lenkede metodikken."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Hva skiller OmniRoute ut – et datert funksjonsøyeblikksbilde vs 9router, OpenRouter, CLIProxyAPI og LiteLLM fordelt på 13 kapasiteter. OmniRoute: 357 leverandører, 150+ innebygde gratisnivåer, 19 rutingstrategier, 12-motorers token-komprimering, innebygd MCP-server med 110 verktøy, A2A agentprotokoll, vedvarende minne, sikkerhetsbarrierer, skyagenter, TLS fingeravtrykk-stealth, Desktop/Termux/PWA og 42 i18n UI-lokaliteter. OmniRoute er MIT-lisensiert og selvhostbar. Konkurrentenes kapasiteter og antall kan endres; se den lenkede metodikken."/>
 
 <sub>📊 Full metodikk &amp; detaljer per funksjon vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1274,7 +1274,7 @@ Kanoniske målinger per 2026-08-24: **1.029 unike videoer** · **11.132.922 kjen
   <tr><td nowrap><b>Kjøretidsmiljø</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> på tvers av <code>src/</code> og <code>open-sse/</code> (ingen <code>any</code> i kjernen siden v2.0)</td></tr>
   <tr><td nowrap><b>Rammeverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (eldre JSON-format) — 137 domenemoduler, 193 migreringer</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (eldre JSON-format) — 137 domenemoduler, 194 migreringer</td></tr>
   <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltekst + int8-kvantiserte vektorrepresentasjoner, typet nedbrytning</td></tr>
   <tr><td nowrap><b>Skjemaer</b></td><td>Zod 4 — validering av MCP-verktøyenes inn- og utdata + API-kontrakter</td></tr>
   <tr><td nowrap><b>Protokoller</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

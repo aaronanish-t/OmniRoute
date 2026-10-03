@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — De Gratis AI Gateway
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Blijf altijd coderen. Elke AI-tool → 358 providers — 150+ gratis — via één eindpunt. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity naar GRATIS Claude / GPT / Gemini met automatische terugval. RTK + Caveman gestapelde compressie bespaart 15–95% tokens (~89% gemiddeld) — bereik nooit limieten. 358 AI-providers · 150+ gratis lagen · ~1,62 miljard gratis tokens/maand · 19 routeringsstrategieën · $0 om te beginnen."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Blijf altijd coderen. Elke AI-tool → 357 providers — 150+ gratis — via één eindpunt. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity naar GRATIS Claude / GPT / Gemini met automatische terugval. RTK + Caveman gestapelde compressie bespaart 15–95% tokens (~89% gemiddeld) — bereik nooit limieten. 357 AI-providers · 150+ gratis lagen · ~1,62 miljard gratis tokens/maand · 19 routeringsstrategieën · $0 om te beginnen."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="De Belofte — Eén endpoint en 358 providers. Automatische fallback houdt de routering in stand zolang er een ander gezond doel beschikbaar is. Zes pijlers: veerkrachtige fallback over 358 providers · tot 95% tokenbesparing op geschikte workloads · $0 om te beginnen met 150+ gratis lagen en 54 terugkerende/sleutelloze gratis-voor-altijd providers · 36 CLI/agent-integraties via één configuratie · OpenAI, Claude, Gemini en Responses API-compatibiliteit op /v1 · productiecontroles inclusief circuit breakers, TLS stealth, MCP 110 tools, A2A, geheugen, guardrails, evals en 39.000+ statische testdeclaraties over 5.100+ bijgehouden testbestanden."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="De Belofte — Eén endpoint en 357 providers. Automatische fallback houdt de routering in stand zolang er een ander gezond doel beschikbaar is. Zes pijlers: veerkrachtige fallback over 357 providers · tot 95% tokenbesparing op geschikte workloads · $0 om te beginnen met 150+ gratis lagen en 54 terugkerende/sleutelloze gratis-voor-altijd providers · 36 CLI/agent-integraties via één configuratie · OpenAI, Claude, Gemini en Responses API-compatibiliteit op /v1 · productiecontroles inclusief circuit breakers, TLS stealth, MCP 110 tools, A2A, geheugen, guardrails, evals en 39.000+ statische testdeclaraties over 5.100+ bijgehouden testbestanden."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Alle **19** strategieën — vrij te combineren per combostap:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Wat OmniRoute onderscheidt — een gedateerde momentopname van functies versus 9router, OpenRouter, CLIProxyAPI en LiteLLM over 13 mogelijkheden. OmniRoute: 358 providers, 150+ ingebouwde gratis lagen, 19 routeringsstrategieën, 12-engine tokencompressie, ingebouwde MCP-server met 110 tools, A2A-agentprotocol, persistent geheugen, vangrails, cloud-agents, TLS-vingerafdrukstealth, Desktop/Termux/PWA en 42 i18n UI-talen. OmniRoute is MIT-gelicentieerd en zelf-hostbaar. Mogelijkheden en aantallen van concurrenten kunnen veranderen; zie de gekoppelde methodologie."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Wat OmniRoute onderscheidt — een gedateerde momentopname van functies versus 9router, OpenRouter, CLIProxyAPI en LiteLLM over 13 mogelijkheden. OmniRoute: 357 providers, 150+ ingebouwde gratis lagen, 19 routeringsstrategieën, 12-engine tokencompressie, ingebouwde MCP-server met 110 tools, A2A-agentprotocol, persistent geheugen, vangrails, cloud-agents, TLS-vingerafdrukstealth, Desktop/Termux/PWA en 42 i18n UI-talen. OmniRoute is MIT-gelicentieerd en zelf-hostbaar. Mogelijkheden en aantallen van concurrenten kunnen veranderen; zie de gekoppelde methodologie."/>
 
 <sub>📊 Volledige methodologie &amp; detail per functie versus 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Canonieke statistieken op 2026-08-24: **1.029 unieke video's** · **11.132.922 b
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Taal</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> in <code>src/</code> en <code>open-sse/</code> (geen enkele <code>any</code> in de kern sinds v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journaling) + LowDB (verouderde JSON-opslag) — 137 domeinmodules, 193 migraties</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journaling) + LowDB (verouderde JSON-opslag) — 137 domeinmodules, 194 migraties</td></tr>
   <tr><td nowrap><b>Geheugen</b></td><td>SQLite FTS5-volledige-tekstzoekfunctie + int8-gekwantiseerde vectorembeddings, getypeerd verval</td></tr>
   <tr><td nowrap><b>Schema's</b></td><td>Zod 4 — validatie van MCP-tool-I/O + API-contracten</td></tr>
   <tr><td nowrap><b>Protocollen</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

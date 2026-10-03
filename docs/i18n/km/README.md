@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — ច្រកទ្វារ AI ឥតគិតថ្លៃ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — កុំឈប់សរសេរកូដ។ រាល់ឧបករណ៍ AI → អ្នកផ្តល់សេវា 358 — ឥតគិតថ្លៃជាង 150 — តាមរយៈចំណុចបញ្ចប់តែមួយ។ Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ទៅកាន់ Claude / GPT / Gemini ឥតគិតថ្លៃ ជាមួយនឹងការបម្រុងទុកដោយស្វ័យប្រវត្តិ។ ការបង្ហាប់ RTK + Caveman stacked compression រក្សាទុក 15–95% tokens (ជាមធ្យម ~89%) — មិនដែលប៉ះដែនកំណត់ឡើយ។ អ្នកផ្តល់សេវា AI 358 · កម្រិតឥតគិតថ្លៃជាង 150 · ~1.62 ពាន់លាន tokens ឥតគិតថ្លៃ/ខែ · យុទ្ធសាស្ត្រកំណត់ផ្លូវ 19 · ចាប់ផ្តើមដោយ $0។"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — កុំឈប់សរសេរកូដ។ រាល់ឧបករណ៍ AI → អ្នកផ្តល់សេវា 357 — ឥតគិតថ្លៃជាង 150 — តាមរយៈចំណុចបញ្ចប់តែមួយ។ Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ទៅកាន់ Claude / GPT / Gemini ឥតគិតថ្លៃ ជាមួយនឹងការបម្រុងទុកដោយស្វ័យប្រវត្តិ។ ការបង្ហាប់ RTK + Caveman stacked compression រក្សាទុក 15–95% tokens (ជាមធ្យម ~89%) — មិនដែលប៉ះដែនកំណត់ឡើយ។ អ្នកផ្តល់សេវា AI 357 · កម្រិតឥតគិតថ្លៃជាង 150 · ~1.62 ពាន់លាន tokens ឥតគិតថ្លៃ/ខែ · យុទ្ធសាស្ត្រកំណត់ផ្លូវ 19 · ចាប់ផ្តើមដោយ $0។"/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ការសន្យា — ចំណុចបញ្ចប់មួយ និងអ្នកផ្តល់សេវា 358 នាក់។ ការបម្រុងទុកដោយស្វ័យប្រវត្តិរក្សាការបញ្ជូនបន្តដរាបណាគោលដៅដែលមានសុខភាពល្អផ្សេងទៀតមាន។ សសរស្តម្ភប្រាំមួយ៖ ការបម្រុងទុកប្រកបដោយភាពធន់ទូទាំងអ្នកផ្តល់សេវា 358 នាក់ · សន្សំ token រហូតដល់ 95% លើបន្ទុកការងារដែលមានសិទ្ធិ · $0 ដើម្បីចាប់ផ្តើមជាមួយកម្រិតឥតគិតថ្លៃ 150+ និងអ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូត 54 នាក់ (recurring/keyless) · ការរួមបញ្ចូល CLI/agent ចំនួន 36 តាមរយៈការកំណត់រចនាសម្ព័ន្ធមួយ · ភាពត្រូវគ្នាជាមួយ OpenAI, Claude, Gemini និង Responses API នៅ /v1 · ការគ្រប់គ្រងផលិតកម្មរួមមាន circuit breakers, TLS stealth, ឧបករណ៍ MCP 110, A2A, memory, guardrails, evals និងការប្រកាសតេស្តឋិតិវន្ត 39,000+ លើឯកសារតេស្តដែលបានតាមដាន 5,100+។"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ការសន្យា — ចំណុចបញ្ចប់មួយ និងអ្នកផ្តល់សេវា 357 នាក់។ ការបម្រុងទុកដោយស្វ័យប្រវត្តិរក្សាការបញ្ជូនបន្តដរាបណាគោលដៅដែលមានសុខភាពល្អផ្សេងទៀតមាន។ សសរស្តម្ភប្រាំមួយ៖ ការបម្រុងទុកប្រកបដោយភាពធន់ទូទាំងអ្នកផ្តល់សេវា 357 នាក់ · សន្សំ token រហូតដល់ 95% លើបន្ទុកការងារដែលមានសិទ្ធិ · $0 ដើម្បីចាប់ផ្តើមជាមួយកម្រិតឥតគិតថ្លៃ 150+ និងអ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូត 54 នាក់ (recurring/keyless) · ការរួមបញ្ចូល CLI/agent ចំនួន 36 តាមរយៈការកំណត់រចនាសម្ព័ន្ធមួយ · ភាពត្រូវគ្នាជាមួយ OpenAI, Claude, Gemini និង Responses API នៅ /v1 · ការគ្រប់គ្រងផលិតកម្មរួមមាន circuit breakers, TLS stealth, ឧបករណ៍ MCP 110, A2A, memory, guardrails, evals និងការប្រកាសតេស្តឋិតិវន្ត 39,000+ លើឯកសារតេស្តដែលបានតាមដាន 5,100+។"/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="អ្វីដែលធ្វើឱ្យ OmniRoute លេចធ្លោ — រូបថតលក្ខណៈពិសេសចាស់មួយធៀបនឹង 9router, OpenRouter, CLIProxyAPI និង LiteLLM លើសមត្ថភាពចំនួន 13។ OmniRoute: អ្នកផ្តល់សេវា 358, កម្រិតឥតគិតថ្លៃជាង 150+ ដែលបានបង្កើតឡើង, យុទ្ធសាស្ត្រកំណត់ផ្លូវ 19, ការបង្ហាប់ថូខឹន 12-engine, ម៉ាស៊ីនមេ MCP ដែលបានបង្កើតឡើងជាមួយឧបករណ៍ 110, ពិធីការភ្នាក់ងារ A2A, អង្គចងចាំជាប់លាប់, របាំងការពារ, ភ្នាក់ងារពពក, ការលាក់បាំងស្នាមម្រាមដៃ TLS, Desktop/Termux/PWA និង 42 ភាសាក្នុងចំណោមភាសា UI i18n។ OmniRoute ត្រូវបានផ្តល់អាជ្ញាប័ណ្ណ MIT និងអាចបង្ហោះដោយខ្លួនឯងបាន។ សមត្ថភាព និងចំនួនគូប្រជែងអាចផ្លាស់ប្តូរបាន។ សូមមើលវិធីសាស្ត្រដែលបានភ្ជាប់។"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="អ្វីដែលធ្វើឱ្យ OmniRoute លេចធ្លោ — រូបថតលក្ខណៈពិសេសចាស់មួយធៀបនឹង 9router, OpenRouter, CLIProxyAPI និង LiteLLM លើសមត្ថភាពចំនួន 13។ OmniRoute: អ្នកផ្តល់សេវា 357, កម្រិតឥតគិតថ្លៃជាង 150+ ដែលបានបង្កើតឡើង, យុទ្ធសាស្ត្រកំណត់ផ្លូវ 19, ការបង្ហាប់ថូខឹន 12-engine, ម៉ាស៊ីនមេ MCP ដែលបានបង្កើតឡើងជាមួយឧបករណ៍ 110, ពិធីការភ្នាក់ងារ A2A, អង្គចងចាំជាប់លាប់, របាំងការពារ, ភ្នាក់ងារពពក, ការលាក់បាំងស្នាមម្រាមដៃ TLS, Desktop/Termux/PWA និង 42 ភាសាក្នុងចំណោមភាសា UI i18n។ OmniRoute ត្រូវបានផ្តល់អាជ្ញាប័ណ្ណ MIT និងអាចបង្ហោះដោយខ្លួនឯងបាន។ សមត្ថភាព និងចំនួនគូប្រជែងអាចផ្លាស់ប្តូរបាន។ សូមមើលវិធីសាស្ត្រដែលបានភ្ជាប់។"/>
 
 <sub>📊 វិធីសាស្ត្រពេញលេញ &amp; លម្អិតតាមលក្ខណៈពិសេស ធៀបនឹង 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ process ដូចគ្នានៅលើ port តែមួយ ដូច្ន�
   <tr><td nowrap><b>បរិស្ថានដំណើរការ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ភាសា</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> នៅទូទាំង <code>src/</code> និង <code>open-sse/</code> (គ្មាន <code>any</code> នៅក្នុងស្នូលចាប់តាំងពី v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, ការកត់ត្រាបែប WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 137, ការធ្វើចំណាកស្រុក 193</td></tr>
+  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, ការកត់ត្រាបែប WAL) + LowDB (JSON ចាស់) — ម៉ូឌុលដែន 137, ការធ្វើចំណាកស្រុក 194</td></tr>
   <tr><td nowrap><b>អង្គចងចាំ</b></td><td>ការស្វែងរកអត្ថបទពេញលេញ SQLite FTS5 + ការបង្កប់វ៉ិចទ័រដែលបានកំណត់បរិមាណជា int8, ការថយចុះដែលមានប្រភេទ</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — ការផ្ទៀងផ្ទាត់ I/O របស់ឧបករណ៍ MCP + កិច្ចសន្យា API</td></tr>
   <tr><td nowrap><b>ពិធីការ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

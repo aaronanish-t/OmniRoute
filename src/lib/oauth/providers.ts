@@ -11,7 +11,7 @@ import { generatePKCE, generateState } from "./utils/pkce";
 import { PROVIDERS } from "./providers/index";
 import { resolvePublicCred } from "@omniroute/open-sse/utils/publicCreds.ts";
 
-const GOOGLE_BROWSER_PROVIDERS = new Set(["antigravity", "agy"]);
+const GOOGLE_BROWSER_PROVIDERS = new Set(["antigravity"]);
 
 type OAuthRedirectEnv = Record<string, string | undefined>;
 
@@ -29,7 +29,7 @@ function hasCustomGoogleOAuthCredentials(
   providerName: string,
   env: OAuthRedirectEnv | null | undefined = process.env
 ): boolean {
-  if (providerName === "antigravity" || providerName === "agy") {
+  if (providerName === "antigravity") {
     // `agy` reuses the antigravity OAuth client + env overrides.
     const clientId = env?.ANTIGRAVITY_OAUTH_CLIENT_ID;
     const clientSecret = env?.ANTIGRAVITY_OAUTH_CLIENT_SECRET;
@@ -41,6 +41,11 @@ function hasCustomGoogleOAuthCredentials(
   }
 
   return false;
+}
+
+/** Keep the retired Antigravity CLI provider slug working on OAuth routes. */
+export function resolveOAuthProviderName(providerName: string): string {
+  return providerName === "agy" ? "antigravity" : providerName;
 }
 
 function isLoopbackHostname(hostname: string): boolean {
@@ -73,6 +78,8 @@ export function resolveBrowserOAuthRedirectUri(
   redirectUri: string,
   env: OAuthRedirectEnv | null | undefined = process.env
 ): string {
+  providerName = resolveOAuthProviderName(providerName);
+
   if (!GOOGLE_BROWSER_PROVIDERS.has(providerName)) {
     return redirectUri;
   }
@@ -115,7 +122,7 @@ export function resolveBrowserOAuthRedirectUri(
  * Get provider handler
  */
 export function getProvider(name) {
-  const provider = PROVIDERS[name];
+  const provider = PROVIDERS[resolveOAuthProviderName(name)];
   if (!provider) {
     throw new Error(`Unknown provider: ${name}`);
   }

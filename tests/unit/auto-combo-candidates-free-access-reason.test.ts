@@ -25,6 +25,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const modelsDb = await import("../../src/lib/db/models.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
 const candidateHandler = await import("../../open-sse/handlers/autoComboCandidates.ts");
@@ -87,6 +88,7 @@ test("the dispatch pool still drops what the guard excludes", async () => {
 
 test("a candidate the guard would exclude stays in the listing, with its reason", async () => {
   const connection = await seedConnection();
+  await modelsDb.addCustomModel("antigravity", "test-not-in-free-catalog", "Custom test model");
   await settingsDb.updateSettings({ freeAccessPolicy: "strict" });
 
   const listing = await candidateHandler.getAutoComboCandidates("auto", null);
@@ -114,9 +116,8 @@ test("a candidate the guard would exclude stays in the listing, with its reason"
     assert.ok(known.has(String(reason)), `unexpected exclusion reason: ${String(reason)}`);
   }
 
-  // A model absent from the free-tier catalog is the commonest case, and it is a
-  // different problem from a drained allowance — which is the whole point of
-  // reporting a reason rather than a boolean.
+  // The custom fixture is absent from the free-tier catalog regardless of which
+  // built-in models have a free allowance. Report that distinct exclusion reason.
   assert.ok(
     reasons.has("not-in-catalog"),
     "a model the free catalog does not list must say so, not just disappear"

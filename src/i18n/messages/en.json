@@ -6355,7 +6355,7 @@
       "mixedbread": "Create embeddings with the Mixedbread API.",
       "segmind": "Generate images and videos with Segmind's hosted models.",
       "amazon-q": "Uses the same AWS Builder ID or imported refresh-token flow as Kiro, but keeps Amazon Q connections separate.",
-      "antigravity": "Connect Antigravity with the existing OAuth flow.",
+      "antigravity": "Import your Antigravity CLI (`agy`) login (paste/upload its token file), auto-detect a local CLI login, or sign in with Google. Uses the same Cloud Code backend (incl. Claude models).",
       "agy": "Import your Antigravity CLI (`agy`) login (paste/upload its token file), auto-detect a local CLI login, or sign in with Google. Shares the Antigravity backend (incl. Claude models).",
       "claude": "Connect Claude Code with the existing OAuth flow.",
       "cline": "Connect Cline with the existing OAuth flow.",

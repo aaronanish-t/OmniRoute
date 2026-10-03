@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — အခမဲ့ AI Gateway
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ကုဒ်ရေးခြင်းကို ဘယ်တော့မှ မရပ်ပါနှင့်။ AI ကိရိယာတိုင်း → ပံ့ပိုးသူ ၃၅၈ ဦး — အခမဲ့ ၁၅၀+ — တစ်ခုတည်းသော endpoint မှတစ်ဆင့်။ Claude Code, Codex, Cursor, Cline, Copilot နှင့် Antigravity တို့ကို အခမဲ့ Claude / GPT / Gemini ထဲသို့ အလိုအလျောက် ပြန်လည်ပြောင်းလဲခြင်း (auto-fallback) ဖြင့်။ RTK + Caveman stacked compression သည် 15–95% tokens (~89% ပျမ်းမျှ) ကို ချွေတာသည် — ကန့်သတ်ချက်များကို ဘယ်တော့မှ မကျော်လွန်ပါ။ AI ပံ့ပိုးသူ ၃၅၈ ဦး · အခမဲ့အဆင့် ၁၅၀+ · တစ်လလျှင် အခမဲ့ tokens ~1.62 ဘီလီယံ · routing နည်းဗျူဟာ ၁၉ ခု · စတင်ရန် $0။"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ကုဒ်ရေးခြင်းကို ဘယ်တော့မှ မရပ်ပါနှင့်။ AI ကိရိယာတိုင်း → ပံ့ပိုးသူ ၃၅၇ ဦး — အခမဲ့ ၁၅၀+ — တစ်ခုတည်းသော endpoint မှတစ်ဆင့်။ Claude Code, Codex, Cursor, Cline, Copilot နှင့် Antigravity တို့ကို အခမဲ့ Claude / GPT / Gemini ထဲသို့ အလိုအလျောက် ပြန်လည်ပြောင်းလဲခြင်း (auto-fallback) ဖြင့်။ RTK + Caveman stacked compression သည် 15–95% tokens (~89% ပျမ်းမျှ) ကို ချွေတာသည် — ကန့်သတ်ချက်များကို ဘယ်တော့မှ မကျော်လွန်ပါ။ AI ပံ့ပိုးသူ ၃၅၇ ဦး · အခမဲ့အဆင့် ၁၅၀+ · တစ်လလျှင် အခမဲ့ tokens ~1.62 ဘီလီယံ · routing နည်းဗျူဟာ ၁၉ ခု · စတင်ရန် $0။"/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ကတိကဝတ် — endpoint တစ်ခုနှင့် ပံ့ပိုးပေးသူ ၃၅၈ ဦး။ အခြားကောင်းမွန်သော ပစ်မှတ်တစ်ခု ရနိုင်နေသရွေ့ အလိုအလျောက် ပြန်လည်ပြောင်းလဲမှုက လမ်းကြောင်းပြောင်းလဲမှုကို ဆက်လက်လုပ်ဆောင်ပေးသည်။ အဓိကအချက် ခြောက်ချက်- ပံ့ပိုးပေးသူ ၃၅၈ ဦးအနှံ့ ခံနိုင်ရည်ရှိသော ပြန်လည်ပြောင်းလဲမှု · သတ်မှတ်ထားသော လုပ်ငန်းများတွင် token ၉၅% အထိ သက်သာစေခြင်း · အခမဲ့အဆင့် ၁၅၀ ကျော်နှင့် ထပ်တလဲလဲ/သော့မလိုသော ထာဝရအခမဲ့ ပံ့ပိုးပေးသူ ၅၄ ဦးဖြင့် $0 ဖြင့် စတင်နိုင်ခြင်း · စနစ်ထည့်သွင်းမှုတစ်ခုတည်းဖြင့် CLI/agent ပေါင်းစပ်မှု ၃၆ ခု · /v1 တွင် OpenAI, Claude, Gemini နှင့် Responses API တွဲဖက်အသုံးပြုနိုင်ခြင်း · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals နှင့် ခြေရာခံထားသော စမ်းသပ်ဖိုင် ၅,၁၀၀ ကျော်တွင် static test ကြေညာချက် ၃၉,၀၀၀ ကျော် အပါအဝင် ထုတ်လုပ်မှု ထိန်းချုပ်မှုများ။"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ကတိကဝတ် — endpoint တစ်ခုနှင့် ပံ့ပိုးပေးသူ ၃၅၇ ဦး။ အခြားကောင်းမွန်သော ပစ်မှတ်တစ်ခု ရနိုင်နေသရွေ့ အလိုအလျောက် ပြန်လည်ပြောင်းလဲမှုက လမ်းကြောင်းပြောင်းလဲမှုကို ဆက်လက်လုပ်ဆောင်ပေးသည်။ အဓိကအချက် ခြောက်ချက်- ပံ့ပိုးပေးသူ ၃၅၇ ဦးအနှံ့ ခံနိုင်ရည်ရှိသော ပြန်လည်ပြောင်းလဲမှု · သတ်မှတ်ထားသော လုပ်ငန်းများတွင် token ၉၅% အထိ သက်သာစေခြင်း · အခမဲ့အဆင့် ၁၅၀ ကျော်နှင့် ထပ်တလဲလဲ/သော့မလိုသော ထာဝရအခမဲ့ ပံ့ပိုးပေးသူ ၅၄ ဦးဖြင့် $0 ဖြင့် စတင်နိုင်ခြင်း · စနစ်ထည့်သွင်းမှုတစ်ခုတည်းဖြင့် CLI/agent ပေါင်းစပ်မှု ၃၆ ခု · /v1 တွင် OpenAI, Claude, Gemini နှင့် Responses API တွဲဖက်အသုံးပြုနိုင်ခြင်း · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals နှင့် ခြေရာခံထားသော စမ်းသပ်ဖိုင် ၅,၁၀၀ ကျော်တွင် static test ကြေညာချက် ၃၉,၀၀၀ ကျော် အပါအဝင် ထုတ်လုပ်မှု ထိန်းချုပ်မှုများ။"/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ combo ဖန်တီးရန် မလိုပါ။ သင့်မော်
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ကို ဘာက ထူးခြားစေသလဲ — 9router, OpenRouter, CLIProxyAPI နှင့် LiteLLM တို့နှင့် နှိုင်းယှဉ်ထားသော အင်္ဂါရပ်များ၏ ခေတ်နောက်ကျနေသော ဓာတ်ပုံ (၁၃) ခု။ OmniRoute: ပံ့ပိုးသူ ၃၅၈ ဦး၊ အခမဲ့အဆင့် ၁၅၀+ ပါဝင်ပြီး၊ လမ်းကြောင်းပြဗျူဟာ ၁၉ ခု၊ အင်ဂျင် ၁၂ ခုပါ တိုကင်ချုံ့ခြင်း၊ ကိရိယာ ၁၁၀ ပါဝင်သော built-in MCP ဆာဗာ၊ A2A အေးဂျင့် ပရိုတိုကော၊ အမြဲတမ်းမှတ်ဉာဏ်၊ ကာကွယ်မှုများ၊ cloud အေးဂျင့်များ၊ TLS လက်ဗွေ လျှို့ဝှက်ချက်၊ Desktop/Termux/PWA နှင့် နိုင်ငံတကာ UI ဘာသာစကား ၄၂ မျိုး။ OmniRoute သည် MIT လိုင်စင်ရရှိထားပြီး ကိုယ်တိုင် hosting လုပ်နိုင်သည်။ ပြိုင်ဘက်များ၏ စွမ်းဆောင်ရည်နှင့် အရေအတွက်များ ပြောင်းလဲနိုင်သည်၊ ချိတ်ဆက်ထားသော နည်းစနစ်ကို ကြည့်ပါ။"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ကို ဘာက ထူးခြားစေသလဲ — 9router, OpenRouter, CLIProxyAPI နှင့် LiteLLM တို့နှင့် နှိုင်းယှဉ်ထားသော အင်္ဂါရပ်များ၏ ခေတ်နောက်ကျနေသော ဓာတ်ပုံ (၁၃) ခု။ OmniRoute: ပံ့ပိုးသူ ၃၅၇ ဦး၊ အခမဲ့အဆင့် ၁၅၀+ ပါဝင်ပြီး၊ လမ်းကြောင်းပြဗျူဟာ ၁၉ ခု၊ အင်ဂျင် ၁၂ ခုပါ တိုကင်ချုံ့ခြင်း၊ ကိရိယာ ၁၁၀ ပါဝင်သော built-in MCP ဆာဗာ၊ A2A အေးဂျင့် ပရိုတိုကော၊ အမြဲတမ်းမှတ်ဉာဏ်၊ ကာကွယ်မှုများ၊ cloud အေးဂျင့်များ၊ TLS လက်ဗွေ လျှို့ဝှက်ချက်၊ Desktop/Termux/PWA နှင့် နိုင်ငံတကာ UI ဘာသာစကား ၄၂ မျိုး။ OmniRoute သည် MIT လိုင်စင်ရရှိထားပြီး ကိုယ်တိုင် hosting လုပ်နိုင်သည်။ ပြိုင်ဘက်များ၏ စွမ်းဆောင်ရည်နှင့် အရေအတွက်များ ပြောင်းလဲနိုင်သည်၊ ချိတ်ဆက်ထားသော နည်းစနစ်ကို ကြည့်ပါ။"/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM တို့နှင့် နှိုင်းယှဉ်ထားသော အပြည့်အစုံ နည်းစနစ်နှင့် အင်္ဂါရပ်အလိုက် အသေးစိတ်အချက်အလက်များ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1267,7 +1267,7 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ဘာသာစကား</b></td><td>TypeScript 6.0 — <code>src/</code> နှင့် <code>open-sse/</code> တစ်လျှောက်လုံး <b>100% TypeScript</b> (v2.0 မှစ၍ core တွင် <code>any</code> လုံးဝမရှိပါ)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite၊ WAL journaling) + LowDB (JSON legacy) — domain module 137 ခု၊ migration 193 ခု</td></tr>
+  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite၊ WAL journaling) + LowDB (JSON legacy) — domain module 137 ခု၊ migration 194 ခု</td></tr>
   <tr><td nowrap><b>မှတ်ဉာဏ်</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings၊ typed decay</td></tr>
   <tr><td nowrap><b>Schema များ</b></td><td>Zod 4 — MCP tool I/O အတည်ပြုခြင်း + API contract များ</td></tr>
   <tr><td nowrap><b>Protocol များ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Bezplatná AI brána
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikdy neprestávajte kódovať. Každý nástroj AI → 358 poskytovateľov — 150+ bezplatných — cez jeden koncový bod. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity do BEZPLATNÉHO Claude / GPT / Gemini s automatickým zálohovaním. RTK + Caveman vrstvená kompresia šetrí 15–95% tokenov (~89% priemer) — nikdy nenarazíte na limity. 358 poskytovateľov AI · 150+ bezplatných úrovní · ~1.62B bezplatných tokenov/mesiac · 19 stratégií smerovania · $0 na začiatok."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikdy neprestávajte kódovať. Každý nástroj AI → 357 poskytovateľov — 150+ bezplatných — cez jeden koncový bod. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity do BEZPLATNÉHO Claude / GPT / Gemini s automatickým zálohovaním. RTK + Caveman vrstvená kompresia šetrí 15–95% tokenov (~89% priemer) — nikdy nenarazíte na limity. 357 poskytovateľov AI · 150+ bezplatných úrovní · ~1.62B bezplatných tokenov/mesiac · 19 stratégií smerovania · $0 na začiatok."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Prísľub — Jeden koncový bod a 358 poskytovateľov. Automatický fallback udržuje smerovanie, kým je k dispozícii ďalší zdravý cieľ. Šesť pilierov: odolný fallback naprieč 358 poskytovateľmi · až 95% úspora tokenov pri oprávnených úlohách · 0 $ na začiatok so 150+ bezplatnými úrovňami a 54 opakujúcimi sa/bezklúčovými poskytovateľmi navždy zadarmo · 36 integrácií CLI/agenta prostredníctvom jednej konfigurácie · kompatibilita s OpenAI, Claude, Gemini a Responses API na /v1 · produkčné ovládacie prvky vrátane ističov, TLS stealth, nástrojov MCP 110, A2A, pamäte, ochranných zábradlí, hodnotení a 39 000+ statických testovacích deklarácií naprieč 5 100+ sledovanými testovacími súbormi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Prísľub — Jeden koncový bod a 357 poskytovateľov. Automatický fallback udržuje smerovanie, kým je k dispozícii ďalší zdravý cieľ. Šesť pilierov: odolný fallback naprieč 357 poskytovateľmi · až 95% úspora tokenov pri oprávnených úlohách · 0 $ na začiatok so 150+ bezplatnými úrovňami a 54 opakujúcimi sa/bezklúčovými poskytovateľmi navždy zadarmo · 36 integrácií CLI/agenta prostredníctvom jednej konfigurácie · kompatibilita s OpenAI, Claude, Gemini a Responses API na /v1 · produkčné ovládacie prvky vrátane ističov, TLS stealth, nástrojov MCP 110, A2A, pamäte, ochranných zábradlí, hodnotení a 39 000+ statických testovacích deklarácií naprieč 5 100+ sledovanými testovacími súbormi."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Všetkých **19** stratégií — ľubovoľne ich kombinujte v jednotlivých kro
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Čím sa OmniRoute odlišuje — aktuálny prehľad funkcií v porovnaní s 9router, OpenRouter, CLIProxyAPI a LiteLLM naprieč 13 schopnosťami. OmniRoute: 358 poskytovateľov, viac ako 150 vstavaných bezplatných úrovní, 19 smerovacích stratégií, kompresia tokenov s 12 enginmi, vstavaný MCP server so 110 nástrojmi, A2A agent protokol, trvalá pamäť, bezpečnostné zábrany, cloudoví agenti, utajenie TLS odtlačku, Desktop/Termux/PWA a 42 lokalizácií používateľského rozhrania. OmniRoute má licenciu MIT a je možné ho hostovať samostatne. Schopnosti a počty konkurentov sa môžu meniť; pozrite si prepojenú metodológiu."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Čím sa OmniRoute odlišuje — aktuálny prehľad funkcií v porovnaní s 9router, OpenRouter, CLIProxyAPI a LiteLLM naprieč 13 schopnosťami. OmniRoute: 357 poskytovateľov, viac ako 150 vstavaných bezplatných úrovní, 19 smerovacích stratégií, kompresia tokenov s 12 enginmi, vstavaný MCP server so 110 nástrojmi, A2A agent protokol, trvalá pamäť, bezpečnostné zábrany, cloudoví agenti, utajenie TLS odtlačku, Desktop/Termux/PWA a 42 lokalizácií používateľského rozhrania. OmniRoute má licenciu MIT a je možné ho hostovať samostatne. Schopnosti a počty konkurentov sa môžu meniť; pozrite si prepojenú metodológiu."/>
 
 <sub>📊 Kompletná metodológia &amp; detail funkcií vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Kanonické metriky k 2026-08-24: **1.029 jedinečných videí** · **11.132.922 
   <tr><td nowrap><b>Behové prostredie</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> v <code>src/</code> a <code>open-sse/</code> (od v2.0 bez jediného <code>any</code> v jadre)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, žurnálovanie WAL) + LowDB (starší formát JSON) — 137 doménových modulov, 193 migrácií</td></tr>
+  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, žurnálovanie WAL) + LowDB (starší formát JSON) — 137 doménových modulov, 194 migrácií</td></tr>
   <tr><td nowrap><b>Pamäť</b></td><td>Fulltextové vyhľadávanie SQLite FTS5 + vektorové vnorenia kvantované na int8, typovaný útlm</td></tr>
   <tr><td nowrap><b>Schémy</b></td><td>Zod 4 — validácia vstupov a výstupov nástrojov MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

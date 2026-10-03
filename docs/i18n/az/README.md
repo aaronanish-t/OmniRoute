@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Pulsuz Süni İntellekt Şlüzü (AI Gateway)
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Heç vaxt kodlaşdırmağı dayandırmayın. Hər bir süni intellekt aləti → 358 təminatçı — 150+ pulsuz — bir nöqtə vasitəsilə. Claude Code, Codex, Cursor, Cline, Copilot və Antigravity avtomatik ehtiyat keçid (auto-fallback) ilə PULSUZ Claude / GPT / Gemini-yə qoşulur. RTK + Caveman yığılmış sıxılması 15–95% tokenə qənaət edir (təxminən 89% orta) — heç vaxt limitlərə düşməyin. 358 Süni İntellekt Təminatçısı · 150+ pulsuz səviyyə · Ayda təxminən 1.62B pulsuz token · 19 yönləndirmə strategiyası · Başlamaq üçün $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Heç vaxt kodlaşdırmağı dayandırmayın. Hər bir süni intellekt aləti → 357 təminatçı — 150+ pulsuz — bir nöqtə vasitəsilə. Claude Code, Codex, Cursor, Cline, Copilot və Antigravity avtomatik ehtiyat keçid (auto-fallback) ilə PULSUZ Claude / GPT / Gemini-yə qoşulur. RTK + Caveman yığılmış sıxılması 15–95% tokenə qənaət edir (təxminən 89% orta) — heç vaxt limitlərə düşməyin. 357 Süni İntellekt Təminatçısı · 150+ pulsuz səviyyə · Ayda təxminən 1.62B pulsuz token · 19 yönləndirmə strategiyası · Başlamaq üçün $0."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 358 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 358 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 54 recurring/keyless free-forever providers · 36 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 39,000+ static test declarations across 5,100+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 357 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 357 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 54 recurring/keyless free-forever providers · 36 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 39,000+ static test declarations across 5,100+ tracked test files."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Bütün **19** strategiya — hər kombo addımında qarışdırıb uyğunlaşd�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-u fərqləndirən nədir — 9router, OpenRouter, CLIProxyAPI və LiteLLM ilə müqayisədə 13 imkan üzrə köhnəlmiş funksiya anlıq görüntüsü. OmniRoute: 358 provayder, daxili 150+ pulsuz səviyyə, 19 marşrutlaşdırma strategiyası, 12 mühərrikli token sıxılması, 110 alətli daxili MCP serveri, A2A agent protokolu, daimi yaddaş, qoruyucu baryerlər, bulud agentləri, TLS barmaq izi gizliliyi, Desktop/Termux/PWA və 42 i18n UI lokalı. OmniRoute MIT lisenziyalıdır və öz-özünə hostlana bilər. Rəqib imkanları və sayları dəyişə bilər; əlaqəli metodologiyaya baxın."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-u fərqləndirən nədir — 9router, OpenRouter, CLIProxyAPI və LiteLLM ilə müqayisədə 13 imkan üzrə köhnəlmiş funksiya anlıq görüntüsü. OmniRoute: 357 provayder, daxili 150+ pulsuz səviyyə, 19 marşrutlaşdırma strategiyası, 12 mühərrikli token sıxılması, 110 alətli daxili MCP serveri, A2A agent protokolu, daimi yaddaş, qoruyucu baryerlər, bulud agentləri, TLS barmaq izi gizliliyi, Desktop/Termux/PWA və 42 i18n UI lokalı. OmniRoute MIT lisenziyalıdır və öz-özünə hostlana bilər. Rəqib imkanları və sayları dəyişə bilər; əlaqəli metodologiyaya baxın."/>
 
 <sub>📊 Tam metodologiya və 9router, OpenRouter, CLIProxyAPI & LiteLLM ilə hər xüsusiyyət üzrə detallar → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ bir portda təqdim olunur, buna görə hazırda ayrıca yalnız CLI üçün pake
   <tr><td nowrap><b>İcra mühiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Proqramlaşdırma dili</b></td><td>TypeScript 6.0 — <code>src/</code> və <code>open-sse/</code> daxilində <b>100% TypeScript</b> (v2.0-dan etibarən əsas hissədə sıfır <code>any</code>)</td></tr>
   <tr><td nowrap><b>Freymlork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Verilənlər bazası</b></td><td>better-sqlite3 (SQLite, WAL jurnallaşdırması) + LowDB (köhnə JSON formatı) — 137 domen modulu, 193 miqrasiya</td></tr>
+  <tr><td nowrap><b>Verilənlər bazası</b></td><td>better-sqlite3 (SQLite, WAL jurnallaşdırması) + LowDB (köhnə JSON formatı) — 137 domen modulu, 194 miqrasiya</td></tr>
   <tr><td nowrap><b>Yaddaş</b></td><td>SQLite FTS5 tam mətn axtarışı + int8-kvantlaşdırılmış vektor yerləşdirmələri, tipləşdirilmiş zəifləmə</td></tr>
   <tr><td nowrap><b>Sxemlər</b></td><td>Zod 4 — MCP alətlərinin giriş/çıxış yoxlaması + API müqavilələri</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

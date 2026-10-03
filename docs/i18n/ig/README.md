@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ụzọ Ọnụ Ụzọ AI Na-akwụghị Ụgwọ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kwụsịla ide koodu ma ọlị. Ngwa ọ bụla nke AI → ndị na-enye 358 — 150+ n'efu — site n'otu njedebe. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity banye n'ime Claude / GPT / Gemini N'efu nwere nkwado akpaaka. Mkpokọta RTK + Caveman na-echekwa 15–95% akara (~89% nkezi) — ebula oke ya ma ọlị. Ndị na-enye AI 358 · Ọkwa 150+ n'efu · ~1.62B akara n'efu / ọnwa · Ụzọ ntụgharị 19 · $0 iji malite."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kwụsịla ide koodu ma ọlị. Ngwa ọ bụla nke AI → ndị na-enye 357 — 150+ n'efu — site n'otu njedebe. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity banye n'ime Claude / GPT / Gemini N'efu nwere nkwado akpaaka. Mkpokọta RTK + Caveman na-echekwa 15–95% akara (~89% nkezi) — ebula oke ya ma ọlị. Ndị na-enye AI 357 · Ọkwa 150+ n'efu · ~1.62B akara n'efu / ọnwa · Ụzọ ntụgharị 19 · $0 iji malite."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwa ahụ — Otu ebe njedebe na ndị na-enye ọrụ 358. Nlaghachi azụ akpaaka na-eme ka ụzọ na-aga n'ihu mgbe ebumnuche ọzọ dị mma dị. Ogidi isii: nlaghachi azụ siri ike gafee ndị na-enye ọrụ 358 · ruo 95% nchekwa token na ọrụ ruru eru · $0 iji malite na ọkwa n'efu 150+ na ndị na-enye ọrụ n'efu ruo mgbe ebighị ebi 54 na-agbanwe agbanwe/enweghị igodo · njikọta CLI/onye nnọchi anya 36 site na otu nhazi · ndakọrịta OpenAI, Claude, Gemini na Responses API na /v1 · njikwa mmepụta gụnyere ndị na-agbaji sekit, izo ezo TLS, ngwaọrụ MCP 110, A2A, ebe nchekwa, nchekwa, nyocha na nkwupụta ule static 39,000+ gafee faịlụ ule 5,100+ a na-enyocha."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwa ahụ — Otu ebe njedebe na ndị na-enye ọrụ 357. Nlaghachi azụ akpaaka na-eme ka ụzọ na-aga n'ihu mgbe ebumnuche ọzọ dị mma dị. Ogidi isii: nlaghachi azụ siri ike gafee ndị na-enye ọrụ 357 · ruo 95% nchekwa token na ọrụ ruru eru · $0 iji malite na ọkwa n'efu 150+ na ndị na-enye ọrụ n'efu ruo mgbe ebighị ebi 54 na-agbanwe agbanwe/enweghị igodo · njikọta CLI/onye nnọchi anya 36 site na otu nhazi · ndakọrịta OpenAI, Claude, Gemini na Responses API na /v1 · njikwa mmepụta gụnyere ndị na-agbaji sekit, izo ezo TLS, ngwaọrụ MCP 110, A2A, ebe nchekwa, nchekwa, nyocha na nkwupụta ule static 39,000+ gafee faịlụ ule 5,100+ a na-enyocha."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Atụmatụ **19** niile — gwakọta ma jikọta ha na nzọụkwụ combo ọ
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ihe na-eme ka OmniRoute dị iche — nlele njirimara ochie ma e jiri ya tụnyere 9router, OpenRouter, CLIProxyAPI na LiteLLM n'ofe ikike iri na atọ. OmniRoute: 358 providers, 150+ free tiers built in, 19 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 42 i18n UI locales. OmniRoute nwere ikike MIT ma nwee ike ịkwado onwe ya. Ikike na ọnụọgụ ndị asọmpi nwere ike ịgbanwe; lee usoro e jikọrọ."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ihe na-eme ka OmniRoute dị iche — nlele njirimara ochie ma e jiri ya tụnyere 9router, OpenRouter, CLIProxyAPI na LiteLLM n'ofe ikike iri na atọ. OmniRoute: 357 providers, 150+ free tiers built in, 19 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 42 i18n UI locales. OmniRoute nwere ikike MIT ma nwee ike ịkwado onwe ya. Ikike na ọnụọgụ ndị asọmpi nwere ike ịgbanwe; lee usoro e jikọrọ."/>
 
 <sub>📊 Usoro zuru ezu &amp; nkọwa njirimara ọ bụla ma e jiri ya tụnyere 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Metrik izizi na 2026-08-24: **vidiyo pụrụ iche 1.029** · **nlele amaara 11.
   <tr><td nowrap><b>Oge ịrụ ọrụ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Asụsụ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> n’ime <code>src/</code> na <code>open-sse/</code> niile (enweghị <code>any</code> n’ime isi sistemụ kemgbe v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (ihe nketa JSON) — modulu ngalaba 137, mbugharị 193</td></tr>
+  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (ihe nketa JSON) — modulu ngalaba 137, mbugharị 194</td></tr>
   <tr><td nowrap><b>Ncheta</b></td><td>Ọchụchọ ederede zuru ezu nke SQLite FTS5 + ntinye vektọ e mere int8-quantization, mbelata nwere ụdị</td></tr>
   <tr><td nowrap><b>Atụmatụ</b></td><td>Zod 4 — nkwado I/O nke ngwa MCP + nkwekọrịta API</td></tr>
   <tr><td nowrap><b>Usoro nkwukọrịta</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

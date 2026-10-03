@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Il-Gateway tal-AI B'Xejn
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Qatt tieqaf tikkodifika. Kull għodda tal-AI → 358 fornitur — 150+ b'xejn — permezz ta' endpoint wieħed. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity f'Claude / GPT / Gemini B'XEJN b'auto-fallback. Il-kompressjoni f'munzelli RTK + Caveman tiffranka 15–95% tokens (~89% medja) — qatt ma tilħaq limiti. 358 fornitur tal-AI · 150+ livelli b'xejn · ~1.62B tokens b'xejn/xahar · 19-il strateġija ta' routing · $0 biex tibda."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Qatt tieqaf tikkodifika. Kull għodda tal-AI → 357 fornitur — 150+ b'xejn — permezz ta' endpoint wieħed. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity f'Claude / GPT / Gemini B'XEJN b'auto-fallback. Il-kompressjoni f'munzelli RTK + Caveman tiffranka 15–95% tokens (~89% medja) — qatt ma tilħaq limiti. 357 fornitur tal-AI · 150+ livelli b'xejn · ~1.62B tokens b'xejn/xahar · 19-il strateġija ta' routing · $0 biex tibda."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Il-Wegħda — Endpoint wieħed u 358 fornitur. Fallback awtomatiku jżomm ir-routing waqt li jkun hemm mira oħra b'saħħitha disponibbli. Sitt pilastri: fallback reżiljenti bejn 358 fornitur · sa 95% iffrankar ta' tokens fuq xogħlijiet eliġibbli · $0 biex tibda b'aktar minn 150 livell b'xejn u 54 fornitur b'xejn għal dejjem rikorrenti/mingħajr ċavetta · 36 integrazzjoni CLI/aġent permezz ta' konfigurazzjoni waħda · Kompatibilità API ta' OpenAI, Claude, Gemini u Responses f'/v1 · kontrolli ta' produzzjoni inklużi circuit breakers, TLS stealth, għodod MCP 110, A2A, memorja, guardrails, evals u aktar minn 39,000 dikjarazzjoni ta' test statiku f'aktar minn 5,100 fajl ta' test segwit."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Il-Wegħda — Endpoint wieħed u 357 fornitur. Fallback awtomatiku jżomm ir-routing waqt li jkun hemm mira oħra b'saħħitha disponibbli. Sitt pilastri: fallback reżiljenti bejn 357 fornitur · sa 95% iffrankar ta' tokens fuq xogħlijiet eliġibbli · $0 biex tibda b'aktar minn 150 livell b'xejn u 54 fornitur b'xejn għal dejjem rikorrenti/mingħajr ċavetta · 36 integrazzjoni CLI/aġent permezz ta' konfigurazzjoni waħda · Kompatibilità API ta' OpenAI, Claude, Gemini u Responses f'/v1 · kontrolli ta' produzzjoni inklużi circuit breakers, TLS stealth, għodod MCP 110, A2A, memorja, guardrails, evals u aktar minn 39,000 dikjarazzjoni ta' test statiku f'aktar minn 5,100 fajl ta' test segwit."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Id-**19-il** strateġija kollha — ħallat u qabbel għal kull pass tal-combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="X'jiddistingwi lil OmniRoute — ritratt tal-karatteristiċi f'ċertu żmien kontra 9router, OpenRouter, CLIProxyAPI u LiteLLM f'13-il kapaċità. OmniRoute: 358 fornitur, 150+ livelli b'xejn integrati, 19-il strateġija ta' routing, kompressjoni ta' tokens b'12-il magna, server MCP integrat b'110 għodda, protokoll ta' aġent A2A, memorja persistenti, guardrails, aġenti tal-cloud, stealth tal-marki tas-swaba' TLS, Desktop/Termux/PWA u 42 lokalità tal-UI i18n. OmniRoute huwa liċenzjat MIT u jista' jiġi ospitat waħdu. Il-kapaċitajiet u l-għadd tal-kompetituri jistgħu jinbidlu; ara l-metodoloġija marbuta."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="X'jiddistingwi lil OmniRoute — ritratt tal-karatteristiċi f'ċertu żmien kontra 9router, OpenRouter, CLIProxyAPI u LiteLLM f'13-il kapaċità. OmniRoute: 357 fornitur, 150+ livelli b'xejn integrati, 19-il strateġija ta' routing, kompressjoni ta' tokens b'12-il magna, server MCP integrat b'110 għodda, protokoll ta' aġent A2A, memorja persistenti, guardrails, aġenti tal-cloud, stealth tal-marki tas-swaba' TLS, Desktop/Termux/PWA u 42 lokalità tal-UI i18n. OmniRoute huwa liċenzjat MIT u jista' jiġi ospitat waħdu. Il-kapaċitajiet u l-għadd tal-kompetituri jistgħu jinbidlu; ara l-metodoloġija marbuta."/>
 
 <sub>📊 Metodoloġija sħiħa &amp; dettall għal kull karatteristika vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Metriċi kanoniċi fl-2026-08-24: **1.029 vidjo uniku** · **11.132.922 dehra ma
   <tr><td nowrap><b>Ambjent ta’ eżekuzzjoni</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lingwa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> f’<code>src/</code> u <code>open-sse/</code> kollha (l-ebda <code>any</code> fil-qalba minn v2.0 ’l hawn)</td></tr>
   <tr><td nowrap><b>Qafas</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bażi tad-data</b></td><td>better-sqlite3 (SQLite, ġurnalizzazzjoni WAL) + LowDB (legat JSON) — 137 modulu tad-dominju, 193 migrazzjoni</td></tr>
+  <tr><td nowrap><b>Bażi tad-data</b></td><td>better-sqlite3 (SQLite, ġurnalizzazzjoni WAL) + LowDB (legat JSON) — 137 modulu tad-dominju, 194 migrazzjoni</td></tr>
   <tr><td nowrap><b>Memorja</b></td><td>Test sħiħ SQLite FTS5 + inkorporazzjonijiet vettorjali kkwantizzati b’int8, tnaqqis ittajpjat</td></tr>
   <tr><td nowrap><b>Skemi</b></td><td>Zod 4 — validazzjoni tal-I/O tal-għodod MCP + kuntratti tal-API</td></tr>
   <tr><td nowrap><b>Protokolli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

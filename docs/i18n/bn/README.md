@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — ফ্রি এআই গেটওয়ে (The Free AI Gateway)
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 358 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 358 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 19 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 357 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 357 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 19 routing strategies · $0 to start."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 358 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 358 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 54 recurring/keyless free-forever providers · 36 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 39,000+ static test declarations across 5,100+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 357 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 357 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 54 recurring/keyless free-forever providers · 36 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 39,000+ static test declarations across 5,100+ tracked test files."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-কে যা আলাদা করে তোলে — 9router, OpenRouter, CLIProxyAPI এবং LiteLLM-এর সাথে 13টি ক্ষমতার উপর একটি পুরনো ফিচার স্ন্যাপশট। OmniRoute: 358টি প্রোভাইডার, 150+ বিল্ট-ইন ফ্রি টিয়ার, 19টি রাউটিং কৌশল, 12-ইঞ্জিন টোকেন কম্প্রেশন, 110টি টুল সহ বিল্ট-ইন MCP সার্ভার, A2A এজেন্ট প্রোটোকল, পার্সিস্টেন্ট মেমরি, গার্ডরেল, ক্লাউড এজেন্ট, TLS ফিঙ্গারপ্রিন্ট স্টিলথ, Desktop/Termux/PWA এবং 42টি i18n UI লোকাল। OmniRoute হল MIT-লাইসেন্সপ্রাপ্ত এবং স্ব-হোস্টযোগ্য। প্রতিযোগীদের ক্ষমতা এবং সংখ্যা পরিবর্তিত হতে পারে; লিঙ্ক করা পদ্ধতি দেখুন।"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-কে যা আলাদা করে তোলে — 9router, OpenRouter, CLIProxyAPI এবং LiteLLM-এর সাথে 13টি ক্ষমতার উপর একটি পুরনো ফিচার স্ন্যাপশট। OmniRoute: 357টি প্রোভাইডার, 150+ বিল্ট-ইন ফ্রি টিয়ার, 19টি রাউটিং কৌশল, 12-ইঞ্জিন টোকেন কম্প্রেশন, 110টি টুল সহ বিল্ট-ইন MCP সার্ভার, A2A এজেন্ট প্রোটোকল, পার্সিস্টেন্ট মেমরি, গার্ডরেল, ক্লাউড এজেন্ট, TLS ফিঙ্গারপ্রিন্ট স্টিলথ, Desktop/Termux/PWA এবং 42টি i18n UI লোকাল। OmniRoute হল MIT-লাইসেন্সপ্রাপ্ত এবং স্ব-হোস্টযোগ্য। প্রতিযোগীদের ক্ষমতা এবং সংখ্যা পরিবর্তিত হতে পারে; লিঙ্ক করা পদ্ধতি দেখুন।"/>
 
 <sub>📊 সম্পূর্ণ পদ্ধতি এবং 9router, OpenRouter, CLIProxyAPI ও LiteLLM-এর সাথে প্রতি-ফিচার বিবরণ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
   <tr><td nowrap><b>রানটাইম</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ভাষা</b></td><td>TypeScript 6.0 — <code>src/</code> এবং <code>open-sse/</code> জুড়ে <b>100% TypeScript</b> (v2.0 থেকে কোরে একটিও <code>any</code> নেই)</td></tr>
   <tr><td nowrap><b>ফ্রেমওয়ার্ক</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (JSON লিগ্যাসি) — 137টি ডোমেইন মডিউল, 193টি মাইগ্রেশন</td></tr>
+  <tr><td nowrap><b>ডেটাবেস</b></td><td>better-sqlite3 (SQLite, WAL জার্নালিং) + LowDB (JSON লিগ্যাসি) — 137টি ডোমেইন মডিউল, 194টি মাইগ্রেশন</td></tr>
   <tr><td nowrap><b>মেমরি</b></td><td>SQLite FTS5 পূর্ণ-পাঠ অনুসন্ধান + int8-কোয়ান্টাইজড ভেক্টর এমবেডিং, টাইপড ডিকে</td></tr>
   <tr><td nowrap><b>স্কিমা</b></td><td>Zod 4 — MCP টুলের ইনপুট/আউটপুট যাচাইকরণ + API কনট্র্যাক্ট</td></tr>
   <tr><td nowrap><b>প্রোটোকল</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

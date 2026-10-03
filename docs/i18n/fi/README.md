@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ilmainen tekoälyportti
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Jokainen tekoälytyökalu → 358 palveluntarjoajaa — yli 150 ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ILMAISEKSI Claude / GPT / Gemini -palveluihin automaattisella varajärjestelmällä. RTK + Caveman pinottu pakkaus säästää 15–95 % tokeneista (~89 % keskimäärin) — ei koskaan rajoituksia. 358 tekoälypalveluntarjoajaa · yli 150 ilmaista tasoa · ~1,62 miljardia ilmaista tokenia/kk · 19 reititysstrategiaa · 0 $ aloittamiseen."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Jokainen tekoälytyökalu → 357 palveluntarjoajaa — yli 150 ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ILMAISEKSI Claude / GPT / Gemini -palveluihin automaattisella varajärjestelmällä. RTK + Caveman pinottu pakkaus säästää 15–95 % tokeneista (~89 % keskimäärin) — ei koskaan rajoituksia. 357 tekoälypalveluntarjoajaa · yli 150 ilmaista tasoa · ~1,62 miljardia ilmaista tokenia/kk · 19 reititysstrategiaa · 0 $ aloittamiseen."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus – Yksi päätepiste ja 358 palveluntarjoajaa. Automaattinen varajärjestelmä pitää reitityksen käynnissä, kun toinen toimiva kohde on saatavilla. Kuusi pilaria: joustava varajärjestelmä 358 palveluntarjoajan yli · jopa 95 % tokenisäästöt kelvollisissa työkuormissa · 0 $ aloittaa yli 150 ilmaisella tasolla ja 54 toistuvalla/avaimettomalla ikuisesti ilmaisella palveluntarjoajalla · 36 CLI/agentti-integraatiota yhden konfiguraation kautta · OpenAI, Claude, Gemini ja Responses API -yhteensopivuus osoitteessa /v1 · tuotannon hallintalaitteet, mukaan lukien katkaisijat, TLS-varkain, MCP 110 -työkalut, A2A, muisti, suojakaiteet, arvioinnit ja yli 39 000 staattista testilausumaa yli 5 100 seurattavassa testitiedostossa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus – Yksi päätepiste ja 357 palveluntarjoajaa. Automaattinen varajärjestelmä pitää reitityksen käynnissä, kun toinen toimiva kohde on saatavilla. Kuusi pilaria: joustava varajärjestelmä 357 palveluntarjoajan yli · jopa 95 % tokenisäästöt kelvollisissa työkuormissa · 0 $ aloittaa yli 150 ilmaisella tasolla ja 54 toistuvalla/avaimettomalla ikuisesti ilmaisella palveluntarjoajalla · 36 CLI/agentti-integraatiota yhden konfiguraation kautta · OpenAI, Claude, Gemini ja Responses API -yhteensopivuus osoitteessa /v1 · tuotannon hallintalaitteet, mukaan lukien katkaisijat, TLS-varkain, MCP 110 -työkalut, A2A, muisti, suojakaiteet, arvioinnit ja yli 39 000 staattista testilausumaa yli 5 100 seurattavassa testitiedostossa."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Kaikki **19** strategiaa — yhdistele vapaasti kombon eri vaiheissa:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista – päivitetty ominaisuuskuvaus verrattuna 9routeriin, OpenRouteriin, CLIProxyAPI:iin ja LiteLLM:ään 13 ominaisuuden osalta. OmniRoute: 358 palveluntarjoajaa, yli 150 sisäänrakennettua ilmaista tasoa, 19 reititysstrategiaa, 12-moottorinen token-pakkaus, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, suojakaiteet, pilviagentit, TLS-sormenjälkien piilotus, työpöytä/Termux/PWA ja 42 i18n-käyttöliittymäkieltä. OmniRoute on MIT-lisensoitu ja itsehostattavissa. Kilpailijoiden ominaisuudet ja määrät voivat muuttua; katso linkitetty metodologia."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista – päivitetty ominaisuuskuvaus verrattuna 9routeriin, OpenRouteriin, CLIProxyAPI:iin ja LiteLLM:ään 13 ominaisuuden osalta. OmniRoute: 357 palveluntarjoajaa, yli 150 sisäänrakennettua ilmaista tasoa, 19 reititysstrategiaa, 12-moottorinen token-pakkaus, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, suojakaiteet, pilviagentit, TLS-sormenjälkien piilotus, työpöytä/Termux/PWA ja 42 i18n-käyttöliittymäkieltä. OmniRoute on MIT-lisensoitu ja itsehostattavissa. Kilpailijoiden ominaisuudet ja määrät voivat muuttua; katso linkitetty metodologia."/>
 
 <sub>📊 Täydellinen metodologia &amp; ominaisuuskohtaiset yksityiskohdat verrattuna 9routeriin, OpenRouteriin, CLIProxyAPI:iin &amp; LiteLLM:ään → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1274,7 +1274,7 @@ Kanoniset mittarit 2026-08-24: **1.029 yksilöllistä videota** · **11.132.922 
   <tr><td nowrap><b>Ajoympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptiä</b> hakemistoissa <code>src/</code> ja <code>open-sse/</code> (ei yhtään <code>any</code>-tyyppiä ytimessä versiosta v2.0 lähtien)</td></tr>
   <tr><td nowrap><b>Sovelluskehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-lokikirjaus) + LowDB (vanha JSON-ratkaisu) — 137 toimialuemoduulia, 193 migraatiota</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-lokikirjaus) + LowDB (vanha JSON-ratkaisu) — 137 toimialuemoduulia, 194 migraatiota</td></tr>
   <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisoidut vektoriupotukset, tyypitetty vaimeneminen</td></tr>
   <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen I/O-validointi + API-sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

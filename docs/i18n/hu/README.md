@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Az Ingyenes AI Átjáró
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Soha ne hagyd abba a kódolást. Minden AI eszköz → 358 szolgáltató — 150+ ingyenes — egyetlen végponton keresztül. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity INGYENES Claude / GPT / Gemini-ba automatikus tartalék opcióval. Az RTK + Caveman rétegzett tömörítés 15–95% tokent takarít meg (~89% átlag) — soha ne érd el a korlátokat. 358 AI szolgáltató · 150+ ingyenes szint · ~1,62 milliárd ingyenes token/hó · 19 útválasztási stratégia · 0 dollár a kezdéshez."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Soha ne hagyd abba a kódolást. Minden AI eszköz → 357 szolgáltató — 150+ ingyenes — egyetlen végponton keresztül. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity INGYENES Claude / GPT / Gemini-ba automatikus tartalék opcióval. Az RTK + Caveman rétegzett tömörítés 15–95% tokent takarít meg (~89% átlag) — soha ne érd el a korlátokat. 357 AI szolgáltató · 150+ ingyenes szint · ~1,62 milliárd ingyenes token/hó · 19 útválasztási stratégia · 0 dollár a kezdéshez."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Az Ígéret — Egy végpont és 358 szolgáltató. Az automatikus visszaváltás fenntartja az útválasztást, amíg egy másik egészséges célpont elérhető. Hat pillér: rugalmas visszaváltás 358 szolgáltató között · akár 95% token megtakarítás a jogosult munkaterheléseken · 0 dolláros indulás 150+ ingyenes szinttel és 54 ismétlődő/kulcs nélküli örökké ingyenes szolgáltatóval · 36 CLI/ügynök integráció egyetlen konfiguráción keresztül · OpenAI, Claude, Gemini és Responses API kompatibilitás a /v1 címen · gyártási vezérlők, beleértve a megszakítókat, TLS lopakodást, MCP 110 eszközöket, A2A-t, memóriát, védőkorlátokat, értékeléseket és 39 000+ statikus tesztdeklarációt 5 100+ nyomon követett tesztfájlban."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Az Ígéret — Egy végpont és 357 szolgáltató. Az automatikus visszaváltás fenntartja az útválasztást, amíg egy másik egészséges célpont elérhető. Hat pillér: rugalmas visszaváltás 357 szolgáltató között · akár 95% token megtakarítás a jogosult munkaterheléseken · 0 dolláros indulás 150+ ingyenes szinttel és 54 ismétlődő/kulcs nélküli örökké ingyenes szolgáltatóval · 36 CLI/ügynök integráció egyetlen konfiguráción keresztül · OpenAI, Claude, Gemini és Responses API kompatibilitás a /v1 címen · gyártási vezérlők, beleértve a megszakítókat, TLS lopakodást, MCP 110 eszközöket, A2A-t, memóriát, védőkorlátokat, értékeléseket és 39 000+ statikus tesztdeklarációt 5 100+ nyomon követett tesztfájlban."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Mind a **19** stratégia — szabadon kombinálhatók a kombó egyes lépéseibe
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mi különbözteti meg az OmniRoute-ot — egy funkcióösszehasonlítás a 9router, OpenRouter, CLIProxyAPI és LiteLLM ellenében, 13 képesség mentén. OmniRoute: 358 szolgáltató, 150+ beépített ingyenes szint, 19 útválasztási stratégia, 12 motoros token tömörítés, beépített MCP szerver 110 eszközzel, A2A ügynök protokoll, tartós memória, védőkorlátok, felhőügynökök, TLS ujjlenyomat lopakodás, Desktop/Termux/PWA és 42 i18n UI nyelvi beállítás. Az OmniRoute MIT-licencelt és saját szerveren üzemeltethető. A versenytársak képességei és számai változhatnak; lásd a hivatkozott módszertant."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mi különbözteti meg az OmniRoute-ot — egy funkcióösszehasonlítás a 9router, OpenRouter, CLIProxyAPI és LiteLLM ellenében, 13 képesség mentén. OmniRoute: 357 szolgáltató, 150+ beépített ingyenes szint, 19 útválasztási stratégia, 12 motoros token tömörítés, beépített MCP szerver 110 eszközzel, A2A ügynök protokoll, tartós memória, védőkorlátok, felhőügynökök, TLS ujjlenyomat lopakodás, Desktop/Termux/PWA és 42 i18n UI nyelvi beállítás. Az OmniRoute MIT-licencelt és saját szerveren üzemeltethető. A versenytársak képességei és számai változhatnak; lásd a hivatkozott módszertant."/>
 
 <sub>📊 Teljes módszertan &amp; funkciónkénti részletek a 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM ellenében → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
   <tr><td nowrap><b>Futtatókörnyezet</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Nyelv</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> a <code>src/</code> és az <code>open-sse/</code> teljes területén (a v2.0 óta nulla <code>any</code> a magban)</td></tr>
   <tr><td nowrap><b>Keretrendszer</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Adatbázis</b></td><td>better-sqlite3 (SQLite, WAL-naplózás) + LowDB (örökölt JSON) — 137 tartománymodul, 193 migráció</td></tr>
+  <tr><td nowrap><b>Adatbázis</b></td><td>better-sqlite3 (SQLite, WAL-naplózás) + LowDB (örökölt JSON) — 137 tartománymodul, 194 migráció</td></tr>
   <tr><td nowrap><b>Memória</b></td><td>SQLite FTS5 teljes szöveges keresés + int8-kvantált vektoros beágyazások, típusos lecsengés</td></tr>
   <tr><td nowrap><b>Sémák</b></td><td>Zod 4 — MCP-eszközök be- és kimenetének validálása + API-szerződések</td></tr>
   <tr><td nowrap><b>Protokollok</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -61,6 +61,7 @@ import { handleUcImageGeneration } from "./imageGeneration/providers/ucImage.ts"
 import { handleCursorAgentImageGeneration } from "./imageGeneration/providers/cursorAgentImage.ts";
 import { handleMinimaxImageGeneration } from "./imageGeneration/providers/minimax.ts";
 import { handleCloudflareAiImageGeneration } from "./imageGeneration/providers/cloudflareAi.ts";
+import { buildXaiImageRequest } from "./imageGeneration/providers/xaiImage.ts";
 import { handleMaxaiImageGeneration } from "./imageGeneration/providers/maxaiImage.ts";
 import { handleAdobeFireflyImageGeneration } from "./imageGeneration/providers/adobeFirefly.ts";
 import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibabaImage.ts";
@@ -1285,7 +1286,11 @@ async function handleOpenAIImageGeneration({
           prompt: body.prompt,
         };
 
-  if (providerConfig.format !== "agnes-image") {
+  if (providerConfig.format === "xai-image") {
+    const request = buildXaiImageRequest(model, body);
+    if ("error" in request) return { success: false, status: 400, error: request.error };
+    Object.assign(upstreamBody, request.body);
+  } else if (providerConfig.format !== "agnes-image") {
     // Pass optional parameters for ordinary OpenAI-compatible providers.
     if (body.n !== undefined) upstreamBody.n = body.n;
     if (body.size !== undefined) upstreamBody.size = body.size;

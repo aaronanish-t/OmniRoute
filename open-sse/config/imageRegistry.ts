@@ -69,6 +69,19 @@ interface ImageCatalogModelEntry {
   mediaCapabilities?: Record<string, unknown>;
 }
 
+// OAuth variants keep their provider identity for token refresh and account selection.
+const XAI_IMAGE_CONFIG = {
+  baseUrl: "https://api.x.ai/v1/images/generations",
+  authHeader: "bearer",
+  format: "xai-image",
+  models: [
+    { id: "grok-imagine-image-2.0", name: "Grok Imagine Image 2.0" },
+    { id: "grok-imagine-image-quality", name: "Grok Imagine Image Quality" },
+    { id: "grok-imagine-image", name: "Grok Imagine Image" },
+  ],
+  supportedSizes: ["1024x1024", "2048x2048", "1536x1024", "1024x1536", "1792x1024", "1024x1792"],
+};
+
 const IMAGE_MODEL_ALIASES: Record<string, ImageModelAliasEntry> = {
   "gemini-3.1-flash-image-preview": {
     provider: "antigravity",
@@ -309,18 +322,9 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     supportedSizes: ["1024x1024", "1024x1536", "1536x1024", "1024x1792", "1792x1024"],
   },
 
-  xai: {
-    id: "xai",
-    baseUrl: "https://api.x.ai/v1/images/generations",
-    authType: "apikey",
-    authHeader: "bearer",
-    format: "openai",
-    models: [
-      { id: "grok-imagine-image-quality", name: "Grok Imagine Image Quality" },
-      { id: "grok-imagine-image", name: "Grok Imagine Image" },
-    ],
-    supportedSizes: ["1024x1024", "2048x2048"],
-  },
+  xai: { ...XAI_IMAGE_CONFIG, id: "xai", authType: "apikey" },
+  "xai-oauth": { ...XAI_IMAGE_CONFIG, id: "xai-oauth", alias: "xao", authType: "oauth" },
+  "grok-cli": { ...XAI_IMAGE_CONFIG, id: "grok-cli", alias: "gc", authType: "oauth" },
 
   "vercel-ai-gateway": {
     id: "vercel-ai-gateway",

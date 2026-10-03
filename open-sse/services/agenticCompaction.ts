@@ -66,29 +66,10 @@ function isCall(value: unknown): boolean {
   );
 }
 
-/** Character budgets are payload thresholds, not model token-window claims. */
-export function compactAgenticBody(
-  source: Body,
-  model: string,
-  config?: AgenticCompactionConfig | null
-): {
-  body: Body;
-  compacted: boolean;
-  before: number;
-  after: number;
-  limit: number;
-  overLimit: boolean;
-} {
-  const before = chars(source);
-  const limit =
-    config?.enabled === true
-      ? (config.modelMaxChars?.[model] ?? config.defaultMaxChars ?? 400_000)
-      : Number.MAX_SAFE_INTEGER;
-  if (before <= limit)
-    return { body: source, compacted: false, before, after: before, limit, overLimit: false };
-  const body = structuredClone(source);
-  const target = Math.floor(limit * (config?.targetRatio ?? 0.72));
-  const maxEvidence = config?.toolResultMaxChars ?? 24_000;
+function prepareHistory(
+  body: Body,
+  maxEvidence: number
+): { key: string; trimmed: Body[]; groups: Body[][] } {
   // Only remove byte-identical definitions: name collisions can have different schemas.
   if (Array.isArray(body.tools)) {
     const seen = new Set<string>();
@@ -112,6 +93,12 @@ export function compactAgenticBody(
         item[field] = (item[field] as unknown[]).map((part) => trimResult(part, maxEvidence));
     return item;
   });
+
+  const groups = groupHistory(trimmed);
+  return { key, trimmed, groups };
+}
+
+function groupHistory(trimmed: Body[]): Body[][] {
   // Group calls and their parallel results atomically; never orphan a tool boundary.
   const groups: Body[][] = [];
   for (const item of trimmed) {
@@ -120,6 +107,34 @@ export function compactAgenticBody(
       previous.push(item);
     else groups.push([item]);
   }
+
+  return groups;
+}
+
+/** Character budgets are payload thresholds, not model token-window claims. */
+export function compactAgenticBody(
+  source: Body,
+  model: string,
+  config?: AgenticCompactionConfig | null
+): {
+  body: Body;
+  compacted: boolean;
+  before: number;
+  after: number;
+  limit: number;
+  overLimit: boolean;
+} {
+  const before = chars(source);
+  const limit =
+    config?.enabled === true
+      ? (config.modelMaxChars?.[model] ?? config.defaultMaxChars ?? 400_000)
+      : Number.MAX_SAFE_INTEGER;
+  if (before <= limit)
+    return { body: source, compacted: false, before, after: before, limit, overLimit: false };
+  const body = structuredClone(source);
+  const target = Math.floor(limit * (config?.targetRatio ?? 0.72));
+  const maxEvidence = config?.toolResultMaxChars ?? 24_000;
+  const { key, trimmed, groups } = prepareHistory(body, maxEvidence);
   const latestUser = trimmed.findLast((item) => item.role === "user" && !isResult(item));
   const pinned = new Set(
     groups.filter(

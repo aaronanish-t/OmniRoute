@@ -138,5 +138,6 @@
     "**/*-worktree-*": true,
     "**/*-issues-*": true,
     "**/*-reorg*": true
-  }
+  },
+  "githubPullRequests.ignoredPullRequestBranches": ["release/v3.8.52"]
 }

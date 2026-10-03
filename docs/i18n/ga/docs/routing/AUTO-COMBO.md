@@ -4,6 +4,10 @@
 
 ---
 
+🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇪🇹 [am](../../../am/docs/routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇧🇦 [bs](../../../bs/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ha](../../../ha/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇰🇷 [ko](../../../ko/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇳🇴 [no](../../../no/docs/routing/AUTO-COMBO.md) · 🇮🇳 [or](../../../or/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
+
+---
+
 > **D'Úsáideoirí**: Ag lorg tús tapa? Féach ar [Threoir Úsáideora Auto-Combo](../getting-started/AUTO-COMBO-GUIDE.md) le haghaidh mínithe agus samplaí simplí.
 
 > Slabhraí samhlacha fé bhainistiú féin le scóráil oiriúnaitheach + uathródú gan chumraíocht
@@ -260,62 +264,69 @@ luachanna réitithe isteach sna hionchuir `config.modePack` / `config.budgetCap`
 `config.budgetFallback` atá san inneall cheana féin. Socraíonn `config.budgetFallback` stóráilte teaglama ("strict" |
 "cheapest") an beartas marthanach; sáraíonn an ceanntásc é le haghaidh iarratais aonair.
 
-## Gach Straitéis Ródúcháin
+## Gach Straitéis Ródaithe
 
-Tacaíonn inneall teaglama OmniRoute le **19 straitéis ródúcháin** (dearbhaithe in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Cuirtear inneall Auto Combo féin ar fáil faoin straitéis `auto`; tá na cinn eile ar fáil do theaglamaí marthanacha.
+Tacaíonn inneall teaglama OmniRoute le **19 straitéis ródaithe** (dearbhaithe i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Nochtar an t-inneall Auto Combo féin faoin straitéis `auto`; tá na cinn eile ar fáil le haghaidh teaglamaí buanaithe.
 
-| Straitéis           | Cur síos                                                                                                                                                                                                                 |
-| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Liosta ordaithe de réir na chéad sprice le tosaíocht shainráite                                                                                                                                                          |
-| `weighted`          | Roghnú randamach ualaithe de réir mheáchan gach sprice                                                                                                                                                                   |
-| `round-robin`       | Rothlaigh trí na spriocanna in ord (i mbaisceanna; féach thíos)                                                                                                                                                          |
-| `context-relay`     | Tabhair an comhthéacs ar aghaidh idir spriocanna (comhráite fada)                                                                                                                                                        |
-| `fill-first`        | Líon cuóta gach sprice sula mbogtar ar aghaidh go dtí an chéad cheann eile                                                                                                                                               |
-| `p2c`               | Cothromú randamach ualaigh de réir chumhacht an dá rogha                                                                                                                                                                 |
-| `random`            | Roghnú randamach aonfhoirmeach                                                                                                                                                                                           |
-| `least-used`        | Roghnaigh an sprioc ag a bhfuil an t-ualach reatha is ísle                                                                                                                                                               |
-| `cost-optimized`    | Íoslaghdaigh $ in aghaidh an iarratais bunaithe ar phraghsáil na catalóige                                                                                                                                               |
-| `reset-aware` ⭐    | Cuir in ord tosaíochta de réir am athshocraithe an chuóta — rangaítear tréimhsí gearra athshocraithe níos airde                                                                                                          |
-| `reset-window`      | Tabhair tús áite do spriocanna a n-athshocrófar fuinneog a gcuóta is luaithe                                                                                                                                             |
-| `headroom`          | Roghnaigh an sprioc ag a bhfuil an lamháil chuóta is mó fágtha                                                                                                                                                           |
-| `strict-random`     | Roghnú randamach gan athdhúbláil na n-athráite                                                                                                                                                                           |
-| `auto`              | Úsáid scóráil Auto Combo (16 fhachtóir) — **molta**                                                                                                                                                                      |
-| `lkgp`              | Last-Known-Good Path (ceanglaíonn sé leis an soláthraí deireanach ar éirigh leis, ansin téann sé siar chuig na rialacha)                                                                                                 |
-| `context-optimized` | Roghnaigh an sprioc is fearr a oireann do mhéid reatha an chomhthéacs                                                                                                                                                    |
-| `cache-optimized`   | Athordaigh spriocanna de réir cleamhnais le taisce leide — baintear triail ar dtús as an nasc is dóichí a bhfuil réimír thaiscthe an iarratais seo aige cheana (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Seol chuig painéal samhlacha go comhthreomhar, ansin déan freagra amháin a shintéisiú trí bhreitheamh (féach thíos)                                                                                                      |
-| `pipeline`          | Rith spriocanna go seicheamhach, agus aschur gach céime á chur isteach mar ionchur sa chéad chéim eile; ní chuirtear ar ais ach an freagra deiridh (#6396)                                                               |
+| Straitéis           | Cur Síos                                                                                                                                                                                                              |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Liosta ordaithe céad-sprioc le tosaíocht shainráite                                                                                                                                                                   |
+| `weighted`          | Randamach ualaithe de réir meáchain in aghaidh na sprioce                                                                                                                                                             |
+| `round-robin`       | Timthriall trí spriocanna in ord (baisceáilte; féach thíos)                                                                                                                                                           |
+| `context-relay`     | Comhthéacs a thabhairt ar aghaidh thar spriocanna (comhráite fada)                                                                                                                                                    |
+| `fill-first`        | Cuóta gach sprioce a líonadh sula n-aistrítear chuig an gcéad cheann eile                                                                                                                                             |
+| `p2c`               | Cothromú lóid randamach Power-of-2-choices                                                                                                                                                                            |
+| `random`            | Roghnú randamach aonfhoirmeach                                                                                                                                                                                        |
+| `least-used`        | Roghnaigh an sprioc leis an lód reatha is ísle                                                                                                                                                                        |
+| `cost-optimized`    | Íoslaghdaigh $ in aghaidh an iarratais bunaithe ar phraghsáil an chatalóige                                                                                                                                           |
+| `reset-aware` ⭐    | Tabhair tosaíocht de réir ama athshocraithe cuóta — fuinneoga gearra athshocraithe rangaithe níos airde                                                                                                               |
+| `reset-window`      | Is fearr leis spriocanna a n-athshocraíonn a bhfuinneog chuóta is túisce                                                                                                                                              |
+| `headroom`          | Roghnaigh an sprioc leis an spás cuóta breise is mó atá fágtha                                                                                                                                                        |
+| `strict-random`     | Randamach gan dídhúblú ar athruithe                                                                                                                                                                                   |
+| `auto`              | Úsáid scóráil Auto Combo (16-fachtóir) — **molta**                                                                                                                                                                    |
+| `lkgp`              | Last-Known-Good Path (ceanglaíonn sé leis an soláthraí rathúil deireanach, ansin titeann sé ar ais ar rialacha)                                                                                                       |
+| `context-optimized` | Roghnaigh an sprioc is fearr a oireann do mhéid an chomhthéacs reatha                                                                                                                                                 |
+| `cache-optimized`   | Athordaigh spriocanna de réir cleamhnais taisce leid — déantar an nasc is dóichí a bhfuil réimír taisce an iarratais seo aige cheana féin a thriail ar dtús (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Scaip amach chuig painéal samhlacha go comhthreomhar, ansin sintéisigh freagra amháin trí bhreitheamh (féach thíos)                                                                                                   |
+| `pipeline`          | Rith spriocanna go seicheamhach, ag snáithiú aschur gach céime isteach in ionchur an chéad chéim eile; ní sheachadtar ach an freagra deiridh (#6396)                                                                  |
 
-⭐ = Nua in v3.8.0 · 🧬 = Nua in v3.8.36
+⭐ = Nua i v3.8.0 · 🧬 = Nua i v3.8.36
 
 ### Séimeantaic `weighted`
 
 Is **tarraingt randamach chomhréireach in aghaidh an iarratais** é `weighted`
 (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ní cothromóir:
 
-- Tarraingíonn gach iarratas **céim amháin** le dóchúlacht `weight / totalWeight`; cuirtear na céimeanna eile
-  in ord íslitheach de réir meáchain mar shlabhra cúltaca don iarratas sin.
-- **Ní tharraingítear riamh** céim a bhfuil meáchan `0` aici (nó nach bhfuil meáchan aici) fad is atá
-  meáchan > 0 ag aon chéim eile — ní féidir léi feidhmiú ach mar chúltaca tar éis theip na céime a tarraingíodh.
-  Ní éiríonn an roghnú aonfhoirmeach ach nuair atá **gach** meáchan cothrom le 0.
-- Baintear céimeanna nach bhfuil aon cheann dá spriocanna ar fáil — scoradán ciorcaid an tsoláthraí `OPEN`,
-  tréimhse mharbhánta an naisc, frithdhúnadh na samhla — den tarraingt sula dtarlaíonn sí
-  (`open-sse/services/combo/targetResolution.ts`), mar sin is féidir le céim shláintiúil aonair gach
-  iarratas a bhuachan go sealadach.
-- Ceanglaíonn `stickyWeightedLimit` (cumraíocht teaglama, réamhshocrú `1` = múchta) an chéim a tarraingíodh
-  ar feadh an lín sin d’éachtaí comhleanúnacha sula ndéantar tarraingt eile.
+- Tarraingíonn gach iarratas céim **amháin** le dóchúlacht `weight / totalWeight`; déantar na céimeanna
+  eile a ordú de réir meáchain íslithigh mar an slabhra cúltaca don iarratas sin.
+- Céim a bhfuil meáchan `0` (nó ar iarraidh) aici, ní **tharraingítear riamh** í fad is a bhíonn meáchan
+  > 0 ag aon chéim eile — ní féidir léi feidhmiú ach mar chúltaca tar éis don chéim a tarraingíodh teip. Is
+  > nuair a bhíonn gach meáchan ag 0 **amháin** a éiríonn an roghnú aonfhoirmeach.
+- Baintear céimeanna a bhfuil a gcuid spriocanna go léir neamh-infhaighte — scoradán ciorcaid an tsoláthraí `OPEN`,
+  fuarú nasctha, frithghlasáil samhla — as an tarraingt sula dtarlaíonn sí
+  (`open-sse/services/combo/targetResolution.ts`), ionas gur féidir le céim shláintiúil amháin gach iarratas
+  a bhuachan go sealadach.
+- Ceanglaíonn `stickyWeightedLimit` (cumraíocht teaglama, réamhshocrú `1` = as) an chéim a tarraingíodh
+  don mhéid sin rath as a chéile sula ndéantar atarraingt.
 
-Le haghaidh rothlú docht, úsáid `round-robin`; tugann meáchain chomhionanna ar `weighted` cothromaíocht
+Le haghaidh rothlú docht úsáid `round-robin`; tugann meáchain chomhionanna ar `weighted` cothromaíocht
 staitistiúil — ní cothromaíocht dhocht.
 
-### Mód píblíne gníomhaíche
+### Mód píblíne gníomhaíoch
 
-Is féidir le teaglaim `pipeline` dhá chéim ródú pleanálaí/reachtóra a roghnú le
+Is féidir le teaglaim dhá chéim `pipeline` rogha a dhéanamh ar ródú pleanálaí/feidhmitheora le
 `config.agenticOrchestration.enabled`. Is leis an gcéad sprioc an phleanáil agus na freagraí deiridh;
-astaíonn an dara sprioc glaonna uirlise atá dúchasach don chliant. Braitheann OmniRoute
-leanúintí torthaí uirlise ó phrótacal na hiarrata, fiafraíonn sé den phleanálaí an bhfuil babhta uirlise eile
-de dhíth, agus roghnaíonn sé go dinimiciúil an reachtóir nó an pleanálaí mar an gcéim dheiridh
-atá os comhair an chliaint.
+astaíonn an dara sprioc glaonna uirlisí atá dúchasach don chliant. Braitheann OmniRoute leanúintí
+toraidh uirlisí ó phrótacal an iarratais, fiafraíonn sé den phleanálaí an bhfuil gá le babhta uirlisí
+eile, agus déanann sé an feidhmitheoir nó an pleanálaí mar an gcéim dheiridh a bhreathnaíonn ar an gcliant go dinimiciúil.
+
+Ar leanúintí toraidh uirlisí, stopann OmniRoute an feidhmiú freisin nuair a athdhéanann dhá bhabhta
+chomhlánaithe as a chéile na glaonna uirlisí céanna le torthaí gan athrú, nó nuair a theip ar gach
+toradh a bhí marcáilte go sainráite i dhá bhabhta as a chéile. Ceadaíonn torthaí athraithe
+glaonna athuair (mar shampla, vótaíocht). Athshocraíonn an cosaint ar iarratas nua ón úsáideoir,
+grúpálann sé glaonna comhthreomhara isteach i mbabhta amháin, agus tacaíonn sé le stair Anthropic, Chat Completions,
+Responses agus Gemini. Faigheann an pleanálaí an chúis agus is leis an freagra deiridh
+fiú má iarrann sé babhta uirlisí eile.
 
 ```json
 {
@@ -327,34 +338,34 @@ atá os comhair an chliaint.
 }
 ```
 
-Féadfaidh an reachtóir roinnt glaonna neamhspleácha a astú in aon fhreagra amháin. Láimhseáiltear glaonna
-spleácha i sealanna torthaí uirlise cliaint níos déanaí, agus déanann an pleanálaí athbhreithniú ar gach toradh.
-Is é `8` réamhshocrú `maxToolRounds` agus glacann sé le `1`–`32`; nuair a shroichtear é, ní mór don phleanálaí
-an freagra deiridh is fearr atá ar fáil a sholáthar. Maolaítear cinntí inmheánacha an phleanálaí, agus
-caomhnaíonn an freagra roghnaithe atá os comhair an chliaint an bhunrogha sruthaithe.
+Féadfaidh an feidhmitheoir ilghlaonna neamhspleácha a astú i bhfreagra amháin. Láimhseáiltear glaonna
+spleácha i ndualais toraidh uirlisí cliant níos déanaí, agus déanann an pleanálaí athbhreithniú ar gach toradh.
+Is é `8` an réamhshocrú do `maxToolRounds` agus glacann sé le `1`–`32`; a luaithe a shroichtear é, ní mór don phleanálaí
+an freagra deiridh is fearr atá ar fáil a tháirgeadh. Maolánaítear cinntí inmheánacha an phleanálaí,
+fad is a chaomhnaíonn an freagra roghnaithe a bhreathnaíonn ar an gcliant an rogha bhunaidh sruthaithe.
 
-### Baisc ghreamaitheach `round-robin` agus leathnú cuntas
+### Baisc ghreamaitheach agus leathnú cuntas `round-robin`
 
-Déantar `round-robin` i mbaisceanna, seachas iarratas amháin in aghaidh na céime:
+Déantar baisceáil ar Round-robin, ní iarratas amháin in aghaidh na céime:
 
-- Coinníonn `stickyRoundRobinLimit` (cumraíocht na teaglaime, ansin `comboStickyRoundRobinLimit`, ansin
-  `settings.stickyRoundRobinLimit`, réamhshocrú **3**) an sprioc chéanna ar feadh an lín sin
-  d’éachtaí comhleanúnacha sula rothlaítear. Socraigh sárú na teaglaime go `1` le haghaidh rothlú
-  aon iarratais amháin. Taispeánann eagarthóir na dteaglam an luach éifeachtach agus an tsraith ónar tháinig sé.
-- Leathnaíonn `connectionAwareExpansion` (cumraíocht na teaglaime, ansin socruithe, réamhshocrú **false**)
-  gach céim ar leibhéal an tsoláthraí ina spriocanna in aghaidh an chuntais roimh an rothlú. Coinníonn straitéisí
-  Ghrúpa B (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
+- Coinníonn `stickyRoundRobinLimit` (cumraíocht teaglaim, ansin `comboStickyRoundRobinLimit`, ansin
+  `settings.stickyRoundRobinLimit`, réamhshocrú **3**) an sprioc chéanna don líon sin
+  d'éachtaí comhleanúnacha sula rothlaíonn sé. Socraigh sárú na teaglaime go `1` le haghaidh rothlú
+  aon iarratais amháin. Taispeánann eagarthóir na teaglaime an luach éifeachtach agus cén ciseal as ar tháinig sé.
+- Leathnaíonn `connectionAwareExpansion` (cumraíocht teaglaim, ansin socruithe, réamhshocrú **false**)
+  gach céim ar leibhéal an tsoláthraí isteach i spriocanna in aghaidh an chuntais roimh rothlú. Coinníonn straitéisí
+  Grúpa-B (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
   fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) amharc ar leibhéal an tsoláthraí go dtí go gcuirtear é seo ar siúl. Cuireann eagarthóir na dteaglam
-  oidhreacht / ar siúl / as ar fáil; úsáideann oidhreacht an réamhshocrú domhanda (as).
-- Athordaíonn ródú logántachta thaisce na leideanna (`promptCacheAffinityEnabled`, réamhshocrú **true**)
-  naisc fheistithe ionas go bhfanfaidh eochracha taisce meaitseála ar aon chuntas amháin. Tugtar tús áite dó thar
-  rothlú round-robin agus weighted thar chéimeanna feistithe in aghaidh an chuntais. Cas as é faoi
-  Socruithe → Réamhshocruithe teaglama má theastaíonn rothlú docht uait. Níl aon sárú in aghaidh na teaglaime ann.
+  pipeline) dearcadh ar leibhéal an tsoláthraí go dtí go mbíonn sé seo ar siúl. Nochtann eagarthóir na teaglaime
+  inherit / on / off; úsáideann inherit an réamhshocrú domhanda (off).
+- Déanann ródú logántachta taisce leideanna (`promptCacheAffinityEnabled`, réamhshocrú **true**) athordú
+  ar naisc phionnáilte ionas go bhfanann eochracha taisce comhoiriúnacha ar chuntas amháin. Bíonn tosaíocht aige ar
+  rothlú round-robin agus ualaithe thar chéimeanna pionnáilte in aghaidh an chuntais. Múch é faoi
+  Settings → Combo defaults má theastaíonn rothlú docht uait. Níl aon sárú in aghaidh na teaglaime ann.
 
-Le haghaidh rothlú ilchuntas ar aon mhúnla amháin, moltar **céim dhinimiciúil cuntais amháin** (`connectionId`
-folamh, an comhthiomsú iomlán) le teorainn ghreamaitheach `1`, seachas trí `connectionId` fheistithe.
-Comhthiteann céimeanna feistithe móide cleamhnas ar an gcuntas céanna fiú agus an cuntar RR
+Le haghaidh rothlú ilchuntais ar mhúnla amháin, is fearr **céim chuntais dhinimiciúil amháin** (folamh
+`connectionId`, an linn iomlán) le teorainn ghreamaitheach `1`, seachas trí `connectionId` phionnáilte.
+Titeann céimeanna pionnáilte móide aclaíocht isteach ar an gcuntas céanna fiú agus an cuntar RR
 ag dul ar aghaidh.
 
 ## Strataisí Fúnáise

@@ -1,0 +1,1 @@
+Agentic pipeline combos can configure additional models as ordered tool-executor backups. Failed responses and transport errors advance to the next executor while successful streams pass through unchanged.

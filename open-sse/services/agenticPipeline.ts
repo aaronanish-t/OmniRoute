@@ -251,14 +251,14 @@ export async function handleAgenticPipelineChat({
   config,
 }: HandleAgenticPipelineOptions): Promise<Response> {
   const chain = steps.filter((step) => Boolean(step && stepModel(step)));
-  if (chain.length !== 2) {
-    return errorResponse(400, "Agentic pipeline requires exactly two models: planner, executor");
+  if (chain.length < 2) {
+    return errorResponse(400, "Agentic pipeline requires a planner and at least one tool executor");
   }
 
   const planner = chain[0];
-  const executor = chain[1];
+  const executors = chain.slice(1);
   const plannerModel = stepModel(planner);
-  const executorModel = stepModel(executor);
+  const executorModels = executors.map(stepModel);
   const continuation = hasTrailingToolResult(body);
   const maxToolRounds = Math.min(Math.max(config?.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS, 1), 32);
   const toolRounds = countToolResultTurns(body);
@@ -266,7 +266,7 @@ export async function handleAgenticPipelineChat({
 
   log.info(
     "AGENTIC_PIPELINE",
-    `Combo "${comboName ?? ""}" | planner=${plannerModel} executor=${executorModel} continuation=${continuation} toolRounds=${toolRounds}/${maxToolRounds}`
+    `Combo "${comboName ?? ""}" | planner=${plannerModel} executors=${executorModels.join(",")} continuation=${continuation} toolRounds=${toolRounds}/${maxToolRounds}`
   );
 
   // Without client tools there is nothing for the executor to do. The planner owns
@@ -311,12 +311,32 @@ export async function handleAgenticPipelineChat({
   }
 
   if (decision.route === "tools" && !maxRoundsReached) {
-    const executorBody = prependSystemInstruction(
-      body,
-      [executor.prompt, executorPrompt(decision.content)].filter(Boolean).join("\n\n")
-    );
-    log.info("AGENTIC_PIPELINE", `Routing client-facing tool turn to ${executorModel}`);
-    return handleSingleModel(executorBody, executorModel, stepTarget(executor));
+    let lastFailure: Response | null = null;
+    for (const executor of executors) {
+      const executorModel = stepModel(executor);
+      const executorBody = prependSystemInstruction(
+        structuredClone(body),
+        [executor.prompt, executorPrompt(decision.content)].filter(Boolean).join("\n\n")
+      );
+      log.info("AGENTIC_PIPELINE", `Routing client-facing tool turn to ${executorModel}`);
+      try {
+        const response = await handleSingleModel(executorBody, executorModel, stepTarget(executor));
+        if (response.ok) return response;
+        lastFailure = response;
+        log.warn(
+          "AGENTIC_PIPELINE",
+          `Tool executor ${executorModel} failed with ${response.status}`
+        );
+        // Release unused upstream bodies before trying another executor. The final
+        // failure is returned intact, and successful SSE streams are never retried.
+        if (executor !== executors.at(-1)) await response.body?.cancel().catch(() => undefined);
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") throw error;
+        log.warn("AGENTIC_PIPELINE", `Tool executor ${executorModel} failed before responding`);
+        lastFailure = errorResponse(502, "All configured agentic tool executors failed");
+      }
+    }
+    if (lastFailure) return lastFailure;
   }
 
   // The planner owns final responses. A second planner call preserves provider-native

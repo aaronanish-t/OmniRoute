@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — ነጻው የኤአይይ መግቢያ በር
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ኮድ መስራት አታቁም:: እያንዳንዱ የኤአይይ መሳሪያ → 358 አቅራቢዎች — 150+ ነጻ — በአንድ የመጨረሻ ነጥብ በኩል:: Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ወደ ነጻ Claude / GPT / Gemini በራስ-ሰር ምትኬ:: RTK + Caveman የተደራረበ መጭመቂያ 15–95% ቶከኖችን ይቆጥባል (~89% በአማካይ) — ገደቦችን በጭራሽ አይመታም:: 358 የኤአይይ አቅራቢዎች · 150+ ነጻ ደረጃዎች · ~1.62B ነጻ ቶከኖች/በወር · 19 የማዞሪያ ስልቶች · ለመጀመር $0::"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ኮድ መስራት አታቁም:: እያንዳንዱ የኤአይይ መሳሪያ → 357 አቅራቢዎች — 150+ ነጻ — በአንድ የመጨረሻ ነጥብ በኩል:: Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ወደ ነጻ Claude / GPT / Gemini በራስ-ሰር ምትኬ:: RTK + Caveman የተደራረበ መጭመቂያ 15–95% ቶከኖችን ይቆጥባል (~89% በአማካይ) — ገደቦችን በጭራሽ አይመታም:: 357 የኤአይይ አቅራቢዎች · 150+ ነጻ ደረጃዎች · ~1.62B ነጻ ቶከኖች/በወር · 19 የማዞሪያ ስልቶች · ለመጀመር $0::"/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ቃል ኪዳኑ — አንድ የመጨረሻ ነጥብ እና 358 አቅራቢዎች። ሌላ ጤናማ ኢላማ እስካለ ድረስ አውቶማቲክ ምትኬ መስመሩን ይቀጥላል። ስድስት ምሰሶዎች: በ358 አቅራቢዎች ላይ ጠንካራ ምትኬ · ብቁ በሆኑ የስራ ጫናዎች ላይ እስከ 95% የቶከን ቁጠባ · ከ150+ ነፃ ደረጃዎች እና 54 ተደጋጋሚ/ቁልፍ የሌላቸው ለዘላለም ነፃ አቅራቢዎች ጋር ለመጀመር $0 · በአንድ ቅንብር በኩል 36 CLI/ወኪል ውህደቶች · OpenAI, Claude, Gemini እና Responses API ተኳሃኝነት በ /v1 · የምርት መቆጣጠሪያዎች እንደ ሰርክዩት ብሬከሮች፣ TLS ስቴልዝ፣ MCP 110 መሳሪያዎች፣ A2A፣ ሜሞሪ፣ ጋርድሬሎች፣ ኢቫልስ እና ከ5,100+ በላይ ክትትል የሚደረግባቸው የሙከራ ፋይሎች ላይ 39,000+ የማይንቀሳቀሱ የሙከራ መግለጫዎችን ጨምሮ።"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ቃል ኪዳኑ — አንድ የመጨረሻ ነጥብ እና 357 አቅራቢዎች። ሌላ ጤናማ ኢላማ እስካለ ድረስ አውቶማቲክ ምትኬ መስመሩን ይቀጥላል። ስድስት ምሰሶዎች: በ357 አቅራቢዎች ላይ ጠንካራ ምትኬ · ብቁ በሆኑ የስራ ጫናዎች ላይ እስከ 95% የቶከን ቁጠባ · ከ150+ ነፃ ደረጃዎች እና 54 ተደጋጋሚ/ቁልፍ የሌላቸው ለዘላለም ነፃ አቅራቢዎች ጋር ለመጀመር $0 · በአንድ ቅንብር በኩል 36 CLI/ወኪል ውህደቶች · OpenAI, Claude, Gemini እና Responses API ተኳሃኝነት በ /v1 · የምርት መቆጣጠሪያዎች እንደ ሰርክዩት ብሬከሮች፣ TLS ስቴልዝ፣ MCP 110 መሳሪያዎች፣ A2A፣ ሜሞሪ፣ ጋርድሬሎች፣ ኢቫልስ እና ከ5,100+ በላይ ክትትል የሚደረግባቸው የሙከራ ፋይሎች ላይ 39,000+ የማይንቀሳቀሱ የሙከራ መግለጫዎችን ጨምሮ።"/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ኦምኒሩት ልዩ የሚያደርገው ምንድን ነው — 9router፣ OpenRouter፣ CLIProxyAPI እና LiteLLMን በ13 ችሎታዎች ላይ የሚያነፃፅር ጊዜ ያለፈበት የባህሪ ቅጽበታዊ ገጽ እይታ። ኦምኒሩት: 358 አቅራቢዎች፣ 150+ ነፃ ደረጃዎች አብሮ የተሰሩ፣ 19 የማዞሪያ ስልቶች፣ 12-ሞተር ቶከን መጭመቂያ፣ አብሮ የተሰራ የኤምሲፒ አገልጋይ ከ110 መሳሪያዎች ጋር፣ A2A ወኪል ፕሮቶኮል፣ ዘላቂ ማህደረ ትውስታ፣ የጥበቃ መስመሮች፣ የደመና ወኪሎች፣ TLS የጣት አሻራ ስውርነት፣ ዴስክቶፕ/ተርሙክስ/PWA እና 42 i18n UI አካባቢያዊ ቋንቋዎች። ኦምኒሩት በMIT ፍቃድ የተሰጠው እና በራስ የሚስተናገድ ነው። የተወዳዳሪዎች ችሎታዎች እና ብዛት ሊለወጡ ይችላሉ፤ የተገናኘውን ዘዴ ይመልከቱ።"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ኦምኒሩት ልዩ የሚያደርገው ምንድን ነው — 9router፣ OpenRouter፣ CLIProxyAPI እና LiteLLMን በ13 ችሎታዎች ላይ የሚያነፃፅር ጊዜ ያለፈበት የባህሪ ቅጽበታዊ ገጽ እይታ። ኦምኒሩት: 357 አቅራቢዎች፣ 150+ ነፃ ደረጃዎች አብሮ የተሰሩ፣ 19 የማዞሪያ ስልቶች፣ 12-ሞተር ቶከን መጭመቂያ፣ አብሮ የተሰራ የኤምሲፒ አገልጋይ ከ110 መሳሪያዎች ጋር፣ A2A ወኪል ፕሮቶኮል፣ ዘላቂ ማህደረ ትውስታ፣ የጥበቃ መስመሮች፣ የደመና ወኪሎች፣ TLS የጣት አሻራ ስውርነት፣ ዴስክቶፕ/ተርሙክስ/PWA እና 42 i18n UI አካባቢያዊ ቋንቋዎች። ኦምኒሩት በMIT ፍቃድ የተሰጠው እና በራስ የሚስተናገድ ነው። የተወዳዳሪዎች ችሎታዎች እና ብዛት ሊለወጡ ይችላሉ፤ የተገናኘውን ዘዴ ይመልከቱ።"/>
 
 <sub>📊 ሙሉ ዘዴ እና የባህሪ ዝርዝር ከ9router፣ OpenRouter፣ CLIProxyAPI እና LiteLLM ጋር ሲነፃፀር → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1264,7 +1264,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
   <tr><td nowrap><b>የማስኬጃ አካባቢ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ቋንቋ</b></td><td>TypeScript 6.0 — በ<code>src/</code> እና <code>open-sse/</code> ውስጥ <b>100% TypeScript</b> (ከv2.0 ጀምሮ በዋናው ክፍል ዜሮ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ማዕቀፍ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>የውሂብ ጎታ</b></td><td>better-sqlite3 (SQLite፣ WAL መዝገብ አያያዝ) + LowDB (የቆየ JSON) — 137 የጎራ ሞጁሎች፣ 193 ፍልሰቶች</td></tr>
+  <tr><td nowrap><b>የውሂብ ጎታ</b></td><td>better-sqlite3 (SQLite፣ WAL መዝገብ አያያዝ) + LowDB (የቆየ JSON) — 137 የጎራ ሞጁሎች፣ 194 ፍልሰቶች</td></tr>
   <tr><td nowrap><b>ማህደረ ትውስታ</b></td><td>SQLite FTS5 ሙሉ-ጽሑፍ + በint8 የተቆጠሩ የቬክተር ውክልናዎች፣ ዓይነት ያለው መዳከም</td></tr>
   <tr><td nowrap><b>መርሀግብሮች</b></td><td>Zod 4 — የMCP መሣሪያ I/O ማረጋገጫ + የAPI ውሎች</td></tr>
   <tr><td nowrap><b>ፕሮቶኮሎች</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

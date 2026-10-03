@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Gerbang AI Gratis
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan pernah berhenti coding. Setiap alat AI → 358 penyedia — 150+ gratis — melalui satu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke Claude / GPT / Gemini GRATIS dengan fallback otomatis. Kompresi bertumpuk RTK + Caveman menghemat 15–95% token (rata-rata ~89%) — tidak pernah mencapai batas. 358 penyedia AI · 150+ tingkatan gratis · ~1,62 Miliar token gratis/bulan · 19 strategi perutean · $0 untuk memulai."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan pernah berhenti coding. Setiap alat AI → 357 penyedia — 150+ gratis — melalui satu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke Claude / GPT / Gemini GRATIS dengan fallback otomatis. Kompresi bertumpuk RTK + Caveman menghemat 15–95% token (rata-rata ~89%) — tidak pernah mencapai batas. 357 penyedia AI · 150+ tingkatan gratis · ~1,62 Miliar token gratis/bulan · 19 strategi perutean · $0 untuk memulai."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 358 penyedia. Fallback otomatis menjaga perutean tetap berjalan selama target sehat lainnya tersedia. Enam pilar: fallback tangguh di 358 penyedia · penghematan token hingga 95% pada beban kerja yang memenuhi syarat · $0 untuk memulai dengan 150+ tingkatan gratis dan 54 penyedia gratis selamanya yang berulang/tanpa kunci · 36 integrasi CLI/agen melalui satu konfigurasi · Kompatibilitas API OpenAI, Claude, Gemini, dan Responses di /v1 · kontrol produksi termasuk pemutus sirkuit, TLS stealth, alat MCP 110, A2A, memori, guardrails, evaluasi, dan 39.000+ deklarasi uji statis di 5.100+ file uji yang dilacak."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 357 penyedia. Fallback otomatis menjaga perutean tetap berjalan selama target sehat lainnya tersedia. Enam pilar: fallback tangguh di 357 penyedia · penghematan token hingga 95% pada beban kerja yang memenuhi syarat · $0 untuk memulai dengan 150+ tingkatan gratis dan 54 penyedia gratis selamanya yang berulang/tanpa kunci · 36 integrasi CLI/agen melalui satu konfigurasi · Kompatibilitas API OpenAI, Claude, Gemini, dan Responses di /v1 · kontrol produksi termasuk pemutus sirkuit, TLS stealth, alat MCP 110, A2A, memori, guardrails, evaluasi, dan 39.000+ deklarasi uji statis di 5.100+ file uji yang dilacak."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Seluruh **19** strategi — padukan sesuai kebutuhan pada setiap langkah combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membedakan OmniRoute — cuplikan fitur yang sudah ketinggalan zaman vs 9router, OpenRouter, CLIProxyAPI, dan LiteLLM di 13 kapabilitas. OmniRoute: 358 penyedia, 150+ tingkatan gratis bawaan, 19 strategi perutean, kompresi token 12-mesin, server MCP bawaan dengan 110 alat, protokol agen A2A, memori persisten, guardrails, agen cloud, stealth sidik jari TLS, Desktop/Termux/PWA, dan 42 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-host sendiri. Kapabilitas dan jumlah pesaing dapat berubah; lihat metodologi yang ditautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membedakan OmniRoute — cuplikan fitur yang sudah ketinggalan zaman vs 9router, OpenRouter, CLIProxyAPI, dan LiteLLM di 13 kapabilitas. OmniRoute: 357 penyedia, 150+ tingkatan gratis bawaan, 19 strategi perutean, kompresi token 12-mesin, server MCP bawaan dengan 110 alat, protokol agen A2A, memori persisten, guardrails, agen cloud, stealth sidik jari TLS, Desktop/Termux/PWA, dan 42 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-host sendiri. Kapabilitas dan jumlah pesaing dapat berubah; lihat metodologi yang ditautkan."/>
 
 <sub>📊 Metodologi lengkap &amp; detail per fitur vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Metrik kanonis pada 2026-08-24: **1.029 video unik** · **11.132.922 tayangan ya
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (tanpa <code>any</code> di inti sejak v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, penjurnalan WAL) + LowDB (JSON lama) — 137 modul domain, 193 migrasi</td></tr>
+  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, penjurnalan WAL) + LowDB (JSON lama) — 137 modul domain, 194 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>Teks lengkap SQLite FTS5 + embedding vektor terkuantisasi int8, peluruhan bertipe</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — validasi I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

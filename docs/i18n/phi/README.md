@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ang Libreng AI Gateway
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Huwag tumigil sa pag-code. Bawat AI tool → 358 provider — 150+ libre — sa pamamagitan ng isang endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity sa LIBRENG Claude / GPT / Gemini na may auto-fallback. Ang RTK + Caveman stacked compression ay nakakatipid ng 15–95% token (~89% average) — hindi kailanman aabot sa limitasyon. 358 AI provider · 150+ libreng tier · ~1.62B libreng token/buwan · 19 diskarte sa pagruruta · $0 para makapagsimula."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Huwag tumigil sa pag-code. Bawat AI tool → 357 provider — 150+ libre — sa pamamagitan ng isang endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity sa LIBRENG Claude / GPT / Gemini na may auto-fallback. Ang RTK + Caveman stacked compression ay nakakatipid ng 15–95% token (~89% average) — hindi kailanman aabot sa limitasyon. 357 AI provider · 150+ libreng tier · ~1.62B libreng token/buwan · 19 diskarte sa pagruruta · $0 para makapagsimula."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ang Pangako — Isang endpoint at 358 provider. Ang awtomatikong fallback ay nagpapanatili ng pagruruta habang may available na isa pang malusog na target. Anim na haligi: matatag na fallback sa 358 provider · hanggang 95% na pagtitipid sa token sa mga karapat-dapat na workload · $0 upang magsimula sa 150+ libreng tier at 54 paulit-ulit/keyless na libre-magpakailanman na provider · 36 CLI/agent integration sa pamamagitan ng isang config · OpenAI, Claude, Gemini at Responses API compatibility sa /v1 · mga kontrol sa produksyon kabilang ang circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals at 39,000+ static test declarations sa 5,100+ na sinusubaybayang test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ang Pangako — Isang endpoint at 357 provider. Ang awtomatikong fallback ay nagpapanatili ng pagruruta habang may available na isa pang malusog na target. Anim na haligi: matatag na fallback sa 357 provider · hanggang 95% na pagtitipid sa token sa mga karapat-dapat na workload · $0 upang magsimula sa 150+ libreng tier at 54 paulit-ulit/keyless na libre-magpakailanman na provider · 36 CLI/agent integration sa pamamagitan ng isang config · OpenAI, Claude, Gemini at Responses API compatibility sa /v1 · mga kontrol sa produksyon kabilang ang circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals at 39,000+ static test declarations sa 5,100+ na sinusubaybayang test files."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Lahat ng **19** na diskarte — paghalu-haluin at pagtugmain sa bawat hakbang ng
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 358 providers, 150+ free tiers built in, 19 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 42 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 357 providers, 150+ free tiers built in, 19 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 42 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 Buong metodolohiya &amp; detalye sa bawat feature kumpara sa 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Mga canonical na sukatan noong 2026-08-24: **1.029 natatanging video** · **11.1
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Wika</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> sa buong <code>src/</code> at <code>open-sse/</code> (walang <code>any</code> sa core mula noong v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (legacy na JSON) — 137 domain module, 193 migration</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (legacy na JSON) — 137 domain module, 194 migration</td></tr>
   <tr><td nowrap><b>Memory</b></td><td>SQLite FTS5 full-text + int8-quantized vector embedding, typed decay</td></tr>
   <tr><td nowrap><b>Mga Schema</b></td><td>Zod 4 — pagpapatunay ng I/O ng MCP tool + mga kontrata ng API</td></tr>
   <tr><td nowrap><b>Mga Protocol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

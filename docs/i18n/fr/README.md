@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — La passerelle IA gratuite
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ne cessez jamais de coder. Chaque outil d'IA → 358 fournisseurs — 150+ gratuits — via un seul point d'accès. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity vers Claude / GPT / Gemini GRATUITS avec repli automatique. La compression empilée RTK + Caveman économise 15 à 95 % des jetons (moy. ~89 %) — ne jamais atteindre les limites. 358 fournisseurs d'IA · 150+ niveaux gratuits · ~1,62 milliard de jetons gratuits/mois · 19 stratégies de routage · 0 $ pour commencer."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ne cessez jamais de coder. Chaque outil d'IA → 357 fournisseurs — 150+ gratuits — via un seul point d'accès. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity vers Claude / GPT / Gemini GRATUITS avec repli automatique. La compression empilée RTK + Caveman économise 15 à 95 % des jetons (moy. ~89 %) — ne jamais atteindre les limites. 357 fournisseurs d'IA · 150+ niveaux gratuits · ~1,62 milliard de jetons gratuits/mois · 19 stratégies de routage · 0 $ pour commencer."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La Promesse — Un seul point d'accès et 358 fournisseurs. Le repli automatique maintient le routage tant qu'une cible saine est disponible. Six piliers : repli résilient sur 358 fournisseurs · jusqu'à 95 % d'économies de jetons sur les charges de travail éligibles · 0 $ pour commencer avec plus de 150 niveaux gratuits et 54 fournisseurs gratuits à vie récurrents/sans clé · 36 intégrations CLI/agent via une seule configuration · Compatibilité OpenAI, Claude, Gemini et Responses API sur /v1 · contrôles de production incluant disjoncteurs, furtivité TLS, outils MCP 110, A2A, mémoire, garde-fous, évaluations et plus de 39 000 déclarations de tests statiques sur plus de 5 100 fichiers de test suivis."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La Promesse — Un seul point d'accès et 357 fournisseurs. Le repli automatique maintient le routage tant qu'une cible saine est disponible. Six piliers : repli résilient sur 357 fournisseurs · jusqu'à 95 % d'économies de jetons sur les charges de travail éligibles · 0 $ pour commencer avec plus de 150 niveaux gratuits et 54 fournisseurs gratuits à vie récurrents/sans clé · 36 intégrations CLI/agent via une seule configuration · Compatibilité OpenAI, Claude, Gemini et Responses API sur /v1 · contrôles de production incluant disjoncteurs, furtivité TLS, outils MCP 110, A2A, mémoire, garde-fous, évaluations et plus de 39 000 déclarations de tests statiques sur plus de 5 100 fichiers de test suivis."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Les **19** stratégies — à combiner librement à chaque étape du combo :
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce qui distingue OmniRoute — un aperçu des fonctionnalités daté comparé à 9router, OpenRouter, CLIProxyAPI et LiteLLM sur 13 capacités. OmniRoute : 358 fournisseurs, plus de 150 niveaux gratuits intégrés, 19 stratégies de routage, compression de jetons à 12 moteurs, serveur MCP intégré avec 110 outils, protocole d'agent A2A, mémoire persistante, garde-fous, agents cloud, furtivité d'empreinte TLS, Desktop/Termux/PWA et 42 locales d'interface utilisateur i18n. OmniRoute est sous licence MIT et auto-hébergeable. Les capacités et les chiffres des concurrents peuvent changer ; voir la méthodologie liée."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce qui distingue OmniRoute — un aperçu des fonctionnalités daté comparé à 9router, OpenRouter, CLIProxyAPI et LiteLLM sur 13 capacités. OmniRoute : 357 fournisseurs, plus de 150 niveaux gratuits intégrés, 19 stratégies de routage, compression de jetons à 12 moteurs, serveur MCP intégré avec 110 outils, protocole d'agent A2A, mémoire persistante, garde-fous, agents cloud, furtivité d'empreinte TLS, Desktop/Termux/PWA et 42 locales d'interface utilisateur i18n. OmniRoute est sous licence MIT et auto-hébergeable. Les capacités et les chiffres des concurrents peuvent changer ; voir la méthodologie liée."/>
 
 <sub>📊 Méthodologie complète &amp; détails par fonctionnalité vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Métriques canoniques au 2026-08-24 : **1.029 vidéos uniques** · **11.132.922 
   <tr><td nowrap><b>Environnement d’exécution</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Langage</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> dans <code>src/</code> et <code>open-sse/</code> (aucun <code>any</code> dans le cœur depuis v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Base de données</b></td><td>better-sqlite3 (SQLite, journalisation WAL) + LowDB (JSON historique) — 137 modules métier, 193 migrations</td></tr>
+  <tr><td nowrap><b>Base de données</b></td><td>better-sqlite3 (SQLite, journalisation WAL) + LowDB (JSON historique) — 137 modules métier, 194 migrations</td></tr>
   <tr><td nowrap><b>Mémoire</b></td><td>Recherche en texte intégral SQLite FTS5 + plongements vectoriels quantifiés en int8, décroissance typée</td></tr>
   <tr><td nowrap><b>Schémas</b></td><td>Zod 4 — validation des entrées/sorties des outils MCP + contrats d’API</td></tr>
   <tr><td nowrap><b>Protocoles</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

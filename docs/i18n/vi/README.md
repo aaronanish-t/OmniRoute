@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Cổng AI miễn phí
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Không ngừng viết mã. Mọi công cụ AI → 358 nhà cung cấp — 150+ miễn phí — thông qua một điểm cuối. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity vào Claude / GPT / Gemini MIỄN PHÍ với tính năng tự động dự phòng. Nén xếp chồng RTK + Caveman tiết kiệm 15–95% token (trung bình ~89%) — không bao giờ đạt giới hạn. 358 nhà cung cấp AI · 150+ gói miễn phí · ~1.62 tỷ token miễn phí/tháng · 19 chiến lược định tuyến · $0 để bắt đầu."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Không ngừng viết mã. Mọi công cụ AI → 357 nhà cung cấp — 150+ miễn phí — thông qua một điểm cuối. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity vào Claude / GPT / Gemini MIỄN PHÍ với tính năng tự động dự phòng. Nén xếp chồng RTK + Caveman tiết kiệm 15–95% token (trung bình ~89%) — không bao giờ đạt giới hạn. 357 nhà cung cấp AI · 150+ gói miễn phí · ~1.62 tỷ token miễn phí/tháng · 19 chiến lược định tuyến · $0 để bắt đầu."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một điểm cuối và 358 nhà cung cấp. Tự động dự phòng giúp định tuyến trong khi có mục tiêu khỏe mạnh khác. Sáu trụ cột: dự phòng linh hoạt trên 358 nhà cung cấp · tiết kiệm tới 95% token cho các khối lượng công việc đủ điều kiện · $0 để bắt đầu với hơn 150 gói miễn phí và 54 nhà cung cấp miễn phí vĩnh viễn/không khóa định kỳ · 36 tích hợp CLI/agent thông qua một cấu hình · tương thích API OpenAI, Claude, Gemini và Responses tại /v1 · kiểm soát sản xuất bao gồm bộ ngắt mạch, ẩn TLS, công cụ MCP 110, A2A, bộ nhớ, guardrails, đánh giá và hơn 39.000 khai báo kiểm tra tĩnh trên hơn 5.100 tệp kiểm tra được theo dõi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một điểm cuối và 357 nhà cung cấp. Tự động dự phòng giúp định tuyến trong khi có mục tiêu khỏe mạnh khác. Sáu trụ cột: dự phòng linh hoạt trên 357 nhà cung cấp · tiết kiệm tới 95% token cho các khối lượng công việc đủ điều kiện · $0 để bắt đầu với hơn 150 gói miễn phí và 54 nhà cung cấp miễn phí vĩnh viễn/không khóa định kỳ · 36 tích hợp CLI/agent thông qua một cấu hình · tương thích API OpenAI, Claude, Gemini và Responses tại /v1 · kiểm soát sản xuất bao gồm bộ ngắt mạch, ẩn TLS, công cụ MCP 110, A2A, bộ nhớ, guardrails, đánh giá và hơn 39.000 khai báo kiểm tra tĩnh trên hơn 5.100 tệp kiểm tra được theo dõi."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Toàn bộ **19** chiến lược — kết hợp tùy ý cho từng bước c�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Điều gì làm OmniRoute trở nên khác biệt — một ảnh chụp nhanh tính năng đã lỗi thời so với 9router, OpenRouter, CLIProxyAPI và LiteLLM trên 13 khả năng. OmniRoute: 358 nhà cung cấp, hơn 150 gói miễn phí tích hợp sẵn, 19 chiến lược định tuyến, nén token 12-engine, máy chủ MCP tích hợp với 110 công cụ, giao thức tác nhân A2A, bộ nhớ bền vững, hàng rào bảo vệ, tác nhân đám mây, ẩn danh dấu vân tay TLS, Desktop/Termux/PWA và 42 ngôn ngữ giao diện người dùng i18n. OmniRoute được cấp phép MIT và có thể tự lưu trữ. Khả năng và số lượng của đối thủ cạnh tranh có thể thay đổi; xem phương pháp luận được liên kết."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Điều gì làm OmniRoute trở nên khác biệt — một ảnh chụp nhanh tính năng đã lỗi thời so với 9router, OpenRouter, CLIProxyAPI và LiteLLM trên 13 khả năng. OmniRoute: 357 nhà cung cấp, hơn 150 gói miễn phí tích hợp sẵn, 19 chiến lược định tuyến, nén token 12-engine, máy chủ MCP tích hợp với 110 công cụ, giao thức tác nhân A2A, bộ nhớ bền vững, hàng rào bảo vệ, tác nhân đám mây, ẩn danh dấu vân tay TLS, Desktop/Termux/PWA và 42 ngôn ngữ giao diện người dùng i18n. OmniRoute được cấp phép MIT và có thể tự lưu trữ. Khả năng và số lượng của đối thủ cạnh tranh có thể thay đổi; xem phương pháp luận được liên kết."/>
 
 <sub>📊 Phương pháp luận đầy đủ &amp; chi tiết từng tính năng so với 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Số liệu chuẩn vào 2026-08-24: **1.029 video duy nhất** · **11.132.922 
   <tr><td nowrap><b>Môi trường chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ngôn ngữ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trên toàn bộ <code>src/</code> và <code>open-sse/</code> (không có <code>any</code> trong phần lõi kể từ v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON cũ) — 137 mô-đun miền, 193 bản di chuyển</td></tr>
+  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON cũ) — 137 mô-đun miền, 194 bản di chuyển</td></tr>
   <tr><td nowrap><b>Bộ nhớ</b></td><td>Tìm kiếm toàn văn SQLite FTS5 + vector embedding lượng tử hóa int8, cơ chế suy giảm có kiểu</td></tr>
   <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — xác thực đầu vào/đầu ra của công cụ MCP + hợp đồng API</td></tr>
   <tr><td nowrap><b>Giao thức</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Lango Huru la AI
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Usiache kuandika msimbo kamwe. Kila zana ya AI → watoa huduma 358 — 150+ bila malipo — kupitia sehemu moja ya mwisho. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity kuingia Claude / GPT / Gemini BURE na kurudi nyuma kiotomatiki. Mbinu ya RTK + Caveman ya kubana data huokoa tokeni 15–95% (wastani ~89%) — usiwahi kufikia vikomo. Watoa huduma 358 wa AI · Viwango 150+ vya bure · ~1.62B tokeni za bure/mwezi · Mikakati 19 ya uelekezaji · Kuanza kwa $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Usiache kuandika msimbo kamwe. Kila zana ya AI → watoa huduma 357 — 150+ bila malipo — kupitia sehemu moja ya mwisho. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity kuingia Claude / GPT / Gemini BURE na kurudi nyuma kiotomatiki. Mbinu ya RTK + Caveman ya kubana data huokoa tokeni 15–95% (wastani ~89%) — usiwahi kufikia vikomo. Watoa huduma 357 wa AI · Viwango 150+ vya bure · ~1.62B tokeni za bure/mwezi · Mikakati 19 ya uelekezaji · Kuanza kwa $0."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Sehemu moja ya mwisho na watoa huduma 358. Hifadhi rudufu ya kiotomatiki huendelea kuelekeza wakati lengo lingine lenye afya linapatikana. Nguzo sita: hifadhi rudufu thabiti kwa watoa huduma 358 · hadi 95% ya akiba ya tokeni kwenye mizigo inayostahiki · $0 kuanza na viwango 150+ vya bure na watoa huduma 54 wa bure wa kudumu/bila ufunguo · miunganisho 36 ya CLI/wakala kupitia usanidi mmoja · utangamano wa OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji ikiwemo vivunja mzunguko, usiri wa TLS, zana za MCP 110, A2A, kumbukumbu, vizuizi, tathmini na matamko 39,000+ ya majaribio tuli kwenye faili 5,100+ za majaribio zilizofuatiliwa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Sehemu moja ya mwisho na watoa huduma 357. Hifadhi rudufu ya kiotomatiki huendelea kuelekeza wakati lengo lingine lenye afya linapatikana. Nguzo sita: hifadhi rudufu thabiti kwa watoa huduma 357 · hadi 95% ya akiba ya tokeni kwenye mizigo inayostahiki · $0 kuanza na viwango 150+ vya bure na watoa huduma 54 wa bure wa kudumu/bila ufunguo · miunganisho 36 ya CLI/wakala kupitia usanidi mmoja · utangamano wa OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji ikiwemo vivunja mzunguko, usiri wa TLS, zana za MCP 110, A2A, kumbukumbu, vizuizi, tathmini na matamko 39,000+ ya majaribio tuli kwenye faili 5,100+ za majaribio zilizofuatiliwa."/>
 
 <br/>
 <br/>
@@ -425,7 +425,7 @@ Mikakati yote **19** — changanya na kuoanisha kwa kila hatua ya combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kinachotofautisha OmniRoute — picha ya vipengele vya zamani dhidi ya 9router, OpenRouter, CLIProxyAPI na LiteLLM katika uwezo 13. OmniRoute: watoa huduma 358, viwango vya bure 150+ vilivyojengwa ndani, mikakati 19 ya uelekezaji, mbano wa tokeni wa injini 12, seva ya MCP iliyojengwa ndani yenye zana 110, itifaki ya wakala ya A2A, kumbukumbu endelevu, vizuizi, mawakala wa wingu, ufichaji wa alama za vidole za TLS, Desktop/Termux/PWA na lugha 42 za UI za i18n. OmniRoute ina leseni ya MIT na inaweza kujihost. Uwezo na idadi ya washindani vinaweza kubadilika; angalia mbinu iliyounganishwa."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kinachotofautisha OmniRoute — picha ya vipengele vya zamani dhidi ya 9router, OpenRouter, CLIProxyAPI na LiteLLM katika uwezo 13. OmniRoute: watoa huduma 357, viwango vya bure 150+ vilivyojengwa ndani, mikakati 19 ya uelekezaji, mbano wa tokeni wa injini 12, seva ya MCP iliyojengwa ndani yenye zana 110, itifaki ya wakala ya A2A, kumbukumbu endelevu, vizuizi, mawakala wa wingu, ufichaji wa alama za vidole za TLS, Desktop/Termux/PWA na lugha 42 za UI za i18n. OmniRoute ina leseni ya MIT na inaweza kujihost. Uwezo na idadi ya washindani vinaweza kubadilika; angalia mbinu iliyounganishwa."/>
 
 <sub>📊 Mbinu kamili &amp; maelezo ya kila kipengele dhidi ya 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1198,7 +1198,7 @@ Vipimo kanuni vya 2026-08-24: **video 1.029 za kipekee** · **mitazamo 11.132.92
   <tr><td nowrap><b>Mazingira ya utekelezaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> katika <code>src/</code> na <code>open-sse/</code> (hakuna <code>any</code> katika kiini tangu v2.0)</td></tr>
   <tr><td nowrap><b>Mfumo</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa jarida wa WAL) + LowDB (urithi wa JSON) — moduli 137 za kikoa, uhamishaji 193</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa jarida wa WAL) + LowDB (urithi wa JSON) — moduli 137 za kikoa, uhamishaji 194</td></tr>
   <tr><td nowrap><b>Kumbukumbu</b></td><td>Utafutaji wa matini kamili wa SQLite FTS5 + upachikaji wa vekta uliokadiriwa kwa int8, ufifishaji wenye aina</td></tr>
   <tr><td nowrap><b>Skima</b></td><td>Zod 4 — uthibitishaji wa I/O wa zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

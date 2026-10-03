@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — 免費 AI 閘道
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停止編碼。每個 AI 工具 → 358 家提供者 — 150+ 免費 — 透過一個端點。將 Claude Code、Codex、Cursor、Cline、Copilot 和 Antigravity 整合到免費的 Claude / GPT / Gemini 中，並具備自動備援功能。RTK + Caveman 堆疊壓縮可節省 15–95% 的代幣（平均約 89%）— 永不觸及限制。358 家 AI 提供者 · 150+ 免費層級 · 每月約 16.2 億免費代幣 · 19 種路由策略 · $0 即可開始。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停止編碼。每個 AI 工具 → 357 家提供者 — 150+ 免費 — 透過一個端點。將 Claude Code、Codex、Cursor、Cline、Copilot 和 Antigravity 整合到免費的 Claude / GPT / Gemini 中，並具備自動備援功能。RTK + Caveman 堆疊壓縮可節省 15–95% 的代幣（平均約 89%）— 永不觸及限制。357 家 AI 提供者 · 150+ 免費層級 · 每月約 16.2 億免費代幣 · 19 種路由策略 · $0 即可開始。"/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="承諾 — 一個端點和 358 個提供者。自動備援確保在有其他健康目標可用時持續路由。六大支柱：跨 358 個提供者的彈性備援 · 在符合條件的工作負載上節省高達 95% 的代幣 · 150 多個免費層級和 54 個定期/無金鑰永久免費提供者，零成本啟動 · 透過一個配置實現 36 個 CLI/代理整合 · 在 /v1 支援 OpenAI、Claude、Gemini 和 Responses API 相容性 · 生產控制，包括斷路器、TLS 隱身、MCP 110 工具、A2A、記憶體、防護欄、評估以及跨 5,100 多個追蹤測試檔案的 39,000 多個靜態測試宣告。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="承諾 — 一個端點和 357 個提供者。自動備援確保在有其他健康目標可用時持續路由。六大支柱：跨 357 個提供者的彈性備援 · 在符合條件的工作負載上節省高達 95% 的代幣 · 150 多個免費層級和 54 個定期/無金鑰永久免費提供者，零成本啟動 · 透過一個配置實現 36 個 CLI/代理整合 · 在 /v1 支援 OpenAI、Claude、Gemini 和 Responses API 相容性 · 生產控制，包括斷路器、TLS 隱身、MCP 110 工具、A2A、記憶體、防護欄、評估以及跨 5,100 多個追蹤測試檔案的 39,000 多個靜態測試宣告。"/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處 — 一個過時的功能快照，與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 項功能上的比較。OmniRoute：358 個提供者，內建 150+ 免費層級，19 種路由策略，12 引擎代幣壓縮，內建含 110 種工具的 MCP 伺服器，A2A 代理協定，持久記憶體，護欄，雲端代理，TLS 指紋隱匿，桌面/Termux/PWA 和 42 種國際化使用者介面語言。OmniRoute 是 MIT 授權並可自行託管的。競爭對手的功能和數量可能會有所變動；請參閱連結的方法論。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處 — 一個過時的功能快照，與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 項功能上的比較。OmniRoute：357 個提供者，內建 150+ 免費層級，19 種路由策略，12 引擎代幣壓縮，內建含 110 種工具的 MCP 伺服器，A2A 代理協定，持久記憶體，護欄，雲端代理，TLS 指紋隱匿，桌面/Termux/PWA 和 42 種國際化使用者介面語言。OmniRoute 是 MIT 授權並可自行託管的。競爭對手的功能和數量可能會有所變動；請參閱連結的方法論。"/>
 
 <sub>📊 完整方法論與各功能詳情，對比 9router、OpenRouter、CLIProxyAPI 和 LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1264,7 +1264,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — 在 <code>src/</code> 與 <code>open-sse/</code> 中使用 <b>100% TypeScript</b>（自 v2.0 起，核心中完全沒有 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌模式）+ LowDB（舊版 JSON）— 137 個領域模組、193 次遷移</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌模式）+ LowDB（舊版 JSON）— 137 個領域模組、194 次遷移</td></tr>
   <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文檢索 + int8 量化向量嵌入、類型化衰減</td></tr>
   <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具輸入／輸出驗證 + API 契約</td></tr>
   <tr><td nowrap><b>通訊協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>

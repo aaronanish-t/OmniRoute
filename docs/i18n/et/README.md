@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — tasuta AI-lüüs
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ära kunagi lõpeta programmeerimist. Iga AI-tööriist → 358 teenusepakkujat — üle 150 tasuta — ühe lõpp-punkti kaudu. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity ühendatakse TASUTA Claude’i / GPT / Geminiga koos automaatse varuvariandile ümberlülitusega. RTK + Cavemani kihiline tihendamine säästab 15–95% tokeneid (keskmiselt ~89%) — piirangud ei tule kunagi vastu. 358 AI-teenusepakkujat · üle 150 tasuta paketi · ~1,62 mld tasuta tokenit kuus · 19 marsruutimisstrateegiat · alustamine maksab $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ära kunagi lõpeta programmeerimist. Iga AI-tööriist → 357 teenusepakkujat — üle 150 tasuta — ühe lõpp-punkti kaudu. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity ühendatakse TASUTA Claude’i / GPT / Geminiga koos automaatse varuvariandile ümberlülitusega. RTK + Cavemani kihiline tihendamine säästab 15–95% tokeneid (keskmiselt ~89%) — piirangud ei tule kunagi vastu. 357 AI-teenusepakkujat · üle 150 tasuta paketi · ~1,62 mld tasuta tokenit kuus · 19 marsruutimisstrateegiat · alustamine maksab $0."/>
 
 </div>
 
@@ -240,7 +240,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 358 teenusepakkujat. Automaatne tõrkesiire jätkab päringute suunamist seni, kuni saadaval on mõni teine töökorras sihtmärk. Kuus sammast: töökindel tõrkesiire 358 teenusepakkuja vahel · sobivate töökoormuste puhul kuni 95% väiksem loakasutus · alustamine maksab $0 tänu enam kui 150 tasuta paketile ning 54 korduvalt kasutatavale või võtmeta igavesti tasuta teenusepakkujale · 36 CLI-/agendiintegratsiooni ühe konfiguratsiooni kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus lõpp-punktis /v1 · tootmiskeskkonna juhtimisvahendid, sealhulgas kaitselülitid, TLS-i varjamine, MCP 110 tööriistaga, A2A, mälu, kaitsepiirded, hindamised ning üle 39 000 staatilise testideklaratsiooni enam kui 5100 jälgitavas testifailis."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 357 teenusepakkujat. Automaatne tõrkesiire jätkab päringute suunamist seni, kuni saadaval on mõni teine töökorras sihtmärk. Kuus sammast: töökindel tõrkesiire 357 teenusepakkuja vahel · sobivate töökoormuste puhul kuni 95% väiksem loakasutus · alustamine maksab $0 tänu enam kui 150 tasuta paketile ning 54 korduvalt kasutatavale või võtmeta igavesti tasuta teenusepakkujale · 36 CLI-/agendiintegratsiooni ühe konfiguratsiooni kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus lõpp-punktis /v1 · tootmiskeskkonna juhtimisvahendid, sealhulgas kaitselülitid, TLS-i varjamine, MCP 110 tööriistaga, A2A, mälu, kaitsepiirded, hindamised ning üle 39 000 staatilise testideklaratsiooni enam kui 5100 jälgitavas testifailis."/>
 
 <br/>
 <br/>
@@ -493,7 +493,7 @@ Kõik **19** strateegiat — kombineerige neid kombo igas etapis:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mis eristab OmniRoute'i teistest — kuupäevastatud funktsioonide hetkeülevaade võrreldes 9routeri, OpenRouteri, CLIProxyAPI ja LiteLLM-iga 13 võimekuse lõikes. OmniRoute: 358 teenusepakkujat, üle 150 sisseehitatud tasuta paketi, 19 marsruutimisstrateegiat, 12 mootoriga tokenitihendus, sisseehitatud 110 tööriistaga MCP-server, A2A agendiprotokoll, püsimälu, kaitsepiirded, pilveagendid, TLS-sõrmejälje varjamine, Desktop/Termux/PWA ja 42 i18n kasutajaliidese lokaati. OmniRoute'il on MIT-litsents ja seda saab ise majutada. Konkurentide võimekused ja arvud võivad muutuda; vaadake lingitud metoodikat."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mis eristab OmniRoute'i teistest — kuupäevastatud funktsioonide hetkeülevaade võrreldes 9routeri, OpenRouteri, CLIProxyAPI ja LiteLLM-iga 13 võimekuse lõikes. OmniRoute: 357 teenusepakkujat, üle 150 sisseehitatud tasuta paketi, 19 marsruutimisstrateegiat, 12 mootoriga tokenitihendus, sisseehitatud 110 tööriistaga MCP-server, A2A agendiprotokoll, püsimälu, kaitsepiirded, pilveagendid, TLS-sõrmejälje varjamine, Desktop/Termux/PWA ja 42 i18n kasutajaliidese lokaati. OmniRoute'il on MIT-litsents ja seda saab ise majutada. Konkurentide võimekused ja arvud võivad muutuda; vaadake lingitud metoodikat."/>
 
 <sub>📊 Täielik metoodika ja funktsioonipõhised üksikasjad võrreldes 9routeri, OpenRouteri, CLIProxyAPI ja LiteLLM-iga → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1282,7 +1282,7 @@ Kanoonilised mõõdikud seisuga 2026-08-24: **1.029 unikaalset videot** · **11.
   <tr><td nowrap><b>Käituskeskkond</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Keel</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kataloogides <code>src/</code> ja <code>open-sse/</code> (alates versioonist v2.0 pole tuumas ühtegi <code>any</code> tüüpi)</td></tr>
   <tr><td nowrap><b>Raamistik</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-logimine) + LowDB (pärand-JSON) — 137 domeenimoodulit, 193 migratsiooni</td></tr>
+  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-logimine) + LowDB (pärand-JSON) — 137 domeenimoodulit, 194 migratsiooni</td></tr>
   <tr><td nowrap><b>Mälu</b></td><td>SQLite FTS5 täistekstiotsing + int8-kvanditud vektormanused, tüübitud hääbumine</td></tr>
   <tr><td nowrap><b>Skeemid</b></td><td>Zod 4 — MCP-tööriistade sisendi/väljundi valideerimine + API-lepingud</td></tr>
   <tr><td nowrap><b>Protokollid</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

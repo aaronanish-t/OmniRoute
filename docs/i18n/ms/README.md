@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Gerbang AI Percuma
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan berhenti mengekod. Setiap alat AI → 358 penyedia — 150+ percuma — melalui satu titik akhir. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke dalam Claude / GPT / Gemini PERCUMA dengan sandaran automatik. Mampatan bertindan RTK + Caveman menjimatkan 15–95% token (purata ~89%) — tidak pernah mencapai had. 358 penyedia AI · 150+ peringkat percuma · ~1.62B token percuma/bulan · 19 strategi penghalaan · $0 untuk bermula."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan berhenti mengekod. Setiap alat AI → 357 penyedia — 150+ percuma — melalui satu titik akhir. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke dalam Claude / GPT / Gemini PERCUMA dengan sandaran automatik. Mampatan bertindan RTK + Caveman menjimatkan 15–95% token (purata ~89%) — tidak pernah mencapai had. 357 penyedia AI · 150+ peringkat percuma · ~1.62B token percuma/bulan · 19 strategi penghalaan · $0 untuk bermula."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu titik akhir dan 358 pembekal. Fallback automatik mengekalkan penghalaan selagi sasaran sihat lain tersedia. Enam tonggak: fallback berdaya tahan merentasi 358 pembekal · penjimatan token sehingga 95% pada beban kerja yang layak · $0 untuk bermula dengan 150+ peringkat percuma dan 54 pembekal percuma-selamanya berulang/tanpa kunci · 36 integrasi CLI/agen melalui satu konfigurasi · keserasian OpenAI, Claude, Gemini dan Responses API di /v1 · kawalan pengeluaran termasuk pemutus litar, penyembunyian TLS, alat MCP 110, A2A, memori, pagar keselamatan, penilaian dan 39,000+ pengisytiharan ujian statik merentasi 5,100+ fail ujian yang dijejaki."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu titik akhir dan 357 pembekal. Fallback automatik mengekalkan penghalaan selagi sasaran sihat lain tersedia. Enam tonggak: fallback berdaya tahan merentasi 357 pembekal · penjimatan token sehingga 95% pada beban kerja yang layak · $0 untuk bermula dengan 150+ peringkat percuma dan 54 pembekal percuma-selamanya berulang/tanpa kunci · 36 integrasi CLI/agen melalui satu konfigurasi · keserasian OpenAI, Claude, Gemini dan Responses API di /v1 · kawalan pengeluaran termasuk pemutus litar, penyembunyian TLS, alat MCP 110, A2A, memori, pagar keselamatan, penilaian dan 39,000+ pengisytiharan ujian statik merentasi 5,100+ fail ujian yang dijejaki."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ Kesemua **19** strategi — gabung dan padankan bagi setiap langkah kombo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri yang bertarikh berbanding 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 358 penyedia, 150+ peringkat percuma terbina dalam, 19 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 42 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan kiraan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri yang bertarikh berbanding 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 357 penyedia, 150+ peringkat percuma terbina dalam, 19 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 42 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan kiraan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
 
 <sub>📊 Metodologi penuh &amp; butiran setiap ciri berbanding 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ Metrik kanonik pada 2026-08-24: **1.029 video unik** · **11.132.922 tontonan di
   <tr><td nowrap><b>Masa jalan</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> merentasi <code>src/</code> dan <code>open-sse/</code> (sifar <code>any</code> dalam teras sejak v2.0)</td></tr>
   <tr><td nowrap><b>Rangka kerja</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, penjurnalan WAL) + LowDB (JSON legasi) — 137 modul domain, 193 migrasi</td></tr>
+  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, penjurnalan WAL) + LowDB (JSON legasi) — 137 modul domain, 194 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>Teks penuh SQLite FTS5 + pembenaman vektor terkuantum int8, susutan berjenis</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — pengesahan I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

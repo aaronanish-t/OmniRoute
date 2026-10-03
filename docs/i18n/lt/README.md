@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — nemokamas DI šliuzas
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — niekada nenustokite programuoti. Kiekvienas DI įrankis → 358 paslaugų teikėjai — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity prijungiami prie NEMOKAMŲ Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. Kartu naudojamas RTK + Caveman glaudinimas sutaupo 15–95 % žetonų (vidutiniškai ~89 %) — niekada nepasiekite limitų. 358 DI paslaugų teikėjai · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėn. · 19 maršruto parinkimo strategijų · pradėkite už $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — niekada nenustokite programuoti. Kiekvienas DI įrankis → 357 paslaugų teikėjai — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity prijungiami prie NEMOKAMŲ Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. Kartu naudojamas RTK + Caveman glaudinimas sutaupo 15–95 % žetonų (vidutiniškai ~89 %) — niekada nepasiekite limitų. 357 DI paslaugų teikėjai · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėn. · 19 maršruto parinkimo strategijų · pradėkite už $0."/>
 
 </div>
 
@@ -240,7 +240,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — viena galinė prieiga ir 358 teikėjai. Automatinis perjungimas tęsia užklausų nukreipimą, kol pasiekiama kita tinkamai veikianti paskirties vieta. Šeši ramsčiai: atsparus perjungimas tarp 358 teikėjų · iki 95 % mažesnis žetonų naudojimas tinkamoms darbo apkrovoms · pradžia už $0 su daugiau nei 150 nemokamų planų ir 54 nuolat nemokamais periodiniais arba rakto nereikalaujančiais teikėjais · 36 CLI ir agentų integracijos naudojant vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas adresu /v1 · produkcinės aplinkos valdikliai, įskaitant grandinės pertraukiklius, TLS maskavimą, MCP 110 įrankių, A2A, atmintį, apsaugos priemones, vertinimus ir daugiau nei 39 000 statinių testų deklaracijų daugiau nei 5 100 stebimų testų failų."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — viena galinė prieiga ir 357 teikėjai. Automatinis perjungimas tęsia užklausų nukreipimą, kol pasiekiama kita tinkamai veikianti paskirties vieta. Šeši ramsčiai: atsparus perjungimas tarp 357 teikėjų · iki 95 % mažesnis žetonų naudojimas tinkamoms darbo apkrovoms · pradžia už $0 su daugiau nei 150 nemokamų planų ir 54 nuolat nemokamais periodiniais arba rakto nereikalaujančiais teikėjais · 36 CLI ir agentų integracijos naudojant vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas adresu /v1 · produkcinės aplinkos valdikliai, įskaitant grandinės pertraukiklius, TLS maskavimą, MCP 110 įrankių, A2A, atmintį, apsaugos priemones, vertinimus ir daugiau nei 39 000 statinių testų deklaracijų daugiau nei 5 100 stebimų testų failų."/>
 
 <br/>
 <br/>
@@ -493,7 +493,7 @@ Visos **19** strategijų — derinkite jas kiekviename derinio žingsnyje:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo „OmniRoute“ išsiskiria — tam tikros datos funkcijų palyginimas su „9router“, „OpenRouter“, „CLIProxyAPI“ ir „LiteLLM“ pagal 13 galimybių. „OmniRoute“: 358 teikėjai, daugiau nei 150 integruotų nemokamų planų, 19 maršruto parinkimo strategijų, 12 variklių žetonų glaudinimas, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, išliekamoji atmintis, apsaugos priemonės, debesijos agentai, TLS kontrolinio atspaudo maskavimas, „Desktop“ / „Termux“ / PWA ir 42 lokalizuotos naudotojo sąsajos kalbos. „OmniRoute“ platinamas pagal MIT licenciją ir gali būti talpinamas savarankiškai. Konkurentų galimybės ir skaičiai gali keistis; žr. pateiktą nuorodą į metodiką."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo „OmniRoute“ išsiskiria — tam tikros datos funkcijų palyginimas su „9router“, „OpenRouter“, „CLIProxyAPI“ ir „LiteLLM“ pagal 13 galimybių. „OmniRoute“: 357 teikėjai, daugiau nei 150 integruotų nemokamų planų, 19 maršruto parinkimo strategijų, 12 variklių žetonų glaudinimas, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, išliekamoji atmintis, apsaugos priemonės, debesijos agentai, TLS kontrolinio atspaudo maskavimas, „Desktop“ / „Termux“ / PWA ir 42 lokalizuotos naudotojo sąsajos kalbos. „OmniRoute“ platinamas pagal MIT licenciją ir gali būti talpinamas savarankiškai. Konkurentų galimybės ir skaičiai gali keistis; žr. pateiktą nuorodą į metodiką."/>
 
 <sub>📊 Visa metodika ir išsami informacija apie kiekvieną funkciją, palyginti su „9router“, „OpenRouter“, „CLIProxyAPI“ ir „LiteLLM“ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1281,7 +1281,7 @@ Kanoniniai rodikliai 2026-08-24: **1.029 unikalūs vaizdo įrašai** · **11.132
   <tr><td nowrap><b>Vykdymo aplinka</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> aplankuose <code>src/</code> ir <code>open-sse/</code> (nuo v2.0 branduolyje nėra nė vieno <code>any</code>)</td></tr>
   <tr><td nowrap><b>Karkasas</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalizavimas) + LowDB (senasis JSON formatas) — 137 domeno moduliai, 193 migracijos</td></tr>
+  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalizavimas) + LowDB (senasis JSON formatas) — 137 domeno moduliai, 194 migracijos</td></tr>
   <tr><td nowrap><b>Atmintis</b></td><td>SQLite FTS5 viso teksto paieška + int8 kvantuotos vektorinės įterptys, tipizuotas slopinimas</td></tr>
   <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties ir išvesties tikrinimas + API sutartys</td></tr>
   <tr><td nowrap><b>Protokolai</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

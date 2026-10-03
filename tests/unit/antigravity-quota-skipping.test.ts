@@ -80,6 +80,11 @@ test("isQuotaExhaustedForRequest isolates Claude and Gemini quota families for a
     true,
     "the legacy agy alias keeps exhausted Claude quota separate from available Gemini quota"
   );
+  assert.equal(
+    quotaCache.isQuotaExhaustedForRequest(connectionIdLegacy, "agy", "agy/gemini-3.8-flash-high"),
+    false,
+    "the legacy agy alias still allows the available Gemini family"
+  );
 
   // Test that unknown models (family 'other') preserve exact-model scoping.
   const connectionIdOther = "conn-other-test";

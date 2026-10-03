@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — brezplačni prehod za umetno inteligenco
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikoli ne prenehajte programirati. Vsako orodje umetne inteligence → 358 ponudnikov — več kot 150 brezplačnih — prek ene končne točke. Claude Code, Codex, Cursor, Cline, Copilot in Antigravity povežite z BREZPLAČNIMI Claude / GPT / Gemini s samodejnim preklopom ob napaki. Kombinirano stiskanje RTK + Caveman prihrani 15–95 % žetonov (~89 % v povprečju) — nikoli ne dosezite omejitev. 358 ponudnikov umetne inteligence · več kot 150 brezplačnih ravni · ~1,62 milijarde brezplačnih žetonov/mesec · 19 strategij usmerjanja · začetek za 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikoli ne prenehajte programirati. Vsako orodje umetne inteligence → 357 ponudnikov — več kot 150 brezplačnih — prek ene končne točke. Claude Code, Codex, Cursor, Cline, Copilot in Antigravity povežite z BREZPLAČNIMI Claude / GPT / Gemini s samodejnim preklopom ob napaki. Kombinirano stiskanje RTK + Caveman prihrani 15–95 % žetonov (~89 % v povprečju) — nikoli ne dosezite omejitev. 357 ponudnikov umetne inteligence · več kot 150 brezplačnih ravni · ~1,62 milijarde brezplačnih žetonov/mesec · 19 strategij usmerjanja · začetek za 0 $."/>
 
 </div>
 
@@ -240,7 +240,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obljuba — ena končna točka in 358 ponudnikov. Samodejni preklop ob napaki nadaljuje usmerjanje, dokler je na voljo drug zdrav cilj. Šest stebrov: odporen preklop ob napaki med 358 ponudniki · do 95 % prihranka žetonov pri primernih delovnih obremenitvah · začetek za $0 z več kot 150 brezplačnimi ravnmi in 54 ponudniki, ki so trajno brezplačni z obnavljajočimi se kvotami ali brez ključev · 36 integracij CLI/agentov prek ene konfiguracije · združljivost z OpenAI, Claude, Gemini in Responses API na /v1 · produkcijski nadzor, vključno z odklopniki, prikrivanjem TLS, 110 orodji MCP, A2A, pomnilnikom, varovalnimi mehanizmi, evalvacijami in več kot 39.000 statičnimi deklaracijami testov v več kot 5.100 spremljanih testnih datotekah."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obljuba — ena končna točka in 357 ponudnikov. Samodejni preklop ob napaki nadaljuje usmerjanje, dokler je na voljo drug zdrav cilj. Šest stebrov: odporen preklop ob napaki med 357 ponudniki · do 95 % prihranka žetonov pri primernih delovnih obremenitvah · začetek za $0 z več kot 150 brezplačnimi ravnmi in 54 ponudniki, ki so trajno brezplačni z obnavljajočimi se kvotami ali brez ključev · 36 integracij CLI/agentov prek ene konfiguracije · združljivost z OpenAI, Claude, Gemini in Responses API na /v1 · produkcijski nadzor, vključno z odklopniki, prikrivanjem TLS, 110 orodji MCP, A2A, pomnilnikom, varovalnimi mehanizmi, evalvacijami in več kot 39.000 statičnimi deklaracijami testov v več kot 5.100 spremljanih testnih datotekah."/>
 
 <br/>
 <br/>
@@ -493,7 +493,7 @@ Vseh **19** strategij — poljubno jih kombinirajte pri vsakem koraku kombinacij
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Po čem OmniRoute izstopa — časovno označen pregled funkcij v primerjavi z 9router, OpenRouter, CLIProxyAPI in LiteLLM pri 13 zmogljivostih. OmniRoute: 358 ponudnikov, več kot 150 vgrajenih brezplačnih paketov, 19 strategij usmerjanja, 12-mehanizemsko stiskanje žetonov, vgrajen strežnik MCP s 110 orodji, protokol agentov A2A, trajni pomnilnik, varovalni mehanizmi, agenti v oblaku, prikrivanje prstnega odtisa TLS, Desktop/Termux/PWA in 42 jezikov uporabniškega vmesnika i18n. OmniRoute ima licenco MIT in ga je mogoče gostiti samostojno. Zmogljivosti in število funkcij konkurentov se lahko spremenijo; glejte povezano metodologijo."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Po čem OmniRoute izstopa — časovno označen pregled funkcij v primerjavi z 9router, OpenRouter, CLIProxyAPI in LiteLLM pri 13 zmogljivostih. OmniRoute: 357 ponudnikov, več kot 150 vgrajenih brezplačnih paketov, 19 strategij usmerjanja, 12-mehanizemsko stiskanje žetonov, vgrajen strežnik MCP s 110 orodji, protokol agentov A2A, trajni pomnilnik, varovalni mehanizmi, agenti v oblaku, prikrivanje prstnega odtisa TLS, Desktop/Termux/PWA in 42 jezikov uporabniškega vmesnika i18n. OmniRoute ima licenco MIT in ga je mogoče gostiti samostojno. Zmogljivosti in število funkcij konkurentov se lahko spremenijo; glejte povezano metodologijo."/>
 
 <sub>📊 Celotna metodologija in podrobnosti posameznih funkcij v primerjavi z 9router, OpenRouter, CLIProxyAPI in LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1280,7 +1280,7 @@ Kanonične metrike na dan 2026-08-24: **1.029 edinstvenih videoposnetkov** · **
   <tr><td nowrap><b>Izvajalno okolje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> v <code>src/</code> in <code>open-sse/</code> (brez uporabe <code>any</code> v jedru od v2.0)</td></tr>
   <tr><td nowrap><b>Ogrodje</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Podatkovna zbirka</b></td><td>better-sqlite3 (SQLite, beleženje WAL) + LowDB (starejši JSON) — 137 domenskih modulov, 193 migracij</td></tr>
+  <tr><td nowrap><b>Podatkovna zbirka</b></td><td>better-sqlite3 (SQLite, beleženje WAL) + LowDB (starejši JSON) — 137 domenskih modulov, 194 migracij</td></tr>
   <tr><td nowrap><b>Pomnilnik</b></td><td>SQLite FTS5 za iskanje po celotnem besedilu + vektorske vložitve, kvantizirane v int8, tipizirano pojemanje</td></tr>
   <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — preverjanje vhodov/izhodov orodij MCP + pogodbe API</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

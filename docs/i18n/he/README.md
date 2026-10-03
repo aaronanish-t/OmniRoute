@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — שער ה-AI החינמי
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיק לקודד. כל כלי AI ← 358 ספקים — 150+ בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity לתוך Claude / GPT / Gemini בחינם עם גיבוי אוטומטי. דחיסת RTK + Caveman חוסכת 15-95% אסימונים (~89% בממוצע) — לעולם אל תגיע למגבלות. 358 ספקי AI · 150+ שכבות חינם · ~1.62 מיליארד אסימונים חינם לחודש · 19 אסטרטגיות ניתוב · $0 להתחלה."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיק לקודד. כל כלי AI ← 357 ספקים — 150+ בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity לתוך Claude / GPT / Gemini בחינם עם גיבוי אוטומטי. דחיסת RTK + Caveman חוסכת 15-95% אסימונים (~89% בממוצע) — לעולם אל תגיע למגבלות. 357 ספקי AI · 150+ שכבות חינם · ~1.62 מיליארד אסימונים חינם לחודש · 19 אסטרטגיות ניתוב · $0 להתחלה."/>
 
 </div>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ההבטחה — נקודת קצה אחת ו-358 ספקים. גיבוי אוטומטי ממשיך לנתב כל עוד יעד בריא אחר זמין. שישה עמודים: גיבוי עמיד על פני 358 ספקים · עד 95% חיסכון באסימונים בעומסי עבודה מתאימים · $0 להתחלה עם 150+ שכבות חינמיות ו-54 ספקים חינמיים תמידיים/ללא מפתח · 36 אינטגרציות CLI/סוכן באמצעות הגדרה אחת · תאימות OpenAI, Claude, Gemini ו-Responses API ב-/v1 · בקרות ייצור כולל מפסקי זרם, התגנבות TLS, כלי MCP 110, A2A, זיכרון, מנגנוני הגנה, הערכות ו-39,000+ הצהרות בדיקה סטטיות על פני 5,100+ קבצי בדיקה במעקב."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ההבטחה — נקודת קצה אחת ו-357 ספקים. גיבוי אוטומטי ממשיך לנתב כל עוד יעד בריא אחר זמין. שישה עמודים: גיבוי עמיד על פני 357 ספקים · עד 95% חיסכון באסימונים בעומסי עבודה מתאימים · $0 להתחלה עם 150+ שכבות חינמיות ו-54 ספקים חינמיים תמידיים/ללא מפתח · 36 אינטגרציות CLI/סוכן באמצעות הגדרה אחת · תאימות OpenAI, Claude, Gemini ו-Responses API ב-/v1 · בקרות ייצור כולל מפסקי זרם, התגנבות TLS, כלי MCP 110, A2A, זיכרון, מנגנוני הגנה, הערכות ו-39,000+ הצהרות בדיקה סטטיות על פני 5,100+ קבצי בדיקה במעקב."/>
 
 <br/>
 <br/>
@@ -492,7 +492,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מייחד את OmniRoute — תמונת מצב עדכנית של תכונות בהשוואה ל-9router, OpenRouter, CLIProxyAPI ו-LiteLLM על פני 13 יכולות. OmniRoute: 358 ספקים, 150+ שכבות חינמיות מובנות, 19 אסטרטגיות ניתוב, דחיסת אסימונים ב-12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכן A2A, זיכרון מתמשך, מנגנוני הגנה, סוכני ענן, התגנבות טביעת אצבע TLS, Desktop/Termux/PWA ו-42 שפות ממשק משתמש בינלאומיות. OmniRoute ברישיון MIT וניתן לאירוח עצמי. יכולות וספירות המתחרים עשויות להשתנות; ראה את המתודולוגיה המקושרת."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="מה מייחד את OmniRoute — תמונת מצב עדכנית של תכונות בהשוואה ל-9router, OpenRouter, CLIProxyAPI ו-LiteLLM על פני 13 יכולות. OmniRoute: 357 ספקים, 150+ שכבות חינמיות מובנות, 19 אסטרטגיות ניתוב, דחיסת אסימונים ב-12 מנועים, שרת MCP מובנה עם 110 כלים, פרוטוקול סוכן A2A, זיכרון מתמשך, מנגנוני הגנה, סוכני ענן, התגנבות טביעת אצבע TLS, Desktop/Termux/PWA ו-42 שפות ממשק משתמש בינלאומיות. OmniRoute ברישיון MIT וניתן לאירוח עצמי. יכולות וספירות המתחרים עשויות להשתנות; ראה את המתודולוגיה המקושרת."/>
 
 <sub>📊 מתודולוגיה מלאה ופירוט לפי תכונה מול 9router, OpenRouter, CLIProxyAPI ו-LiteLLM ← [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -1265,7 +1265,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
   <tr><td nowrap><b>סביבת הרצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל <code>src/</code> ו-<code>open-sse/</code> (ללא <code>any</code> בליבה מאז v2.0)</td></tr>
   <tr><td nowrap><b>תשתית</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (מורשת JSON) — 137 מודולי תחום, 193 מיגרציות</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (מורשת JSON) — 137 מודולי תחום, 194 מיגרציות</td></tr>
   <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא באמצעות SQLite FTS5 + הטמעות וקטוריות מכומתות ל-int8, דעיכה עם טיפוסים</td></tr>
   <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -1,0 +1,1 @@
+- **feat(sse):** Agentic pipelines support opt-in context compaction with per-model character budgets, preserved instructions and active tool boundaries, and pre-dispatch oversize rejection ([#15421](https://github.com/diegosouzapw/OmniRoute/pull/15421)) — thanks @potatosips.

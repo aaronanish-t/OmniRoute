@@ -4,6 +4,10 @@
 
 ---
 
+🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇧🇦 [bs](../../../bs/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇪 [ga](../../../ga/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ha](../../../ha/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇰🇷 [ko](../../../ko/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇳🇴 [no](../../../no/docs/routing/AUTO-COMBO.md) · 🇮🇳 [or](../../../or/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
+
+---
+
 > **ለተጠቃሚዎች**፦ በፍጥነት መጀመር ይፈልጋሉ? ቀላል ማብራሪያዎችን እና ምሳሌዎችን ለማግኘት [የAuto-Combo ተጠቃሚ መመሪያ](../getting-started/AUTO-COMBO-GUIDE.md)ን ይመልከቱ።
 
 > ራሳቸውን የሚያስተዳድሩ የሞዴል ሰንሰለቶች፣ ከተላማጅ የውጤት አሰጣጥ + ምንም ውቅር ከማይፈልግ ራስ-ሰር ማዘዋወር ጋር
@@ -272,57 +276,71 @@ curl -sS http://localhost:20128/v1/chat/completions \
 `config.budgetFallback` inputs ይገባሉ። በcombo ውስጥ የተከማቸው `config.budgetFallback` ("strict" |
 "cheapest") ቋሚውን ፖሊሲ ያዘጋጃል፤ header ለአንድ ጥያቄ ብቻ ይተካዋል።
 
-## ሁሉም የማስተላለፊያ ስልቶች
+## ሁሉም የማዞሪያ ስልቶች (Routing Strategies)
 
-የOmniRoute combo engine **19 የማስተላለፊያ ስልቶችን** ይደግፋል (`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` ውስጥ የተገለጹ)። Auto Combo engine ራሱ በ`auto` ስልት ስር ይቀርባል፤ ሌሎቹ ደግሞ ለተቀመጡ combos ይገኛሉ።
+የ OmniRoute combo engine **19 የማዞሪያ ስልቶችን** ይደግፋል (በ `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` ውስጥ የተገለጹ)። የ Auto Combo engine ራሱ በ `auto` ስልት ስር የቀረበ ነው፤ ሌሎቹ ለተቀመጡ (persisted) combos ይገኛሉ።
 
-| ስልት                 | መግለጫ                                                                                                                                                                              |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | ግልጽ ቅድሚያ ያለው፣ የመጀመሪያውን target ቅድሚያ የሚሰጥ የተደረደረ ዝርዝር                                                                                                                               |
-| `weighted`          | በእያንዳንዱ target ክብደት መሠረት የሚካሄድ ክብደት-ተኮር የዘፈቀደ ምርጫ                                                                                                                                 |
-| `round-robin`       | targetsን በቅደም ተከተል በዙር መጠቀም (በቡድን፤ ከታች ይመልከቱ)                                                                                                                                     |
-| `context-relay`     | contextን በtargets መካከል ማስተላለፍ (ለረጅም ውይይቶች)                                                                                                                                        |
-| `fill-first`        | ወደ ቀጣዩ ከመሸጋገር በፊት የእያንዳንዱን target ኮታ መሙላት                                                                                                                                         |
-| `p2c`               | በPower-of-2-choices የዘፈቀደ የጭነት ማመጣጠን                                                                                                                                              |
-| `random`            | ወጥ የዘፈቀደ ምርጫ                                                                                                                                                                      |
-| `least-used`        | አሁን ዝቅተኛው ጭነት ያለበትን target መምረጥ                                                                                                                                                   |
-| `cost-optimized`    | በcatalog ዋጋ መሠረት የእያንዳንዱን request የ$ ወጪ መቀነስ                                                                                                                                      |
-| `reset-aware` ⭐    | በኮታ reset ጊዜ መሠረት ቅድሚያ መስጠት — አጭር የreset መስኮቶች ከፍ ያለ ደረጃ ያገኛሉ                                                                                                                     |
-| `reset-window`      | የኮታ መስኮታቸው ቀድሞ reset የሚደረግላቸውን targets መምረጥ                                                                                                                                       |
-| `headroom`          | ከፍተኛው የቀረ የኮታ ትርፍ አቅም ያለውን target መምረጥ                                                                                                                                            |
-| `strict-random`     | የተደጋገሙ ምርጫዎችን ሳያስወግድ የሚደረግ የዘፈቀደ ምርጫ                                                                                                                                              |
-| `auto`              | Auto Combo scoringን (16-factor) መጠቀም — **የሚመከር**                                                                                                                                  |
-| `lkgp`              | Last-Known-Good Path (የመጨረሻው ስኬታማ provider ላይ ያቆያል፣ ከዚያ ወደ rules ይመለሳል)                                                                                                           |
-| `context-optimized` | ለአሁኑ context መጠን በተሻለ ሁኔታ የሚስማማውን target መምረጥ                                                                                                                                     |
-| `cache-optimized`   | targetsን በprompt-cache affinity መሠረት እንደገና ማደራጀት — የዚህን request cached prefix ቀድሞውኑ ይዞ ሊገኝ የሚችለው connection መጀመሪያ ይሞከራል (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | በትይዩ ወደ models ፓነል ማሰራጨት፣ ከዚያ በjudge አማካይነት አንድ መልስ ማዋሃድ (ከታች ይመልከቱ)                                                                                                              |
-| `pipeline`          | targetsን በቅደም ተከተል ማስኬድ፣ የእያንዳንዱን ደረጃ output ወደ ቀጣዩ ደረጃ input ማስገባት፤ የመጨረሻው መልስ ብቻ ይመለሳል (#6396)                                                                                  |
+| Strategy            | Description                                                                                                                                                 |
+| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | ግልጽ ቅድሚያ የሚሰጠው የመጀመሪያ ዒላማ ቅደም ተከተል ዝርዝር                                                                                                                     |
+| `weighted`          | በእያንዳንዱ ዒላማ ክብደት ላይ የተመሰረተ ሚዛናዊ የዘፈቀደ (weighted random) ምርጫ                                                                                                 |
+| `round-robin`       | ዒላማዎችን በቅደም ተከተል ማሽከርከር (በጥቅል፤ ከዚህ በታች ይመልከቱ)                                                                                                               |
+| `context-relay`     | በዒላማዎች መካከል አውድን ማስተላለፍ (ለረጅም ውይይቶች)                                                                                                                        |
+| `fill-first`        | ወደ ቀጣዩ ከመሄድዎ በፊት የእያንዳንዱን ዒላማ ኮታ መሙላት                                                                                                                       |
+| `p2c`               | Power-of-2-choices የዘፈቀደ የጭነት ማመጣጠኛ (load balancing)                                                                                                        |
+| `random`            | ወጥ የሆነ የዘፈቀደ ምርጫ                                                                                                                                            |
+| `least-used`        | ዝቅተኛው የአሁን ጭነት ያለውን ዒላማ መምረጥ                                                                                                                                |
+| `cost-optimized`    | በተሰጠው የካታሎግ ዋጋ መሰረት በእያንዳንዱ ጥያቄ የሚወጣውን $ መቀነስ                                                                                                               |
+| `reset-aware` ⭐    | በኮታ ዳግም ማስጀመሪያ ጊዜ ቅድሚያ መስጠት — አጫጭር የዳግም ማስጀመሪያ መስኮቶች ከፍ ያለ ደረጃ ይሰጣቸዋል                                                                                       |
+| `reset-window`      | የኮታ መስኮታቸው በጣም በቅርቡ ዳግም የሚጀምር ዒላማዎችን መምረጥ                                                                                                                   |
+| `headroom`          | ከፍተኛው የቀረ የኮታ ክፍተት (headroom) ያለውን ዒላማ መምረጥ                                                                                                                 |
+| `strict-random`     | ድግግሞሾችን ያለማስወገድ የሚደረግ የዘፈቀደ ምርጫ                                                                                                                             |
+| `auto`              | የ Auto Combo ውጤት አሰጣጥን (16-factor) መጠቀም — **የሚመከር**                                                                                                         |
+| `lkgp`              | Last-Known-Good Path (የመጨረሻው የተሳካ አቅራቢ ላይ ያቆያል፣ ከዚያም ወደ ደንቦች ይመለሳል)                                                                                         |
+| `context-optimized` | ለአሁኑ የአውድ መጠን የተሻለ ተስማሚ የሆነውን ዒላማ መምረጥ                                                                                                                      |
+| `cache-optimized`   | ዒላማዎችን በ prompt-cache affinity እንደገና ማስተካከል — የዚህን ጥያቄ የተቀመጠ ቅድመ ቅጥያ አስቀድሞ የያዘው ግንኙነት መጀመሪያ ይሞከራል (`open-sse/services/combo/promptCacheAffinity.ts`፣ #8008) |
+| `fusion` 🧬         | በትይዩ ወደ ሞዴሎች ፓነል ማሰራጨት፣ ከዚያም በአንድ ዳኛ በኩል አንድ መልስ ማቀናጀት (ከዚህ በታች ይመልከቱ)                                                                                      |
+| `pipeline`          | ዒላማዎችን በቅደም ተከተል ማስኬድ፣ የእያንዳንዱን ደረጃ ውጤት ወደ ቀጣዩ ደረጃ ግብዓት በማስተላለፍ፤ የመጨረሻው መልስ ብቻ ይመለሳል (#6396)                                                                |
 
-⭐ = በv3.8.0 አዲስ · 🧬 = በv3.8.36 አዲስ
+⭐ = በ v3.8.0 አዲስ የቀረበ · 🧬 = በ v3.8.36 አዲስ የቀረበ
 
-### የ`weighted` አሠራር
+### የ `weighted` ትርጉም
 
-`weighted` **ለእያንዳንዱ request ተመጣጣኝ የዘፈቀደ ምርጫ** ነው
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`)፣ ማመጣጠኛ አይደለም፦
+`weighted` ማለት **በእያንዳንዱ ጥያቄ የሚደረግ ተመጣጣኝ የዘፈቀደ እጣ ማውጣት** ነው
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`)፣ እኩል ማድረጊያ አይደለም፡
 
-- እያንዳንዱ request በ`weight / totalWeight` ዕድል **አንድ** step ይመርጣል፤ የቀሩት steps
-  ለዚያ request እንደ fallback chain በክብደት ከከፍተኛ ወደ ዝቅተኛ ይደረደራሉ።
-- ክብደቱ `0` የሆነ (ወይም ያልተገለጸ) step፣ ሌላ ማንኛውም step
-  weight > 0 እስካለው ድረስ **ፈጽሞ አይመረጥም** — የተመረጠው step ካልተሳካ በኋላ እንደ fallback ብቻ ሊያገለግል ይችላል። ምርጫው ወጥ የሚሆነው **ሁሉም**
-  weights 0 ሲሆኑ ብቻ ነው።
-- ሁሉም targets የማይገኙባቸው steps — provider circuit breaker `OPEN`፣ connection
-  cooldown፣ model lockout — ምርጫው ከመካሄዱ በፊት ይወገዳሉ
-  (`open-sse/services/combo/targetResolution.ts`)፤ ስለዚህ አንድ ጤናማ step ሁሉንም requests ለጊዜው
-  ሊያሸንፍ ይችላል።
-- `stickyWeightedLimit` (የcombo ውቅር፣ default `1` = off) እንደገና ከመምረጡ በፊት የተመረጠውን step ለዚያ ብዛት
-  ተከታታይ ስኬቶች አቆይቶ ይይዛል።
+- እያንዳንዱ ጥያቄ `weight / totalWeight` ባለ ዕድል **አንድ** ደረጃን ይመርጣል፤ የቀሩት ደረጃዎች
+  ለዚያ ጥያቄ እንደ አማራጭ ሰንሰለት (fallback chain) በሚወርድ የክብደት ቅደም ተከተል ይቀመጣሉ።
+- ክብደቱ `0` የሆነ (ወይም የሌለው) ደረጃ፣ ክብደቱ > 0 የሆነ ሌላ ማንኛውም ደረጃ እስካለ ድረስ **በፍጹም አይመረጥም** —
+  ሊያገለግል የሚችለው የተመረጠው ደረጃ ካልተሳካ በኋላ እንደ አማራጭ ብቻ ነው። **ሁሉም** ክብደቶች 0 ሲሆኑ
+  ብቻ ምርጫው ወጥ ይሆናል።
+- ሁሉም ዒላማዎቻቸው የማይገኙ የሆኑ ደረጃዎች — የአቅራቢ ሰርኪዩት ብሬከር `OPEN`፣ የግንኙነት
+  ማቀዝቀዣ (cooldown)፣ የሞዴል መቆለፍ — እጣው ከመውጣቱ በፊት ይወገዳሉ
+  (`open-sse/services/combo/targetResolution.ts`)፣ ስለዚህ አንድ ጤናማ ደረጃ ለጊዜው
+  ሁሉንም ጥያቄዎች ሊያሸንፍ ይችላል።
+- `stickyWeightedLimit` (የ combo ውቅር፣ ነባሪው `1` = ጠፍቷል) እንደገና እጣ ከማውጣቱ በፊት የተመረጠውን ደረጃ
+  ለተከታታይ ስኬቶች ያህል ያቆየዋል።
 
-ጥብቅ የዙር ሽግግር ለማግኘት `round-robin`ን ይጠቀሙ፤ በ`weighted` ላይ እኩል weights ስታቲስቲካዊ — ጥብቅ
-ያልሆነ — ሚዛን ይሰጣሉ።
+ለትክክለኛ ዙር ማሽከርከር `round-robin` ይጠቀሙ፤ በ `weighted` ላይ እኩል ክብደቶች ስታትስቲካዊ እንጂ
+ጥብቅ የሆነ ሚዛን አይሰጡም።
 
-### ወኪላዊ pipeline ሁነታ
+### የ Agentic pipeline ሁነታ
 
-ባለሁለት-ደረጃ `pipeline` ጥምረት በ`config.agenticOrchestration.enabled` አማካኝነት የእቅድ አውጪ/አስፈጻሚ ማዘዋወርን መምረጥ ይችላል። የመጀመሪያው ዒላማ የእቅድ ማውጣትንና የመጨረሻ መልሶችን ይቆጣጠራል፤ ሁለተኛው ዒላማ ደግሞ ከደንበኛው ጋር ቤተኛ የሆኑ የመሣሪያ ጥሪዎችን ያወጣል። OmniRoute ከጥያቄው ፕሮቶኮል የሚመጡ የመሣሪያ-ውጤት ቀጣይ ሂደቶችን ይለያል፣ ሌላ የመሣሪያ ዙር ያስፈልግ እንደሆነ እቅድ አውጪውን ይጠይቃል፣ እና አስፈጻሚውን ወይም እቅድ አውጪውን ለደንበኛው የሚቀርበው ተለዋዋጭ የመጨረሻ ደረጃ አድርጎ ይመርጣል።
+ባለሁለት-ደረጃ የ`pipeline` ጥምረት በ`config.agenticOrchestration.enabled` አማካኝነት የplanner/executor መስመር ዝርጋታን (routing) መምረጥ ይችላል። የመጀመሪያው target እቅድ የማውጣት እና የመጨረሻ መልሶችን የመስጠት ባለቤት ሲሆን፤ ሁለተኛው target ደግሞ client-native የሆኑ የtool ጥሪዎችን ያመነጫል። OmniRoute የtool-result ቀጣይነቶችን ከrequest protocol ለይቶ ያውቃል፣ ሌላ የtool ዙር እንደሚያስፈልግ plannerን ይጠይቃል፣ እንዲሁም executorን ወይም plannerን በተለዋዋጭነት ለclient የሚቀርብ የመጨረሻ ደረጃ ያደርጋል።
+
+አማራጭ የሆነው `config.agenticOrchestration.contextCompaction` ከእያንዳንዱ የplanner ወይም executor ስምሪት በፊት የተለየ የpayload በጀት ይተገብራል። በግልጽ እንዲህ ያንቁት፡
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+እነዚህ በአስኬጅ (operator) የተመረጡ serialized JSON የቁምፊ በጀቶች እንጂ የtoken context መስኮቶች ወይም የተረጋገጡ የupstream ገደቦች አይደሉም። ትክክለኛ የሞዴል መለያዎች (IDs) ነባሪውን ይተካሉ። ከመነሻው ገደብ (threshold) በላይ ሲሆን፣ compaction ተመሳሳይ የtool ትርጓሜዎችን ያስወግዳል፣ ከመጠን በላይ የሆኑ የtool ማስረጃዎችን በdigest ያሳጥራል፣ እና ወደ target ምጥጥኑ ለመድረስ የቆዩ ሙሉ የታሪክ ቡድኖችን ያስወግዳል። የsystem/developer መመሪያዎችን፣ የቅርብ ጊዜውን የተጠቃሚ ጥያቄ፣ ትይዩ ጥሪዎችን/ውጤቶችን ጨምሮ የመጨረሻውን የtool ዙር፣ እና የGeminiን መሪ የrouting መመሪያ ይይዛል። ከፍተኛ-ደረጃ መመሪያዎች እና የtool ቅንብሮች ይጠበቃሉ። የተወገደ ታሪክን የመተው ምልክት (omission marker) ይመዘግባል፤ ይህ ተጨባጭ ማሳጠር (deterministic trimming) እንጂ ፍሬ-ነገር ማጠቃለያ (semantic summary) አይደለም። የተያዘው context አሁንም ከበጀቱ በላይ ከሆነ፣ ጥያቄው ሞዴሉን ከማነጋገሩ በፊት 413 ይመልሳል። Compaction ሲቦዝን ወይም ከመነሻው ገደብ በታች ሲሆን ጥያቄው ሳይለወጥ ያልፋል።
 
 ```json
 {
@@ -334,17 +352,17 @@ curl -sS http://localhost:20128/v1/chat/completions \
 }
 ```
 
-አስፈጻሚው በአንድ ምላሽ ውስጥ ብዙ ገለልተኛ ጥሪዎችን ሊያወጣ ይችላል። ጥገኛ ጥሪዎች በቀጣዮቹ የደንበኛ መሣሪያ-ውጤት ዙሮች ይከናወናሉ፣ እቅድ አውጪውም እያንዳንዱን ውጤት ይገመግማል። `maxToolRounds` ነባሪው `8` ሲሆን `1`–`32` ይቀበላል፤ ገደቡ ከተደረሰ በኋላ እቅድ አውጪው በወቅቱ የሚገኘውን ምርጥ የመጨረሻ መልስ ማቅረብ አለበት። የውስጥ የእቅድ አውጪ ውሳኔዎች በቋት ይያዛሉ፣ የተመረጠው ለደንበኛ የሚቀርብ ምላሽ ግን የመጀመሪያውን የዥረት ምርጫ ይጠብቃል።
+Executor በአንድ ምላሽ ውስጥ በርካታ ራሳቸውን የቻሉ ጥሪዎችን ሊያመነጭ ይችላል። ጥገኛ የሆኑ ጥሪዎች planner እያንዳንዱን ውጤት እየገመገመ፣ በኋለኞቹ የclient tool-result ተራዎች ውስጥ ይስተናገዳሉ። `maxToolRounds` በነባሪነት `8` ሲሆን ከ`1`–`32` ይቀበላል፤ አንዴ ከተደረሰበት planner የተሻለውን የሚገኝ የመጨረሻ መልስ ማመንጨት አለበት። የውስጥ planner ውሳኔዎች buffered ሲደረጉ፣ የተመረጠው ለclient የሚቀርብ ምላሽ ደግሞ የመጀመሪያውን የstreaming ምርጫ ይጠብቃል።
 
-### የ`round-robin` ተጣባቂ ባች እና የመለያ ማስፋፊያ
+### `round-robin` sticky ስብስብ (batch) እና የመለያ ማስፋፊያ
 
-Round-robin በባች ይሠራል፣ በእያንዳንዱ ደረጃ አንድ ጥያቄ አይደለም፦
+Round-robin በስብስብ (batched) ነው እንጂ በአንድ-ጥያቄ-በደረጃ አይደለም፡
 
-- `stickyRoundRobinLimit` (በቅደም ተከተል የጥምረት ውቅር፣ ከዚያ `comboStickyRoundRobinLimit`፣ በመቀጠል `settings.stickyRoundRobinLimit`፣ ነባሪው **3**) ወደ ሌላ ዒላማ ከመዞሩ በፊት ለዚያ ያህል ተከታታይ ስኬቶች ተመሳሳዩን ዒላማ ይጠቀማል። ለእያንዳንዱ-ጥያቄ መዞር የጥምረቱን መሻሪያ ወደ `1` ያቀናብሩ። የጥምረት አርታዒው ተግባራዊውን ዋጋ እና ከየትኛው ንብርብር እንደመጣ ያሳያል።
-- `connectionAwareExpansion` (በቅደም ተከተል የጥምረት ውቅር፣ ከዚያ ቅንብሮች፣ ነባሪው **false**) ከመዞሩ በፊት እያንዳንዱን በአቅራቢ-ደረጃ ያለ ደረጃ ወደ በእያንዳንዱ-መለያ ዒላማዎች ያስፋፋል። የGroup-B ስልቶች (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline) ይህ እስኪበራ ድረስ የአቅራቢ-ደረጃ እይታን ይይዛሉ። የጥምረት አርታዒው inherit / on / off አማራጮችን ያቀርባል፤ inherit ዓለም አቀፉን ነባሪ (off) ይጠቀማል።
-- የጥያቄ-ቋት አካባቢያዊነት ማዘዋወር (`promptCacheAffinityEnabled`፣ ነባሪው **true**) ተመሳሳይ የቋት ቁልፎች በአንድ መለያ ላይ እንዲቆዩ የተሰኩ ግንኙነቶችን እንደገና ያደራጃል። በተሰኩ የበእያንዳንዱ-መለያ ደረጃዎች ላይ ከround-robin እና weighted መዞር ቅድሚያ ይኖረዋል። ጥብቅ መዞር ካስፈለገዎት በSettings → Combo defaults ስር ያጥፉት። ለእያንዳንዱ ጥምረት የተለየ መሻሪያ የለም።
+- `stickyRoundRobinLimit` (የcombo config፣ ከዚያ `comboStickyRoundRobinLimit`፣ ከዚያ `settings.stickyRoundRobinLimit`፣ ነባሪ **3**) ከመቀያየሩ በፊት ለዚያ ያህል ተከታታይ ስኬቶች ተመሳሳይ targetን ይይዛል። ለአንድ-ጥያቄ መቀያየር የcombo overrideን ወደ `1` ያዘጋጁት። የcombo አራሚው (editor) ትክክለኛውን ዋጋ እና ከየትኛው ንብርብር እንደመጣ ያሳያል።
+- `connectionAwareExpansion` (የcombo config፣ ከዚያ settings፣ ነባሪ **false**) ከመቀያየሩ በፊት እያንዳንዱን የprovider-ደረጃ እርምጃ ወደ እያንዳንዱ-መለያ targets ያሰፋዋል። የGroup-B ስልቶች (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline) ይህ እስኪበራ ድረስ የprovider-ደረጃ እይታን ይይዛሉ። የcombo አራሚው inherit / on / off ያቀርባል፤ inherit ዓለም አቀፍ ነባሪውን (off) ይጠቀማል።
+- Prompt-cache locality መስመር ዝርጋታ (`promptCacheAffinityEnabled`፣ ነባሪ **true**) የሚዛመዱ የcache ቁልፎች በአንድ መለያ ላይ እንዲቆዩ pinned የተደረጉ ግንኙነቶችን እንደገና ያደራጃል። በpinned በተደረጉ የእያንዳንዱ-መለያ ደረጃዎች ዙሪያ ከround-robin እና weighted መቀያየር ይልቅ ቅድሚያ ይወስዳል። ጥብቅ መቀያየር ካስፈለገዎት በSettings → Combo defaults ስር ያጥፉት። ለእያንዳንዱ-combo የሚሆን override የለም።
 
-በአንድ ሞዴል ላይ ለባለብዙ-መለያ መዞር፣ ሦስት የተሰኩ `connectionId`ዎችን ከመጠቀም ይልቅ ተጣባቂ ገደቡ `1` የሆነ **አንድ ተለዋዋጭ-መለያ ደረጃ** (ባዶ `connectionId`፣ ሙሉ ስብስቡ) መጠቀም ይመረጣል። የተሰኩ ደረጃዎች ከአቻነት ጋር ሲጣመሩ፣ የRR ቆጣሪው እየጨመረ ቢሄድም በተመሳሳዩ መለያ ላይ ይሰባሰባሉ።
+በአንድ ሞዴል ላይ ለብዙ-መለያ መቀያየር፣ ሶስት pinned የተደረጉ `connectionId`ዎችን ከመጠቀም ይልቅ sticky ገደቡ `1` የሆነ **አንድ ተለዋዋጭ-መለያ ደረጃ** (ባዶ `connectionId`፣ ሙሉ pool) ይመረጣል። የRR counter ወደፊት ቢራመድም እንኳ pinned የተደረጉ ደረጃዎች እና affinity ወደ ተመሳሳይ መለያ ይሰበሰባሉ።
 
 ## የFusion ስትራቴጂ
 

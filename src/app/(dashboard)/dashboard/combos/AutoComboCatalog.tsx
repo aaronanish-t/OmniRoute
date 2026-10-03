@@ -80,7 +80,9 @@ export default function AutoComboCatalog({
         const res = await fetch("/api/combos/auto", { cache: "no-store" });
         if (!res.ok) return;
         const data = (await res.json()) as { combos?: AutoCatalogApiEntry[] };
-        if (!Array.isArray(data.combos) || data.combos.length === 0) return;
+        // An empty live list is authoritative (no combo has candidates right
+        // now) — only a failed/malformed response falls back to the templates.
+        if (!Array.isArray(data.combos)) return;
         const items = data.combos
           .filter((entry): entry is AutoCatalogApiEntry & { id: string } => {
             return typeof entry?.id === "string" && entry.id.length > 0;
@@ -184,7 +186,11 @@ export default function AutoComboCatalog({
         </span>
       </button>
 
-      {open && (
+      {open && items.length === 0 && (
+        <p className="mt-4 text-xs text-text-muted">{t("autoCatalogNoCandidates")}</p>
+      )}
+
+      {open && items.length > 0 && (
         <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
           {items.map((item) => {
             const testing = testingName === item.id;

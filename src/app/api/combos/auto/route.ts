@@ -46,6 +46,8 @@ export async function GET(request: Request) {
     for (const { variant, name } of ALL_VARIANTS) {
       try {
         const virtual = await createVirtualAutoComboFromPrepared(prepared, variant);
+        // A combo with no live candidates can never dispatch — don't list it.
+        if (!virtual.candidatePool?.length) continue;
         const id = variant ? `auto/${variant}` : "auto";
         seenIds.add(id);
         combos.push({
@@ -83,6 +85,7 @@ export async function GET(request: Request) {
         const variant = AUTO_TEMPLATE_VARIANTS[modelStr];
         const spec = modelStr === "auto/best-free" ? { tier: "free" as const } : undefined;
         const virtual = await createVirtualAutoComboFromPrepared(prepared, variant, spec);
+        if (!virtual.candidatePool?.length) continue;
 
         const displayName = variant
           ? `Auto ${variant.charAt(0).toUpperCase() + variant.slice(1)}`
@@ -126,6 +129,7 @@ export async function GET(request: Request) {
           category: parsed.category,
           tier: parsed.tier,
         });
+        if (!virtual.candidatePool?.length) continue;
 
         // Build a human-readable name from the category and tier
         const catName = parsed.category
@@ -169,6 +173,7 @@ export async function GET(request: Request) {
         const virtual = await createVirtualAutoComboFromPrepared(prepared, undefined, {
           family: suffix,
         });
+        if (!virtual.candidatePool?.length) continue;
 
         const displayName = `Auto ${suffix.charAt(0).toUpperCase() + suffix.slice(1)}`;
 

@@ -897,6 +897,8 @@ async function buildUnifiedModelsResponseCore(
           await yieldCatalogBuildTurn();
         }
         const virtualCombo = await createBuiltinAutoCombo(autoId, suffix, preparedAutoInputs);
+        // A combo with no live candidates can never dispatch — don't advertise it.
+        if (virtualCombo.models.length === 0) continue;
         const contextLength = virtualCombo.advertisedContextLength || 128000;
         const maxOutputTokens = virtualCombo.advertisedMaxOutputTokens || 8192;
 

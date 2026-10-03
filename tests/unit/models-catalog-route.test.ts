@@ -952,11 +952,13 @@ test("v1 models catalog preserves GLM-5.2 limits alongside GitHub Copilot Astra"
     const body = (await response.json()) as any;
     const byId = new Map(body.data.map((item) => [item.id, item]));
     for (const id of ["github/gpt-6-astra", "gh/gpt-6-astra"]) assert.ok(byId.has(id), id);
+    // Provider-specific authoritative windows override the lower synced/model.dev hints above:
+    // HF and Cloudflare route safely at 262K, while these OpenCode/ZenMux routes support 1M.
     for (const [id, expectedContext] of [
-      ["huggingface/zai-org/GLM-5.2", 128000],
-      ["cloudflare-ai/@cf/zai-org/glm-5.2", 128000],
+      ["huggingface/zai-org/GLM-5.2", 262144],
+      ["cloudflare-ai/@cf/zai-org/glm-5.2", 262144],
       ["opencode-go/glm-5.2", 1000000],
-      ["zenmux/z-ai/glm-5.2", 128000],
+      ["zenmux/z-ai/glm-5.2", 1000000],
     ] as const) {
       const model = byId.get(id) as any;
       assert.ok(model, `expected ${id} in catalog`);

@@ -72,6 +72,30 @@ describe("providerLimits/quotaNormalize — sanitize/normalize are callable & pu
   });
 });
 
+describe("providerLimits — shouldRefreshProviderLimitsCache", () => {
+  it("triggers refresh when Antigravity cache lacks family weekly quota keys", async () => {
+    const { shouldRefreshProviderLimitsCache } = await import("../../src/lib/usage/providerLimits.ts");
+    const conn = { provider: "antigravity" };
+
+    // Missing weekly keys -> should refresh
+    const cacheOnly5Hour = {
+      quotas: {
+        "gemini-3.1-flash-lite": { remainingPercentage: 10, quotaSource: "retrieveUserQuota" },
+      },
+    };
+    assert.equal(shouldRefreshProviderLimitsCache(conn as any, cacheOnly5Hour as any), true);
+
+    // Has weekly keys -> should NOT refresh
+    const cacheComplete = {
+      quotas: {
+        "gemini-3.1-flash-lite": { remainingPercentage: 10, quotaSource: "retrieveUserQuota" },
+        gemini_weekly: { remainingPercentage: 40, quotaSource: "retrieveUserQuotaSummary" },
+      },
+    };
+    assert.equal(shouldRefreshProviderLimitsCache(conn as any, cacheComplete as any), false);
+  });
+});
+
 // ── host public API surface ──────────────────────────────────────────────────
 
 const host = await import("../../src/lib/usage/providerLimits.ts");

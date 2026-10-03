@@ -157,6 +157,15 @@ function hasRetrieveUserQuotaSource(
   });
 }
 
+function hasFamilyWeeklyQuotas(
+  provider: string,
+  cache: ProviderLimitsCacheEntry | undefined
+): boolean {
+  if (provider !== "antigravity" && provider !== "agy") return true;
+  if (!cache?.quotas) return false;
+  return Boolean(cache.quotas.gemini_weekly || cache.quotas.claude_gpt_weekly);
+}
+
 function sanitizeProviderLimitsCacheForConnection(
   connection: ProviderConnectionLike | null | undefined,
   entry: ProviderLimitsCacheEntry | null
@@ -168,7 +177,7 @@ function sanitizeProviderLimitsCacheForConnection(
   return sanitizedQuotas === entry.quotas ? entry : { ...entry, quotas: sanitizedQuotas };
 }
 
-function shouldRefreshProviderLimitsCache(
+export function shouldRefreshProviderLimitsCache(
   connection: ProviderConnectionLike,
   cache: ProviderLimitsCacheEntry | undefined
 ): boolean {
@@ -177,6 +186,7 @@ function shouldRefreshProviderLimitsCache(
 
   return (
     !hasRetrieveUserQuotaSource(connection.provider, cache) ||
+    !hasFamilyWeeklyQuotas(connection.provider, cache) ||
     Object.keys(cache.quotas).some(
       (quotaKey) => !isUsageQuotaKeyAllowed(connection.provider, quotaKey)
     )

@@ -169,9 +169,7 @@ export function legacyToStable(
     capabilities: { tools: m.capabilities.toolcall, input, output },
     variants,
     time: { released: Number.isNaN(parsed) ? 0 : parsed },
-    cost: [
-      { input: m.cost.input, output: m.cost.output, cache: { ...m.cost.cache } },
-    ],
+    cost: [{ input: m.cost.input, output: m.cost.output, cache: { ...m.cost.cache } }],
     status: m.status,
     enabled: true,
     limit: { ...m.limit },
@@ -724,9 +722,13 @@ export async function collectCatalog(
       baseURL: opts.baseURL,
       apiFormat: opts.apiFormat,
     });
-    applyEnrichment(mapped, lookupEnrichment(entry.id, enrichment, canonicalToAlias), {
-      providerTag: opts.providerTag !== false,
-    });
+    applyEnrichment(
+      mapped,
+      lookupEnrichment(entry.id, enrichment, canonicalToAlias, entry.owned_by),
+      {
+        providerTag: opts.providerTag !== false,
+      }
+    );
     const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
     const key = X + "/" + mid;
     collected.set(key, mapped);
@@ -780,7 +782,10 @@ export async function collectCatalog(
     log.warn(
       `[omniroute-v2] auto combos fetch failed, falling back to models+combos catalog: ${err instanceof Error ? err.message : String(err)}`
     );
-    return { entries: collected, counts: { models: modelCount, combos: comboCount, autoCombos: 0 } };
+    return {
+      entries: collected,
+      counts: { models: modelCount, combos: comboCount, autoCombos: 0 },
+    };
   }
 
   let autoComboCount = 0;
@@ -813,7 +818,10 @@ export async function collectCatalog(
     autoComboCount += 1;
   }
 
-  return { entries: collected, counts: { models: modelCount, combos: comboCount, autoCombos: autoComboCount } };
+  return {
+    entries: collected,
+    counts: { models: modelCount, combos: comboCount, autoCombos: autoComboCount },
+  };
 }
 
 /**
@@ -876,7 +884,10 @@ export async function publishCatalog(
     const settings = (info.settings ?? {}) as Record<string, unknown>;
     const npm = String(info.package ?? "").replace("@opencode/ai/providers/", "@ai-sdk/");
     p["api"] = { type: "aisdk", package: npm, url: settings["baseURL"] };
-    p["request"] = { headers: (info.headers ?? {}) as Record<string, string>, body: (info.body ?? {}) as Record<string, unknown> };
+    p["request"] = {
+      headers: (info.headers ?? {}) as Record<string, string>,
+      body: (info.body ?? {}) as Record<string, unknown>,
+    };
   });
   for (const m of collected.entries.keys()) {
     const slash = m.indexOf("/");

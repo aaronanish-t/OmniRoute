@@ -7,26 +7,32 @@ packages:
 autoInstallPeers: false
 allowBuilds:
   "@parcel/watcher": true
+  "@playwright/browser-chromium": true
   "@swc/core": true
   better-sqlite3: true
+  bun: true
   core-js: true
   esbuild: true
   keytar: true
   libxmljs2: true
   onnxruntime-node: true
+  opencode-ai: true
   protobufjs: true
   sharp: true
   unrs-resolver: true
 onlyBuiltDependencies:
   - "@parcel/watcher"
+  - "@playwright/browser-chromium"
   - "@swc/core"
   - "better-sqlite3"
+  - "bun"
   - "core-js"
   - "esbuild"
   - "keytar"
   - "libxmljs2"
   - "onnxruntime-node"
   - "omniroute"
+  - "opencode-ai"
   - "protobufjs"
   - "sharp"
   - "unrs-resolver"

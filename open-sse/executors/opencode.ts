@@ -1296,9 +1296,7 @@ export class OpencodeExecutor extends BaseExecutor {
       forwardOpencodeClientHeaders(headers, clientHeaders ?? {}, {
         synthesizeRequestId: true,
         cliDefaults,
-        // #15311: Go asks third-party agents to send their own User-Agent; the CLI
-        // identity rewrite is a Zen free-tier policy and must not apply there.
-        keepAgentUserAgent: this._surface() === "go" && !gatedScope,
+        keepAgentUserAgent: this._surface() === "go" && !gatedScope, // #15311
         sessionBody: projectOpencodeSessionBody(body),
       });
     }

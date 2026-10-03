@@ -245,19 +245,25 @@ function applySessionFallback(
  * like the OpenCode CLI (opencode-cli/...) is preserved so the real CLI's versioned
  * identity stays intact. (#5997, follow-up)
  */
+/**
+ * Whether the client's User-Agent survives CLI synthesis. A UA that satisfies the upstream
+ * contract is always kept; the previous rule kept anything starting with `opencode-cli/`,
+ * which carries no parsable version and is refused by the free tier. With
+ * `keepAgentUserAgent` (OpenCode Go, #15311) an agent's own UA is kept too, because Go asks
+ * third-party agents to identify themselves — but never a generic SDK / HTTP-library UA.
+ */
+function keepsClientUserAgent(userAgent: string | undefined, keepAgentUserAgent: boolean) {
+  if (satisfiesOpencodeUserAgentContract(userAgent)) return true;
+  return keepAgentUserAgent && !isGenericClientUserAgent(userAgent);
+}
+
 function applyCliDefaults(
   headers: Record<string, string>,
   cliDefaults: { userAgent: string; client: string; project: string },
   sessionBody?: OpencodeSessionBody,
   keepAgentUserAgent = false
 ): void {
-  // A client User-Agent is kept only when it already satisfies the upstream contract.
-  // The previous rule kept anything starting with `opencode-cli/`, which carries no
-  // parsable version and is refused by the free tier. On OpenCode Go an agent's own
-  // User-Agent is kept as well, because Go asks third-party agents to send one (#15311).
-  const existingUa = headers["User-Agent"] || headers["user-agent"];
-  const keepAgentUa = keepAgentUserAgent && !isGenericClientUserAgent(existingUa);
-  if (!keepAgentUa && !satisfiesOpencodeUserAgentContract(existingUa)) {
+  if (!keepsClientUserAgent(headers["User-Agent"] || headers["user-agent"], keepAgentUserAgent)) {
     setUserAgentHeader(headers, cliDefaults.userAgent);
   }
   headers["x-opencode-client"] ||= cliDefaults.client;

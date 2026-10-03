@@ -8,6 +8,7 @@
  * executor may still emit multiple independent tool calls in parallel.
  */
 import { errorResponse } from "../utils/error.ts";
+import { stalledToolLoopReason } from "./agenticLoopGuard.ts";
 import type { ComboLogger, HandleSingleModel, ResolvedComboTarget } from "./combo/types.ts";
 import { extractPanelText, isToolBearingRequest } from "./fusion.ts";
 import { prependSystemInstruction, type PipelineStep } from "./pipeline.ts";
@@ -263,6 +264,7 @@ export async function handleAgenticPipelineChat({
   const maxToolRounds = Math.min(Math.max(config?.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS, 1), 32);
   const toolRounds = countToolResultTurns(body);
   const maxRoundsReached = toolRounds >= maxToolRounds;
+  const stalledReason = continuation ? stalledToolLoopReason(body) : null;
 
   log.info(
     "AGENTIC_PIPELINE",
@@ -283,7 +285,10 @@ export async function handleAgenticPipelineChat({
     withoutTools(body, false),
     [
       planner.prompt,
-      plannerDecisionPrompt(continuation, maxRoundsReached),
+      plannerDecisionPrompt(continuation, maxRoundsReached || Boolean(stalledReason)),
+      stalledReason
+        ? `Tool-loop protection stopped further execution because ${stalledReason}. Explain the blocker using the returned evidence.`
+        : "",
       availableToolsPrompt(body),
     ]
       .filter(Boolean)
@@ -310,7 +315,7 @@ export async function handleAgenticPipelineChat({
     );
   }
 
-  if (decision.route === "tools" && !maxRoundsReached) {
+  if (decision.route === "tools" && !maxRoundsReached && !stalledReason) {
     const executorBody = prependSystemInstruction(
       body,
       [executor.prompt, executorPrompt(decision.content)].filter(Boolean).join("\n\n")
@@ -323,7 +328,15 @@ export async function handleAgenticPipelineChat({
   // streaming and response translation while keeping the internal decision buffered.
   const finalBody = prependSystemInstruction(
     withoutTools(body, true),
-    [planner.prompt, finalPrompt(decision.content)].filter(Boolean).join("\n\n")
+    [
+      planner.prompt,
+      finalPrompt(decision.content),
+      stalledReason
+        ? `Further tool execution was stopped because ${stalledReason}. Explain the blocker; do not claim unfinished work succeeded.`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n")
   );
   log.info("AGENTIC_PIPELINE", `Routing client-facing final turn to ${plannerModel}`);
   return handleSingleModel(finalBody, plannerModel, stepTarget(planner));

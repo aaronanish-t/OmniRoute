@@ -1,0 +1,1 @@
+Agentic pipelines support opt-in context compaction with per-model serialized-character budgets. Compaction trims tool evidence and old complete tool rounds, preserves instructions and the latest request, and rejects payloads that cannot fit without dropping pinned context.

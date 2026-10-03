@@ -8,6 +8,7 @@
  * executor may still emit multiple independent tool calls in parallel.
  */
 import { errorResponse } from "../utils/error.ts";
+import { compactAgenticBody, type AgenticCompactionConfig } from "./agenticCompaction.ts";
 import type { ComboLogger, HandleSingleModel, ResolvedComboTarget } from "./combo/types.ts";
 import { extractPanelText, isToolBearingRequest } from "./fusion.ts";
 import { prependSystemInstruction, type PipelineStep } from "./pipeline.ts";
@@ -17,6 +18,7 @@ type Body = Record<string, unknown>;
 export type AgenticOrchestrationConfig = {
   enabled?: boolean;
   maxToolRounds?: number;
+  contextCompaction?: AgenticCompactionConfig;
 };
 
 export type HandleAgenticPipelineOptions = {
@@ -250,6 +252,20 @@ export async function handleAgenticPipelineChat({
   comboName,
   config,
 }: HandleAgenticPipelineOptions): Promise<Response> {
+  const dispatch: HandleSingleModel = async (request, model, target) => {
+    const compacted = compactAgenticBody(request, model, config?.contextCompaction);
+    if (compacted.overLimit)
+      return errorResponse(
+        413,
+        `Agentic context for ${model} exceeds its configured character budget after compaction; reduce pinned instructions, tools, or the latest request`
+      );
+    if (compacted.compacted)
+      log.info(
+        "AGENTIC_PIPELINE",
+        `Context compaction for ${model}: ${compacted.before} -> ${compacted.after} chars`
+      );
+    return handleSingleModel(compacted.body, model, target);
+  };
   const chain = steps.filter((step) => Boolean(step && stepModel(step)));
   if (chain.length !== 2) {
     return errorResponse(400, "Agentic pipeline requires exactly two models: planner, executor");
@@ -272,7 +288,7 @@ export async function handleAgenticPipelineChat({
   // Without client tools there is nothing for the executor to do. The planner owns
   // the response directly and preserves the client's stream preference.
   if (!isToolBearingRequest(body)) {
-    return handleSingleModel(
+    return dispatch(
       prependSystemInstruction(body, planner.prompt),
       plannerModel,
       stepTarget(planner)
@@ -289,7 +305,7 @@ export async function handleAgenticPipelineChat({
       .filter(Boolean)
       .join("\n\n")
   );
-  const decisionResponse = await handleSingleModel(decisionBody, plannerModel, stepTarget(planner));
+  const decisionResponse = await dispatch(decisionBody, plannerModel, stepTarget(planner));
   if (!decisionResponse.ok) return decisionResponse;
 
   let decisionText = "";
@@ -316,7 +332,7 @@ export async function handleAgenticPipelineChat({
       [executor.prompt, executorPrompt(decision.content)].filter(Boolean).join("\n\n")
     );
     log.info("AGENTIC_PIPELINE", `Routing client-facing tool turn to ${executorModel}`);
-    return handleSingleModel(executorBody, executorModel, stepTarget(executor));
+    return dispatch(executorBody, executorModel, stepTarget(executor));
   }
 
   // The planner owns final responses. A second planner call preserves provider-native
@@ -326,5 +342,5 @@ export async function handleAgenticPipelineChat({
     [planner.prompt, finalPrompt(decision.content)].filter(Boolean).join("\n\n")
   );
   log.info("AGENTIC_PIPELINE", `Routing client-facing final turn to ${plannerModel}`);
-  return handleSingleModel(finalBody, plannerModel, stepTarget(planner));
+  return dispatch(finalBody, plannerModel, stepTarget(planner));
 }

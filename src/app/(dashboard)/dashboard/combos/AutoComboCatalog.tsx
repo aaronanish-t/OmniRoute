@@ -53,6 +53,159 @@ function templateItem(template: AutoComboTemplate): CatalogItem {
 
 const FALLBACK_ITEMS: CatalogItem[] = AUTO_COMBO_TEMPLATES.map(templateItem);
 
+function CatalogItemActions({
+  item,
+  testing,
+  duplicatingName,
+  onTestCombo,
+  onDuplicate,
+  t,
+}: {
+  item: CatalogItem;
+  testing: boolean;
+  duplicatingName: string | null;
+  onTestCombo?: (combo: { name: string }) => void;
+  onDuplicate: (item: CatalogItem) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5">
+      <Link
+        href={`/dashboard/combos/${encodeURIComponent(item.id)}`}
+        className="p-0.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors"
+        title={t("controlCenter")}
+      >
+        <span className="material-symbols-outlined text-[14px]">monitoring</span>
+      </Link>
+      {onTestCombo && (
+        <button
+          onClick={() => onTestCombo({ name: item.id })}
+          disabled={testing}
+          className="p-0.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-emerald-500 transition-colors disabled:opacity-50"
+          title={t("testCombo")}
+        >
+          <span
+            className={`material-symbols-outlined text-[14px] ${testing ? "animate-spin" : ""}`}
+          >
+            {testing ? "progress_activity" : "play_arrow"}
+          </span>
+        </button>
+      )}
+      {item.id !== "auto" && (
+        <button
+          onClick={() => onDuplicate(item)}
+          disabled={duplicatingName !== null}
+          className="p-0.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors"
+          title={t("duplicateAutoComboTitle", { name: item.id })}
+        >
+          <span
+            className={`material-symbols-outlined text-[14px] ${duplicatingName === item.id ? "animate-spin" : ""}`}
+          >
+            {duplicatingName === item.id ? "progress_activity" : "content_copy"}
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+function CatalogItemCard({
+  item,
+  testing,
+  duplicatingName,
+  onTestCombo,
+  onDuplicate,
+  t,
+}: {
+  item: CatalogItem;
+  testing: boolean;
+  duplicatingName: string | null;
+  onTestCombo?: (combo: { name: string }) => void;
+  onDuplicate: (item: CatalogItem) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="relative rounded-lg border border-border bg-bg-subtle p-3 pb-7 text-xs">
+      <CatalogItemActions
+        item={item}
+        testing={testing}
+        duplicatingName={duplicatingName}
+        onTestCombo={onTestCombo}
+        onDuplicate={onDuplicate}
+        t={t}
+      />
+      <div className="flex items-center justify-between gap-2">
+        <code className="font-mono text-sm text-text-main">{item.id}</code>
+        <span className="rounded bg-black/5 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-text-muted dark:bg-white/5">
+          {item.template?.strategy ?? t(KIND_LABEL_KEYS[item.kind])}
+        </span>
+      </div>
+      <p className="mt-1 text-[11px] font-semibold text-text-main">{item.displayName}</p>
+      <div className="mt-2 flex flex-wrap gap-1">
+        {item.template ? (
+          <>
+            {item.template.categories.map((cat) => (
+              <span
+                key={cat}
+                className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary"
+              >
+                {cat}
+              </span>
+            ))}
+            {item.template.tiers.map((tier) => (
+              <span
+                key={tier}
+                className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[10px] text-text-muted dark:bg-white/[0.04]"
+              >
+                {tier}
+              </span>
+            ))}
+          </>
+        ) : (
+          item.candidateCount !== null && (
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] ${
+                item.candidateCount > 0
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                  : "bg-black/[0.04] text-text-muted dark:bg-white/[0.04]"
+              }`}
+            >
+              {item.candidateCount > 0
+                ? t("autoCatalogCandidates", { count: item.candidateCount })
+                : t("autoCatalogNoCandidates")}
+            </span>
+          )
+        )}
+      </div>
+      {item.template?.systemMessage && (
+        <p className="mt-2 text-[10px] italic text-text-muted line-clamp-2">
+          {item.template.systemMessage}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function toCatalogItems(combos: AutoCatalogApiEntry[]): CatalogItem[] {
+  return combos
+    .filter((entry): entry is AutoCatalogApiEntry & { id: string } => {
+      return typeof entry?.id === "string" && entry.id.length > 0;
+    })
+    .map((entry): CatalogItem => {
+      const kind = VALID_KINDS.has(entry.kind ?? "")
+        ? (entry.kind as CatalogItem["kind"])
+        : "variant";
+      return {
+        id: entry.id,
+        displayName:
+          typeof entry.name === "string" && entry.name.length > 0 ? entry.name : entry.id,
+        kind,
+        candidateCount: typeof entry.candidateCount === "number" ? entry.candidateCount : null,
+        template: AUTO_COMBO_TEMPLATES.find((tpl) => tpl.name === entry.id) ?? null,
+      };
+    });
+}
+
 export default function AutoComboCatalog({
   onComboCreated,
   onTestCombo,
@@ -83,24 +236,7 @@ export default function AutoComboCatalog({
         // An empty live list is authoritative (no combo has candidates right
         // now) — only a failed/malformed response falls back to the templates.
         if (!Array.isArray(data.combos)) return;
-        const items = data.combos
-          .filter((entry): entry is AutoCatalogApiEntry & { id: string } => {
-            return typeof entry?.id === "string" && entry.id.length > 0;
-          })
-          .map((entry): CatalogItem => {
-            const kind = VALID_KINDS.has(entry.kind ?? "")
-              ? (entry.kind as CatalogItem["kind"])
-              : "variant";
-            return {
-              id: entry.id,
-              displayName:
-                typeof entry.name === "string" && entry.name.length > 0 ? entry.name : entry.id,
-              kind,
-              candidateCount:
-                typeof entry.candidateCount === "number" ? entry.candidateCount : null,
-              template: AUTO_COMBO_TEMPLATES.find((tpl) => tpl.name === entry.id) ?? null,
-            };
-          });
+        const items = toCatalogItems(data.combos);
         if (!cancelled) setLiveItems(items);
       } catch {
         // Endpoint unavailable — the static template fallback keeps rendering.
@@ -192,102 +328,17 @@ export default function AutoComboCatalog({
 
       {open && items.length > 0 && (
         <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((item) => {
-            const testing = testingName === item.id;
-            return (
-              <div
-                key={item.id}
-                className="relative rounded-lg border border-border bg-bg-subtle p-3 pb-7 text-xs"
-              >
-                <div className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5">
-                  <Link
-                    href={`/dashboard/combos/${encodeURIComponent(item.id)}`}
-                    className="p-0.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors"
-                    title={t("controlCenter")}
-                  >
-                    <span className="material-symbols-outlined text-[14px]">monitoring</span>
-                  </Link>
-                  {onTestCombo && (
-                    <button
-                      onClick={() => onTestCombo({ name: item.id })}
-                      disabled={testing}
-                      className="p-0.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-emerald-500 transition-colors disabled:opacity-50"
-                      title={t("testCombo")}
-                    >
-                      <span
-                        className={`material-symbols-outlined text-[14px] ${testing ? "animate-spin" : ""}`}
-                      >
-                        {testing ? "progress_activity" : "play_arrow"}
-                      </span>
-                    </button>
-                  )}
-                  {item.id !== "auto" && (
-                    <button
-                      onClick={() => handleDuplicateEntry(item)}
-                      disabled={duplicatingName !== null}
-                      className="p-0.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors"
-                      title={t("duplicateAutoComboTitle", { name: item.id })}
-                    >
-                      <span
-                        className={`material-symbols-outlined text-[14px] ${duplicatingName === item.id ? "animate-spin" : ""}`}
-                      >
-                        {duplicatingName === item.id ? "progress_activity" : "content_copy"}
-                      </span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between gap-2">
-                  <code className="font-mono text-sm text-text-main">{item.id}</code>
-                  <span className="rounded bg-black/5 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-text-muted dark:bg-white/5">
-                    {item.template?.strategy ?? t(KIND_LABEL_KEYS[item.kind])}
-                  </span>
-                </div>
-                <p className="mt-1 text-[11px] font-semibold text-text-main">{item.displayName}</p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {item.template ? (
-                    <>
-                      {item.template.categories.map((cat) => (
-                        <span
-                          key={cat}
-                          className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary"
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                      {item.template.tiers.map((tier) => (
-                        <span
-                          key={tier}
-                          className="rounded-full bg-black/[0.04] px-2 py-0.5 text-[10px] text-text-muted dark:bg-white/[0.04]"
-                        >
-                          {tier}
-                        </span>
-                      ))}
-                    </>
-                  ) : (
-                    item.candidateCount !== null && (
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] ${
-                          item.candidateCount > 0
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                            : "bg-black/[0.04] text-text-muted dark:bg-white/[0.04]"
-                        }`}
-                      >
-                        {item.candidateCount > 0
-                          ? t("autoCatalogCandidates", { count: item.candidateCount })
-                          : t("autoCatalogNoCandidates")}
-                      </span>
-                    )
-                  )}
-                </div>
-                {item.template?.systemMessage && (
-                  <p className="mt-2 text-[10px] italic text-text-muted line-clamp-2">
-                    {item.template.systemMessage}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+          {items.map((item) => (
+            <CatalogItemCard
+              key={item.id}
+              item={item}
+              testing={testingName === item.id}
+              duplicatingName={duplicatingName}
+              onTestCombo={onTestCombo}
+              onDuplicate={handleDuplicateEntry}
+              t={t}
+            />
+          ))}
         </div>
       )}
     </Card>

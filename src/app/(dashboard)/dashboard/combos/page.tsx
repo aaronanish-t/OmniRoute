@@ -63,6 +63,7 @@ import {
 } from "@/lib/combos/builderDraft";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import AutoComboCatalog from "./AutoComboCatalog";
+import { AutoComboTruncatedNote, getI18nOrFallback } from "./comboPageHelpers";
 import KimiComboPresetCard from "./KimiComboPresetCard";
 import { KIMI_CODING_PRESET, hasKimiCodingPreset } from "./kimiComboPreset";
 import BuilderIntelligentStep from "./BuilderIntelligentStep";
@@ -594,13 +595,6 @@ function getStrategyBadgeClass(strategy) {
   if (strategy === "fill-first") return "bg-orange-500/15 text-orange-600 dark:text-orange-400";
   if (strategy === "p2c") return "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400";
   return "bg-blue-500/15 text-blue-600 dark:text-blue-400";
-}
-
-function getI18nOrFallback(t, key, fallback, values = undefined) {
-  try {
-    if (typeof t.has === "function" && t.has(key)) return t(key, values);
-  } catch {}
-  return fallback;
 }
 
 function moveArrayItem(items, fromIndex, toIndex) {
@@ -2015,7 +2009,6 @@ function ComboCardInner({
 const ComboCard = memo(ComboCardInner);
 
 function TestResultsView({ results }) {
-  const t = useTranslations("combos");
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
 
   if (results.error) {
@@ -2033,19 +2026,7 @@ function TestResultsView({ results }) {
         Targets are tested independently. This checks model health, not the combo’s routing strategy
         or fallback order.
       </p>
-      {results.comboType === "auto" &&
-        typeof results.totalCandidates === "number" &&
-        Array.isArray(results.results) &&
-        results.totalCandidates > results.results.length && (
-          <p className="text-xs text-text-muted">
-            {getI18nOrFallback(
-              t,
-              "autoComboTestTruncated",
-              `Tested ${results.results.length} of ${results.totalCandidates} live candidates (highest weights first).`,
-              { tested: results.results.length, total: results.totalCandidates }
-            )}
-          </p>
-        )}
+      <AutoComboTruncatedNote results={results} />
       {results.resolvedBy && (
         <div className="flex items-center gap-2 text-sm">
           <span className="material-symbols-outlined text-emerald-500 text-[18px]">

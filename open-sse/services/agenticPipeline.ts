@@ -242,6 +242,38 @@ function finalPrompt(draft: string): string {
     .join("\n\n");
 }
 
+async function dispatchExecutors(
+  body: Body,
+  executors: PipelineStep[],
+  plan: string,
+  handleSingleModel: HandleSingleModel,
+  log: ComboLogger
+): Promise<Response> {
+  let lastFailure = errorResponse(502, "All configured agentic tool executors failed");
+  for (const executor of executors) {
+    const model = stepModel(executor);
+    const request = prependSystemInstruction(
+      structuredClone(body),
+      [executor.prompt, executorPrompt(plan)].filter(Boolean).join("\n\n")
+    );
+    log.info("AGENTIC_PIPELINE", `Routing client-facing tool turn to ${model}`);
+    try {
+      const response = await handleSingleModel(request, model, stepTarget(executor));
+      if (response.ok) return response;
+      lastFailure = response;
+      log.warn("AGENTIC_PIPELINE", `Tool executor ${model} failed with ${response.status}`);
+      // Only discard a failed body when another executor remains. Never retry SSE
+      // after a successful response starts; preserve the final failure intact.
+      if (executor !== executors.at(-1)) await response.body?.cancel().catch(() => undefined);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") throw error;
+      log.warn("AGENTIC_PIPELINE", `Tool executor ${model} failed before responding`);
+      lastFailure = errorResponse(502, "All configured agentic tool executors failed");
+    }
+  }
+  return lastFailure;
+}
+
 export async function handleAgenticPipelineChat({
   body,
   steps,
@@ -311,32 +343,7 @@ export async function handleAgenticPipelineChat({
   }
 
   if (decision.route === "tools" && !maxRoundsReached) {
-    let lastFailure: Response | null = null;
-    for (const executor of executors) {
-      const executorModel = stepModel(executor);
-      const executorBody = prependSystemInstruction(
-        structuredClone(body),
-        [executor.prompt, executorPrompt(decision.content)].filter(Boolean).join("\n\n")
-      );
-      log.info("AGENTIC_PIPELINE", `Routing client-facing tool turn to ${executorModel}`);
-      try {
-        const response = await handleSingleModel(executorBody, executorModel, stepTarget(executor));
-        if (response.ok) return response;
-        lastFailure = response;
-        log.warn(
-          "AGENTIC_PIPELINE",
-          `Tool executor ${executorModel} failed with ${response.status}`
-        );
-        // Release unused upstream bodies before trying another executor. The final
-        // failure is returned intact, and successful SSE streams are never retried.
-        if (executor !== executors.at(-1)) await response.body?.cancel().catch(() => undefined);
-      } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") throw error;
-        log.warn("AGENTIC_PIPELINE", `Tool executor ${executorModel} failed before responding`);
-        lastFailure = errorResponse(502, "All configured agentic tool executors failed");
-      }
-    }
-    if (lastFailure) return lastFailure;
+    return dispatchExecutors(body, executors, decision.content, handleSingleModel, log);
   }
 
   // The planner owns final responses. A second planner call preserves provider-native

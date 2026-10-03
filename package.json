@@ -473,10 +473,13 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@parcel/watcher",
+      "@playwright/browser-chromium",
       "@swc/core",
       "better-sqlite3",
+      "bun",
       "esbuild",
       "omniroute",
+      "opencode-ai",
       "sharp"
     ]
   },

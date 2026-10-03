@@ -35,9 +35,9 @@
   "search.followSymlinks": false,
 
   // ─── TypeScript server (monorepo grande: ~6,6k arquivos rastreados, Next.js 16) ───
-  "typescript.tsserver.maxTsServerMemory": 4096,
-  "typescript.disableAutomaticTypeAcquisition": true,
-  "typescript.tsc.autoDetect": "off",
+  "js/ts.tsserver.maxMemory": 4096,
+  "js/ts.tsserver.automaticTypeAcquisition.enabled": false,
+  "js/ts.tsc.autoDetect": "off",
   "npm.autoDetect": "off",
   // O tsserver tem o próprio watcher (independente de files.watcherExclude).
   // excludeDirectories evita que ele vigie as árvores pesadas.

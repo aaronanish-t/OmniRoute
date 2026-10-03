@@ -33,6 +33,7 @@ import {
 import { commonChatGptWebRetirementResponse } from "@/lib/providers/chatgptWebRetirementResponse";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
+import { decisionOnlyChatRejection } from "@/lib/providerModels/decisionOnlyChatGuard";
 
 export { parseModel, stripContextWindowSuffix };
 
@@ -614,8 +615,9 @@ export async function getModelInfo(modelStr) {
 }
 
 export async function getModelInfoOrRetirementResponse(modelId: string) {
+  let modelInfo: Awaited<ReturnType<typeof getModelInfo>>;
   try {
-    return await getModelInfo(modelId);
+    modelInfo = await getModelInfo(modelId);
   } catch (error) {
     if (isMicrosoftDesignerWebProviderRetiredError(error)) {
       return { error: errorResponse(HTTP_STATUS.GONE, error.message) };
@@ -633,6 +635,10 @@ export async function getModelInfoOrRetirementResponse(modelId: string) {
     }
     throw error;
   }
+  // A System One decision model (Clef / Clef Flash) cannot serve chat: refuse it here,
+  // before any credential is picked, with a 400 a combo treats as model-scoped.
+  const decisionOnly = await decisionOnlyChatRejection(modelInfo);
+  return decisionOnly ? { error: decisionOnly } : modelInfo;
 }
 
 /**

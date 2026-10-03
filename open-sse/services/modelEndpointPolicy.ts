@@ -8,7 +8,7 @@
  */
 
 export type ModelEndpointKind =
-  "chat" | "image" | "video" | "embedding" | "rerank" | "non-chat" | "unknown";
+  "chat" | "image" | "video" | "embedding" | "rerank" | "decision" | "non-chat" | "unknown";
 
 export type ModelEndpointDecision = {
   kind: ModelEndpointKind;
@@ -32,6 +32,9 @@ const EMBEDDING_ENDPOINTS = new Set(["embeddings", "embedding"]);
 const RERANK_ENDPOINTS = new Set(["rerank", "reranking"]);
 const IMAGE_ENDPOINTS = new Set(["image", "images", "images/generations"]);
 const VIDEO_ENDPOINTS = new Set(["video", "videos", "videos/generations"]);
+// System One decision models (Ollama Clef / Clef Flash, TypeSafe Jev): typed questions in,
+// probabilities out — never a chat completion.
+const DECISION_ENDPOINTS = new Set(["systemone"]);
 
 function normalizeEndpoint(endpoint: string): string {
   return endpoint.trim().toLowerCase().replace(/^\/+/, "").replace(/^v1\//, "");
@@ -57,6 +60,9 @@ function classifyExplicitEndpoints(
   }
   if (endpoints.some((endpoint) => VIDEO_ENDPOINTS.has(endpoint))) {
     return { kind: "video", chatSelectable: false, reason: "explicit-endpoints" };
+  }
+  if (endpoints.some((endpoint) => DECISION_ENDPOINTS.has(endpoint))) {
+    return { kind: "decision", chatSelectable: false, reason: "explicit-endpoints" };
   }
   return { kind: "non-chat", chatSelectable: false, reason: "explicit-endpoints" };
 }

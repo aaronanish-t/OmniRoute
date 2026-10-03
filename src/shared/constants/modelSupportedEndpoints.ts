@@ -7,6 +7,8 @@ export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "audio-speech",
   "audio-transcriptions",
   "images-generations",
+  // System One typed-decision API (`POST /v1/systemone`): choice / noul / score answers.
+  "systemone",
   // Persisted legacy values remain valid input and normalize on write/edit.
   "video",
   "audio",
@@ -33,14 +35,21 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
   return normalized;
 }
 
+/** A System One model that does not also serve chat is a decision model (Clef, Clef Flash). */
+function isDecisionOnly(endpoints: readonly string[]): boolean {
+  if (!endpoints.includes("systemone")) return false;
+  return !endpoints.includes("chat") && !endpoints.includes("responses");
+}
+
 export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
-  type?: "embedding" | "rerank" | "image" | "video" | "audio";
+  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "decision";
   subtype?: "speech" | "transcription";
 } {
   if (endpoints.includes("embeddings")) return { type: "embedding" };
   if (endpoints.includes("rerank")) return { type: "rerank" };
   if (endpoints.includes("images")) return { type: "image" };
   if (endpoints.includes("videos") || endpoints.includes("video")) return { type: "video" };
+  if (isDecisionOnly(endpoints)) return { type: "decision" };
 
   const supportsSpeech = endpoints.includes("audio-speech");
   const supportsTranscription =

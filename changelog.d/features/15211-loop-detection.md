@@ -1,1 +1,0 @@
-Agentic pipelines detect repeated tool rounds with unchanged results and consecutive failed rounds, return control to the planner, and explain the blocker. Detection supports Anthropic, Chat Completions, Responses and Gemini histories and resets on a fresh user turn.

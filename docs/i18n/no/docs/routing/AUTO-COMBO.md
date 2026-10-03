@@ -4,6 +4,10 @@
 
 ---
 
+🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇪🇹 [am](../../../am/docs/routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇧🇦 [bs](../../../bs/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇪 [ga](../../../ga/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ha](../../../ha/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇰🇷 [ko](../../../ko/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇮🇳 [or](../../../or/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
+
+---
+
 > **For brukere**: Ønsker du en rask innføring? Se [brukerveiledningen for Auto-Combo](../getting-started/AUTO-COMBO-GUIDE.md) for enkle forklaringer og eksempler.
 
 > Selvadministrerende modellkjeder med adaptiv poengberegning + automatisk ruting uten konfigurasjon
@@ -280,60 +284,84 @@ fastsatte verdiene sendes til motorens eksisterende `config.modePack`- / `config
 
 ## Alle rutingsstrategier
 
-OmniRoutes kombinasjonsmotor støtter **19 rutingsstrategier** (deklarert i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Selve Auto Combo-motoren er tilgjengelig under strategien `auto`; de andre er tilgjengelige for lagrede kombinasjoner.
+OmniRoutes combo-motor støtter **19 rutingsstrategier** (deklarert i `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Selve Auto Combo-motoren er eksponert under `auto`-strategien; de andre er tilgjengelige for persisterte kombinasjoner.
 
-| Strategi            | Beskrivelse                                                                                                                                                                                                                   |
-| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Ordnet liste med første mål og eksplisitt prioritet                                                                                                                                                                           |
-| `weighted`          | Vektet tilfeldig valg basert på vekt per mål                                                                                                                                                                                  |
-| `round-robin`       | Gå gjennom målene i rekkefølge (satsvis; se nedenfor)                                                                                                                                                                         |
-| `context-relay`     | Overfør kontekst mellom mål (lange samtaler)                                                                                                                                                                                  |
-| `fill-first`        | Fyll kvoten til hvert mål før du går videre til neste                                                                                                                                                                         |
-| `p2c`               | Tilfeldig lastbalansering med Power-of-2-choices                                                                                                                                                                              |
-| `random`            | Uniformt tilfeldig valg                                                                                                                                                                                                       |
-| `least-used`        | Velg målet med lavest gjeldende belastning                                                                                                                                                                                    |
-| `cost-optimized`    | Minimer $ per forespørsel basert på katalogpriser                                                                                                                                                                             |
-| `reset-aware` ⭐    | Prioriter etter tidspunkt for kvotetilbakestilling — korte tilbakestillingsvinduer rangeres høyere                                                                                                                            |
-| `reset-window`      | Foretrekk mål der kvotevinduet tilbakestilles først                                                                                                                                                                           |
-| `headroom`          | Velg målet med størst gjenværende kvotemargin                                                                                                                                                                                 |
-| `strict-random`     | Tilfeldig uten deduplisering av gjentakelser                                                                                                                                                                                  |
-| `auto`              | Bruk Auto Combo-poengberegning (16 faktorer) — **anbefalt**                                                                                                                                                                   |
-| `lkgp`              | Siste kjente fungerende rute (låses til den sist vellykkede leverandøren, og faller deretter tilbake på regler)                                                                                                               |
-| `context-optimized` | Velg målet som passer best til gjeldende kontekststørrelse                                                                                                                                                                    |
-| `cache-optimized`   | Endre rekkefølgen på mål etter tilhørighet til ledetekstbufferen — tilkoblingen som mest sannsynlig allerede har denne forespørselens bufrede prefiks, prøves først (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Send forespørselen til et panel av modeller parallelt, og syntetiser deretter ett svar via en dommer (se nedenfor)                                                                                                            |
-| `pipeline`          | Kjør mål sekvensielt, og før utdataene fra hvert trinn inn som inndata til neste trinn; bare det endelige svaret returneres (#6396)                                                                                           |
+| Strategi            | Beskrivelse                                                                                                                                                                                                          |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Første-mål-ordnet liste med eksplisitt prioritet                                                                                                                                                                     |
+| `weighted`          | Vektet tilfeldig utvalg basert på vekt per mål                                                                                                                                                                       |
+| `round-robin`       | Roter gjennom mål i rekkefølge (puljebasert; se nedenfor)                                                                                                                                                            |
+| `context-relay`     | Send kontekst videre på tvers av mål (lange samtaler)                                                                                                                                                                |
+| `fill-first`        | Fyll opp hvert måls kvote før det gås videre til neste                                                                                                                                                               |
+| `p2c`               | Power-of-2-choices tilfeldig lastbalansering                                                                                                                                                                         |
+| `random`            | Ensartet tilfeldig utvalg                                                                                                                                                                                            |
+| `least-used`        | Velg målet med lavest gjeldende belastning                                                                                                                                                                           |
+| `cost-optimized`    | Minimer $ per forespørsel basert på katalogpriser                                                                                                                                                                    |
+| `reset-aware` ⭐    | Prioriter etter tidspunkt for kvotetilbakestilling — korte tilbakestillingsvinduer rangeres høyere                                                                                                                   |
+| `reset-window`      | Foretrekk mål der kvotevinduet tilbakestilles raskest                                                                                                                                                                |
+| `headroom`          | Velg målet med mest gjenværende kvotemargin                                                                                                                                                                          |
+| `strict-random`     | Tilfeldig uten deduplisering av gjentakelser                                                                                                                                                                         |
+| `auto`              | Bruk Auto Combo-poengberegning (16 faktorer) — **anbefalt**                                                                                                                                                          |
+| `lkgp`              | Last-Known-Good Path (låser til den siste vellykkede leverandøren, og faller deretter tilbake på regler)                                                                                                             |
+| `context-optimized` | Velg målet som passer best for gjeldende kontekststørrelse                                                                                                                                                           |
+| `cache-optimized`   | Omorganiser mål etter affinitet for prompt-mellomlagring — tilkoblingen som mest sannsynlig allerede har forespørselens hurtigbufrede prefiks prøves først (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Vifte ut til et panel av modeller parallelt, og syntetiser deretter ett svar via en dommer (se nedenfor)                                                                                                             |
+| `pipeline`          | Kjør mål sekvensielt, der utdata fra hvert trinn mates inn som inndata til neste trinn; kun det endelige svaret returneres (#6396)                                                                                   |
 
 ⭐ = Nytt i v3.8.0 · 🧬 = Nytt i v3.8.36
 
-### Semantikk for `weighted`
+### `weighted`-semantikk
 
 `weighted` er en **proporsjonal tilfeldig trekning per forespørsel**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ikke en utjevningsmekanisme:
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ikke en utjevner:
 
 - Hver forespørsel trekker **ett** trinn med sannsynligheten `weight / totalWeight`; de gjenværende trinnene
-  sorteres etter synkende vekt som reservekjede for den aktuelle forespørselen.
-- Et trinn med vekt `0` (eller uten angitt vekt) blir **aldri trukket** så lenge et annet trinn har en
-  vekt > 0 — det kan bare fungere som reserve etter at det trukne trinnet mislykkes. Bare når **alle**
+  rangeres etter synkende vekt som reservelenke (fallback chain) for den forespørselen.
+- Et trinn med vekt `0` (eller som mangler) blir **aldri trukket** så lenge et annet trinn har en
+  vekt > 0 — det kan bare fungere som en reserve etter at det utvalgte trinnet feiler. Kun når **alle**
   vekter er 0, blir utvalget uniformt.
-- Trinn der alle målene er utilgjengelige — leverandørens kretsbryter er `OPEN`, tilkoblingen er i
-  nedkjølingsperiode, modellen er sperret — fjernes fra trekningen før den utføres
-  (`open-sse/services/combo/targetResolution.ts`), slik at ett enkelt friskt trinn midlertidig kan
+- Trinn der alle mål er utilgjengelige — leverandørens kretsbryter (circuit breaker) er `OPEN`, tilkoblingen
+  er i nedkjøling (cooldown), modellutestengelse — fjernes fra trekningen før den finner sted
+  (`open-sse/services/combo/targetResolution.ts`), slik at et enkelt velfungerende trinn midlertidig kan
   vinne hver forespørsel.
-- `stickyWeightedLimit` (kombinasjonskonfigurasjon, standardverdi `1` = av) låser det trukne trinnet for det angitte antallet
-  påfølgende vellykkede kjøringer før en ny trekning.
+- `stickyWeightedLimit` (combo-konfigurasjon, standardverdi `1` = av) låser det utvalgte trinnet for så mange
+  påfølgende vellykkede forsøk før det trekkes på nytt.
 
-Bruk `round-robin` for streng rotasjon; like vekter med `weighted` gir statistisk — ikke
+For streng rotasjon, bruk `round-robin`; like vekter i `weighted` gir statistisk — ikke
 streng — balanse.
 
-### Agentbasert pipeline-modus
+### Agentisk pipeline-modus
 
-En totrinns `pipeline`-kombinasjon kan aktivere planlegger-/utførerruting med
+En to-trinns `pipeline`-kombinasjon kan velge ruting for planlegger/utfører (planner/executor) med
 `config.agenticOrchestration.enabled`. Det første målet håndterer planlegging og endelige svar;
-det andre målet sender ut verktøykall i klientens opprinnelige format. OmniRoute oppdager
-fortsettelser med verktøyresultater fra forespørselsprotokollen, spør planleggeren om det
-trengs en ny verktøyrunde, og gjør dynamisk enten utføreren eller planleggeren til det
-endelige klientrettede trinnet.
+det andre målet sender ut klient-opprinnelige verktøykall. OmniRoute oppdager fortsettelser
+av verktøyresultater fra forespørselsprotokollen, spør planleggeren om en ny verktøyrunde er
+nødvendig, og gjør dynamisk enten utføreren eller planleggeren til det klientsiden-rettede endelige
+trinnet.
+
+Valgfri `config.agenticOrchestration.contextCompaction` bruker et separat nyttelastbudsjett
+før hver utsendelse til planlegger eller utfører. Aktiver det eksplisitt:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+Dette er serialiserte JSON-tegnbudsjetter valgt av operatøren, ikke token-kontekstvinduer
+eller garanterte oppstrømsgrenser. Nøyaktige modell-ID-er overstyrer standarden.
+Over terskelen fjerner komprimeringen identiske verktøydefinisjoner, trimmer for store
+verktøybevis med et sammendrag, og fjerner gamle, fullstendige historikkgrupper mot målforholdet.
+Den beholder system-/utviklerinstruksjoner, den nyeste brukerforespørselen, den siste
+verktøyrunden inkludert parallelle kall/resultater, og Geminis innledende rutinginstruksjon.
+Toppnivåinstruksjoner og verktøyinnstillinger bevares. En utelatelsesmarkør registrerer
+fjernet historikk; dette er deterministisk trimming, ikke et semantisk sammendrag. Hvis den festede
+konteksten fortsatt overskrider budsjettet, returnerer forespørselen 413 før modellen kontaktes.
+Når komprimering er deaktivert eller under terskelen, sendes forespørselen uendret gjennom.
 
 ```json
 {
@@ -345,35 +373,34 @@ endelige klientrettede trinnet.
 }
 ```
 
-Utføreren kan sende ut flere uavhengige kall i ett svar. Avhengige kall
-håndteres i senere klientrunder med verktøyresultater, der planleggeren gjennomgår hvert resultat.
-`maxToolRounds` har standardverdien `8` og godtar `1`–`32`; når grensen er nådd, må planleggeren
-produsere det beste tilgjengelige endelige svaret. Interne planleggeravgjørelser bufres, mens
-det valgte klientrettede svaret beholder den opprinnelige strømmepreferansen.
+Utføreren kan sende ut flere uavhengige kall i ett svar. Avhengige kall håndteres
+i senere klientsvinger for verktøyresultater, hvor planleggeren går gjennom hvert resultat.
+`maxToolRounds` har som standard `8` og godtar `1`–`32`; når dette er nådd, må planleggeren
+produsere det beste tilgjengelige endelige svaret. Interne planleggerbeslutninger bufres, mens
+det valgte klientsiden-rettede svaret bevarer den opprinnelige strømmepreferansen.
 
-### Fast gruppering og kontoutvidelse for `round-robin`
+### `round-robin` klebrig batch og kontoekspansjon
 
-Round-robin er gruppert, ikke én forespørsel per trinn:
+Round-robin er samlet i puljer (batched), ikke én forespørsel per trinn:
 
 - `stickyRoundRobinLimit` (kombinasjonskonfigurasjon, deretter `comboStickyRoundRobinLimit`, deretter
-  `settings.stickyRoundRobinLimit`, standard **3**) beholder samme mål i dette antallet
-  påfølgende vellykkede kjøringer før det roteres. Sett overstyringen for kombinasjonen til `1` for
-  rotasjon per forespørsel. Kombinasjonsredigereren viser den gjeldende verdien og hvilket lag den kommer fra.
+  `settings.stickyRoundRobinLimit`, standard **3**) beholder samme mål for så mange
+  påfølgende vellykkede forsøk før rotering. Sett kombinasjonsoverstyringen til `1` for én-forespørsels
+  rotering. Kombinasjonsredigereren viser den gjeldende verdien og hvilket lag den kom fra.
 - `connectionAwareExpansion` (kombinasjonskonfigurasjon, deretter innstillinger, standard **false**) utvider
-  hvert trinn på leverandørnivå til mål per konto før rotasjon. Gruppe B-strategier
+  hvert trinn på leverandørnivå til mål per konto før rotering. Gruppe-B-strategier
   (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
   fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) beholder en visning på leverandørnivå til dette aktiveres. Kombinasjonsredigereren tilbyr
-  arv / på / av; arv bruker den globale standardverdien (av).
-- Ruting basert på lokalitet i ledetekstbufferen (`promptCacheAffinityEnabled`, standard **true**) endrer
-  rekkefølgen på festede tilkoblinger, slik at samsvarende buffernøkler blir værende på én konto. Dette har
-  forrang over round-robin- og vektet rotasjon på tvers av festede trinn per konto. Slå det av under
-  Innstillinger → Standardverdier for kombinasjoner hvis du trenger streng rotasjon. Det finnes ingen overstyring
-  per kombinasjon.
+  pipeline) beholder en visning på leverandørnivå inntil dette er slått på. Kombinasjonsredigereren eksponerer
+  inherit / on / off; inherit bruker den globale standarden (off).
+- Ruting etter prompt-hurtigbufferlokalitet (`promptCacheAffinityEnabled`, standard **true**) omorganiserer
+  festede tilkoblinger slik at samsvarende hurtigbuffernøkler forblir på én konto. Det har forrang over
+  round-robin og vektet rotering på tvers av festede trinn per konto. Slå det av under
+  Settings → Combo defaults hvis du trenger streng rotering. Det finnes ingen overstyring per kombinasjon.
 
-For rotasjon mellom flere kontoer på én modell bør du foretrekke **ett trinn med dynamisk konto** (tom
-`connectionId`, hele utvalget) med en fast grense på `1`, ikke tre festede `connectionId`-er.
-Festede trinn kombinert med affinitet samles på samme konto selv mens RR-telleren
+For fler-kontorotering på én modell, foretrekk **ett dynamisk-konto-trinn** (tom
+`connectionId`, hele utvalget) med klebrighetsgrense `1`, ikke tre festede `connectionId`-er.
+Festede trinn pluss affinitet faller sammen på den samme kontoen selv om RR-telleren
 øker.
 
 ## Fusjonsstrategi

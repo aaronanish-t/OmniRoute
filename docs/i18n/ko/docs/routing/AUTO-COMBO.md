@@ -4,6 +4,10 @@
 
 ---
 
+🌐 **Languages:** 🇺🇸 [English](../../../../routing/AUTO-COMBO.md) · 🇪🇹 [am](../../../am/docs/routing/AUTO-COMBO.md) · 🇸🇦 [ar](../../../ar/docs/routing/AUTO-COMBO.md) · 🇦🇿 [az](../../../az/docs/routing/AUTO-COMBO.md) · 🇧🇬 [bg](../../../bg/docs/routing/AUTO-COMBO.md) · 🇧🇩 [bn](../../../bn/docs/routing/AUTO-COMBO.md) · 🇧🇦 [bs](../../../bs/docs/routing/AUTO-COMBO.md) · 🇨🇿 [cs](../../../cs/docs/routing/AUTO-COMBO.md) · 🇩🇰 [da](../../../da/docs/routing/AUTO-COMBO.md) · 🇩🇪 [de](../../../de/docs/routing/AUTO-COMBO.md) · 🇬🇷 [el](../../../el/docs/routing/AUTO-COMBO.md) · 🇪🇸 [es](../../../es/docs/routing/AUTO-COMBO.md) · 🇪🇪 [et](../../../et/docs/routing/AUTO-COMBO.md) · 🇮🇷 [fa](../../../fa/docs/routing/AUTO-COMBO.md) · 🇫🇮 [fi](../../../fi/docs/routing/AUTO-COMBO.md) · 🇫🇷 [fr](../../../fr/docs/routing/AUTO-COMBO.md) · 🇮🇪 [ga](../../../ga/docs/routing/AUTO-COMBO.md) · 🇮🇳 [gu](../../../gu/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ha](../../../ha/docs/routing/AUTO-COMBO.md) · 🇮🇱 [he](../../../he/docs/routing/AUTO-COMBO.md) · 🇮🇳 [hi](../../../hi/docs/routing/AUTO-COMBO.md) · 🇭🇷 [hr](../../../hr/docs/routing/AUTO-COMBO.md) · 🇭🇺 [hu](../../../hu/docs/routing/AUTO-COMBO.md) · 🇦🇲 [hy](../../../hy/docs/routing/AUTO-COMBO.md) · 🇮🇩 [id](../../../id/docs/routing/AUTO-COMBO.md) · 🇳🇬 [ig](../../../ig/docs/routing/AUTO-COMBO.md) · 🇮🇹 [it](../../../it/docs/routing/AUTO-COMBO.md) · 🇯🇵 [ja](../../../ja/docs/routing/AUTO-COMBO.md) · 🇬🇪 [ka](../../../ka/docs/routing/AUTO-COMBO.md) · 🇰🇭 [km](../../../km/docs/routing/AUTO-COMBO.md) · 🇮🇳 [kn](../../../kn/docs/routing/AUTO-COMBO.md) · 🇱🇹 [lt](../../../lt/docs/routing/AUTO-COMBO.md) · 🇱🇻 [lv](../../../lv/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ml](../../../ml/docs/routing/AUTO-COMBO.md) · 🇮🇳 [mr](../../../mr/docs/routing/AUTO-COMBO.md) · 🇲🇾 [ms](../../../ms/docs/routing/AUTO-COMBO.md) · 🇲🇹 [mt](../../../mt/docs/routing/AUTO-COMBO.md) · 🇲🇲 [my](../../../my/docs/routing/AUTO-COMBO.md) · 🇳🇵 [ne](../../../ne/docs/routing/AUTO-COMBO.md) · 🇳🇱 [nl](../../../nl/docs/routing/AUTO-COMBO.md) · 🇳🇴 [no](../../../no/docs/routing/AUTO-COMBO.md) · 🇮🇳 [or](../../../or/docs/routing/AUTO-COMBO.md) · 🇮🇳 [pa](../../../pa/docs/routing/AUTO-COMBO.md) · 🇵🇭 [phi](../../../phi/docs/routing/AUTO-COMBO.md) · 🇵🇱 [pl](../../../pl/docs/routing/AUTO-COMBO.md) · 🇵🇹 [pt](../../../pt/docs/routing/AUTO-COMBO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/AUTO-COMBO.md) · 🇷🇴 [ro](../../../ro/docs/routing/AUTO-COMBO.md) · 🇷🇺 [ru](../../../ru/docs/routing/AUTO-COMBO.md) · 🇱🇰 [si](../../../si/docs/routing/AUTO-COMBO.md) · 🇸🇰 [sk](../../../sk/docs/routing/AUTO-COMBO.md) · 🇸🇮 [sl](../../../sl/docs/routing/AUTO-COMBO.md) · 🇷🇸 [sr](../../../sr/docs/routing/AUTO-COMBO.md) · 🇸🇪 [sv](../../../sv/docs/routing/AUTO-COMBO.md) · 🇰🇪 [sw](../../../sw/docs/routing/AUTO-COMBO.md) · 🇮🇳 [ta](../../../ta/docs/routing/AUTO-COMBO.md) · 🇮🇳 [te](../../../te/docs/routing/AUTO-COMBO.md) · 🇹🇭 [th](../../../th/docs/routing/AUTO-COMBO.md) · 🇹🇷 [tr](../../../tr/docs/routing/AUTO-COMBO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/AUTO-COMBO.md) · 🇵🇰 [ur](../../../ur/docs/routing/AUTO-COMBO.md) · 🇺🇿 [uz](../../../uz/docs/routing/AUTO-COMBO.md) · 🇻🇳 [vi](../../../vi/docs/routing/AUTO-COMBO.md) · 🇳🇬 [yo](../../../yo/docs/routing/AUTO-COMBO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/AUTO-COMBO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/AUTO-COMBO.md)
+
+---
+
 > **사용자용**: 빠르게 시작하고 싶으신가요? 간단한 설명과 예제는 [Auto-Combo 사용자 가이드](../getting-started/AUTO-COMBO-GUIDE.md)를 참조하세요.
 
 > 적응형 점수 계산과 무설정 자동 라우팅을 사용하는 자체 관리형 모델 체인
@@ -259,48 +263,69 @@ curl -sS http://localhost:20128/v1/chat/completions \
 
 ## 모든 라우팅 전략
 
-OmniRoute의 콤보 엔진은 **19가지 라우팅 전략**을 지원합니다(`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`에 선언됨). Auto Combo 엔진 자체는 `auto` 전략으로 제공되며, 나머지 전략은 저장된 콤보에서 사용할 수 있습니다.
+OmniRoute의 콤보 엔진은 **19가지 라우팅 전략**을 지원합니다(`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`에 선언됨). Auto Combo 엔진 자체는 `auto` 전략으로 제공되며, 그 외 전략들은 영구 저장된 콤보에서 사용할 수 있습니다.
 
-| 전략                | 설명                                                                                                                                                                                         |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | 명시적 우선순위가 지정된 첫 번째 대상 우선 순서 목록                                                                                                                                         |
-| `weighted`          | 대상별 가중치에 따른 가중 무작위 선택                                                                                                                                                        |
-| `round-robin`       | 순서대로 대상을 순환(배치 방식, 아래 참조)                                                                                                                                                   |
-| `context-relay`     | 대상 간에 컨텍스트를 전달(긴 대화)                                                                                                                                                           |
-| `fill-first`        | 다음 대상으로 이동하기 전에 각 대상의 할당량을 먼저 소진                                                                                                                                     |
-| `p2c`               | 2개 선택지 기반 무작위 부하 분산                                                                                                                                                             |
-| `random`            | 균등 무작위 선택                                                                                                                                                                             |
-| `least-used`        | 현재 부하가 가장 낮은 대상 선택                                                                                                                                                              |
-| `cost-optimized`    | 카탈로그 가격을 기준으로 요청당 비용 최소화                                                                                                                                                  |
-| `reset-aware` ⭐    | 할당량 재설정 시간을 기준으로 우선순위 지정 — 재설정 주기가 짧을수록 높은 순위                                                                                                               |
-| `reset-window`      | 할당량 기간이 가장 빨리 재설정되는 대상 선호                                                                                                                                                 |
-| `headroom`          | 남은 할당량 여유가 가장 큰 대상 선택                                                                                                                                                         |
-| `strict-random`     | 반복 항목을 중복 제거하지 않는 무작위 선택                                                                                                                                                   |
-| `auto`              | Auto Combo 점수 산정(16개 요소) 사용 — **권장**                                                                                                                                              |
-| `lkgp`              | 마지막으로 정상 작동한 경로(마지막으로 성공한 제공자에 고정한 후 규칙에 따라 대체 경로 사용)                                                                                                 |
-| `context-optimized` | 현재 컨텍스트 크기에 가장 적합한 대상 선택                                                                                                                                                   |
-| `cache-optimized`   | 프롬프트 캐시 친화도를 기준으로 대상 순서 재정렬 — 이 요청의 캐시된 접두사를 이미 보유하고 있을 가능성이 가장 높은 연결을 먼저 시도(`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | 여러 모델 패널에 병렬로 요청한 다음 판정 모델을 통해 하나의 답변으로 종합(아래 참조)                                                                                                         |
-| `pipeline`          | 대상을 순차적으로 실행하며 각 단계의 출력을 다음 단계의 입력으로 전달하고, 최종 답변만 반환(#6396)                                                                                           |
+| 전략                | 설명                                                                                                                                                                                                       |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | 명시적 우선순위가 지정된 첫 번째 타깃 정렬 목록                                                                                                                                                            |
+| `weighted`          | 타깃별 가중치에 따른 가중치 기반 무작위 선택                                                                                                                                                               |
+| `round-robin`       | 순서대로 타깃 순환 (배치 처리 방식; 아래 참조)                                                                                                                                                             |
+| `context-relay`     | 타깃 간 컨텍스트 전달 (긴 대화용)                                                                                                                                                                          |
+| `fill-first`        | 다음 타깃으로 넘어가기 전에 각 타깃의 쿼터를 먼저 채움                                                                                                                                                     |
+| `p2c`               | Power-of-2-choices 무작위 로드 밸런싱                                                                                                                                                                      |
+| `random`            | 균등 무작위 선택                                                                                                                                                                                           |
+| `least-used`        | 현재 부하가 가장 낮은 타깃 선택                                                                                                                                                                            |
+| `cost-optimized`    | 카탈로그 가격 책정을 기반으로 요청당 비용($) 최소화                                                                                                                                                        |
+| `reset-aware` ⭐    | 쿼터 리셋 시간을 기준으로 우선순위 지정 — 리셋 윈도우가 짧을수록 높은 순위 부여                                                                                                                            |
+| `reset-window`      | 쿼터 윈도우가 가장 빨리 리셋되는 타깃 선호                                                                                                                                                                 |
+| `headroom`          | 남은 쿼터 여유분(headroom)이 가장 많은 타깃 선택                                                                                                                                                           |
+| `strict-random`     | 중복 제거 없는 무작위 선택                                                                                                                                                                                 |
+| `auto`              | Auto Combo 점수 계산(16가지 요소) 사용 — **권장됨**                                                                                                                                                        |
+| `lkgp`              | Last-Known-Good Path (가장 최근에 성공한 제공자에 고정 후, 실패 시 규칙으로 폴백)                                                                                                                          |
+| `context-optimized` | 현재 컨텍스트 크기에 가장 적합한 타깃 선택                                                                                                                                                                 |
+| `cache-optimized`   | 프롬프트 캐시 친화도(prompt-cache affinity)에 따라 타깃 재정렬 — 이 요청의 캐시된 접두사를 이미 보유하고 있을 가능성이 가장 높은 연결을 먼저 시도(`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | 여러 모델 패널에 병렬로 팬아웃(fan out)한 후, 판정 모델(judge)을 통해 하나의 답변으로 합성 (아래 참조)                                                                                                     |
+| `pipeline`          | 타깃을 순차적으로 실행하며 각 단계의 출력을 다음 단계의 입력으로 전달; 최종 답변만 반환됨 (#6396)                                                                                                          |
 
-⭐ = v3.8.0의 새로운 기능 · 🧬 = v3.8.36의 새로운 기능
+⭐ = v3.8.0 신규 기능 · 🧬 = v3.8.36 신규 기능
 
 ### `weighted` 동작 방식
 
-`weighted`는 균등화 방식이 아니라 **요청별 비례 무작위 추첨** 방식입니다
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`).
+`weighted`는 균등 분배기가 아니라 **요청당 비례 무작위 추첨**입니다
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`):
 
-- 각 요청은 `weight / totalWeight` 확률로 **하나의** 단계를 추첨하며, 나머지 단계는 해당 요청의 대체 경로 체인으로 사용되도록 가중치 내림차순으로 정렬됩니다.
-- 가중치가 `0`이거나 지정되지 않은 단계는 다른 단계 중 하나라도 가중치가 0보다 크면 **절대 추첨되지 않습니다**. 이 단계는 추첨된 단계가 실패한 후에만 대체 경로로 사용될 수 있습니다. **모든** 가중치가 0인 경우에만 균등 선택으로 전환됩니다.
-- 모든 대상이 사용할 수 없는 단계(제공자 회로 차단기 `OPEN`, 연결 쿨다운, 모델 잠금)는 추첨 전에 제거됩니다
-  (`open-sse/services/combo/targetResolution.ts`). 따라서 정상 상태인 단계가 하나뿐이면 일시적으로 모든 요청에 선택될 수 있습니다.
-- `stickyWeightedLimit`(콤보 구성, 기본값 `1` = 비활성화)은 다시 추첨하기 전에 지정된 횟수만큼 연속으로 성공할 때까지 추첨된 단계를 고정합니다.
+- 각 요청은 `weight / totalWeight` 확률로 **하나**의 스텝을 추첨합니다. 나머지 스텝들은
+  해당 요청의 폴백 체인 역할을 하도록 가중치 내림차순으로 정렬됩니다.
+- 가중치가 `0`이거나 누락된 스텝은 가중치가 0보다 큰 다른 스텝이 있는 동안에는 **절대 추첨되지 않으며**,
+  추첨된 스텝이 실패한 후의 폴백으로만 동작할 수 있습니다. **모든** 가중치가 0일 때만
+  균등 선택으로 전환됩니다.
+- 모든 타깃을 사용할 수 없는 스텝(제공자 서킷 브레이커 `OPEN`, 연결 쿨다운,
+  모델 락아웃 등)은 추첨이 진행되기 전에 추첨 대상에서 제외되므로
+  (`open-sse/services/combo/targetResolution.ts`), 단 하나의 정상 스텝이 일시적으로
+  모든 요청을 가져갈 수 있습니다.
+- `stickyWeightedLimit` (콤보 설정, 기본값 `1` = 비활성화)은 다시 추첨하기 전까지
+  해당 횟수만큼 연속으로 성공하는 동안 추첨된 스텝을 고정합니다.
 
-엄격한 순환 방식을 사용하려면 `round-robin`을 사용하세요. `weighted`에 동일한 가중치를 지정하면 엄격한 균형이 아닌 통계적 균형만 제공됩니다.
+엄격한 순환이 필요한 경우 `round-robin`을 사용하세요. `weighted`에서 동일한 가중치를 부여하면
+엄격한 균등 분배가 아닌 통계적 균등 분배가 이루어집니다.
 
-### 에이전트형 파이프라인 모드
+### 에이전틱 파이프라인 모드
 
-2단계 `pipeline` 콤보는 `config.agenticOrchestration.enabled`를 통해 플래너/실행기 라우팅을 활성화할 수 있습니다. 첫 번째 대상은 계획 수립과 최종 답변을 담당하고, 두 번째 대상은 클라이언트 네이티브 도구 호출을 생성합니다. OmniRoute는 요청 프로토콜에서 도구 결과 후속 요청을 감지하고, 플래너에게 추가 도구 라운드가 필요한지 확인한 후, 실행기 또는 플래너를 클라이언트에 표시되는 최종 단계로 동적으로 지정합니다.
+2단계 `pipeline` 콤보는 `config.agenticOrchestration.enabled`를 통해 플래너(planner)/실행기(executor) 라우팅을 선택할 수 있습니다. 첫 번째 타깃은 계획 수립 및 최종 답변 생성을 담당하며, 두 번째 타깃은 클라이언트 네이티브 도구 호출을 내보냅니다. OmniRoute는 요청 프로토콜로부터 도구 결과 연속성을 감지하고, 플래너에게 추가 도구 라운드가 필요한지 묻고, 실행기 또는 플래너 중 하나를 클라이언트에 직접 전달되는 최종 단계로 동적으로 설정합니다.
+
+선택적 `config.agenticOrchestration.contextCompaction`은 각 플래너 또는 실행기 디스패치 전에 별도의 페이로드 예산을 적용합니다. 명시적으로 활성화해야 합니다:
+
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+이 값들은 토큰 컨텍스트 창이나 보장된 업스트림 한도가 아니며, 운영자가 지정한 직렬화된 JSON 문자 수 예산입니다. 정확한 모델 ID는 기본값을 덮어씁니다. 임계값을 초과하면 압축(compaction) 기능이 동일한 도구 정의를 제거하고, 크기가 초과된 도구 근거 데이터를 요약(digest)으로 잘라내며, 목표 비율을 향해 오래된 전체 히스토리 그룹을 제거합니다. 시스템/개발자 지침, 최신 사용자 요청, 병렬 호출/결과를 포함한 마지막 도구 라운드 및 Gemini의 선행 라우팅 지침은 유지됩니다. 최상위 지침과 도구 설정도 보존됩니다. 생략 표시기가 제거된 기록을 기록합니다. 이는 시맨틱 요약이 아닌 결정론적 트리밍입니다. 고정된 컨텍스트가 여전히 예산을 초과하는 경우, 모델에 요청을 전달하기 전에 413을 반환합니다. 압축이 비활성화되어 있거나 임계값 미만인 경우 요청은 변경 없이 그대로 통과됩니다.
 
 ```json
 {
@@ -312,17 +337,17 @@ OmniRoute의 콤보 엔진은 **19가지 라우팅 전략**을 지원합니다(`
 }
 ```
 
-실행기는 하나의 응답에서 서로 독립적인 여러 호출을 생성할 수 있습니다. 종속 호출은 이후 클라이언트 도구 결과 턴에서 처리되며, 플래너가 모든 결과를 검토합니다. `maxToolRounds`의 기본값은 `8`이고 `1`–`32`를 허용합니다. 한도에 도달하면 플래너는 현재 제공 가능한 최선의 최종 답변을 생성해야 합니다. 내부 플래너 결정은 버퍼링되며, 선택된 클라이언트 대상 응답은 원래의 스트리밍 설정을 유지합니다.
+실행기는 단일 응답에서 여러 개의 독립적인 호출을 내보낼 수 있습니다. 종속적인 호출은 이후의 클라이언트 도구 결과 턴에서 처리되며, 플래너가 모든 결과를 검토합니다. `maxToolRounds`의 기본값은 `8`이며 `1`–`32` 범위를 허용합니다. 이 값에 도달하면 플래너는 사용 가능한 최선의 최종 답변을 생성해야 합니다. 내부 플래너 결정은 버퍼링되는 반면, 선택된 클라이언트 대면 응답은 원래의 스트리밍 설정을 유지합니다.
 
-### `round-robin` 고정 배치 및 계정 확장
+### `round-robin` 스티키 배치 및 계정 확장
 
-라운드 로빈은 요청마다 한 단계씩 진행되는 방식이 아니라 배치 방식으로 작동합니다.
+라운드 로빈(Round-robin)은 단계당 단일 요청 방식이 아닌 배치 방식으로 동작합니다:
 
-- `stickyRoundRobinLimit`(콤보 설정, 그다음 `comboStickyRoundRobinLimit`, 그다음 `settings.stickyRoundRobinLimit`, 기본값 **3**)는 지정된 횟수만큼 연속으로 성공할 때까지 동일한 대상을 유지한 후 다음 대상으로 순환합니다. 요청마다 순환하려면 콤보 재정의 값을 `1`로 설정합니다. 콤보 편집기에는 유효한 값과 해당 값이 적용된 계층이 표시됩니다.
-- `connectionAwareExpansion`(콤보 설정, 그다음 전역 설정, 기본값 **false**)은 순환 전에 각 제공자 수준 단계를 계정별 대상으로 확장합니다. 그룹 B 전략(priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline)은 이 옵션이 활성화될 때까지 제공자 수준 보기를 유지합니다. 콤보 편집기는 상속 / 켜기 / 끄기 옵션을 제공하며, 상속은 전역 기본값(꺼짐)을 사용합니다.
-- 프롬프트 캐시 지역성 라우팅(`promptCacheAffinityEnabled`, 기본값 **true**)은 일치하는 캐시 키가 하나의 계정에 유지되도록 고정된 연결의 순서를 재정렬합니다. 이는 고정된 계정별 단계 전반의 라운드 로빈 및 가중치 기반 순환보다 우선합니다. 엄격한 순환이 필요하면 Settings → Combo defaults에서 이 옵션을 끄십시오. 콤보별 재정의는 제공되지 않습니다.
+- `stickyRoundRobinLimit` (콤보 설정, 그 다음 `comboStickyRoundRobinLimit`, 그 다음 `settings.stickyRoundRobinLimit` 순으로 적용, 기본값 **3**)은 교체(rotate)되기 전까지 해당 횟수만큼 연속으로 성공하는 동안 동일한 타깃을 유지합니다. 요청당 1회 회전을 원할 경우 콤보 오버라이드를 `1`로 설정하십시오. 콤보 편집기는 유효한 값과 해당 값이 어떤 레이어에서 적용되었는지 표시합니다.
+- `connectionAwareExpansion` (콤보 설정, 그 다음 설정 순으로 적용, 기본값 **false**)은 회전 전에 각 제공자(provider) 수준 단계를 계정별 타깃으로 확장합니다. 그룹 B 전략(priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline)은 이 옵션이 켜질 때까지 제공자 수준의 뷰를 유지합니다. 콤보 편집기는 inherit / on / off 옵션을 제공하며, inherit는 전역 기본값(off)을 사용합니다.
+- 프롬프트 캐시 로컬리티 라우팅(`promptCacheAffinityEnabled`, 기본값 **true**)은 일치하는 캐시 키가 하나의 계정에 유지되도록 고정된 연결의 순서를 재정렬합니다. 이는 고정된 계정별 단계 전반에서 라운드 로빈 및 가중치 기반 회전보다 우선 적용됩니다. 엄격한 회전이 필요한 경우 Settings → Combo defaults에서 이 옵션을 끄십시오. 콤보별 오버라이드는 제공되지 않습니다.
 
-하나의 모델에서 여러 계정을 순환하려면, 고정된 `connectionId` 세 개 대신 고정 한도가 `1`인 **단일 동적 계정 단계**(빈 `connectionId`, 전체 풀)를 사용하는 것이 좋습니다. 고정된 단계와 선호도 기능을 함께 사용하면 RR 카운터가 증가하더라도 동일한 계정으로 집중됩니다.
+단일 모델에서 다중 계정 회전을 구현할 때는 고정된 세 개의 `connectionId`를 사용하는 대신, 스티키 제한이 `1`로 설정된 **단일 동적 계정 단계**(비어 있는 `connectionId`, 전체 풀)를 사용하는 것이 좋습니다. 고정된 단계에 친화성(affinity)이 더해지면 RR 카운터가 증가하더라도 동일한 계정으로 수렴하게 됩니다.
 
 ## Fusion 전략
 

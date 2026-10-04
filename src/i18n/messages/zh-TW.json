@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "隱藏側邊欄專案",
     "sidebarVisibilityDesc": "可以隱藏任意側邊欄導航項，以減少視覺負擔，但不會停用任何功能",
     "sidebarVisibilityHint": "當某個側邊欄分組中的所有專案都被隱藏時，該分組會自動隱藏",
+    "sidebarSectionShow": "__MISSING__:Show all items in this section",
+    "sidebarSectionHide": "__MISSING__:Hide all items in this section",
     "presetAll": "全部",
     "presetAllDesc": "顯示所有項目",
     "presetEssentials": "基本項目",

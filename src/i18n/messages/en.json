@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "Hide sidebar items",
     "sidebarVisibilityDesc": "Hide any sidebar navigation entry to reduce visual clutter without disabling any features",
     "sidebarVisibilityHint": "Any sidebar section is hidden automatically when all of its entries are hidden",
+    "sidebarSectionShow": "Show all items in this section",
+    "sidebarSectionHide": "Hide all items in this section",
     "presetAll": "All",
     "presetAllDesc": "Show everything",
     "presetEssentials": "Essentials",

@@ -154,6 +154,68 @@ export function getSectionItems(
   );
 }
 
+// ─── Section master toggle ────────────────────────────────────────────────────
+
+/**
+ * Items that must always remain visible (safety guard). Shared by the settings
+ * UI so the item-level and section-level toggles agree on what can be hidden.
+ */
+export const PROTECTED_SIDEBAR_ITEM_IDS: ReadonlySet<SidebarItemId> = new Set<SidebarItemId>([
+  "proxy",
+  "settings-sidebar",
+]);
+
+/**
+ * Ids of a section's items the master toggle may hide: every hideable item,
+ * flattened across groups, minus the protected ones.
+ */
+export function getSectionToggleableItemIds(
+  section: SidebarSectionDefinition | { children: readonly SidebarSectionChild[] }
+): HideableSidebarItemId[] {
+  return getSectionItems(section)
+    .map((item) => item.id)
+    .filter(
+      (id): id is HideableSidebarItemId =>
+        HIDEABLE_SIDEBAR_ITEM_IDS.includes(id as HideableSidebarItemId) &&
+        !PROTECTED_SIDEBAR_ITEM_IDS.has(id as SidebarItemId)
+    );
+}
+
+/**
+ * A section counts as visible while at least one of its toggleable items is
+ * visible. Sections with nothing toggleable are always visible.
+ */
+export function isSidebarSectionVisible(
+  section: SidebarSectionDefinition | { children: readonly SidebarSectionChild[] },
+  hiddenItems: readonly HideableSidebarItemId[]
+): boolean {
+  const toggleable = getSectionToggleableItemIds(section);
+  if (toggleable.length === 0) return true;
+  const hidden = new Set(hiddenItems);
+  return toggleable.some((id) => !hidden.has(id));
+}
+
+/**
+ * Show/hide a whole section in one click. `show: false` adds every toggleable
+ * item of the section to the hidden list; `show: true` removes exactly those
+ * ids — hidden items of other sections are preserved, and protected items are
+ * never added.
+ */
+export function toggleSidebarSectionHidden(
+  hiddenItems: readonly HideableSidebarItemId[],
+  section: SidebarSectionDefinition | { children: readonly SidebarSectionChild[] },
+  show: boolean
+): HideableSidebarItemId[] {
+  const toggleable = new Set(getSectionToggleableItemIds(section));
+  const next = hiddenItems.filter((id) => !toggleable.has(id));
+  if (!show) {
+    for (const id of toggleable) {
+      next.push(id);
+    }
+  }
+  return next;
+}
+
 const RADAR_ADMIN_ITEM: SidebarItemDefinition = {
   id: "radar-admin",
   href: "",

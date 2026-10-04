@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "サイドバー項目を非表示",
     "sidebarVisibilityDesc": "Hide any sidebar navigation entry to reduce visual clutter.",
     "sidebarVisibilityHint": "Any sidebar section is hidden automatically when a...",
+    "sidebarSectionShow": "__MISSING__:Show all items in this section",
+    "sidebarSectionHide": "__MISSING__:Hide all items in this section",
     "presetAll": "すべて",
     "presetAllDesc": "すべて表示",
     "presetEssentials": "基本",

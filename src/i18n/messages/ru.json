@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "Скрывать элементы боковой панели",
     "sidebarVisibilityDesc": "Скрывайте любые элементы навигации боковой панели, чтобы уменьшить визуальный шум.",
     "sidebarVisibilityHint": "Любой раздел боковой панели скрывается автоматически, когда...",
+    "sidebarSectionShow": "__MISSING__:Show all items in this section",
+    "sidebarSectionHide": "__MISSING__:Hide all items in this section",
     "presetAll": "Все",
     "presetAllDesc": "Показать всё",
     "presetEssentials": "Основное",

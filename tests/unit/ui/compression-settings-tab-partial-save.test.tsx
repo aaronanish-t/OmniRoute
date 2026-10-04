@@ -83,7 +83,8 @@ const PACKS = [
 ];
 
 // Stands in for the compression settings route. Like updateCompressionSettings, a PUT
-// overwrites every key in its body. /api/context/caveman/config re-exports the same handler.
+// overwrites every key in its body, except that it merges a partial cavemanOutputMode into
+// the stored one. /api/context/caveman/config re-exports the same handler.
 function startServer(failPut: (body: Settings) => boolean = () => false) {
   let stored: Settings = JSON.parse(JSON.stringify(STORED));
   let readsFail = false;
@@ -103,7 +104,14 @@ function startServer(failPut: (body: Settings) => boolean = () => false) {
         const body = JSON.parse(String(init.body)) as Settings;
         puts.push(body);
         if (failPut(body)) return respond({ error: "Save failed" }, 500);
-        stored = { ...stored, ...body };
+        const outputMode = body.cavemanOutputMode as Settings | undefined;
+        stored = {
+          ...stored,
+          ...body,
+          ...(outputMode && {
+            cavemanOutputMode: { ...(stored.cavemanOutputMode as Settings), ...outputMode },
+          }),
+        };
         return respond(stored);
       }
       if (pathname === "/api/compression/rules") return respond({ rules: [] });
@@ -222,6 +230,8 @@ describe("CompressionSettingsTab saves only what changed", () => {
       fireEvent.click(screen.getByLabelText("autoClarity"));
       await settle();
 
+      // The page names only the field it changes, and the store merges it into its row.
+      expect(server.puts.at(-1)).toEqual({ cavemanOutputMode: { autoClarity: false } });
       expect(server.stored.cavemanOutputMode).toEqual({
         enabled: false,
         intensity: "ultra",
@@ -288,20 +298,42 @@ describe("CompressionSettingsTab saves only what changed", () => {
   );
 
   it(
-    "sends no Auto-Clarity save when the caveman page cannot re-read the settings row",
+    "keeps English when the caveman page turns another pack off",
     { timeout: 30_000 },
     async () => {
       const server = startServer();
+      server.write({
+        languageConfig: {
+          enabled: true,
+          defaultLanguage: "en",
+          autoDetect: false,
+          enabledPacks: ["en", "es", "fr"],
+        },
+      });
       render(<CavemanContextPageClient />);
       await settle();
-      server.failReads();
 
-      const autoClarity = screen.getByLabelText("autoClarity") as HTMLInputElement;
-      fireEvent.click(autoClarity);
+      fireEvent.click(screen.getByLabelText("es - rulesCount"));
+      await settle();
+
+      expect(server.stored.languageConfig).toMatchObject({ enabledPacks: ["en", "fr"] });
+    }
+  );
+
+  it(
+    "sends no language save when the caveman page cannot read the settings row",
+    { timeout: 30_000 },
+    async () => {
+      const server = startServer();
+      server.failReads();
+      render(<CavemanContextPageClient />);
+      await settle();
+
+      // The page shows its built-in defaults; a save built from them would overwrite the row.
+      fireEvent.click(screen.getByLabelText("autoDetect"));
       await settle();
 
       expect(server.puts).toEqual([]);
-      expect(autoClarity.checked).toBe(true);
     }
   );
 

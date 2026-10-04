@@ -41,6 +41,12 @@ type CompressionSettings = {
   cavemanConfig?: InputModeConfig & Record<string, unknown>;
 };
 
+// What a save sends. The store merges a partial cavemanOutputMode into its row.
+type SettingsPatch = {
+  languageConfig?: LanguageConfig;
+  cavemanOutputMode?: Partial<OutputModeConfig>;
+};
+
 type LanguagePack = { language: string; ruleCount: number; categories?: string[] };
 
 function formatNumber(value: number | undefined): string {
@@ -87,22 +93,29 @@ export default function CavemanContextPageClient() {
   };
   const masterEnabled = settings?.enabled ?? false;
 
-  // The server stores each nested settings object as one row, so a save carries the whole
-  // object. Each save builds it from the server's current row, not this page's copy, so a
-  // field saved elsewhere since the page loaded is not written back. No row, no save.
+  // A save sends the keys it names. The store merges a partial cavemanOutputMode into its row
+  // but replaces languageConfig whole, so a language save is built from the server's current
+  // row, not this page's copy, and a change saved elsewhere since the page loaded is not
+  // written back. A built save with no row sends nothing.
   const saveSettings = async (
-    build: (current: CompressionSettings) => Partial<CompressionSettings>
+    patch: SettingsPatch | ((current: CompressionSettings) => SettingsPatch)
   ) => {
     setSaving(true);
     try {
-      const current: CompressionSettings | null = await fetch("/api/context/caveman/config")
-        .then((res) => (res.ok ? res.json() : null))
-        .catch(() => null);
-      if (!current) return;
+      let body: SettingsPatch;
+      if (typeof patch === "function") {
+        const current: CompressionSettings | null = await fetch("/api/context/caveman/config")
+          .then((res) => (res.ok ? res.json() : null))
+          .catch(() => null);
+        if (!current) return;
+        body = patch(current);
+      } else {
+        body = patch;
+      }
       const res = await fetch("/api/context/caveman/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(build(current)),
+        body: JSON.stringify(body),
       });
       if (res.ok) setSettings(await res.json());
     } finally {
@@ -115,7 +128,7 @@ export default function CavemanContextPageClient() {
   };
 
   const updateOutputMode = (patch: Partial<OutputModeConfig>) => {
-    saveSettings((current) => ({ cavemanOutputMode: { ...current.cavemanOutputMode, ...patch } }));
+    saveSettings({ cavemanOutputMode: patch });
   };
 
   const togglePack = (language: string, enabled: boolean) => {
@@ -123,7 +136,7 @@ export default function CavemanContextPageClient() {
       const packs = current.languageConfig?.enabledPacks ?? [];
       const enabledPacks = enabled
         ? [...new Set([...packs, language])]
-        : packs.filter((pack) => pack !== language && pack !== "en");
+        : packs.filter((pack) => pack !== language);
       return { languageConfig: { ...current.languageConfig, enabledPacks } };
     });
   };

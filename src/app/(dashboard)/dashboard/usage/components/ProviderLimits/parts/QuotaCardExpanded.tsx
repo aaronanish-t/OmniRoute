@@ -25,6 +25,9 @@ import {
   hasFixedQuotaOrder,
   hasCanonicalWindowOrder,
   sortQuotasByWindow,
+  computeAntigravityHeadline,
+  isAntigravityHeadlineProvider,
+  type AntigravityHeadline,
 } from "../quotaParsing";
 import KiloPassMeter from "./KiloPassMeter";
 
@@ -132,6 +135,53 @@ export function shouldShowLoadingPlaceholder(
   message?: string | null
 ): boolean {
   return loading && quotaCount === 0 && !message;
+}
+
+/**
+ * LimitBar-style headline bar: the tightest quota window of an Antigravity/agy
+ * account as one prominent used-% meter (percentage-based — Google upstream
+ * reports no absolute limit, only remainingFraction).
+ */
+function AntigravityHeadlineBar({ headline }: { headline: AntigravityHeadline }) {
+  const t = useTranslations("usage");
+  const colors = getBarColor(headline.remainingPct);
+  const cd = formatCountdown(headline.resetAt);
+  const label = headline.quota?.displayName || formatQuotaLabel(String(headline.quota?.name ?? ""));
+  const usedText = headline.usedPct.toFixed(1);
+  const leftText = headline.remainingPct.toFixed(1);
+
+  return (
+    <div className="my-1 flex flex-col gap-1.5 rounded-lg border border-border/60 bg-bg-subtle/60 px-2.5 py-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-1.5 text-[12px] font-semibold leading-none text-text-main">
+          <span
+            className="material-symbols-outlined text-[15px] leading-none"
+            style={{ color: colors.text }}
+          >
+            speed
+          </span>
+          <span className="truncate">{label}</span>
+        </span>
+        <span
+          className="shrink-0 text-[13px] font-bold leading-none tabular-nums"
+          style={{ color: colors.text }}
+        >
+          {translateUsageOrFallback(t, "percentUsed", `${usedText}% used`, { pct: usedText })}
+        </span>
+      </div>
+      <QuotaMiniBar percent={headline.remainingPct} size="sm" />
+      <div className="flex items-center justify-between gap-2 text-[10px] leading-none text-text-muted tabular-nums">
+        <span>
+          {translateUsageOrFallback(t, "percentLeft", `${leftText}% left`, { pct: leftText })}
+        </span>
+        {cd ? (
+          <span>
+            ⏱ {t("resetsIn")} {cd}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 interface Props {
@@ -360,6 +410,12 @@ export default function QuotaCardExpanded({
   // the derived meter values while balance/renewal metadata render below it.
   const kiloPassRow = providerId === "kilocode" ? findKiloPassQuotaRow(sortedQuotas) : null;
 
+  // LimitBar-style headline (Antigravity/agy only): tightest window as one used-% bar.
+  const headline = useMemo(
+    () => (isAntigravityHeadlineProvider(providerId) ? computeAntigravityHeadline(quotas) : null),
+    [providerId, quotas]
+  );
+
   const refreshedLabel = refreshedAt
     ? new Date(refreshedAt).toLocaleTimeString([], {
         hour: "2-digit",
@@ -391,6 +447,7 @@ export default function QuotaCardExpanded({
         <div className="text-[11px] text-text-muted italic">{t("noQuotaData")}</div>
       ) : (
         <div className="flex flex-col divide-y divide-border/40">
+          {headline && <AntigravityHeadlineBar headline={headline} />}
           {visibleQuotas.map((q, i) => (
             <QuotaDetailRow
               key={`${q.name}-${q.modelKey ?? ""}-${i}`}

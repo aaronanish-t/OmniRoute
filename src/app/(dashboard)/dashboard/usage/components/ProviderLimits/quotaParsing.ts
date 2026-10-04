@@ -1,6 +1,7 @@
 import { getModelsByProviderId } from "@omniroute/open-sse/config/providerModels.ts";
 import { getProviderConnectionFamilyIds } from "@/shared/constants/providers";
 import { safePercentage } from "@/shared/utils/formatting";
+import { matchesSearch } from "@/shared/utils/turkishText";
 
 const GLM_QUOTA_ORDER: Record<string, number> = { session: 0, weekly: 1, mcp_monthly: 2 };
 const CODEX_QUOTA_ORDER: Record<string, number> = {
@@ -219,6 +220,206 @@ function parseAntigravity(data: any) {
   return quotaEntries(data)
     .map(([modelKey, quota]) => parseAntigravityQuota(modelKey, quota))
     .filter(Boolean);
+}
+
+/**
+ * LimitBar-style headline (ported from the standalone LimitBar Flutter app):
+ * the tightest window — lowest remaining percentage — across the account's
+ * quota rows, rendered as one prominent used-% bar at the top of the
+ * Antigravity card. Google reports only `remainingFraction` (no absolute
+ * limit), so the headline is percentage-based exactly like LimitBar's.
+ */
+export interface AntigravityHeadline {
+  /** The tightest quota row; the caller renders its label via displayName/formatQuotaLabel. */
+  quota: any;
+  /** Remaining percentage (0-100) of the tightest row. */
+  remainingPct: number;
+  /** Used percentage (100 - remaining), like LimitBar's usedPct. */
+  usedPct: number;
+  /** Reset timestamp of the tightest row, when upstream reported one. */
+  resetAt: string | null;
+}
+
+const ANTIGRAVITY_HEADLINE_PROVIDERS = new Set(["antigravity", "agy"]);
+
+export function isAntigravityHeadlineProvider(providerId: string | undefined): boolean {
+  return ANTIGRAVITY_HEADLINE_PROVIDERS.has(String(providerId || "").toLowerCase());
+}
+
+function headlineRemainingPct(q: any): number | null {
+  if (q?.unlimited) return 100;
+  const raw = Number(q?.remainingPercentage);
+  if (Number.isFinite(raw)) return Math.max(0, Math.min(100, raw));
+  const total = Number(q?.total || 0);
+  if (total > 0) {
+    const used = Number(q?.used || 0);
+    return Math.max(0, Math.min(100, ((total - used) / total) * 100));
+  }
+  return null;
+}
+
+export function computeAntigravityHeadline(quotas: any): AntigravityHeadline | null {
+  if (!Array.isArray(quotas) || quotas.length === 0) return null;
+  const scored = (quotas.filter((q: any) => q && !q.isCredits && !q.isResetCredits) as any[])
+    .map((q) => ({ q, pct: headlineRemainingPct(q) }))
+    .filter((entry): entry is { q: any; pct: number } => entry.pct !== null);
+  if (scored.length === 0) return null;
+
+  // Window rows (gemini_weekly / claude_gpt_weekly) are the summary view, like
+  // LimitBar's retrieveUserQuotaSummary windows; prefer them for the headline.
+  // Per-model rows are the fallback when the weekly fetch returned nothing.
+  const windows = scored.filter(({ q }) => quotaWindowRank(q.name) !== null);
+  const pool = windows.length > 0 ? windows : scored;
+
+  let tightest = pool[0];
+  for (const entry of pool) {
+    if (entry.pct < tightest.pct) tightest = entry;
+  }
+
+  return {
+    quota: tightest.q,
+    remainingPct: tightest.pct,
+    usedPct: Math.max(0, 100 - tightest.pct),
+    resetAt: typeof tightest.q?.resetAt === "string" ? tightest.q.resetAt : null,
+  };
+}
+
+/**
+ * Provider-agnostic "worst quota" summary for compact surfaces (e.g. the
+ * Providers page connection-row chip): the lowest remaining percentage across
+ * the connection's quota rows, with the tightest row's label + reset time.
+ */
+export interface QuotaUsageSummary {
+  label: string;
+  remainingPct: number;
+  usedPct: number;
+  resetAt: string | null;
+}
+
+function worstQuotaRow(rows: any[]): QuotaUsageSummary | null {
+  const scored = rows
+    .map((q) => ({ q, pct: headlineRemainingPct(q) }))
+    .filter((entry): entry is { q: any; pct: number } => entry.pct !== null);
+  if (scored.length === 0) return null;
+
+  let tightest = scored[0];
+  for (const entry of scored) {
+    if (entry.pct < tightest.pct) tightest = entry;
+  }
+
+  const label = String(tightest.q?.displayName || tightest.q?.name || "");
+  return {
+    label,
+    remainingPct: tightest.pct,
+    usedPct: Math.max(0, 100 - tightest.pct),
+    resetAt: typeof tightest.q?.resetAt === "string" ? tightest.q.resetAt : null,
+  };
+}
+
+export function computeQuotaUsageSummary(quotas: any): QuotaUsageSummary | null {
+  if (!Array.isArray(quotas) || quotas.length === 0) return null;
+  const eligible = (quotas as any[]).filter(
+    (q) => q && !q.isCredits && !q.isResetCredits && q.unlimited !== true
+  );
+  if (eligible.length === 0) return null;
+  return worstQuotaRow(eligible);
+}
+
+/**
+ * Antigravity/agy four-window summary, mirroring the LimitBar app: Google
+ * enforces a weekly AND a ~5-hour window for EACH of the two model families —
+ * "Gemini Models" and "Claude and GPT models" (the "api" family). The four
+ * explicit `retrieveUserQuotaSummary` rows (gemini_weekly / gemini_5h /
+ * claude_gpt_weekly / claude_gpt_5h) are authoritative when present; for caches
+ * written before those rows existed, each window falls back to inferring from
+ * per-model rows: family by model name, window kind by reset horizon (a row
+ * resetting within the short horizon is a five-hour bucket). Pure name-family
+ * heuristics would misclassify models like gpt-oss-120b-medium, which shares
+ * the 5-hour Claude-family window without a "claude" name — hence the horizon
+ * split for the fallback path.
+ */
+export interface AntigravityWindowSummaries {
+  geminiWeekly: QuotaUsageSummary | null;
+  geminiFiveHour: QuotaUsageSummary | null;
+  apiWeekly: QuotaUsageSummary | null;
+  apiFiveHour: QuotaUsageSummary | null;
+}
+
+const FIVE_HOUR_WINDOW_HORIZON_MS = 6 * 60 * 60 * 1000;
+
+const EXPLICIT_WINDOW_ROW_NAMES = new Set([
+  "gemini_weekly",
+  "gemini_5h",
+  "claude_gpt_weekly",
+  "claude_gpt_5h",
+]);
+
+function isGeminiFamilyName(name: unknown): boolean {
+  return matchesSearch(String(name || ""), "gemini");
+}
+
+function isApiFamilyName(name: unknown): boolean {
+  const n = String(name || "");
+  return (
+    matchesSearch(n, "claude") ||
+    matchesSearch(n, "gpt") ||
+    matchesSearch(n, "cloud") ||
+    matchesSearch(n, "anthropic")
+  );
+}
+
+export function computeAntigravityWindowSummaries(quotas: any): AntigravityWindowSummaries {
+  const result: AntigravityWindowSummaries = {
+    geminiWeekly: null,
+    geminiFiveHour: null,
+    apiWeekly: null,
+    apiFiveHour: null,
+  };
+  const explicit = new Map<string, any>();
+  const geminiRows: any[] = [];
+  const apiRows: any[] = [];
+
+  for (const q of Array.isArray(quotas) ? (quotas as any[]) : []) {
+    if (!q || q.isCredits || q.isResetCredits || q.unlimited === true) continue;
+    const name = String(q.name || "");
+    if (EXPLICIT_WINDOW_ROW_NAMES.has(name)) {
+      explicit.set(name, q);
+      continue;
+    }
+    if (isGeminiFamilyName(name)) geminiRows.push(q);
+    else if (isApiFamilyName(name)) apiRows.push(q);
+  }
+
+  // Explicit rows first; each missing window falls back to the {weekly, fiveHour}
+  // pair inferred from that family's per-model rows.
+  result.geminiWeekly = explicit.get("gemini_weekly")
+    ? worstQuotaRow([explicit.get("gemini_weekly")])
+    : fallbackPair(geminiRows).weekly;
+  result.geminiFiveHour = explicit.get("gemini_5h")
+    ? worstQuotaRow([explicit.get("gemini_5h")])
+    : fallbackPair(geminiRows).fiveHour;
+  result.apiWeekly = explicit.get("claude_gpt_weekly")
+    ? worstQuotaRow([explicit.get("claude_gpt_weekly")])
+    : fallbackPair(apiRows).weekly;
+  result.apiFiveHour = explicit.get("claude_gpt_5h")
+    ? worstQuotaRow([explicit.get("claude_gpt_5h")])
+    : fallbackPair(apiRows).fiveHour;
+  return result;
+}
+
+/** Splits a family's per-model rows into weekly / five-hour worst rows by reset horizon. */
+function fallbackPair(rows: any[]): {
+  weekly: QuotaUsageSummary | null;
+  fiveHour: QuotaUsageSummary | null;
+} {
+  const fiveHour: any[] = [];
+  const weekly: any[] = [];
+  for (const q of rows) {
+    const ts = q.resetAt ? Date.parse(q.resetAt) : NaN;
+    if (Number.isFinite(ts) && ts - Date.now() <= FIVE_HOUR_WINDOW_HORIZON_MS) fiveHour.push(q);
+    else weekly.push(q);
+  }
+  return { weekly: worstQuotaRow(weekly), fiveHour: worstQuotaRow(fiveHour) };
 }
 
 function buildBankedResetCreditsQuota(count: number) {

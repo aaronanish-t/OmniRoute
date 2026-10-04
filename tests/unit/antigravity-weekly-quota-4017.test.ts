@@ -101,9 +101,14 @@ test("parseAntigravityWeeklyQuotas extracts the weekly bucket per model-family g
   assert.ok(quotas.claude_gpt_weekly, "claude/gpt weekly bucket extracted");
   assert.equal(quotas.claude_gpt_weekly.remainingPercentage, 10);
 
-  // The 5h bucket in the same group must NOT be picked up as "weekly" —
-  // only one entry per group, and it must be the one whose text says "weekly".
-  assert.equal(Object.keys(quotas).length, 2);
+  // Both window kinds are extracted per group: the 5h bucket lands under
+  // `${slug}_5h` with its own fraction + reset (previously dropped here, which
+  // left the summary blind to the five-hour window).
+  assert.ok(quotas.gemini_5h, "gemini 5h bucket extracted");
+  assert.equal(quotas.gemini_5h.remainingPercentage, 40);
+  assert.equal(quotas.gemini_5h.resetAt, RESET_IN_2_HOURS);
+  assert.equal(quotas.gemini_5h.unlimited, false);
+  assert.equal(Object.keys(quotas).length, 3);
 });
 
 test("parseAntigravityWeeklyQuotas tolerates the quotaSummary-nested envelope", () => {

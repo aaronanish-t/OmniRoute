@@ -83,15 +83,12 @@ export async function fetchAntigravityUserQuotaSummaryCached(
   const promise = (async () => {
     try {
       for (const baseUrl of ANTIGRAVITY_RUNTIME_BASE_URLS) {
-        const response = await fetch(
-          `${baseUrl}/v1internal:retrieveUserQuotaSummary`,
-          {
-            method: "POST",
-            headers: getAntigravityContentHeaders(clientProfile, accessToken),
-            body: JSON.stringify({ project: projectId }),
-            signal: AbortSignal.timeout(10000),
-          }
-        );
+        const response = await fetch(`${baseUrl}/v1internal:retrieveUserQuotaSummary`, {
+          method: "POST",
+          headers: getAntigravityContentHeaders(clientProfile, accessToken),
+          body: JSON.stringify({ project: projectId }),
+          signal: AbortSignal.timeout(10000),
+        });
 
         if (!response.ok) continue;
 
@@ -118,29 +115,34 @@ function bucketMatchesWindow(bucket: JsonRecord, keyword: RegExp): boolean {
 }
 
 const WEEKLY_KEYWORD = /\bweekly\b/;
+const FIVE_HOUR_KEYWORD = /\b5h\b|five[_\s-]?hour\b/;
 
-/** Turns a group displayName (e.g. "Gemini Models", "Claude and GPT models") into a quota key. */
-function slugifyGroupWeeklyKey(displayName: string): string | null {
+/** Turns a group displayName (e.g. "Gemini Models", "Claude and GPT models") into a slug. */
+function slugifyGroupKey(displayName: string): string | null {
   const cleaned = String(displayName || "")
     .toLowerCase()
     .replace(/\bmodels?\b/g, "")
     .replace(/\band\b/g, " ")
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
-  return cleaned ? `${cleaned}_weekly` : null;
+  return cleaned || null;
 }
 
 /**
- * Parse the raw `retrieveUserQuotaSummary` response into weekly `UsageQuota` entries,
- * one per model family group. Tolerant of the two response envelopes third-party
- * Antigravity clients have observed (`groups[]` at the top level, or nested under
- * `quotaSummary.groups[]`) since the RPC is undocumented and unversioned by Google.
+ * Parse the raw `retrieveUserQuotaSummary` response into window `UsageQuota` entries
+ * — one per model family group AND window kind. Google reports BOTH a weekly and a
+ * ~5-hour bucket per family ("Gemini Models" → gemini-weekly + gemini-5h; "Claude and
+ * GPT models" → 3p-weekly + 3p-5h), keyed `${slug}_weekly` / `${slug}_5h`. Tolerant of
+ * the two response envelopes third-party Antigravity clients have observed (`groups[]`
+ * at the top level, or nested under `quotaSummary.groups[]`) since the RPC is
+ * undocumented and unversioned by Google.
  */
 export function parseAntigravityWeeklyQuotas(summaryData: unknown): Record<string, UsageQuota> {
   const quotas: Record<string, UsageQuota> = {};
   for (const groupValue of extractSummaryGroups(summaryData)) {
-    const entry = parseGroupWeeklyQuota(toRecord(groupValue));
-    if (entry) quotas[entry.key] = entry.quota;
+    for (const entry of parseGroupWindowQuotas(toRecord(groupValue))) {
+      quotas[entry.key] = entry.quota;
+    }
   }
   return quotas;
 }
@@ -153,32 +155,54 @@ function extractSummaryGroups(summaryData: unknown): unknown[] {
   return Array.isArray(nested) ? nested : [];
 }
 
-/** Parses one model-family group into its weekly quota entry, or null when absent/invalid. */
-function parseGroupWeeklyQuota(group: JsonRecord): { key: string; quota: UsageQuota } | null {
+/**
+ * Parses one model-family group into its window quota entries — the weekly bucket
+ * (legacy behavior) plus the 5-hour bucket when Google reports one. The 5h window
+ * was previously dropped here, leaving the summary blind to half the quota model.
+ */
+function parseGroupWindowQuotas(group: JsonRecord): Array<{ key: string; quota: UsageQuota }> {
   const buckets = Array.isArray(group.buckets) ? group.buckets : [];
-  const weeklyBucketValue = buckets.find(
-    (b) => b && typeof b === "object" && bucketMatchesWindow(toRecord(b), WEEKLY_KEYWORD)
-  );
-  if (!weeklyBucketValue) return null;
+  const slug = slugifyGroupKey(String(group.displayName || ""));
+  if (!slug) return [];
 
-  const weeklyBucket = toRecord(weeklyBucketValue);
-  if (weeklyBucket.disabled === true) return null;
+  const entries: Array<{ key: string; quota: UsageQuota }> = [];
+  for (const bucketValue of buckets) {
+    if (!bucketValue || typeof bucketValue !== "object") continue;
+    const bucket = toRecord(bucketValue);
+    if (bucket.disabled === true) continue;
 
-  const key = slugifyGroupWeeklyKey(String(group.displayName || ""));
-  if (!key) return null;
+    const windowKind = bucketMatchesWindow(bucket, WEEKLY_KEYWORD)
+      ? "weekly"
+      : bucketMatchesWindow(bucket, FIVE_HOUR_KEYWORD)
+        ? "5h"
+        : null;
+    if (!windowKind) continue;
 
-  const rawFraction = toNumber(weeklyBucket.remainingFraction, -1);
+    const entry = toWindowQuotaEntry(bucket, slug, windowKind, group);
+    if (entry) entries.push(entry);
+  }
+  return entries;
+}
+
+function toWindowQuotaEntry(
+  bucket: JsonRecord,
+  slug: string,
+  windowKind: "weekly" | "5h",
+  group: JsonRecord
+): { key: string; quota: UsageQuota } | null {
+  const rawFraction = toNumber(bucket.remainingFraction, -1);
   if (rawFraction < 0) return null;
 
   const remainingFraction = Math.max(0, Math.min(1, rawFraction));
-  const resetAt = parseResetTime(weeklyBucket.resetTime);
+  const resetAt = parseResetTime(bucket.resetTime);
   const isUnlimited = !resetAt && remainingFraction >= 1;
   const QUOTA_NORMALIZED_BASE = 1000;
   const total = QUOTA_NORMALIZED_BASE;
   const remaining = Math.round(total * remainingFraction);
+  const windowLabel = windowKind === "weekly" ? "Weekly" : "5-hour";
 
   return {
-    key,
+    key: `${slug}_${windowKind === "weekly" ? "weekly" : "5h"}`,
     quota: {
       used: isUnlimited ? 0 : Math.max(0, total - remaining),
       total: isUnlimited ? 0 : total,
@@ -187,7 +211,7 @@ function parseGroupWeeklyQuota(group: JsonRecord): { key: string; quota: UsageQu
       unlimited: isUnlimited,
       fractionReported: true,
       quotaSource: "retrieveUserQuota",
-      displayName: String(group.displayName || "").trim() || undefined,
+      displayName: `${String(group.displayName || "").trim()} — ${windowLabel}`,
     },
   };
 }

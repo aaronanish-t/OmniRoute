@@ -93,11 +93,14 @@ export interface CompressionAnalyticsSummary {
 
 export interface GrevCachingAnalytics {
   totalRuns: number;
+  totalConversations: number;
   originalTokens: number;
   compressedTokens: number;
   tokensSaved: number;
   averageSavingsPercent: number;
   requestsWithUsage: number;
+  promptReportingRequests: number;
+  cacheReadReportingRequests: number;
   actualPromptTokens: number;
   cacheReadTokens: number;
   estimatedCacheHitTokens: number;
@@ -128,11 +131,13 @@ export interface GrevCachingAnalytics {
     exchanges: number;
     promptEstimatedTokens: number;
     actualPromptTokens: number;
-    providerCacheReadTokens: number;
+    promptRequestsReported: number;
+    cacheReadRequestsReported: number;
     compressionTokensSaved: number;
     compressionSavingsPercent: number;
     engineTokensSaved: number;
     engineSavingsPercent: number;
+    estimatedPrefixTokensReused: number;
     lastActivity: string;
   }>;
 }
@@ -199,6 +204,7 @@ export function getGrevCachingAnalytics(
   const totals = db
     .prepare(
       `SELECT COUNT(*) AS total_runs,
+              COUNT(DISTINCT conversation_id) AS total_conversations,
               COALESCE(SUM(original_tokens), 0) AS original_tokens,
               COALESCE(SUM(compressed_tokens), 0) AS compressed_tokens,
               COALESCE(SUM(tokens_saved), 0) AS tokens_saved,
@@ -206,8 +212,10 @@ export function getGrevCachingAnalytics(
                 THEN 100.0 * tokens_saved / original_tokens END), 0) AS average_savings_percent,
               COUNT(CASE WHEN actual_prompt_tokens IS NOT NULL
                 OR actual_cache_read_tokens IS NOT NULL THEN 1 END) AS requests_with_usage,
+              COUNT(actual_prompt_tokens) AS prompt_reporting_requests,
+              COUNT(actual_cache_read_tokens) AS cache_read_reporting_requests,
               COALESCE(SUM(actual_prompt_tokens), 0) AS actual_prompt_tokens,
-              COALESCE(SUM(actual_cache_read_tokens), 0) AS provider_cache_read_tokens,
+              COUNT(actual_prompt_tokens) AS prompt_requests_reported,
               COALESCE(SUM(actual_cache_read_tokens), 0) AS cache_read_tokens,
               COALESCE(SUM(estimated_cache_hit_tokens), 0) AS estimated_cache_hit_tokens
        FROM compression_analytics WHERE ${where}`
@@ -227,13 +235,15 @@ export function getGrevCachingAnalytics(
               COUNT(*) AS exchanges,
               COALESCE(SUM(prompt_estimated_tokens), 0) AS prompt_estimated_tokens,
               COALESCE(SUM(actual_prompt_tokens), 0) AS actual_prompt_tokens,
-              COALESCE(SUM(actual_cache_read_tokens), 0) AS provider_cache_read_tokens,
+              COUNT(actual_prompt_tokens) AS prompt_requests_reported,
+              COUNT(actual_cache_read_tokens) AS cache_read_requests_reported,
               COALESCE(SUM(tokens_saved), 0) AS compression_tokens_saved,
-              COALESCE(SUM(estimated_cache_hit_tokens), 0) AS engine_tokens_saved,
+              COALESCE(SUM(actual_cache_read_tokens), 0) AS engine_tokens_saved,
+              COALESCE(SUM(estimated_cache_hit_tokens), 0) AS estimated_prefix_tokens_reused,
               COALESCE(100.0 * SUM(tokens_saved) / NULLIF(SUM(original_tokens), 0), 0)
                 AS compression_savings_percent,
-              COALESCE(100.0 * SUM(estimated_cache_hit_tokens) /
-                NULLIF(SUM(prompt_estimated_tokens), 0), 0) AS engine_savings_percent,
+              COALESCE(100.0 * SUM(actual_cache_read_tokens) /
+                NULLIF(SUM(actual_prompt_tokens), 0), 0) AS engine_savings_percent,
               MAX(timestamp) AS last_activity
        FROM compression_analytics WHERE ${where} AND conversation_id IS NOT NULL
        GROUP BY conversation_id
@@ -260,11 +270,14 @@ export function getGrevCachingAnalytics(
     .all(...params) as Array<Record<string, string | number>>;
   return {
     totalRuns: totals.total_runs,
+    totalConversations: totals.total_conversations,
     originalTokens: totals.original_tokens,
     compressedTokens: totals.compressed_tokens,
     tokensSaved: totals.tokens_saved,
     averageSavingsPercent: Math.round(totals.average_savings_percent * 100) / 100,
     requestsWithUsage: totals.requests_with_usage,
+    promptReportingRequests: totals.prompt_reporting_requests,
+    cacheReadReportingRequests: totals.cache_read_reporting_requests,
     actualPromptTokens: totals.actual_prompt_tokens,
     cacheReadTokens: totals.cache_read_tokens,
     estimatedCacheHitTokens: totals.estimated_cache_hit_tokens,
@@ -299,12 +312,14 @@ export function getGrevCachingAnalytics(
       exchanges: Number(row.exchanges ?? 0),
       promptEstimatedTokens: Number(row.prompt_estimated_tokens ?? 0),
       actualPromptTokens: Number(row.actual_prompt_tokens ?? 0),
-      providerCacheReadTokens: Number(row.provider_cache_read_tokens ?? 0),
+      promptRequestsReported: Number(row.prompt_requests_reported ?? 0),
+      cacheReadRequestsReported: Number(row.cache_read_requests_reported ?? 0),
       compressionTokensSaved: Number(row.compression_tokens_saved ?? 0),
       compressionSavingsPercent:
         Math.round(Number(row.compression_savings_percent ?? 0) * 100) / 100,
       engineTokensSaved: Number(row.engine_tokens_saved ?? 0),
       engineSavingsPercent: Math.round(Number(row.engine_savings_percent ?? 0) * 100) / 100,
+      estimatedPrefixTokensReused: Number(row.estimated_prefix_tokens_reused ?? 0),
       lastActivity: String(row.last_activity),
     })),
   };
@@ -450,21 +465,43 @@ export function attachCompressionUsageReceipt(
   source: "provider" | "estimated" | "stream" = "provider"
 ): void {
   if (!requestId || !usage || typeof usage !== "object") return;
-  const promptTokens = toFiniteInt(usage.prompt_tokens);
-  const completionTokens = toFiniteInt(usage.completion_tokens);
-  const totalTokens =
-    toFiniteInt(usage.total_tokens) ?? (promptTokens ?? 0) + (completionTokens ?? 0);
   const promptDetails =
     usage.prompt_tokens_details && typeof usage.prompt_tokens_details === "object"
       ? (usage.prompt_tokens_details as Record<string, unknown>)
       : {};
-  const cacheReadTokens = toFiniteInt(
-    usage.cache_read_input_tokens ?? usage.cached_tokens ?? promptDetails.cached_tokens
+  const inputDetails =
+    usage.input_tokens_details && typeof usage.input_tokens_details === "object"
+      ? (usage.input_tokens_details as Record<string, unknown>)
+      : {};
+  const promptTokens = firstReportedTokenCount(usage.prompt_tokens, usage.input_tokens);
+  const completionTokens = firstReportedTokenCount(usage.completion_tokens, usage.output_tokens);
+  const totalTokens =
+    toFiniteInt(usage.total_tokens) ?? (promptTokens ?? 0) + (completionTokens ?? 0);
+  const cacheReadTokens = firstReportedTokenCount(
+    usage.cache_read_input_tokens,
+    usage.cached_tokens,
+    usage.prompt_cache_hit_tokens,
+    usage.cachedContentTokenCount,
+    promptDetails.cached_tokens,
+    inputDetails.cached_tokens
   );
-  const cacheWriteTokens = toFiniteInt(
-    usage.cache_creation_input_tokens ?? promptDetails.cache_creation_tokens
+  const cacheWriteTokens = firstReportedTokenCount(
+    usage.cache_creation_input_tokens,
+    usage.cache_write_tokens,
+    promptDetails.cache_creation_tokens,
+    promptDetails.cache_write_tokens,
+    inputDetails.cache_creation_tokens,
+    inputDetails.cache_write_tokens
   );
-  if (promptTokens === null && completionTokens === null && totalTokens <= 0) return;
+  if (
+    promptTokens === null &&
+    completionTokens === null &&
+    totalTokens <= 0 &&
+    cacheReadTokens === null &&
+    cacheWriteTokens === null
+  ) {
+    return;
+  }
 
   const db = getDbInstance();
   ensureCompressionAnalyticsColumns();
@@ -526,6 +563,11 @@ function toFiniteInt(value: unknown): number | null {
     if (Number.isFinite(parsed)) return Math.max(0, Math.floor(parsed));
   }
   return null;
+}
+
+function firstReportedTokenCount(...values: unknown[]): number | null {
+  const counts = values.map(toFiniteInt).filter((value): value is number => value !== null);
+  return counts.find((value) => value > 0) ?? counts[0] ?? null;
 }
 
 function appendCondition(whereClause: string, condition: string): string {

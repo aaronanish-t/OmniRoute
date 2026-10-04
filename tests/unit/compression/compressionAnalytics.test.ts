@@ -120,11 +120,14 @@ describe("compressionAnalytics", () => {
 
     assert.deepEqual(getGrevCachingAnalytics("all"), {
       totalRuns: 1,
+      totalConversations: 0,
       originalTokens: 100_000,
       compressedTokens: 20_000,
       tokensSaved: 80_000,
       averageSavingsPercent: 80,
       requestsWithUsage: 1,
+      promptReportingRequests: 1,
+      cacheReadReportingRequests: 1,
       actualPromptTokens: 25_000,
       cacheReadTokens: 12_000,
       estimatedCacheHitTokens: 200_000,
@@ -197,11 +200,13 @@ describe("compressionAnalytics", () => {
         exchanges: 2,
         promptEstimatedTokens: 5000,
         actualPromptTokens: 3900,
-        providerCacheReadTokens: 1200,
+        promptRequestsReported: 1,
+        cacheReadRequestsReported: 1,
         compressionTokensSaved: 700,
         compressionSavingsPercent: 17.5,
-        engineTokensSaved: 3000,
-        engineSavingsPercent: 60,
+        engineTokensSaved: 1200,
+        engineSavingsPercent: 30.77,
+        estimatedPrefixTokensReused: 3000,
         lastActivity: timestamp,
       },
     ]);
@@ -497,6 +502,53 @@ describe("compressionAnalytics", () => {
     assert.equal(summary.realUsage.cacheReadTokens, 100);
     assert.equal(summary.realUsage.cacheWriteTokens, 12);
     assert.equal(summary.realUsage.bySource.provider, 1);
+  });
+
+  it("reads actual cache tokens from Responses API input-token details", () => {
+    insertCompressionAnalyticsRow({
+      timestamp: new Date().toISOString(),
+      mode: "grevcaching",
+      original_tokens: 1000,
+      compressed_tokens: 1000,
+      tokens_saved: 0,
+      request_id: "req-responses-cache",
+      conversation_id: "responses-chat",
+      effective_model: "responses-model",
+    });
+    attachCompressionUsageReceipt("req-responses-cache", {
+      input_tokens: 800,
+      output_tokens: 20,
+      cache_read_input_tokens: 0,
+      input_tokens_details: { cached_tokens: 600 },
+    });
+
+    const analytics = getGrevCachingAnalytics("all");
+    assert.equal(analytics.actualPromptTokens, 800);
+    assert.equal(analytics.cacheReadTokens, 600);
+    assert.equal(analytics.cacheReadReportingRequests, 1);
+    assert.equal(analytics.totalConversations, 1);
+    assert.equal(analytics.conversations[0].engineTokensSaved, 600);
+    assert.equal(analytics.conversations[0].engineSavingsPercent, 75);
+  });
+
+  it("persists provider cache-read counts even when prompt totals are omitted", () => {
+    insertCompressionAnalyticsRow({
+      timestamp: new Date().toISOString(),
+      mode: "grevcaching",
+      original_tokens: 100,
+      compressed_tokens: 100,
+      tokens_saved: 0,
+      request_id: "req-cache-only",
+      conversation_id: "cache-only-chat",
+    });
+    attachCompressionUsageReceipt("req-cache-only", { cache_read_input_tokens: 350 });
+
+    const analytics = getGrevCachingAnalytics("all");
+    assert.equal(analytics.actualPromptTokens, 0);
+    assert.equal(analytics.cacheReadTokens, 350);
+    assert.equal(analytics.cacheReadReportingRequests, 1);
+    assert.equal(analytics.conversations[0].engineTokensSaved, 350);
+    assert.equal(analytics.conversations[0].engineSavingsPercent, 0);
   });
 
   it("attaches estimated stable-prefix reuse independently of provider usage receipts", () => {

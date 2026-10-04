@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GrevCachingAnalytics } from "./GrevCachingAnalytics";
 
 type Model = {
   fullModel: string;
@@ -220,10 +219,9 @@ export function GrevCachingPage() {
           Compression Settings; models in the exclusion list stay on OmniRoute’s normal path.
         </p>
       </div>
-      <GrevCachingAnalytics compact />
       <a
         href="/dashboard/context/grevcaching/analytics"
-        className="-mt-4 w-fit text-sm font-medium text-primary hover:underline"
+        className="w-fit rounded border border-border bg-surface px-3 py-2 text-sm font-medium text-primary hover:underline"
       >
         View detailed GrevCaching analytics â†’
       </a>

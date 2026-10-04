@@ -105,6 +105,16 @@ export const COMPRESSION_CONTEXT_GROUP: SidebarItemGroup = {
       icon: "settings",
     },
     {
+      id: "context-grev-caching",
+      href: "/dashboard/context/grevcaching",
+      i18nKey: "contextGrevCaching",
+      labelFallback: "GrevCaching",
+      subtitleKey: "contextGrevCachingSubtitle",
+      subtitleFallback: "Exclusive context owner",
+      icon: "inventory_2",
+      iconImageSrc: "/images/grevcaching-icon.webp",
+    },
+    {
       id: "context-combos",
       href: "/dashboard/context/combos",
       i18nKey: "contextCombos",

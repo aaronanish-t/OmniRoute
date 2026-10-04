@@ -61,6 +61,10 @@ export interface CompressionEngineApplyOptions {
   stepConfig?: Record<string, unknown>;
   /** Authenticated principal (API key id) making the request. Used by CCR to scope its store. */
   principalId?: string;
+  /** Resolved context window for the selected upstream model. */
+  modelContextLimit?: number | null;
+  /** Requested output-token reservation, excluded from the input context budget. */
+  requestMaxTokens?: number | null;
   /** Provider resolvido do alvo. A contabilidade do omniglyph depende dele:
    *  Anthropic reporta input/cache em buckets disjuntos, OpenAI/xAI reportam
    *  cached como subconjunto do input. Ausente => `unknown` (falha fechado). */

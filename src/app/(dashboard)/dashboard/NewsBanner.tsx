@@ -50,13 +50,15 @@ export default function NewsBanner() {
   const announcement = selectActiveNews(payload, locale, dismissedIds);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
 
-    void fetchNewsPayload(fetch, controller.signal).then((value) => {
-      if (value !== null) setPayload(value);
+    void fetchNewsPayload().then((value) => {
+      if (active && value !== null) setPayload(value);
     });
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (!announcement) return null;

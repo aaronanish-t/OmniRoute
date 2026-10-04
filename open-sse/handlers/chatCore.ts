@@ -405,6 +405,7 @@ import {
   getComboTargetTokenLimit,
   resolveComboContextLimit,
 } from "../services/contextManager.ts";
+import { prepareGrevCacheHitEstimate } from "../services/compression/grevCacheEstimate.ts";
 import { resolveBackgroundTaskRedirect } from "./chatCore/backgroundRedirect.ts";
 import type {
   CompressionConfig,
@@ -1072,16 +1073,20 @@ async function handleChatCoreInner({
     detailedLoggingEnabled && getCallLogPipelineCaptureStreamChunks();
   const skillRequestId = generateRequestId();
   let compressionAnalyticsWritePromise: Promise<void> | null = null;
+  let grevEstimatedCacheHitTokens: number | null = null;
+  let rememberGrevCachePromptAfterSuccess: (() => void) | null = null;
   // Compression usage-receipt attachment extracted to chatCore/compressionUsageReceipt.ts (#3501);
   // pass the in-flight analytics write + request id so behaviour stays byte-identical.
   const attachCompressionUsageReceiptAfterAnalytics = (
-    usage: Record<string, unknown>,
+    usage: Record<string, unknown> | null,
     source: "provider" | "estimated" | "stream"
-  ) =>
+  ) => {
     attachCompressionUsageReceiptAfterAnalyticsFor(usage, source, {
       pendingWrite: compressionAnalyticsWritePromise,
       skillRequestId,
+      estimatedCacheHitTokens: grevEstimatedCacheHitTokens,
     });
+  };
   // #8249: raw header value, kept separate from `pipelineSessionId`'s skillRequestId fallback
   // below so call_logs.session_tag is only ever set when the caller explicitly supplied the
   // header — never synthesized from the internal per-request skillRequestId.
@@ -1505,6 +1510,9 @@ async function handleChatCoreInner({
       }
       let compressionComboKey = comboName ?? null;
       let compressionComboApplied = false;
+      let grevRoutingComboIds = [comboName, routingComboId].filter(
+        (id): id is string => typeof id === "string" && id.length > 0
+      );
       const applyCompressionComboConfig = (
         compressionCombo: RuntimeCompressionCombo | null,
         routingOverrideIds: string[] = []
@@ -1605,6 +1613,7 @@ async function handleChatCoreInner({
             routingComboId,
             comboName?.startsWith("combo/") ? comboName.substring(6) : null,
           ].filter((id): id is string => typeof id === "string" && id.length > 0);
+          grevRoutingComboIds = routingComboIds;
           if (routingComboIds.length > 0) {
             const { getCompressionComboForRoutingCombo } =
               await import("../../src/lib/db/compressionCombos.ts");
@@ -1628,6 +1637,23 @@ async function handleChatCoreInner({
               (err instanceof Error ? err.message : String(err))
           );
         }
+      }
+      const { isGrevCachingTarget } = await import("../services/compression/grevCaching.ts");
+      const { supportsToolCalling } = await import("../../src/lib/modelCapabilities.ts");
+      const grevCachingActive = isGrevCachingTarget(config.grevCaching, {
+        provider,
+        model: effectiveModel,
+        routingComboIds: grevRoutingComboIds,
+        compatible: supportsToolCalling({ provider, model: effectiveModel }),
+      });
+      if (grevCachingActive) {
+        // GrevCaching is a context owner, not a compression pipeline step. Turn off
+        // every normal mutating path for this request before a selector can see it.
+        promptCompressionEnabled = false;
+        reactiveContextCompactionEnabled = false;
+        contextEditingEnabled = false;
+        config = { ...config, enabled: false };
+        log?.debug?.("CONTEXT", "GrevCaching exclusively owns context handling for this target");
       }
       let namedCombos: Record<string, CompressionPipelineStep[]> = {};
       try {
@@ -1694,7 +1720,7 @@ async function handleChatCoreInner({
       // The Auto-Clarity toggle is read from cavemanOutputMode.autoClarity.
       let outputStyleResult:
         import("../services/compression/outputStyles/apply.ts").OutputStylesResult | null = null;
-      if (config.enabled && compressionHeader?.trim().toLowerCase() !== "off") {
+      if (!grevCachingActive && config.enabled && compressionHeader?.trim().toLowerCase() !== "off") {
         try {
           const { resolveOutputStyleSelection } =
             await import("../services/compression/outputStyles/backCompat.ts");
@@ -1745,6 +1771,115 @@ async function handleChatCoreInner({
         typeof (compressionInputBody as Record<string, unknown>)?.max_tokens === "number"
           ? ((compressionInputBody as Record<string, unknown>).max_tokens as number)
           : null;
+      let grevCompressionStats:
+        | import("../services/compression/types.ts").CompressionStats
+        | null = null;
+      const grevConversationId = (() => {
+        const suppliedConversation = conversationId || reasoningReplaySessionKey;
+        const generatedConversation = suppliedConversation
+          ? null
+          : generateSessionId(compressionInputBody, { provider });
+        const stableId = suppliedConversation || generatedConversation;
+        return stableId ? `${String(apiKeyInfo?.id ?? "local")}\x1f${stableId}` : null;
+      })();
+      if (grevCachingActive) {
+        const { appendPreservingCcrEngine } =
+          await import("../services/compression/engines/appendPreservingCcr/index.ts");
+        const adapter = adaptBodyForCompression(compressionInputBody);
+        const grevResult = appendPreservingCcrEngine.apply(adapter.body, {
+          principalId: apiKeyInfo?.id ? String(apiKeyInfo.id) : undefined,
+          modelContextLimit: adaptiveModelContextLimit,
+          requestMaxTokens,
+          stepConfig: { ...config.grevCaching },
+        });
+        if (grevResult.compressed && grevResult.stats) {
+          grevCompressionStats = grevResult.stats;
+          body = adapter.restore(grevResult.body) as typeof body;
+          estimatedTokens = grevResult.stats.compressedTokens;
+          tokensCompressed = Math.max(
+            0,
+            grevResult.stats.originalTokens - grevResult.stats.compressedTokens
+          );
+          compressionResponseMeta = "; grev-caching";
+          log?.info?.("CONTEXT", `GrevCaching archived history for ${provider}/${effectiveModel}`);
+        }
+        const grevNewBlockPipeline = config.grevCaching?.newBlockPipeline ?? [];
+        {
+          const { applyGrevNewBlockPipeline } =
+            await import("../services/compression/grevNewBlock.ts");
+          const currentBlockAdapter = adaptBodyForCompression(body as Record<string, unknown>);
+          const currentBlockResult = await applyGrevNewBlockPipeline(
+            currentBlockAdapter.body,
+            grevNewBlockPipeline,
+            {
+              model: effectiveModel,
+              principalId: apiKeyInfo?.id ? String(apiKeyInfo.id) : undefined,
+              provider,
+            }
+          );
+          const currentMessageStats = currentBlockResult.stats;
+          const passSummary = currentMessageStats?.engineBreakdown
+            ?.map(
+              (pass) =>
+                `${pass.engine}:${pass.originalTokens}->${pass.compressedTokens}`
+            )
+            .join(",");
+          log?.debug?.(
+            "COMPRESSION",
+            `GrevCaching current-message pipeline selected=[${grevNewBlockPipeline.join(",")}] changed=${currentBlockResult.compressed} estimatedTokens=${currentMessageStats?.originalTokens ?? 0}->${currentMessageStats?.compressedTokens ?? 0} passes=[${passSummary || "none"}]`
+          );
+          if (currentBlockResult.compressed || currentBlockResult.stats) {
+            if (currentBlockResult.compressed) {
+              body = currentBlockAdapter.restore(currentBlockResult.body) as typeof body;
+              estimatedTokens = estimateTokens(body?.messages ?? body?.input ?? []);
+            }
+            if (currentBlockResult.stats) {
+              compressionAnalyticsWritePromise = writeCompressionAnalytics({
+                stats: currentBlockResult.stats,
+                provider,
+                effectiveModel,
+                effectiveServiceTier,
+                comboName,
+                mode: "grevcaching",
+                compressionComboId: null,
+                skillRequestId,
+                cavemanOutputModeApplied: false,
+                cavemanOutputModeIntensity: null,
+                measurementScope: "message",
+                conversationId: grevConversationId,
+                promptEstimatedTokens: estimateTokens(
+                  (body as Record<string, unknown> | null)?.messages ??
+                    (body as Record<string, unknown> | null)?.input ?? []
+                ),
+                log,
+              });
+              await compressionAnalyticsWritePromise;
+            }
+            if (currentBlockResult.compressed) {
+              log?.info?.(
+                "CONTEXT",
+                `GrevCaching applied ${grevNewBlockPipeline.join(", ")} to the current prompt only`
+              );
+            }
+          }
+        }
+      }
+      if (grevCachingActive) {
+        const grevSessionKey = grevConversationId
+          ? [
+              grevConversationId,
+              provider ?? "unknown-provider",
+              effectiveModel ?? "unknown-model",
+            ].join("\x1f")
+          : null;
+        const estimate = prepareGrevCacheHitEstimate(
+          grevSessionKey,
+          (body as Record<string, unknown> | null)?.messages,
+          (message) => estimateTokens([message])
+        );
+        grevEstimatedCacheHitTokens = estimate.estimatedTokens;
+        rememberGrevCachePromptAfterSuccess = estimate.rememberSuccessfulRequest;
+      }
       let adaptiveTelemetry:
         import("../services/compression/adaptiveCompression/types.ts").AdaptiveTelemetry | null =
         null;
@@ -1771,7 +1906,9 @@ async function handleChatCoreInner({
           `adaptive budget-exceeded: target=${adaptiveTelemetry.target} headroomAfter=${adaptiveTelemetry.headroomAfter} stages=${adaptiveTelemetry.stagesApplied.join(",")} (best-effort plan sent, content preserved)`
         );
       }
-      compressionResponseMeta = formatCompressionMeta(compressionPlan);
+      compressionResponseMeta = grevCachingActive
+        ? "; grev-caching"
+        : formatCompressionMeta(compressionPlan);
       // When the per-engine toggle map derives a stacked pipeline (and no named/routing
       // combo already set config.stackedPipeline), feed that derived pipeline through so
       // applyCompressionAsync (which reads config.stackedPipeline for stacked mode) runs the
@@ -1788,6 +1925,25 @@ async function handleChatCoreInner({
         };
       }
       let compressionAnalyticsRecorded = false;
+      if (grevCompressionStats) {
+        compressionAnalyticsRecorded = true;
+        compressionAnalyticsWritePromise = writeCompressionAnalytics({
+          stats: grevCompressionStats,
+          provider,
+          effectiveModel,
+          effectiveServiceTier,
+          comboName,
+          mode: "grevcaching",
+          compressionComboId: null,
+          skillRequestId: `${skillRequestId}::rollover`,
+          cavemanOutputModeApplied: false,
+          cavemanOutputModeIntensity: null,
+          measurementScope: "rollover",
+          conversationId: grevConversationId,
+          log,
+        });
+        await compressionAnalyticsWritePromise;
+      }
       if (mode !== "off") {
         // #3890: in a caching context, never compress the system prompt (cacheable prefix)
         // even if the operator disabled preserveSystemPrompt — honors the cache-aware flag
@@ -1820,6 +1976,8 @@ async function handleChatCoreInner({
           config: compressionConfig,
           cachingContext: cacheCtx,
           principalId: compressionPrincipalId,
+          modelContextLimit: adaptiveModelContextLimit,
+          requestMaxTokens,
           // F3.3: stream per-engine progress live (best-effort) before compression.completed.
           onEngineStep: (s) => {
             try {
@@ -5423,8 +5581,13 @@ async function handleChatCoreInner({
       });
       const usage = toolLoopUsage ?? extractUsageFromResponse(responseBody, provider);
       const cacheUsageLogMeta = buildCacheUsageLogMeta(usage);
+      rememberGrevCachePromptAfterSuccess?.();
+      rememberGrevCachePromptAfterSuccess = null;
+      attachCompressionUsageReceiptAfterAnalytics(
+        usage && typeof usage === "object" ? (usage as Record<string, unknown>) : null,
+        "provider"
+      );
       if (usage && typeof usage === "object") {
-        attachCompressionUsageReceiptAfterAnalytics(usage as Record<string, unknown>, "provider");
         if (provider === "gemini") {
           const promptTokens =
             typeof (usage as Record<string, unknown>).prompt_tokens === "number"
@@ -6099,8 +6262,17 @@ async function handleChatCoreInner({
     });
 
     // Track cache token metrics for streaming responses
+    if (normalizedStreamStatus === 200) {
+      rememberGrevCachePromptAfterSuccess?.();
+      rememberGrevCachePromptAfterSuccess = null;
+    }
+    attachCompressionUsageReceiptAfterAnalytics(
+      streamUsage && typeof streamUsage === "object"
+        ? (streamUsage as Record<string, unknown>)
+        : null,
+      "stream"
+    );
     if (streamUsage && typeof streamUsage === "object") {
-      attachCompressionUsageReceiptAfterAnalytics(streamUsage as Record<string, unknown>, "stream");
       // Track Gemini token consumption for TPM rate-limit pre-check
       if (provider === "gemini") {
         const promptTokens =

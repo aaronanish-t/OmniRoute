@@ -31,6 +31,9 @@ type WriteOpts = {
   skillRequestId: string;
   cavemanOutputModeApplied: boolean;
   cavemanOutputModeIntensity: string | null | undefined;
+  measurementScope?: "message" | "rollover";
+  conversationId?: string | null;
+  promptEstimatedTokens?: number | null;
   log?: LoggerLike;
 };
 
@@ -78,6 +81,10 @@ function buildAnalyticsRow(
     validation_fallback: stats.fallbackApplied ? 1 : 0,
     output_mode: opts.cavemanOutputModeApplied ? opts.cavemanOutputModeIntensity : null,
     ...buildRtkPointerFields(rtkPointers),
+    measurement_scope: opts.measurementScope ?? null,
+    conversation_id: opts.conversationId ?? null,
+    effective_model: opts.effectiveModel ?? null,
+    prompt_estimated_tokens: opts.promptEstimatedTokens ?? null,
   };
 }
 
@@ -119,6 +126,10 @@ export function writeCompressionSkip(opts: WriteOpts, skipReason: string): Promi
         duration_ms: stats.durationMs ?? null,
         request_id: opts.skillRequestId,
         skip_reason: skipReason,
+        measurement_scope: opts.measurementScope ?? null,
+        conversation_id: opts.conversationId ?? null,
+        effective_model: opts.effectiveModel ?? null,
+        prompt_estimated_tokens: opts.promptEstimatedTokens ?? null,
       });
     } catch (err) {
       opts.log?.warn?.(

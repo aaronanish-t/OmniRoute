@@ -991,6 +991,32 @@ Auto-trigger by token threshold, flip on the adaptive dial, pin a named profile,
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
+### GrevCaching — stable-prefix context rollover (opt-in)
+
+GrevCaching is an alternative to OmniRoute's normal prompt-compression path for long-running
+conversations. For included models, it applies the selected GrevCaching compression passes to the
+newest direct user message only; replayed conversation history is left unchanged by those passes.
+When the configured context threshold is reached, eligible older exchanges are archived as
+separate, chronologically ordered CCR blocks. The prompt keeps previews and hashes for those
+blocks, plus a recent inline tail, so the model can retrieve an older block when a later question
+needs it. Models on the GrevCaching exclusion list continue through the normal OmniRoute path.
+
+The stable prefix is intended to improve the chance of provider-side KV-cache reuse; actual cache
+hits depend on the provider, model, and serving configuration and are not guaranteed by OmniRoute.
+GrevCaching's CCR recall tool is an execution mechanism for the model, not a user-facing retrieval
+workflow.
+
+**Local CCR recall test (limited result, not a general benchmark):** Three OmniRoute-routed runs
+with a local Qwen3.8-27B model used a 128k test target and the same synthetic filler conversation
+with five hidden locator values per run. The model selected a block that contained the requested
+record in **15/15 first tries (100%)** and returned the exact locator in **14/15 first tries
+(93.3%)**. The one miss was a one-character transcription error after the correct block had been
+retrieved. In each run, the provider-reported prompt count fell from 125,575 before rollover to
+33,993 after it (91,582 fewer tokens, about 73%). These repeated runs cover one local model, one
+synthetic corpus, and five repeated questions; they do not establish cross-model reliability or
+measure provider KV-cache hits. Treat the result as an initial controlled check, not a guarantee
+of recall accuracy.
+
 <br/>
 
 <div align="center">

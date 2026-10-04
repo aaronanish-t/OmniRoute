@@ -181,6 +181,32 @@ export const ccrConfigSchema = z
   })
   .strict();
 
+export const appendPreservingCcrConfigSchema = z
+  .object({
+    triggerPercent: z.number().int().min(1).max(100).optional(),
+    preserveRecentPercent: z.number().int().min(1).max(90).optional(),
+    minArchiveChars: z.number().int().min(1).max(1_000_000).optional(),
+    minRetainedMessages: z.number().int().min(1).max(100).optional(),
+    maxArchiveSectionChars: z.number().int().min(1_000).max(1_000_000).optional(),
+  })
+  .strict();
+
+export const grevCachingConfigSchema = appendPreservingCcrConfigSchema.extend({
+  enabled: z.boolean().optional(),
+  excludedModelKeys: z.array(z.string().trim().min(1).max(200)).max(500).optional(),
+  excludedComboIds: z.array(z.string().trim().min(1).max(200)).max(500).optional(),
+  newBlockPipeline: z.array(z.string().trim().min(1).max(80)).max(30).optional(),
+});
+
+export const relevanceConfigSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    overlapThreshold: z.number().min(0).max(1).optional(),
+    budgetPercent: z.number().min(0.1).max(1).optional(),
+    boilerplateWeight: z.number().min(0).max(1).optional(),
+  })
+  .strict();
+
 const noConfigSchema = z.object({}).strict();
 
 // Structural engines (session-dedup / ccr / headroom / relevance / llmlingua) do not
@@ -381,6 +407,7 @@ export const compressionSettingsUpdateSchema = z
     outputStyles: z.array(outputStyleSelectionSchema).optional(),
     rtkConfig: rtkConfigSchema.optional(),
     codexResponsesConfig: codexResponsesConfigSchema.optional(),
+    relevanceConfig: relevanceConfigSchema.optional(),
     languageConfig: languageConfigSchema.optional(),
     aggressive: aggressiveConfigSchema.optional(),
     ultra: ultraConfigSchema.optional(),
@@ -388,6 +415,8 @@ export const compressionSettingsUpdateSchema = z
     headroom: headroomConfigSchema.optional(),
     sessionDedup: sessionDedupConfigSchema.optional(),
     ccr: ccrConfigSchema.optional(),
+    appendPreservingCcr: appendPreservingCcrConfigSchema.optional(),
+    grevCaching: grevCachingConfigSchema.optional(),
     contextBudget: contextBudgetConfigSchema.optional(),
     contextEditing: contextEditingConfigSchema.optional(),
     omniglyph: omniglyphConfigSchema.optional(),

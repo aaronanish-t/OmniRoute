@@ -1112,6 +1112,7 @@
     "contextUltra": "Ultra",
     "contextOmniglyph": "OmniGlyph",
     "contextSettings": "Compression Settings",
+    "contextGrevCaching": "GrevCaching",
     "contextHeadroom": "Headroom",
     "contextSessionDedup": "Session Dedup",
     "contextCcr": "CCR",
@@ -1121,6 +1122,7 @@
     "compressionStudio": "Compression Studio",
     "compressionExclusions": "Exclusions",
     "contextSettingsSubtitle": "Global defaults",
+    "contextGrevCachingSubtitle": "Exclusive context owner",
     "contextHeadroomSubtitle": "Tabular compaction",
     "contextSessionDedupSubtitle": "Cross-turn deduplication",
     "contextCcrSubtitle": "Retrieve markers",
@@ -7541,6 +7543,10 @@
     "clearSyncedPricing": "Clear Synced Pricing",
     "compressionTitle": "Prompt Compression",
     "compressionDesc": "Reduce token usage by compressing prompts before sending to providers",
+    "grevCachingTitle": "GrevCaching",
+    "grevCachingDescription": "Exclusive append-preserving context handling for selected models and routing combos. Normal prompt compression is disabled while this is on.",
+    "grevCachingConfigure": "Configure",
+    "grevCachingEffectivePipeline": "GrevCaching",
     "autoCombosTitle": "Auto Combos",
     "autoCombosDesc": "Allow this key to use the built-in auto/* combos, which pick a model automatically from every configured provider",
     "compressionGuidanceFullGuideLink": "Full compression guide",
@@ -7934,6 +7940,10 @@
       "ccr": {
         "label": "CCR (Retrieval)",
         "description": "Content-addressed retrieval markers."
+      },
+      "append-preserving-ccr": {
+        "label": "GrevCaching",
+        "description": "Archives older conversation while keeping the recent tail direct."
       },
       "lite": {
         "label": "Lite",
@@ -8570,6 +8580,13 @@
     "runs": "Runs",
     "tokensSaved": "Tokens saved",
     "averageSavings": "Average savings",
+    "modelPlannerTitle": "Model context planner",
+    "modelPlannerDescription": "Planning only. Requests use their selected model's actual context window.",
+    "modelPlannerModel": "Model",
+    "modelPlannerUnavailable": "No available models report a context window.",
+    "modelPlannerContext": "Context window",
+    "modelPlannerArchiveAt": "Archive at",
+    "modelPlannerDirectTail": "Direct tail",
     "diffLabels": {
       "change": "Change",
       "added": "Added",
@@ -8588,6 +8605,18 @@
       "ccr": {
         "name": "CCR",
         "description": "Content-addressed retrieval markers for repeated context blocks."
+      },
+      "append-preserving-ccr": {
+        "name": "GrevCaching",
+        "description": "Archives older plain-text conversation into recoverable markers while retaining the recent tail."
+      },
+      "codex-responses": {
+        "name": "Responses Tool Output",
+        "description": "Compresses eligible Responses API shell, patch, search, build, and JSON outputs."
+      },
+      "relevance": {
+        "name": "Relevance",
+        "description": "Keeps the sentences most relevant to the latest user request."
       },
       "llmlingua": {
         "name": "LLMLingua-2 (Semantic Pruning)",
@@ -8618,6 +8647,22 @@
       "minChars": {
         "label": "Minimum block characters",
         "description": "Minimum character count for a block to be a CCR candidate."
+      },
+      "triggerPercent": {
+        "label": "Archive trigger percent",
+        "description": "Archive eligible history when this share of the model input budget is used."
+      },
+      "preserveRecentPercent": {
+        "label": "Direct tail percent",
+        "description": "Keep this share of recent input context as direct messages."
+      },
+      "minArchiveChars": {
+        "label": "Minimum archive characters",
+        "description": "Only replace eligible history when the resulting archive is at least this large."
+      },
+      "minRetainedMessages": {
+        "label": "Minimum direct messages",
+        "description": "Keep at least this many recent messages direct, even when the tail budget is small."
       },
       "retrievalRampFactor": {
         "label": "Retrieval ramp factor (H8)",

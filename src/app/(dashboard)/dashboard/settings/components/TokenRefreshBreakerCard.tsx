@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { Card } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import type {
+  TokenRefreshBreakerScope,
+  TokenRefreshBreakerSettings,
+} from "@/lib/resilience/settings";
 import { NumberField } from "./ResilienceFields";
 
-export type TokenRefreshBreakerValue = {
-  scope: "provider" | "connection";
-  failureThreshold: number;
-  cooldownMs: number;
-};
+// Alias of the canonical settings shape so the host re-export stays consumed.
+export type TokenRefreshBreakerValue = TokenRefreshBreakerSettings;
 
 function ActionButtons({
   editing,
@@ -92,6 +93,10 @@ function EditFields({
 }) {
   const t = useTranslations("settings");
   const cooldownMinutes = Math.round(editing.cooldownMs / 60000);
+  const handleScopeChange = (raw: string) => {
+    const scope: TokenRefreshBreakerScope = raw === "connection" ? "connection" : "provider";
+    onChange({ ...editing, scope });
+  };
   return (
     <>
       <label className="flex flex-col gap-1">
@@ -99,12 +104,7 @@ function EditFields({
         <select
           className="rounded-lg border border-border bg-bg-subtle px-3 py-2 text-sm"
           value={editing.scope}
-          onChange={(event) =>
-            onChange({
-              ...editing,
-              scope: event.target.value === "connection" ? "connection" : "provider",
-            })
-          }
+          onChange={(event) => handleScopeChange(event.target.value)}
         >
           <option value="provider">{t("resilienceTokenRefreshScopeProvider")}</option>
           <option value="connection">{t("resilienceTokenRefreshScopeConnection")}</option>

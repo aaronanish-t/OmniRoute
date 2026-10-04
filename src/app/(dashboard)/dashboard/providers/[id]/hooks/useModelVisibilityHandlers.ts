@@ -110,6 +110,7 @@ export function useModelVisibilityHandlers({
 }: UseModelVisibilityHandlersParams): UseModelVisibilityHandlersReturn {
   const [compatSavingModelId, setCompatSavingModelId] = useState<string | null>(null);
   const [togglingModelId, setTogglingModelId] = useState<string | null>(null);
+  const [blacklistingModelId, setBlacklistingModelId] = useState<string | null>(null);
   const [bulkVisibilityAction, setBulkVisibilityAction] = useState<"select" | "deselect" | null>(
     null
   );
@@ -228,6 +229,30 @@ export function useModelVisibilityHandlers({
       notify.error(t("failedSaveCustomModel"));
     } finally {
       setTogglingModelId(null);
+    }
+  };
+
+  // #15690 — Blacklist a model: hide it immediately and notify the user.
+  // Reuses the existing isHidden persistence as the eye toggle, but provides
+  // a more visible entry point for models that error with forbidden/per-model-
+  // access errors.
+  const handleBlacklistModel = async (
+    modelId: string,
+    fullModel: string
+  ): Promise<void> => {
+    setBlacklistingModelId(modelId);
+    try {
+      await handleToggleModelHidden(providerId, modelId, true);
+      notify.success(
+        providerText(
+          t,
+          "modelBlacklisted",
+          "Blacklisted model {model} — it has been hidden from this provider.",
+          { model: fullModel }
+        )
+      );
+    } finally {
+      setBlacklistingModelId(null);
     }
   };
 
@@ -441,6 +466,8 @@ export function useModelVisibilityHandlers({
     handleClearAllModels,
     onTestModel,
     handleTestAll,
+    handleBlacklistModel,
+    blacklistingModelId,
     onModelTestStatusChange: (modelId: string, status: "ok" | "error" | "quota") =>
       setModelTestStatus((prev) => ({ ...prev, [modelId]: status })),
   };

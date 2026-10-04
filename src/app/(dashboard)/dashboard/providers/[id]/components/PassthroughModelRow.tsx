@@ -77,6 +77,8 @@ export default function PassthroughModelRow({
   onTestModel,
   testStatus,
   testingModel,
+  onBlacklistModel,
+  blacklistingModelId,
 }: PassthroughModelRowProps) {
   const [editing, setEditing] = useState(false);
   const [aliasValue, setAliasValue] = useState(alias || "");
@@ -238,7 +240,18 @@ export default function PassthroughModelRow({
                 {isHidden ? "visibility_off" : "visibility"}
               </span>
             </button>
-          )}
+          )}{"/* #15690 — blacklist button for models with error status */}{testStatus === "error" && onBlacklistModel && (
+            <button
+              onClick={() => onBlacklistModel(modelId, fullModel)}
+              disabled={blacklistingModelId === modelId}
+              className="flex items-center gap-1 rounded p-1 text-xs font-medium text-red-400 hover:bg-red-500/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              title={providerText(t, "blacklistModel", "Blacklist this model (hide from provider)")}
+            >
+              <span className="material-symbols-outlined text-sm">block</span>
+              <span>Blacklist</span>
+            </button>
+          )
+        }
           <ModelCompatPopover
             t={t}
             providerId={provider}

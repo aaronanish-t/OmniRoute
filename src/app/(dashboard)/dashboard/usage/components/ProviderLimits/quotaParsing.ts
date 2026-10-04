@@ -295,13 +295,8 @@ export interface QuotaUsageSummary {
   resetAt: string | null;
 }
 
-export function computeQuotaUsageSummary(quotas: any): QuotaUsageSummary | null {
-  if (!Array.isArray(quotas) || quotas.length === 0) return null;
-  const scored = (
-    quotas.filter(
-      (q: any) => q && !q.isCredits && !q.isResetCredits && q.unlimited !== true
-    ) as any[]
-  )
+function worstQuotaRow(rows: any[]): QuotaUsageSummary | null {
+  const scored = rows
     .map((q) => ({ q, pct: headlineRemainingPct(q) }))
     .filter((entry): entry is { q: any; pct: number } => entry.pct !== null);
   if (scored.length === 0) return null;
@@ -318,6 +313,51 @@ export function computeQuotaUsageSummary(quotas: any): QuotaUsageSummary | null 
     usedPct: Math.max(0, 100 - tightest.pct),
     resetAt: typeof tightest.q?.resetAt === "string" ? tightest.q.resetAt : null,
   };
+}
+
+export function computeQuotaUsageSummary(quotas: any): QuotaUsageSummary | null {
+  if (!Array.isArray(quotas) || quotas.length === 0) return null;
+  const eligible = (quotas as any[]).filter(
+    (q) => q && !q.isCredits && !q.isResetCredits && q.unlimited !== true
+  );
+  if (eligible.length === 0) return null;
+  return worstQuotaRow(eligible);
+}
+
+/**
+ * Antigravity/agy dual-window summary: Google enforces BOTH a weekly window
+ * and a ~5-hour rolling window (Claude/GPT-OSS model buckets) on the same
+ * account. Window classification is data-driven — a row whose reset is within
+ * the short horizon is a five-hour bucket, everything else (including the
+ * explicit gemini_weekly / claude_gpt_weekly summary rows) is weekly. Name
+ * heuristics would misclassify models like gpt-oss-120b-medium, which shares
+ * the 5-hour Claude-family window without a "claude" name.
+ */
+export interface AntigravityWindowSummaries {
+  weekly: QuotaUsageSummary | null;
+  fiveHour: QuotaUsageSummary | null;
+}
+
+const FIVE_HOUR_WINDOW_HORIZON_MS = 6 * 60 * 60 * 1000;
+
+export function computeAntigravityWindowSummaries(quotas: any): AntigravityWindowSummaries {
+  const weeklyRows: any[] = [];
+  const fiveHourRows: any[] = [];
+  for (const q of Array.isArray(quotas) ? (quotas as any[]) : []) {
+    if (!q || q.isCredits || q.isResetCredits || q.unlimited === true) continue;
+    // Explicit weekly summary rows (gemini_weekly / claude_gpt_weekly) are always weekly.
+    if (quotaWindowRank(q.name) === 1) {
+      weeklyRows.push(q);
+      continue;
+    }
+    const ts = q.resetAt ? Date.parse(q.resetAt) : NaN;
+    if (Number.isFinite(ts) && ts - Date.now() <= FIVE_HOUR_WINDOW_HORIZON_MS) {
+      fiveHourRows.push(q);
+    } else {
+      weeklyRows.push(q);
+    }
+  }
+  return { weekly: worstQuotaRow(weeklyRows), fiveHour: worstQuotaRow(fiveHourRows) };
 }
 
 function buildBankedResetCreditsQuota(count: number) {

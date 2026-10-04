@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import {
   parseQuotaData,
   computeQuotaUsageSummary,
+  computeAntigravityWindowSummaries,
+  isAntigravityHeadlineProvider,
   type QuotaUsageSummary,
 } from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing";
 import {
@@ -27,11 +29,32 @@ function loadLimitsCaches(): Promise<Record<string, unknown>> {
   return limitsPromise;
 }
 
+function ChipText({
+  summary,
+  labelKey,
+  fallbackSuffix,
+  t,
+}: {
+  summary: QuotaUsageSummary;
+  labelKey: string;
+  fallbackSuffix: string;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const usedText = summary.usedPct.toFixed(0);
+  const fallback = `${usedText}% used${fallbackSuffix ? ` ${fallbackSuffix}` : ""}`;
+  return (
+    <>
+      <span className="material-symbols-outlined text-[11px]">data_usage</span>
+      {translateUsageOrFallback(t, labelKey, fallback, { pct: usedText })}
+    </>
+  );
+}
+
 /**
- * Compact per-connection quota chip for the Providers page rows: shows the
- * worst (lowest remaining %) quota window of the account, colored by the
- * standard green/yellow/red thresholds. Percentage-based for fraction-only
- * providers (Antigravity/agy report no absolute limit upstream).
+ * Compact per-connection quota chip for the Providers page rows. Antigravity/agy
+ * accounts show BOTH windows Google enforces ("X% used weekly" + "Y% used five
+ * hour"); every other provider shows the single worst ("X% used"). Percentage-
+ * based — Antigravity reports no absolute limit upstream, only fractions.
  */
 export default function ConnectionQuotaChip({
   connectionId,
@@ -41,43 +64,63 @@ export default function ConnectionQuotaChip({
   provider: string;
 }) {
   const t = useTranslations("usage");
-  const [summary, setSummary] = useState<QuotaUsageSummary | null>(null);
+  const [state, setState] = useState<{
+    weekly: QuotaUsageSummary | null;
+    fiveHour: QuotaUsageSummary | null;
+    generic: QuotaUsageSummary | null;
+  }>({ weekly: null, fiveHour: null, generic: null });
 
   useEffect(() => {
     let alive = true;
     loadLimitsCaches().then((caches) => {
       if (!alive) return;
       const entry = caches[connectionId];
-      if (!entry || typeof entry !== "object") {
-        setSummary(null);
-        return;
-      }
+      if (!entry || typeof entry !== "object") return;
       const rows = parseQuotaData(provider, entry);
-      setSummary(computeQuotaUsageSummary(rows));
+      if (isAntigravityHeadlineProvider(provider)) {
+        const windows = computeAntigravityWindowSummaries(rows);
+        setState({ weekly: windows.weekly, fiveHour: windows.fiveHour, generic: null });
+      } else {
+        setState({ weekly: null, fiveHour: null, generic: computeQuotaUsageSummary(rows) });
+      }
     });
     return () => {
       alive = false;
     };
   }, [connectionId, provider]);
 
-  if (!summary) return null;
+  const renderChip = (
+    summary: QuotaUsageSummary | null,
+    labelKey: string,
+    fallbackSuffix: string,
+    key: string
+  ) => {
+    if (!summary) return null;
+    const colors = getBarColor(summary.remainingPct);
+    const cd = formatCountdown(summary.resetAt);
+    return (
+      <span
+        key={key}
+        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium tabular-nums"
+        style={{ background: colors.bg, color: colors.text }}
+        title={
+          cd
+            ? `${summary.label} — ${translateUsageOrFallback(t, "resetsIn", "Resets in")} ${cd}`
+            : summary.label
+        }
+      >
+        <ChipText summary={summary} labelKey={labelKey} fallbackSuffix={fallbackSuffix} t={t} />
+      </span>
+    );
+  };
 
-  const colors = getBarColor(summary.remainingPct);
-  const usedText = summary.usedPct.toFixed(0);
-  const cd = formatCountdown(summary.resetAt);
+  if (isAntigravityHeadlineProvider(provider)) {
+    const chips = [
+      renderChip(state.weekly, "percentUsedWeekly", "weekly", "weekly"),
+      renderChip(state.fiveHour, "percentUsedFiveHour", "five hour", "fiveHour"),
+    ].filter(Boolean);
+    return chips.length > 0 ? <>{chips}</> : null;
+  }
 
-  return (
-    <span
-      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium tabular-nums"
-      style={{ background: colors.bg, color: colors.text }}
-      title={
-        cd
-          ? `${summary.label} — ${translateUsageOrFallback(t, "resetsIn", "Resets in")} ${cd}`
-          : summary.label
-      }
-    >
-      <span className="material-symbols-outlined text-[11px]">data_usage</span>
-      {translateUsageOrFallback(t, "percentUsed", `${usedText}% used`, { pct: usedText })}
-    </span>
-  );
+  return renderChip(state.generic, "percentUsed", "", "generic");
 }

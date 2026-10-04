@@ -221,6 +221,68 @@ function parseAntigravity(data: any) {
     .filter(Boolean);
 }
 
+/**
+ * LimitBar-style headline (ported from the standalone LimitBar Flutter app):
+ * the tightest window — lowest remaining percentage — across the account's
+ * quota rows, rendered as one prominent used-% bar at the top of the
+ * Antigravity card. Google reports only `remainingFraction` (no absolute
+ * limit), so the headline is percentage-based exactly like LimitBar's.
+ */
+export interface AntigravityHeadline {
+  /** The tightest quota row; the caller renders its label via displayName/formatQuotaLabel. */
+  quota: any;
+  /** Remaining percentage (0-100) of the tightest row. */
+  remainingPct: number;
+  /** Used percentage (100 - remaining), like LimitBar's usedPct. */
+  usedPct: number;
+  /** Reset timestamp of the tightest row, when upstream reported one. */
+  resetAt: string | null;
+}
+
+const ANTIGRAVITY_HEADLINE_PROVIDERS = new Set(["antigravity", "agy"]);
+
+export function isAntigravityHeadlineProvider(providerId: string | undefined): boolean {
+  return ANTIGRAVITY_HEADLINE_PROVIDERS.has(String(providerId || "").toLowerCase());
+}
+
+function headlineRemainingPct(q: any): number | null {
+  if (q?.unlimited) return 100;
+  const raw = Number(q?.remainingPercentage);
+  if (Number.isFinite(raw)) return Math.max(0, Math.min(100, raw));
+  const total = Number(q?.total || 0);
+  if (total > 0) {
+    const used = Number(q?.used || 0);
+    return Math.max(0, Math.min(100, ((total - used) / total) * 100));
+  }
+  return null;
+}
+
+export function computeAntigravityHeadline(quotas: any): AntigravityHeadline | null {
+  if (!Array.isArray(quotas) || quotas.length === 0) return null;
+  const scored = (quotas.filter((q: any) => q && !q.isCredits && !q.isResetCredits) as any[])
+    .map((q) => ({ q, pct: headlineRemainingPct(q) }))
+    .filter((entry): entry is { q: any; pct: number } => entry.pct !== null);
+  if (scored.length === 0) return null;
+
+  // Window rows (gemini_weekly / claude_gpt_weekly) are the summary view, like
+  // LimitBar's retrieveUserQuotaSummary windows; prefer them for the headline.
+  // Per-model rows are the fallback when the weekly fetch returned nothing.
+  const windows = scored.filter(({ q }) => quotaWindowRank(q.name) !== null);
+  const pool = windows.length > 0 ? windows : scored;
+
+  let tightest = pool[0];
+  for (const entry of pool) {
+    if (entry.pct < tightest.pct) tightest = entry;
+  }
+
+  return {
+    quota: tightest.q,
+    remainingPct: tightest.pct,
+    usedPct: Math.max(0, 100 - tightest.pct),
+    resetAt: typeof tightest.q?.resetAt === "string" ? tightest.q.resetAt : null,
+  };
+}
+
 function buildBankedResetCreditsQuota(count: number) {
   return {
     name: "banked_reset_credits",

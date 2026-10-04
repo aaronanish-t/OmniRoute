@@ -1812,6 +1812,17 @@ async function handleChatCoreInner({
               provider,
             }
           );
+          const currentMessageStats = currentBlockResult.stats;
+          const passSummary = currentMessageStats?.engineBreakdown
+            ?.map(
+              (pass) =>
+                `${pass.engine}:${pass.originalTokens}->${pass.compressedTokens}`
+            )
+            .join(",");
+          log?.debug?.(
+            "COMPRESSION",
+            `GrevCaching current-message pipeline selected=[${grevNewBlockPipeline.join(",")}] changed=${currentBlockResult.compressed} estimatedTokens=${currentMessageStats?.originalTokens ?? 0}->${currentMessageStats?.compressedTokens ?? 0} passes=[${passSummary || "none"}]`
+          );
           if (currentBlockResult.compressed || currentBlockResult.stats) {
             if (currentBlockResult.compressed) {
               body = currentBlockAdapter.restore(currentBlockResult.body) as typeof body;

@@ -128,6 +128,7 @@ export interface GrevCachingAnalytics {
     exchanges: number;
     promptEstimatedTokens: number;
     actualPromptTokens: number;
+    providerCacheReadTokens: number;
     compressionTokensSaved: number;
     compressionSavingsPercent: number;
     engineTokensSaved: number;
@@ -206,6 +207,7 @@ export function getGrevCachingAnalytics(
               COUNT(CASE WHEN actual_prompt_tokens IS NOT NULL
                 OR actual_cache_read_tokens IS NOT NULL THEN 1 END) AS requests_with_usage,
               COALESCE(SUM(actual_prompt_tokens), 0) AS actual_prompt_tokens,
+              COALESCE(SUM(actual_cache_read_tokens), 0) AS provider_cache_read_tokens,
               COALESCE(SUM(actual_cache_read_tokens), 0) AS cache_read_tokens,
               COALESCE(SUM(estimated_cache_hit_tokens), 0) AS estimated_cache_hit_tokens
        FROM compression_analytics WHERE ${where}`
@@ -225,6 +227,7 @@ export function getGrevCachingAnalytics(
               COUNT(*) AS exchanges,
               COALESCE(SUM(prompt_estimated_tokens), 0) AS prompt_estimated_tokens,
               COALESCE(SUM(actual_prompt_tokens), 0) AS actual_prompt_tokens,
+              COALESCE(SUM(actual_cache_read_tokens), 0) AS provider_cache_read_tokens,
               COALESCE(SUM(tokens_saved), 0) AS compression_tokens_saved,
               COALESCE(SUM(estimated_cache_hit_tokens), 0) AS engine_tokens_saved,
               COALESCE(100.0 * SUM(tokens_saved) / NULLIF(SUM(original_tokens), 0), 0)
@@ -296,6 +299,7 @@ export function getGrevCachingAnalytics(
       exchanges: Number(row.exchanges ?? 0),
       promptEstimatedTokens: Number(row.prompt_estimated_tokens ?? 0),
       actualPromptTokens: Number(row.actual_prompt_tokens ?? 0),
+      providerCacheReadTokens: Number(row.provider_cache_read_tokens ?? 0),
       compressionTokensSaved: Number(row.compression_tokens_saved ?? 0),
       compressionSavingsPercent:
         Math.round(Number(row.compression_savings_percent ?? 0) * 100) / 100,

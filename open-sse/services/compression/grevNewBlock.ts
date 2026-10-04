@@ -9,15 +9,29 @@ type MessageLike = {
   [key: string]: unknown;
 };
 
+function hasTextPromptContent(content: unknown): boolean {
+  if (typeof content === "string") return true;
+  return (
+    Array.isArray(content) &&
+    content.some(
+      (part) =>
+        !!part &&
+        typeof part === "object" &&
+        "text" in part &&
+        typeof (part as { text?: unknown }).text === "string"
+    )
+  );
+}
+
 /** The current prompt is the final direct user message; replayed history is never selected. */
 export function findCurrentGrevPromptIndex(messages: MessageLike[]): number {
   for (let index = messages.length - 1; index >= 0; index--) {
     const message = messages[index];
     if (
       message.role === "user" &&
-      typeof message.content === "string" &&
+      hasTextPromptContent(message.content) &&
       !Array.isArray(message.tool_calls) &&
-      !message.content.startsWith("[CCR retrieve ")
+      !(typeof message.content === "string" && message.content.startsWith("[CCR retrieve "))
     ) {
       return index;
     }
@@ -46,12 +60,9 @@ export async function applyGrevNewBlockPipeline(
     return {
       body,
       compressed: false,
-      stats: createCompressionStats(
-        { messages: [current] },
-        { messages: [current] },
-        "stacked",
-        ["no-current-message-passes-selected"]
-      ),
+      stats: createCompressionStats({ messages: [current] }, { messages: [current] }, "stacked", [
+        "no-current-message-passes-selected",
+      ]),
     };
   }
 
@@ -67,12 +78,14 @@ export async function applyGrevNewBlockPipeline(
   const rewritten = Array.isArray(result.body.messages)
     ? (result.body.messages as MessageLike[])
     : [];
-  const stats = result.stats ?? createCompressionStats(
-    { messages: [current] },
-    { messages: [current] },
-    "stacked",
-    pipeline.map((engine) => `${engine}-no-change`)
-  );
+  const stats =
+    result.stats ??
+    createCompressionStats(
+      { messages: [current] },
+      { messages: [current] },
+      "stacked",
+      pipeline.map((engine) => `${engine}-no-change`)
+    );
   if (rewritten.length === 0) return { body, compressed: false, stats };
   const changed = JSON.stringify(rewritten[0]) !== JSON.stringify(current);
   if (!changed) return { body, compressed: false, stats };

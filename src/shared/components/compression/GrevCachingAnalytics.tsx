@@ -13,20 +13,13 @@ interface Analytics {
   actualPromptTokens: number;
   cacheReadTokens: number;
   estimatedCacheHitTokens: number;
-  engines: Array<{
-    engine: string;
-    runs: number;
-    originalTokens: number;
-    compressedTokens: number;
-    tokensSaved: number;
-    averageSavingsPercent: number;
-  }>;
   conversations: Array<{
     conversationId: string;
     model: string | null;
     exchanges: number;
     promptEstimatedTokens: number;
     actualPromptTokens: number;
+    providerCacheReadTokens: number;
     compressionTokensSaved: number;
     compressionSavingsPercent: number;
     engineTokensSaved: number;
@@ -36,8 +29,6 @@ interface Analytics {
 }
 
 const number = new Intl.NumberFormat();
-const formatTokens = (value: number | null) =>
-  value === null ? "Not reported" : number.format(value);
 
 export function GrevCachingAnalytics({ compact = false }: { compact?: boolean }) {
   const [since, setSince] = useState<Since>("7d");
@@ -46,39 +37,55 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/context/grev-caching/analytics?since=${since}`)
-      .then(async (response) => {
+    const refresh = async () => {
+      try {
+        const response = await fetch(`/api/context/grev-caching/analytics?since=${since}`);
         if (!response.ok) throw new Error("analytics request failed");
-        return (await response.json()) as Analytics;
-      })
-      .then((data) => {
+        const data = (await response.json()) as Analytics;
         if (!cancelled) {
           setStats(data);
           setError(false);
         }
-      })
-      .catch(() => !cancelled && setError(true));
+      } catch {
+        if (!cancelled) setError(true);
+      }
+    };
+    void refresh();
+    const refreshTimer = setInterval(() => void refresh(), 15_000);
     return () => {
       cancelled = true;
+      clearInterval(refreshTimer);
     };
   }, [since]);
 
-  const cards = [
-    ["Grev exchanges", stats ? number.format(stats.totalRuns) : "—"],
-    ["Estimated compression tokens saved", stats ? number.format(stats.tokensSaved) : "—"],
-    ["Average compression reduction", stats ? `${stats.averageSavingsPercent}%` : "—"],
-    ["Estimated engine prefix reuse", stats ? number.format(stats.estimatedCacheHitTokens) : "—"],
-  ];
+  const cards = compact
+    ? [
+        ["Exchanges", stats ? number.format(stats.totalRuns) : "—"],
+        ["Estimated compression saved", stats ? number.format(stats.tokensSaved) : "—"],
+        ["Average compression reduction", stats ? `${stats.averageSavingsPercent}%` : "—"],
+        ["Estimated prefix reuse", stats ? number.format(stats.estimatedCacheHitTokens) : "—"],
+      ]
+    : [
+        ["Tracked chats", stats ? number.format(stats.conversations.length) : "—"],
+        [
+          "Estimated prefix tokens reused",
+          stats ? number.format(stats.estimatedCacheHitTokens) : "—",
+        ],
+        ["Provider cache-read tokens", stats ? number.format(stats.cacheReadTokens) : "—"],
+        ["Provider-reported prompt tokens", stats ? number.format(stats.actualPromptTokens) : "—"],
+      ];
 
   return (
     <section className="rounded-lg border border-border bg-surface p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-medium text-text">GrevCaching usage</h2>
+          <h2 className="font-medium text-text">
+            {compact ? "GrevCaching usage" : "GrevCaching engine cache performance"}
+          </h2>
           <p className="mt-1 text-xs text-text-muted">
-            Compression savings are measured per exchange and added up by conversation. Engine
-            savings estimate the unchanged prompt prefix across turns; this is not provider
-            confirmation of a KV-cache hit. Provider-reported cache reads are tracked separately.
+            {compact
+              ? "Compression savings are measured on the current message; prefix reuse is estimated separately."
+              : "Prefix reuse is an estimate from stable prompt history, not proof of a provider cache hit. Provider cache-read tokens are shown separately as confirmation when the model reports them. Compression totals are summarized by chat below."}
           </p>
         </div>
         <label className="text-xs text-text-muted">
@@ -109,40 +116,6 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
       )}
       {!compact && stats && (
         <>
-          <div className="mt-4 grid gap-3 text-sm text-text sm:grid-cols-3">
-            <div>Estimated input before: {formatTokens(stats.originalTokens)} tokens</div>
-            <div>Estimated input after: {formatTokens(stats.compressedTokens)} tokens</div>
-            <div>Provider-reported prompt tokens: {formatTokens(stats.actualPromptTokens)}</div>
-          </div>
-          <h3 className="mt-6 font-medium text-text">GrevCaching engine breakdown</h3>
-          {stats.engines.length === 0 ? (
-            <p className="mt-2 text-sm text-text-muted">
-              No per-engine compression passes have produced savings in this period.
-            </p>
-          ) : (
-            <div className="mt-2 overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="text-xs text-text-muted">
-                  <tr>
-                    <th className="p-2">Engine</th>
-                    <th className="p-2">Runs</th>
-                    <th className="p-2">Estimated tokens saved</th>
-                    <th className="p-2">Average reduction</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.engines.map((engine) => (
-                    <tr key={engine.engine} className="border-t border-border text-text">
-                      <td className="p-2">{engine.engine}</td>
-                      <td className="p-2">{number.format(engine.runs)}</td>
-                      <td className="p-2">{number.format(engine.tokensSaved)}</td>
-                      <td className="p-2">{engine.averageSavingsPercent}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
           <h3 className="mt-6 font-medium text-text">Conversation history</h3>
           {stats.conversations.length === 0 ? (
             <p className="mt-2 text-sm text-text-muted">
@@ -150,7 +123,7 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
             </p>
           ) : (
             <div className="mt-2 overflow-x-auto">
-              <table className="w-full min-w-[1050px] text-left text-sm">
+              <table className="w-full min-w-[1180px] text-left text-sm">
                 <thead className="text-xs text-text-muted">
                   <tr>
                     <th className="p-2">Chat / last activity</th>
@@ -158,6 +131,7 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
                     <th className="p-2">Turns</th>
                     <th className="p-2">Estimated prompt total</th>
                     <th className="p-2">Actual prompt tokens</th>
+                    <th className="p-2">Provider cache reads</th>
                     <th className="p-2">Compression saved</th>
                     <th className="p-2">Compression saved %</th>
                     <th className="p-2">Estimated engine saved</th>
@@ -176,6 +150,11 @@ export function GrevCachingAnalytics({ compact = false }: { compact?: boolean })
                       <td className="p-2">{number.format(chat.promptEstimatedTokens)}</td>
                       <td className="p-2">
                         {chat.actualPromptTokens ? number.format(chat.actualPromptTokens) : "—"}
+                      </td>
+                      <td className="p-2">
+                        {chat.providerCacheReadTokens
+                          ? number.format(chat.providerCacheReadTokens)
+                          : "—"}
                       </td>
                       <td className="p-2">{number.format(chat.compressionTokensSaved)}</td>
                       <td className="p-2">{chat.compressionSavingsPercent}%</td>

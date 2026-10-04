@@ -175,6 +175,7 @@ describe("compressionAnalytics", () => {
       tokens_saved: 600,
       prompt_estimated_tokens: 4000,
       actual_prompt_tokens: 3900,
+      actual_cache_read_tokens: 1200,
       estimated_cache_hit_tokens: 3000,
     });
     insertCompressionAnalyticsRow({
@@ -196,6 +197,7 @@ describe("compressionAnalytics", () => {
         exchanges: 2,
         promptEstimatedTokens: 5000,
         actualPromptTokens: 3900,
+        providerCacheReadTokens: 1200,
         compressionTokensSaved: 700,
         compressionSavingsPercent: 17.5,
         engineTokensSaved: 3000,

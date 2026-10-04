@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { applyGrevNewBlockPipeline } from "../../../open-sse/services/compression/grevNewBlock.ts";
+import {
+  applyGrevNewBlockPipeline,
+  findCurrentGrevPromptIndex,
+} from "../../../open-sse/services/compression/grevNewBlock.ts";
 
 test("GrevCaching only normalizes whitespace in the newest user turn", async () => {
   const history = { role: "user", content: "old   history" };
@@ -17,6 +20,10 @@ test("GrevCaching only normalizes whitespace in the newest user turn", async () 
   assert.deepEqual(messages[1], tool);
   assert.equal(messages[2].content, "new   prompt\n\nwith trailing spaces\n");
   assert.deepEqual(result.stats?.techniquesUsed, ["whitespace"]);
+  assert.deepEqual(
+    result.stats?.engineBreakdown?.map((pass) => pass.engine),
+    ["lite"]
+  );
 });
 
 test("GrevCaching with no selected pass leaves the prompt unchanged", async () => {
@@ -25,4 +32,11 @@ test("GrevCaching with no selected pass leaves the prompt unchanged", async () =
   assert.equal(result.compressed, false);
   assert.equal(result.body, body);
   assert.ok(result.stats);
+});
+
+test("GrevCaching recognizes a current multimodal user message that contains text", () => {
+  const messages = [
+    { role: "user", content: [{ type: "text", text: "Large pasted prompt" }, { type: "image" }] },
+  ];
+  assert.equal(findCurrentGrevPromptIndex(messages), 0);
 });

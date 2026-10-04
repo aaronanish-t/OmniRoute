@@ -570,6 +570,7 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
     "quotaPreflight",
     "quotaShareConcurrencyLimit",
     "requestQueue",
+    "tokenRefreshBreaker",
     "waitForCooldown",
   ]);
   assert.equal("providerBreakers" in json, false);

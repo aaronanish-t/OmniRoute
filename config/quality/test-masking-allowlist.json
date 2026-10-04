@@ -61,6 +61,14 @@
       "sourceRemoved": ["src/lib/oauth/services/raycastLocal.ts"],
       "reason": "v3.8.50 provenance remediation: the retired Raycast integration no longer ships local credential extraction. The replacement checks exact source closure and the negative runtime contract."
     },
+    "@omniroute/opencode-plugin-v2/tests/auto-combos.test.ts": {
+      "replacement": "@omniroute/opencode-plugin-v2/tests/refresh-routes.test.ts",
+      "reason": "v3.8.52 #15392: the retired virtual-entries route and its fetcher (src/shared/auto-combos.ts) no longer ship; the replacement covers the gateway /v1/models publish path."
+    },
+    "@omniroute/opencode-plugin-v2/tests/shared-auto-combos.test.ts": {
+      "replacement": "@omniroute/opencode-plugin-v2/tests/catalog-provider.test.ts",
+      "reason": "v3.8.52 #15392: same retirement; the replacement covers the served catalog entries."
+    },
     "tests/unit/web-cookie-hailuo-web-11000.test.ts": {
       "replacement": "tests/unit/gpl-derived-provider-removals.test.ts",
       "sourceRemoved": [

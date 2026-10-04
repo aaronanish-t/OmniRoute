@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "Zoo ihe ndị dị n'akụkụ menu",
     "sidebarVisibilityDesc": "Zoo ntinye nsoroụzọ ọ bụla dị n'akụkụ menu iji belata mkpọtụ anya na-agbanyụghị atụmatụ ọ bụla",
     "sidebarVisibilityHint": "A na-ezo ngalaba ọ bụla dị n'akụkụ menu na-akpaghị aka mgbe e zoro ntinye ya niile",
+    "sidebarSectionShow": "__MISSING__:Show all items in this section",
+    "sidebarSectionHide": "__MISSING__:Hide all items in this section",
     "presetAll": "Ha niile",
     "presetAllDesc": "Gosi ihe niile",
     "presetEssentials": "Ihe ndị dị mkpa",

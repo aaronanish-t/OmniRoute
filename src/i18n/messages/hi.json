@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "साइडबार आइटम छिपाएँ",
     "sidebarVisibilityDesc": "Hide any sidebar navigation entry to reduce visual clutter.",
     "sidebarVisibilityHint": "Any sidebar section is hidden automatically when a...",
+    "sidebarSectionShow": "__MISSING__:Show all items in this section",
+    "sidebarSectionHide": "__MISSING__:Hide all items in this section",
     "presetAll": "सभी",
     "presetAllDesc": "सब कुछ दिखाएँ",
     "presetEssentials": "ज़रूरी विकल्प",

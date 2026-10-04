@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "隐藏侧边栏项目",
     "sidebarVisibilityDesc": "可以隐藏任意侧边栏导航项，以减少视觉负担，但不会禁用任何功能",
     "sidebarVisibilityHint": "当某个侧边栏分组中的所有项目都被隐藏时，该分组会自动隐藏",
+    "sidebarSectionShow": "显示该分组中的所有项目",
+    "sidebarSectionHide": "隐藏该分组中的所有项目",
     "presetAll": "全部",
     "presetAllDesc": "显示所有内容",
     "presetEssentials": "基础",

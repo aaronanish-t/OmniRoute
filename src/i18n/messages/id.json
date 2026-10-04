@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "Sembunyikan item bilah sisi",
     "sidebarVisibilityDesc": "Hide any sidebar navigation entry to reduce visual clutter.",
     "sidebarVisibilityHint": "Any sidebar section is hidden automatically when a...",
+    "sidebarSectionShow": "__MISSING__:Show all items in this section",
+    "sidebarSectionHide": "__MISSING__:Hide all items in this section",
     "presetAll": "Semua",
     "presetAllDesc": "Tampilkan semuanya",
     "presetEssentials": "Esensial",

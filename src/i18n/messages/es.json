@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "Ocultar elementos de la barra lateral",
     "sidebarVisibilityDesc": "Hide any sidebar navigation entry to reduce visual clutter.",
     "sidebarVisibilityHint": "Any sidebar section is hidden automatically when a...",
+    "sidebarSectionShow": "__MISSING__:Show all items in this section",
+    "sidebarSectionHide": "__MISSING__:Hide all items in this section",
     "presetAll": "Todo",
     "presetAllDesc": "Mostrar todo",
     "presetEssentials": "Elementos esenciales",

@@ -6806,6 +6806,8 @@
     "sidebarVisibility": "Skryť položky bočného panela",
     "sidebarVisibilityDesc": "Hide any sidebar navigation entry to reduce visual clutter.",
     "sidebarVisibilityHint": "Any sidebar section is hidden automatically when a...",
+    "sidebarSectionShow": "__MISSING__:Show all items in this section",
+    "sidebarSectionHide": "__MISSING__:Hide all items in this section",
     "presetAll": "Všetko",
     "presetAllDesc": "Zobraziť všetko",
     "presetEssentials": "Základné",

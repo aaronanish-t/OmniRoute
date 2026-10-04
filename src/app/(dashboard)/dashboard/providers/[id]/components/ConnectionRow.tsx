@@ -21,6 +21,7 @@ import { getCodexPlanLabel } from "../codexPlanLabel";
 import type { CodexAccountPoolProjection } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import CodexAccountDetails from "./CodexAccountDetails";
 import ProviderQuotaVisibilityToggle from "./ProviderQuotaVisibilityToggle";
+import ConnectionQuotaChip from "./ConnectionQuotaChip";
 
 // ---------------------------------------------------------------------------
 // Types (exported so the client can reference them without re-importing)
@@ -416,8 +417,7 @@ export default function ConnectionRow({
   // #11497: cookie rows with a decodable JWT credential carry a persisted
   // cookieExpiresAt — feed it into the same countdown badge OAuth rows use.
   const cookieExpiresAt = readCookieExpiresAt(connection.providerSpecificData);
-  const effectiveExpiresAt =
-    connection.tokenExpiresAt || connection.expiresAt || cookieExpiresAt;
+  const effectiveExpiresAt = connection.tokenExpiresAt || connection.expiresAt || cookieExpiresAt;
   const hasExpirySource = isOAuth || Boolean(cookieExpiresAt);
   const getTokenMinsLeft = () => {
     if (!hasExpirySource || !effectiveExpiresAt) return null;
@@ -566,6 +566,9 @@ export default function ConnectionRow({
             <Badge variant={statusPresentation.statusVariant as any} size="sm" dot>
               {statusPresentation.statusLabel}
             </Badge>
+            {connection.id && connection.provider && (
+              <ConnectionQuotaChip connectionId={connection.id} provider={connection.provider} />
+            )}
             {codexPlanLabel && (
               <Badge variant="primary" size="sm" className="capitalize">
                 {codexPlanLabel}

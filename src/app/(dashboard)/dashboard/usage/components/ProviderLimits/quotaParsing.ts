@@ -283,6 +283,43 @@ export function computeAntigravityHeadline(quotas: any): AntigravityHeadline | n
   };
 }
 
+/**
+ * Provider-agnostic "worst quota" summary for compact surfaces (e.g. the
+ * Providers page connection-row chip): the lowest remaining percentage across
+ * the connection's quota rows, with the tightest row's label + reset time.
+ */
+export interface QuotaUsageSummary {
+  label: string;
+  remainingPct: number;
+  usedPct: number;
+  resetAt: string | null;
+}
+
+export function computeQuotaUsageSummary(quotas: any): QuotaUsageSummary | null {
+  if (!Array.isArray(quotas) || quotas.length === 0) return null;
+  const scored = (
+    quotas.filter(
+      (q: any) => q && !q.isCredits && !q.isResetCredits && q.unlimited !== true
+    ) as any[]
+  )
+    .map((q) => ({ q, pct: headlineRemainingPct(q) }))
+    .filter((entry): entry is { q: any; pct: number } => entry.pct !== null);
+  if (scored.length === 0) return null;
+
+  let tightest = scored[0];
+  for (const entry of scored) {
+    if (entry.pct < tightest.pct) tightest = entry;
+  }
+
+  const label = String(tightest.q?.displayName || tightest.q?.name || "");
+  return {
+    label,
+    remainingPct: tightest.pct,
+    usedPct: Math.max(0, 100 - tightest.pct),
+    resetAt: typeof tightest.q?.resetAt === "string" ? tightest.q.resetAt : null,
+  };
+}
+
 function buildBankedResetCreditsQuota(count: number) {
   return {
     name: "banked_reset_credits",

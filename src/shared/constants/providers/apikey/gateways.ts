@@ -341,10 +341,10 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     // prices a named subset of its catalog at 0 credit, so the badge is earned by those
     // models, not by a standing free tier. The note dates the snapshot and points at the
     // file rather than promising the subset survives. It quotes no cash figure: the
-    // credit-to-cash conversion is a published promotional rate, so only 0 stays stable.
+    // credit-to-cash conversion has changed before (1:20 promo → 1:10 on 2026-10-01).
     hasFree: true,
     freeNote:
-      "4 of its 17 catalog models (deepseek/deepseek-v4-flash, minimax/minimax-m2.7, tencent/hy3, xiaomi/mimo-v2.5) are priced at 0 credit in the publisher's 2026-09-29 snapshot; the rest bill against prepaid credit, and signup grants a small credit whose amount is Y-API's to set. Y-API can withdraw a free model at any time — re-check https://y-api.bestvirtualgoods.com/pricing.json.",
+      "4 of its 20 catalog models (deepseek/deepseek-v4-flash, minimax/minimax-m2.7, tencent/hy3, xiaomi/mimo-v2.5) are priced at 0 credit in the publisher's 2026-10-04 snapshot; the rest bill against prepaid credit, and signup grants a small credit whose amount is Y-API's to set. Y-API can withdraw a free model at any time — re-check https://y-api.bestvirtualgoods.com/pricing.json.",
     apiHint:
       "Create an API key at https://y-api.bestvirtualgoods.com, then use https://api.y-api.bestvirtualgoods.com/v1 as the OpenAI-compatible base URL. Models are served by this gateway from the third-party upstream vendors named per model in its catalog; check each upstream jurisdiction, privacy and data-transfer terms before use.",
   },

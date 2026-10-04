@@ -66,8 +66,9 @@ test("y-api free badge states only what the publisher prices", () => {
     "the note points at the file a reader can re-check"
   );
   // The operator withdraws free models without notice, so nothing may read as
-  // permanent, and the credit-to-cash conversion is promotional: a USD number
-  // written here would be wrong within days.
+  // permanent, and the credit-to-cash conversion has changed before (a 1:20
+  // promo reverted to 1:10 on 2026-10-01): a USD number written here would go
+  // stale the next time the rate moves.
   for (const claim of ["always", "permanent", "unlimited", "no card"]) {
     assert.ok(!note.toLowerCase().includes(claim), `freeNote must not imply "${claim}"`);
   }

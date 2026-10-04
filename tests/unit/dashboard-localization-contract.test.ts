@@ -57,11 +57,11 @@ test("compression engine pages localize API-driven labels and normalize icon ids
   assert.equal(source.includes("Turn this layer on/off"), false);
 });
 
-test("English compression messages cover the append-preserving CCR engine", () => {
+test("English compression messages cover the GrevCaching engine", () => {
   const messages = JSON.parse(readSource("src/i18n/messages/en.json"));
   const engine = messages.settings.compressionEngine["append-preserving-ccr"];
 
-  assert.equal(engine.label, "Append-Preserving CCR");
+  assert.equal(engine.label, "GrevCaching");
   assert.equal(engine.description, "Archives older conversation while keeping the recent tail direct.");
 });
 

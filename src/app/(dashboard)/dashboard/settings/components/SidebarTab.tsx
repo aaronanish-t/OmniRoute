@@ -36,9 +36,11 @@ import {
   PROTECTED_SIDEBAR_ITEM_IDS,
   applySectionOrder,
   applyItemOrder,
-  getSectionToggleableItemIds,
-  isSidebarSectionVisible,
-  toggleSidebarSectionHidden,
+  HIDDEN_SIDEBAR_SECTIONS_SETTING_KEY,
+  isSidebarSectionHideable,
+  isSidebarSectionHidden,
+  normalizeHiddenSidebarSections,
+  toggleSidebarSectionVisibility,
   normalizeHiddenSidebarItems,
   HIDEABLE_SIDEBAR_ITEM_IDS,
   resolveRuntimeSidebarSections,
@@ -58,6 +60,7 @@ import {
 interface SortableSectionProps {
   section: SidebarSectionDefinition & { title: string };
   hiddenSet: Set<HideableSidebarItemId>;
+  sectionHiddenList: SidebarSectionId[];
   hiddenGroupLabelsSet: Set<HideableSidebarGroupId>;
   itemOrder: string[];
   onToggleItem: (id: HideableSidebarItemId) => void;
@@ -70,6 +73,7 @@ interface SortableSectionProps {
 function SortableSection({
   section,
   hiddenSet,
+  sectionHiddenList,
   hiddenGroupLabelsSet,
   itemOrder,
   onToggleItem,
@@ -92,9 +96,8 @@ function SortableSection({
 
   const [expanded, setExpanded] = useState(true);
 
-  const toggleableIds = getSectionToggleableItemIds(section);
-  const canToggleSection = toggleableIds.length > 0;
-  const sectionVisible = canToggleSection && toggleableIds.some((id) => !hiddenSet.has(id));
+  const canToggleSection = isSidebarSectionHideable(section);
+  const sectionHidden = isSidebarSectionHidden(section.id as SidebarSectionId, sectionHiddenList);
 
   const allChildren = section.children as SidebarSectionChild[];
   const getChildId = (c: SidebarSectionChild) =>
@@ -153,18 +156,17 @@ function SortableSection({
         </button>
         {canToggleSection ? (
           <Toggle
-            size="sm"
-            checked={sectionVisible}
+            checked={!sectionHidden}
             onChange={() => onToggleSection(section)}
             title={
-              sectionVisible
-                ? getSettingsLabel("sidebarSectionHide", "Hide all items in this section")
-                : getSettingsLabel("sidebarSectionShow", "Show all items in this section")
+              sectionHidden
+                ? getSettingsLabel("sidebarSectionShow", "Show all items in this section")
+                : getSettingsLabel("sidebarSectionHide", "Hide all items in this section")
             }
             ariaLabel={
-              sectionVisible
-                ? getSettingsLabel("sidebarSectionHide", "Hide all items in this section")
-                : getSettingsLabel("sidebarSectionShow", "Show all items in this section")
+              sectionHidden
+                ? getSettingsLabel("sidebarSectionShow", "Show all items in this section")
+                : getSettingsLabel("sidebarSectionHide", "Hide all items in this section")
             }
           />
         ) : (
@@ -429,6 +431,7 @@ export default function SidebarTab() {
 
   const [loading, setLoading] = useState(true);
   const [hiddenSidebarItems, setHiddenSidebarItems] = useState<HideableSidebarItemId[]>([]);
+  const [hiddenSidebarSections, setHiddenSidebarSections] = useState<SidebarSectionId[]>([]);
   const [hiddenSidebarGroupLabels, setHiddenSidebarGroupLabels] = useState<
     HideableSidebarGroupId[]
   >([]);
@@ -445,6 +448,9 @@ export default function SidebarTab() {
       .then((data) => {
         setHiddenSidebarItems(
           normalizeHiddenSidebarItems(data?.[HIDDEN_SIDEBAR_ITEMS_SETTING_KEY])
+        );
+        setHiddenSidebarSections(
+          normalizeHiddenSidebarSections(data?.[HIDDEN_SIDEBAR_SECTIONS_SETTING_KEY])
         );
         setHiddenSidebarGroupLabels(
           normalizeHiddenSidebarGroupLabels(data?.[HIDDEN_SIDEBAR_GROUP_LABELS_SETTING_KEY])
@@ -496,14 +502,21 @@ export default function SidebarTab() {
 
   const hiddenSet = new Set(hiddenSidebarItems);
   const hiddenGroupLabelsSet = new Set(hiddenSidebarGroupLabels);
+  // Section master toggle: independent of the per-item hidden list — child item
+  // states are preserved untouched, like the group separator toggle.
+  const hiddenSectionList = hiddenSidebarSections;
 
   const toggleSection = (section: SidebarSectionDefinition) => {
-    const show = !isSidebarSectionVisible(section, hiddenSidebarItems);
-    const next = toggleSidebarSectionHidden(hiddenSidebarItems, section, show);
-    setHiddenSidebarItems(next);
+    const show = isSidebarSectionHidden(section.id as SidebarSectionId, hiddenSectionList);
+    const next = toggleSidebarSectionVisibility(
+      hiddenSectionList,
+      section.id as SidebarSectionId,
+      show
+    );
+    setHiddenSidebarSections(next);
     // Any manual change → custom mode
     setActivePreset(null);
-    patch({ [HIDDEN_SIDEBAR_ITEMS_SETTING_KEY]: next, [SIDEBAR_PRESET_KEY]: null });
+    patch({ [HIDDEN_SIDEBAR_SECTIONS_SETTING_KEY]: next, [SIDEBAR_PRESET_KEY]: null });
   };
 
   const toggleGroupLabel = (id: HideableSidebarGroupId) => {
@@ -555,6 +568,7 @@ export default function SidebarTab() {
     // Ensure protected items are never hidden, even if a preset includes them
     const safeHidden = preset.hiddenItems.filter((id) => !PROTECTED_SIDEBAR_ITEM_IDS.has(id));
     setHiddenSidebarItems(safeHidden);
+    setHiddenSidebarSections([]);
     setHiddenSidebarGroupLabels([]);
     setSectionOrder([]);
     setItemOrder({});
@@ -562,6 +576,7 @@ export default function SidebarTab() {
     setConfirmPreset(null);
     patch({
       [HIDDEN_SIDEBAR_ITEMS_SETTING_KEY]: safeHidden,
+      [HIDDEN_SIDEBAR_SECTIONS_SETTING_KEY]: [],
       [HIDDEN_SIDEBAR_GROUP_LABELS_SETTING_KEY]: [],
       [SIDEBAR_SECTION_ORDER_KEY]: [],
       [SIDEBAR_ITEM_ORDER_KEY]: {},
@@ -757,6 +772,7 @@ export default function SidebarTab() {
                     key={section.id}
                     section={section}
                     hiddenSet={hiddenSet}
+                    sectionHiddenList={hiddenSectionList}
                     hiddenGroupLabelsSet={hiddenGroupLabelsSet}
                     itemOrder={itemOrder[section.id as SidebarSectionId] ?? []}
                     onToggleItem={toggleItem}

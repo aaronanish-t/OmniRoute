@@ -20,6 +20,7 @@ import { getModelSpec } from "../../../src/shared/constants/modelSpecs.ts";
 
 import {
   DEFAULT_SAFETY_SETTINGS,
+  buildGeminiThinkingConfig,
   convertOpenAIContentToParts,
   extractTextContent,
   tryParseJSON,
@@ -276,13 +277,14 @@ function openaiToGeminiBase(
       // requested budget down to 0. Omitting thinkingConfig entirely here regressed
       // the pre-#6943 native-defaults contract (thinkingBudget 0 / includeThoughts
       // false must still be present) and crashed callers that read
-      // .thinkingConfig.thinkingBudget unconditionally.
+      // .thinkingConfig.thinkingBudget unconditionally. Flash-Lite models are the
+      // exception: AI Studio 400s on thinkingBudget 0, so it is omitted there.
       // Gemini 3.x exception: an explicit thinkingLevel makes the numeric budget
       // redundant (the deprecated field is dropped when the level is forwarded), so
       // only include thinkingBudget when no explicit level was supplied.
       result.generationConfig.thinkingConfig = explicitThinkingLevel
         ? { includeThoughts: budget !== 0 }
-        : { thinkingBudget: budget, includeThoughts: budget !== 0 };
+        : buildGeminiThinkingConfig(model, budget, budget !== 0);
     }
     // 2. Claude format: thinking (type: enabled, budget_tokens)
     // Use an explicit numeric check (not truthy) so an explicit `budget_tokens: 0` — the
@@ -304,7 +306,7 @@ function openaiToGeminiBase(
       if (cappedBudget > 0 || getModelSpec(model)?.thinkingBudgetCap !== 0) {
         result.generationConfig.thinkingConfig = explicitThinkingLevel
           ? { includeThoughts: cappedBudget !== 0 }
-          : { thinkingBudget: cappedBudget, includeThoughts: cappedBudget !== 0 };
+          : buildGeminiThinkingConfig(model, cappedBudget, cappedBudget !== 0);
       }
     }
   }

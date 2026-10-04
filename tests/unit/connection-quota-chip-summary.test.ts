@@ -90,13 +90,41 @@ describe("computeQuotaUsageSummary (providers-page quota chip)", () => {
   });
 });
 
-describe("computeAntigravityWindowSummaries (dual weekly / five-hour windows)", () => {
+describe("computeAntigravityWindowSummaries (four windows: gemini/api × weekly/5h)", () => {
   const inHours = (h: number) => new Date(Date.now() + h * 3600_000).toISOString();
 
-  it("splits per-model buckets into five-hour vs weekly by reset horizon", () => {
+  it("uses the four explicit summary rows when present (live v3.8.52+ payload)", () => {
     const rows = parseQuotaData("antigravity", {
       quotas: {
-        // gemini models: weekly window (resets in days)
+        gemini_weekly: {
+          used: 53,
+          total: 1000,
+          remainingPercentage: 46.94,
+          fractionReported: true,
+          resetAt: inHours(80),
+        },
+        gemini_5h: {
+          used: 99,
+          total: 1000,
+          remainingPercentage: 90.11,
+          fractionReported: true,
+          resetAt: inHours(4),
+        },
+        claude_gpt_weekly: {
+          used: 3,
+          total: 1000,
+          remainingPercentage: 99.69,
+          fractionReported: true,
+          resetAt: inHours(160),
+        },
+        claude_gpt_5h: {
+          used: 2,
+          total: 1000,
+          remainingPercentage: 99.98,
+          fractionReported: true,
+          resetAt: inHours(4),
+        },
+        // per-model rows must NOT override the explicit summary rows
         "gemini-3.1-pro-low": {
           used: 922,
           total: 1000,
@@ -104,49 +132,65 @@ describe("computeAntigravityWindowSummaries (dual weekly / five-hour windows)", 
           fractionReported: true,
           resetAt: inHours(80),
         },
-        // claude + gpt-oss models: ~5h rolling window (resets within hours)
-        "claude-sonnet-4-6": {
-          used: 400,
-          total: 1000,
-          remainingPercentage: 60,
-          fractionReported: true,
-          resetAt: inHours(4),
-        },
-        "gpt-oss-120b-medium": {
-          used: 100,
-          total: 1000,
-          remainingPercentage: 90,
-          fractionReported: true,
-          resetAt: inHours(5),
-        },
-        // explicit summary windows
-        gemini_weekly: {
-          used: 922,
-          total: 1000,
-          remainingPercentage: 7.78,
-          fractionReported: true,
-          resetAt: inHours(80),
-        },
-        claude_gpt_weekly: {
-          used: 0,
-          total: 1000,
-          remainingPercentage: 100,
-          fractionReported: true,
-          resetAt: inHours(160),
-        },
         credits: { remaining: 42 },
       },
     });
-    const { weekly, fiveHour } = computeAntigravityWindowSummaries(rows);
-    assert.ok(weekly, "weekly summary exists");
-    assert.ok(fiveHour, "five-hour summary exists");
-    assert.ok(Math.abs(weekly.remainingPct - 7.78) < 0.01, `weekly=${weekly.remainingPct}`);
-    // worst 5h bucket = claude-sonnet (60% remaining)
-    assert.ok(Math.abs(fiveHour.remainingPct - 60) < 0.01, `fiveHour=${fiveHour.remainingPct}`);
-    assert.equal(fiveHour.label, "claude-sonnet-4-6");
+    const w = computeAntigravityWindowSummaries(rows);
+    assert.ok(w.geminiWeekly);
+    assert.ok(Math.abs(w.geminiWeekly.remainingPct - 46.94) < 0.01);
+    assert.ok(w.geminiFiveHour);
+    assert.ok(Math.abs(w.geminiFiveHour.remainingPct - 90.11) < 0.01);
+    assert.ok(w.apiWeekly);
+    assert.ok(Math.abs(w.apiWeekly.remainingPct - 99.69) < 0.01);
+    assert.ok(w.apiFiveHour);
+    assert.ok(Math.abs(w.apiFiveHour.remainingPct - 99.98) < 0.01);
   });
 
-  it("classifies non-claude-named 5h models correctly (gpt-oss shares the claude-family window)", () => {
+  it("falls back to per-model inference per family when explicit rows are missing (legacy cache)", () => {
+    const rows = [
+      {
+        name: "gemini-3.1-pro-low",
+        used: 922,
+        total: 1000,
+        remainingPercentage: 7.78,
+        resetAt: inHours(80),
+      },
+      {
+        name: "gemini-3.1-flash-lite",
+        used: 500,
+        total: 1000,
+        remainingPercentage: 50,
+        resetAt: inHours(80),
+      },
+      {
+        name: "claude-sonnet-4-6",
+        used: 400,
+        total: 1000,
+        remainingPercentage: 60,
+        resetAt: inHours(4),
+      },
+      {
+        name: "gpt-oss-120b-medium",
+        used: 100,
+        total: 1000,
+        remainingPercentage: 90,
+        resetAt: inHours(5),
+      },
+    ];
+    const w = computeAntigravityWindowSummaries(rows);
+    // gemini weekly = worst gemini model (7.78%)
+    assert.ok(w.geminiWeekly);
+    assert.equal(w.geminiWeekly.label, "gemini-3.1-pro-low");
+    // gemini models have no 5h buckets here
+    assert.equal(w.geminiFiveHour, null);
+    // api 5h = worst of claude/gpt 5h buckets (60%)
+    assert.ok(w.apiFiveHour);
+    assert.equal(w.apiFiveHour.label, "claude-sonnet-4-6");
+    // api weekly = null (no api-family weekly rows and no explicit summary row)
+    assert.equal(w.apiWeekly, null);
+  });
+
+  it("classifies non-claude-named 5h models correctly (gpt-oss shares the api-family window)", () => {
     const rows = [
       {
         name: "gpt-oss-120b-medium",
@@ -163,33 +207,11 @@ describe("computeAntigravityWindowSummaries (dual weekly / five-hour windows)", 
         resetAt: inHours(100),
       },
     ];
-    const { weekly, fiveHour } = computeAntigravityWindowSummaries(rows);
-    assert.ok(fiveHour);
-    assert.equal(fiveHour.label, "gpt-oss-120b-medium");
-    assert.ok(weekly);
-    assert.equal(weekly.label, "gemini-3.1-pro-low");
-  });
-
-  it("returns null fiveHour when only weekly rows exist", () => {
-    const rows = [
-      {
-        name: "gemini_weekly",
-        used: 922,
-        total: 1000,
-        remainingPercentage: 7.78,
-        resetAt: inHours(80),
-      },
-      {
-        name: "gemini-3.1-pro-low",
-        used: 922,
-        total: 1000,
-        remainingPercentage: 7.78,
-        resetAt: inHours(80),
-      },
-    ];
-    const { weekly, fiveHour } = computeAntigravityWindowSummaries(rows);
-    assert.ok(weekly);
-    assert.equal(fiveHour, null);
+    const w = computeAntigravityWindowSummaries(rows);
+    assert.ok(w.apiFiveHour);
+    assert.equal(w.apiFiveHour.label, "gpt-oss-120b-medium");
+    assert.ok(w.geminiWeekly);
+    assert.equal(w.geminiWeekly.label, "gemini-3.1-pro-low");
   });
 
   it("keeps an explicit weekly summary row weekly even when its reset is < 6h away", () => {
@@ -209,15 +231,15 @@ describe("computeAntigravityWindowSummaries (dual weekly / five-hour windows)", 
         resetAt: inHours(2),
       },
     ];
-    const { weekly, fiveHour } = computeAntigravityWindowSummaries(rows);
-    assert.ok(weekly);
-    assert.equal(weekly.label, "claude_gpt_weekly");
-    assert.ok(fiveHour);
-    assert.equal(fiveHour.label, "claude-sonnet-4-6");
+    const w = computeAntigravityWindowSummaries(rows);
+    assert.ok(w.apiWeekly);
+    assert.equal(w.apiWeekly.label, "claude_gpt_weekly");
+    assert.ok(w.apiFiveHour);
+    assert.equal(w.apiFiveHour.label, "claude-sonnet-4-6");
   });
 
   it("ignores credits, reset-credits and unlimited rows", () => {
-    const { weekly, fiveHour } = computeAntigravityWindowSummaries([
+    const w = computeAntigravityWindowSummaries([
       {
         name: "credits",
         isCredits: true,
@@ -234,7 +256,9 @@ describe("computeAntigravityWindowSummaries (dual weekly / five-hour windows)", 
       },
       { name: "chat_20706", unlimited: true, used: 0, total: 0, resetAt: null },
     ]);
-    assert.equal(weekly, null);
-    assert.equal(fiveHour, null);
+    assert.equal(w.geminiWeekly, null);
+    assert.equal(w.geminiFiveHour, null);
+    assert.equal(w.apiWeekly, null);
+    assert.equal(w.apiFiveHour, null);
   });
 });

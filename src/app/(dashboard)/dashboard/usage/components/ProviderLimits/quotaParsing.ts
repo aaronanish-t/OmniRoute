@@ -1,6 +1,7 @@
 import { getModelsByProviderId } from "@omniroute/open-sse/config/providerModels.ts";
 import { getProviderConnectionFamilyIds } from "@/shared/constants/providers";
 import { safePercentage } from "@/shared/utils/formatting";
+import { matchesSearch } from "@/shared/utils/turkishText";
 
 const GLM_QUOTA_ORDER: Record<string, number> = { session: 0, weekly: 1, mcp_monthly: 2 };
 const CODEX_QUOTA_ORDER: Record<string, number> = {
@@ -325,39 +326,100 @@ export function computeQuotaUsageSummary(quotas: any): QuotaUsageSummary | null 
 }
 
 /**
- * Antigravity/agy dual-window summary: Google enforces BOTH a weekly window
- * and a ~5-hour rolling window (Claude/GPT-OSS model buckets) on the same
- * account. Window classification is data-driven — a row whose reset is within
- * the short horizon is a five-hour bucket, everything else (including the
- * explicit gemini_weekly / claude_gpt_weekly summary rows) is weekly. Name
+ * Antigravity/agy four-window summary, mirroring the LimitBar app: Google
+ * enforces a weekly AND a ~5-hour window for EACH of the two model families —
+ * "Gemini Models" and "Claude and GPT models" (the "api" family). The four
+ * explicit `retrieveUserQuotaSummary` rows (gemini_weekly / gemini_5h /
+ * claude_gpt_weekly / claude_gpt_5h) are authoritative when present; for caches
+ * written before those rows existed, each window falls back to inferring from
+ * per-model rows: family by model name, window kind by reset horizon (a row
+ * resetting within the short horizon is a five-hour bucket). Pure name-family
  * heuristics would misclassify models like gpt-oss-120b-medium, which shares
- * the 5-hour Claude-family window without a "claude" name.
+ * the 5-hour Claude-family window without a "claude" name — hence the horizon
+ * split for the fallback path.
  */
 export interface AntigravityWindowSummaries {
-  weekly: QuotaUsageSummary | null;
-  fiveHour: QuotaUsageSummary | null;
+  geminiWeekly: QuotaUsageSummary | null;
+  geminiFiveHour: QuotaUsageSummary | null;
+  apiWeekly: QuotaUsageSummary | null;
+  apiFiveHour: QuotaUsageSummary | null;
 }
 
 const FIVE_HOUR_WINDOW_HORIZON_MS = 6 * 60 * 60 * 1000;
 
+const EXPLICIT_WINDOW_ROW_NAMES = new Set([
+  "gemini_weekly",
+  "gemini_5h",
+  "claude_gpt_weekly",
+  "claude_gpt_5h",
+]);
+
+function isGeminiFamilyName(name: unknown): boolean {
+  return matchesSearch(String(name || ""), "gemini");
+}
+
+function isApiFamilyName(name: unknown): boolean {
+  const n = String(name || "");
+  return (
+    matchesSearch(n, "claude") ||
+    matchesSearch(n, "gpt") ||
+    matchesSearch(n, "cloud") ||
+    matchesSearch(n, "anthropic")
+  );
+}
+
 export function computeAntigravityWindowSummaries(quotas: any): AntigravityWindowSummaries {
-  const weeklyRows: any[] = [];
-  const fiveHourRows: any[] = [];
+  const result: AntigravityWindowSummaries = {
+    geminiWeekly: null,
+    geminiFiveHour: null,
+    apiWeekly: null,
+    apiFiveHour: null,
+  };
+  const explicit = new Map<string, any>();
+  const geminiRows: any[] = [];
+  const apiRows: any[] = [];
+
   for (const q of Array.isArray(quotas) ? (quotas as any[]) : []) {
     if (!q || q.isCredits || q.isResetCredits || q.unlimited === true) continue;
-    // Explicit weekly summary rows (gemini_weekly / claude_gpt_weekly) are always weekly.
-    if (quotaWindowRank(q.name) === 1) {
-      weeklyRows.push(q);
+    const name = String(q.name || "");
+    if (EXPLICIT_WINDOW_ROW_NAMES.has(name)) {
+      explicit.set(name, q);
       continue;
     }
-    const ts = q.resetAt ? Date.parse(q.resetAt) : NaN;
-    if (Number.isFinite(ts) && ts - Date.now() <= FIVE_HOUR_WINDOW_HORIZON_MS) {
-      fiveHourRows.push(q);
-    } else {
-      weeklyRows.push(q);
-    }
+    if (isGeminiFamilyName(name)) geminiRows.push(q);
+    else if (isApiFamilyName(name)) apiRows.push(q);
   }
-  return { weekly: worstQuotaRow(weeklyRows), fiveHour: worstQuotaRow(fiveHourRows) };
+
+  // Explicit rows first; each missing window falls back to the {weekly, fiveHour}
+  // pair inferred from that family's per-model rows.
+  result.geminiWeekly = explicit.get("gemini_weekly")
+    ? worstQuotaRow([explicit.get("gemini_weekly")])
+    : fallbackPair(geminiRows).weekly;
+  result.geminiFiveHour = explicit.get("gemini_5h")
+    ? worstQuotaRow([explicit.get("gemini_5h")])
+    : fallbackPair(geminiRows).fiveHour;
+  result.apiWeekly = explicit.get("claude_gpt_weekly")
+    ? worstQuotaRow([explicit.get("claude_gpt_weekly")])
+    : fallbackPair(apiRows).weekly;
+  result.apiFiveHour = explicit.get("claude_gpt_5h")
+    ? worstQuotaRow([explicit.get("claude_gpt_5h")])
+    : fallbackPair(apiRows).fiveHour;
+  return result;
+}
+
+/** Splits a family's per-model rows into weekly / five-hour worst rows by reset horizon. */
+function fallbackPair(rows: any[]): {
+  weekly: QuotaUsageSummary | null;
+  fiveHour: QuotaUsageSummary | null;
+} {
+  const fiveHour: any[] = [];
+  const weekly: any[] = [];
+  for (const q of rows) {
+    const ts = q.resetAt ? Date.parse(q.resetAt) : NaN;
+    if (Number.isFinite(ts) && ts - Date.now() <= FIVE_HOUR_WINDOW_HORIZON_MS) fiveHour.push(q);
+    else weekly.push(q);
+  }
+  return { weekly: worstQuotaRow(weekly), fiveHour: worstQuotaRow(fiveHour) };
 }
 
 function buildBankedResetCreditsQuota(count: number) {

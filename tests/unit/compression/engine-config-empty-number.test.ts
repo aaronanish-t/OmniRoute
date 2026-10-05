@@ -61,4 +61,37 @@ describe("engine config emptied numbers", () => {
 
     assert.deepEqual(config, { compressionRate: 0, maxTokensPerMessage: 2048 });
   });
+
+  it("keeps an overflow value in the body so the settings schema rejects it", () => {
+    const saved: Settings = { minSavingsThreshold: 0.5 };
+    const body = buildEngineDetailUpdate(
+      "aggressive",
+      saved,
+      { minSavingsThreshold: Number("1e999") },
+      { minSavingsThreshold: 0.5 }
+    );
+
+    assert.deepEqual(body, { minSavingsThreshold: Number.POSITIVE_INFINITY });
+  });
+
+  it("keeps an overflow cap in the lite body, where the page range guard rejects it", () => {
+    const saved: Settings = { compressToolResults: true, maxToolLength: 8000 };
+    const body = buildEngineDetailUpdate(
+      "lite",
+      saved,
+      { ...saved, maxToolLength: Number("1e999") },
+      { ...saved }
+    );
+
+    assert.deepEqual(body, {
+      compressToolResults: true,
+      maxToolLength: Number.POSITIVE_INFINITY,
+    });
+  });
+
+  it("keeps an overflow value in the preview config so the schema rejects it", () => {
+    const config = withoutEmptyText({ compressionRate: Number("1e999") });
+
+    assert.deepEqual(config, { compressionRate: Number.POSITIVE_INFINITY });
+  });
 });

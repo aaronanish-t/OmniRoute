@@ -48,6 +48,8 @@ function startServer(initial: Settings) {
   const server = {
     puts: [] as { body: Settings; status: number }[],
     previews: [] as { config: unknown; status: number }[],
+    // The next PUT answers 500 without applying, as a transient server failure would.
+    failNextPut: false,
     get stored() {
       return stored;
     },
@@ -71,6 +73,10 @@ function startServer(initial: Settings) {
         const parsed = compressionSettingsUpdateSchema.safeParse(body);
         server.puts.push({ body, status: parsed.success ? 200 : 400 });
         if (!parsed.success) return respond({ error: "Invalid request" }, 400);
+        if (server.failNextPut) {
+          server.failNextPut = false;
+          return respond({ error: "unavailable" }, 500);
+        }
         const { lite, ...rest } = parsed.data as Settings;
         stored = { ...stored, ...rest };
         if (lite) stored.lite = mergeLite(stored.lite, lite as Settings);
@@ -134,6 +140,8 @@ describe("EngineConfigPage treats an emptied number field as not set", () => {
     await settle();
 
     expect(inputFor("Minimum savings threshold").value).toBe("");
+    // The blank state shows the schema default as a placeholder, so "default applies" is visible.
+    expect(inputFor("Minimum savings threshold").placeholder.length).toBeGreaterThan(0);
     expect(server.puts).toHaveLength(0);
   });
 
@@ -197,5 +205,64 @@ describe("EngineConfigPage treats an emptied number field as not set", () => {
 
     expect(server.puts.at(-1)?.status).toBe(200);
     expect((server.stored.aggressive as Settings).minSavingsThreshold).toBe(0);
+  });
+
+  it("rejects an overflow cap instead of silently clearing it", async () => {
+    // jsdom empties "1e999", so the overflow arrives as the finite 9e300; the range check it
+    // hits is the same one Infinity fails, since only NaN skips the check.
+    const server = startServer({ lite: { compressToolResults: true, maxToolLength: 8000 } });
+    await renderPage("lite");
+
+    fireEvent.change(inputFor("Maximum tool-result length"), { target: { value: "9e300" } });
+    await save();
+
+    expect(server.puts).toHaveLength(0);
+    expect(screen.getByText("Failed to save configuration.")).toBeTruthy();
+    expect((server.stored.lite as Settings).maxToolLength).toBe(8000);
+  });
+
+  it("keeps an emptied field unset through a failed save and its retry", async () => {
+    const server = startServer({
+      aggressive: { ...DEFAULT_AGGRESSIVE_CONFIG, minSavingsThreshold: 0.5 },
+    });
+    await renderPage("aggressive");
+
+    server.failNextPut = true;
+    fireEvent.change(inputFor("Minimum savings threshold"), { target: { value: "" } });
+    await save();
+    expect(screen.getByText("Failed to save configuration.")).toBeTruthy();
+    expect(inputFor("Minimum savings threshold").value).toBe("");
+
+    await save();
+
+    expect(server.puts.at(-1)?.status).toBe(200);
+    const { minSavingsThreshold: _unset, ...defaults } = DEFAULT_AGGRESSIVE_CONFIG;
+    expect(server.stored.aggressive).toEqual(defaults);
+  });
+
+  it("previews a stored finite minRows", async () => {
+    const server = startServer({ headroom: { minRows: 8 } });
+    await renderPage("headroom");
+
+    fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+    await settle();
+
+    expect(server.previews.at(-1)?.status).toBe(200);
+    expect(server.previews.at(-1)?.config).toEqual({ headroom: { minRows: 8 } });
+  });
+
+  it("shows the schema default again after an emptied field saves", async () => {
+    const server = startServer({
+      aggressive: { ...DEFAULT_AGGRESSIVE_CONFIG, minSavingsThreshold: 0.5 },
+    });
+    await renderPage("aggressive");
+
+    fireEvent.change(inputFor("Minimum savings threshold"), { target: { value: "" } });
+    await save();
+
+    expect(server.puts.at(-1)?.status).toBe(200);
+    expect(inputFor("Minimum savings threshold").value).toBe(
+      String(DEFAULT_AGGRESSIVE_CONFIG.minSavingsThreshold)
+    );
   });
 });

@@ -296,7 +296,9 @@ function classifyStreamingUpstreamFailure(parsed: unknown): StreamingUpstreamFai
   const requestScoped =
     type === "invalid_request_error" ||
     code === "invalid_request_error" ||
+    type === "context_length_exceeded" ||
     code === "context_length_exceeded" ||
+    type === "context_window_exceeded" ||
     code === "context_window_exceeded";
   const message = sanitizeErrorMessage(normalized.message).slice(0, 300);
   return {

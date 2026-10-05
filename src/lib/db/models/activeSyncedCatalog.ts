@@ -202,7 +202,11 @@ async function unionCustomModels(
     const overlay = Object.fromEntries(
       Object.entries(model).filter(([, value]) => value !== undefined)
     ) as Partial<SyncedAvailableModel>;
-    merged.set(model.id, { ...existing, ...overlay, id: model.id });
+    const mergedRow = { ...existing, ...overlay, id: model.id };
+    // A custom overlay is operator-owned, not registry-derived: drop the
+    // stale union marker unless the overlay itself re-declares the origin.
+    if (!overlay.catalogOrigin) delete mergedRow.catalogOrigin;
+    merged.set(model.id, mergedRow);
   }
   return Array.from(merged.values());
 }
@@ -217,7 +221,17 @@ const registryDispatchRowsCache = new Map<string, SyncedAvailableModel[]>();
 function getRegistryDispatchRows(storedProviderId: string): SyncedAvailableModel[] {
   let rows = registryDispatchRowsCache.get(storedProviderId);
   if (rows) return rows;
-  const tagged = (getRegistryEntry(storedProviderId)?.models ?? []).filter(
+  const entry = getRegistryEntry(storedProviderId);
+  // Opt-in per provider: targetFormat tags assert dispatch intent, but only
+  // providers whose discovery is known to under-report may union them into
+  // authoritative catalogs. Elsewhere, discovery omission usually means
+  // per-account entitlement and must keep its gating (#12137).
+  if (!entry?.registryDispatchUnion) {
+    rows = [];
+    registryDispatchRowsCache.set(storedProviderId, rows);
+    return rows;
+  }
+  const tagged = entry.models.filter(
     (model) => typeof model.targetFormat === "string" && model.targetFormat.length > 0
   );
   rows = normalizeSyncedAvailableModels(
@@ -241,7 +255,10 @@ function getRegistryDispatchRows(storedProviderId: string): SyncedAvailableModel
         : {}),
     })),
     storedProviderId
-  ).map((row) => ({ ...row, catalogOrigin: "registry" as const }));
+  ).map((row) => Object.freeze({ ...row, catalogOrigin: "registry" as const }));
+  // Freeze the shared rows: they are handed out by reference on every catalog
+  // read, so copy-on-write is a structural guarantee, not a caller convention.
+  for (const row of rows) Object.freeze(row);
   registryDispatchRowsCache.set(storedProviderId, rows);
   return rows;
 }

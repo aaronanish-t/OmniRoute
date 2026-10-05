@@ -131,6 +131,39 @@ test("listing surfaces agree with dispatch: the tagged base is listed with regis
   assert.equal(listed.catalogOrigin, "registry");
 });
 
+test("a tagged provider without the opt-in flag keeps discovery gating", async () => {
+  const { openaiProvider } =
+    await import("../../open-sse/config/providers/registry/openai/index.ts");
+  const { getAllActiveSyncedModels } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+
+  // openai carries targetFormat tags but has NOT opted into the union: a
+  // discovery snapshot omitting one of its tagged models must keep vetoing it.
+  const taggedModel = openaiProvider.models.find(
+    (model) => typeof model.targetFormat === "string" && model.targetFormat.length > 0
+  );
+  assert.ok(taggedModel, "precondition: openai registry has a targetFormat-tagged model");
+  assert.notEqual(openaiProvider.registryDispatchUnion, true);
+
+  const db = core.getDbInstance();
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT OR REPLACE INTO provider_connections (id, provider, is_active, created_at, updated_at)
+     VALUES (?, ?, 1, ?, ?)`
+  ).run("openai-no-union-flag", "openai", now, now);
+  const discoveredIds = openaiProvider.models
+    .filter((model) => model.id !== taggedModel.id)
+    .map((model) => ({ id: model.id, name: model.name, source: "imported" }));
+  await replaceSyncedAvailableModelsForConnection("openai", "openai-no-union-flag", discoveredIds);
+
+  const resolved = await getModelInfo(`openai/${taggedModel.id}`);
+  assert.equal(resolved.provider, null);
+  assert.equal(resolved.errorType, "model_not_found");
+
+  const listings = await getAllActiveSyncedModels();
+  assert.ok(!(listings.openai ?? []).some((model) => model.id === taggedModel.id));
+});
+
 test("the tagged base joins the authoritative catalog without displacing discovery rows", async () => {
   const { getActiveSyncedCatalog } = await import("../../src/lib/db/models/activeSyncedCatalog.ts");
 

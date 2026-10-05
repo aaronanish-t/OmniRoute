@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
+import path from "node:path";
 import { after, describe, it } from "node:test";
+import { pathToFileURL } from "node:url";
 import type { Worker } from "node:worker_threads";
 import {
   __setCompressionWorkerFactoryForTests,
@@ -602,7 +604,7 @@ describe("llmlingua worker spawn specifier", () => {
     const specifier = llmlinguaWorkerSpecifier("/app/onnxWorker.js");
     assert.ok(specifier instanceof URL, "Worker entry must be a URL object, not a string");
     assert.equal(specifier.protocol, "file:");
-    assert.equal(specifier.pathname, "/app/onnxWorker.js");
+    assert.equal(specifier.pathname, pathToFileURL(path.resolve("/app/onnxWorker.js")).pathname);
   });
 });
 

@@ -88,6 +88,7 @@
 - [`GET /api/v1/me/status`](#get-apiv1mestatus)
 - [`GET /api/v1/me/sessions`](#get-apiv1mesessions)
 - [`GET /api/v1/me/sessions/{id}`](#get-apiv1mesessionsid)
+- [`GET /api/v1/me/sessions/{id}/messages`](#get-apiv1mesessionsidmessages)
 - [`GET /api/v1/muse-code/models`](#get-apiv1muse-codemodels)
 - [`GET /api/v1/music/generations`](#get-apiv1musicgenerations)
 - [`POST /api/v1/music/generations`](#post-apiv1musicgenerations)
@@ -1046,6 +1047,17 @@ Get details and recent requests of a session owned by the calling API key.
 
 ```bash
 curl https://localhost:20128/api/v1/me/sessions/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions/{id}/messages
+
+GET me › sessions › <id> › messages
+
+Simplified conversation turns for a session owned by the calling API key.
+
+```bash
+curl https://localhost:20128/api/v1/me/sessions/{id}/messages \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 

@@ -8639,9 +8639,6 @@
         "label": "Kiwango cha chini cha safu mlalo za kubana",
         "description": "Kiwango cha chini cha safu mlalo katika safu ya JSON inayofanana inayohitajika ili kuanzisha ubana wa jedwali. Chaguo-msingi: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Hifadhi kidokezo cha mfumo"
-      },
       "summarizerEnabled": {
         "label": "Wezesha kifupishaji"
       },

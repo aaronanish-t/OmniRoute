@@ -8639,9 +8639,6 @@
         "label": "Mínimo de linhas a compactar",
         "description": "Número mínimo de linhas num array JSON homogéneo necessário para acionar a compactação tabular. Predefinição: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Preservar prompt do sistema"
-      },
       "summarizerEnabled": {
         "label": "Ativar resumidor"
       },

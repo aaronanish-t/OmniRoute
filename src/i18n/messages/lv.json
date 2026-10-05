@@ -8639,9 +8639,6 @@
         "label": "Minimālais rindu skaits saspiešanai",
         "description": "Minimālais rindu skaits homogēnā JSON masīvā, kas nepieciešams tabulārās saspiešanas aktivizēšanai. Noklusējums: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Saglabāt sistēmas uzvedni"
-      },
       "summarizerEnabled": {
         "label": "Iespējot kopsavilkuma veidotāju"
       },

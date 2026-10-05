@@ -8639,9 +8639,6 @@
         "label": "Minimálny počet riadkov na zhustenie",
         "description": "Minimálny počet riadkov v homogénnom JSON poli potrebný na spustenie tabuľkového zhustenia. Predvolené: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Zachovať systémový prompt"
-      },
       "summarizerEnabled": {
         "label": "Povoliť sumarizátor"
       },

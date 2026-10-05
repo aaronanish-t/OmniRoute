@@ -8639,9 +8639,6 @@
         "label": "Lignes minimales à compacter",
         "description": "Nombre minimum de lignes dans un tableau JSON homogène requis pour déclencher le compactage tabulaire. Par défaut : 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Préserver le prompt système"
-      },
       "summarizerEnabled": {
         "label": "Activer le résumeur"
       },

@@ -8639,9 +8639,6 @@
         "label": "Minimalni redovi za kompaktiranje",
         "description": "Minimalni broj redova u homogenom JSON nizu potreban za pokretanje tabularnog kompaktiranja. Podrazumijevano: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Zadrži sistemski prompt"
-      },
       "summarizerEnabled": {
         "label": "Omogući sumarizator"
       },

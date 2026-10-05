@@ -8639,9 +8639,6 @@
         "label": "Minimum aantal rijen om te compacteren",
         "description": "Minimum aantal rijen in een homogene JSON-array dat vereist is om tabulaire compactie te activeren. Standaard: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Systeemprompt behouden"
-      },
       "summarizerEnabled": {
         "label": "Samenvatter inschakelen"
       },

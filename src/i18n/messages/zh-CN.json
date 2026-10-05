@@ -8639,9 +8639,6 @@
         "label": "压缩所需的最小行数",
         "description": "触发表格压缩所需的同构 JSON 数组的最小行数。默认值: 8。"
       },
-      "preserveSystemPrompt": {
-        "label": "保留系统提示词"
-      },
       "summarizerEnabled": {
         "label": "启用摘要生成器"
       },

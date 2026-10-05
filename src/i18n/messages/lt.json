@@ -8639,9 +8639,6 @@
         "label": "Mažiausias sutankinamų eilučių skaičius",
         "description": "Mažiausias vienarūšio JSON masyvo eilučių skaičius, reikalingas sutankinimui lentelės formatu pradėti. Numatytoji reikšmė: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Išsaugoti sistemos raginimą"
-      },
       "summarizerEnabled": {
         "label": "Įjungti santraukų kūrimą"
       },

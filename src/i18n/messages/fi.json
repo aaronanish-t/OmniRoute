@@ -8639,9 +8639,6 @@
         "label": "Tiivistettävien rivien vähimmäismäärä",
         "description": "Homogeenisen JSON-taulukon rivien vähimmäismäärä taulukkomaisen tiivistämisen käynnistämiseksi. Oletus: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Säilytä järjestelmäkehote"
-      },
       "summarizerEnabled": {
         "label": "Ota tiivistäjä käyttöön"
       },

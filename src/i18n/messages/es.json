@@ -8639,9 +8639,6 @@
         "label": "Filas mínimas para compactar",
         "description": "Número mínimo de filas de una matriz JSON homogénea necesario para activar la compactación tabular. Valor predeterminado: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Conservar el prompt del sistema"
-      },
       "summarizerEnabled": {
         "label": "Activar el generador de resúmenes"
       },

@@ -8639,9 +8639,6 @@
         "label": "Najmanjše število vrstic za stiskanje",
         "description": "Najmanjše število vrstic v homogenem polju JSON, potrebno za sprožitev tabelaričnega stiskanja. Privzeto: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Ohrani sistemski poziv"
-      },
       "summarizerEnabled": {
         "label": "Omogoči povzemalnik"
       },

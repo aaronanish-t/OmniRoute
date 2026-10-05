@@ -8639,9 +8639,6 @@
         "label": "Baris minimum untuk dipadatkan",
         "description": "Jumlah baris minimum dalam array JSON homogen yang diperlukan untuk memicu pemadatan tabular. Default: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Pertahankan prompt sistem"
-      },
       "summarizerEnabled": {
         "label": "Aktifkan peringkas"
       },

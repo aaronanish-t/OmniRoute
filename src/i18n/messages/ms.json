@@ -8639,9 +8639,6 @@
         "label": "Baris minimum untuk dipadatkan",
         "description": "Baris minimum dalam tatasusunan JSON homogen yang diperlukan untuk mencetuskan pemadatan jadual. Lalai: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Kekalkan gesaan sistem"
-      },
       "summarizerEnabled": {
         "label": "Dayakan peringkas"
       },

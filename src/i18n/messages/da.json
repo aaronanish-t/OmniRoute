@@ -8639,9 +8639,6 @@
         "label": "Minimum rækker til komprimering",
         "description": "Minimum antal rækker i et homogent JSON-array, der kræves for at udløse tabelkomprimering. Standard: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Bevar systemprompt"
-      },
       "summarizerEnabled": {
         "label": "Aktivér opsummering"
       },

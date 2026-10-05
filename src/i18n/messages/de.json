@@ -8639,9 +8639,6 @@
         "label": "Minimale Zeilen zum Komprimieren",
         "description": "Mindestanzahl an Zeilen in einem homogenen JSON-Array, die erforderlich ist, um eine tabellarische Komprimierung auszulösen. Standard: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "System-Prompt beibehalten"
-      },
       "summarizerEnabled": {
         "label": "Summarizer aktivieren"
       },

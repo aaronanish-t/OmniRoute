@@ -18,6 +18,8 @@ const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 const { getCompressionSettings, updateCompressionSettings } =
   await import("../../src/lib/db/compression.ts");
 const { normalizeCcrConfig } = await import("../../src/lib/db/compressionDetailNormalizers.ts");
+const { compressionSettingsUpdateSchema } =
+  await import("../../src/shared/validation/compressionConfigSchemas.ts");
 
 test.after(() => {
   resetDbInstance();
@@ -64,6 +66,22 @@ test("non-finite retrievalRampFactor falls back to the default (2)", () => {
     normalizeCcrConfig({ retrievalRampFactor: Number.POSITIVE_INFINITY }).retrievalRampFactor,
     2
   );
+});
+
+test("update schema accepts a fractional retrievalRampFactor (no .int())", () => {
+  // The schema's int/fraction asymmetry is the contract this fix restores: adding .int()
+  // here would reject fractional saves at the API layer and re-create the bug while the
+  // DB-layer tests above stay green.
+  const fraction = compressionSettingsUpdateSchema.safeParse({
+    ccr: { retrievalRampFactor: 1.5 },
+  });
+  assert.equal(fraction.success, true);
+  const intField = compressionSettingsUpdateSchema.safeParse({ ccr: { minChars: 100.5 } });
+  assert.equal(intField.success, false);
+});
+
+test("minChars keeps integer flooring (fraction exemption is retrievalRampFactor-only)", () => {
+  assert.equal(normalizeCcrConfig({ minChars: 100.7 }).minChars, 100);
 });
 
 test("non-numeric retrievalRampFactor falls back to the default (2)", async () => {

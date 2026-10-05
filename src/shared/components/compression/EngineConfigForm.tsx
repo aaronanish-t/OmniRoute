@@ -23,20 +23,12 @@ export function EngineConfigForm({ schema, value, onChange: set }: EngineConfigF
             {f.type === "number" && (
               <input
                 type="number"
-                value={
-                  f.key === "maxToolLength" && !(typeof v === "number" && Number.isFinite(v))
-                    ? ""
-                    : (v as number)
-                }
+                // NaN (an emptied field, "not set") renders as an empty input, never as 0.
+                value={typeof v === "number" && Number.isFinite(v) ? v : ""}
                 min={f.min}
                 max={f.max}
                 onChange={(e) =>
-                  set(
-                    f.key,
-                    f.key === "maxToolLength" && e.target.value === ""
-                      ? Number.NaN
-                      : Number(e.target.value)
-                  )
+                  set(f.key, e.target.value === "" ? Number.NaN : Number(e.target.value))
                 }
                 className="border border-border rounded px-2 py-1"
               />

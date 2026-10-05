@@ -32,7 +32,8 @@ export function seedEngineForm(
  * The sub-object an engine page PUTs on save. The server replaces each sub-object row whole
  * (lite merges), so the body starts from the copy stored at save time and applies only the fields
  * edited since `saved`. The page hides `enabled`, so the form never writes it and the stored value
- * passes through. An emptied text field removes its key.
+ * passes through. An emptied text field removes its key, and an emptied number field (NaN) leaves
+ * the body as not set — except lite's cap, which maps to null below.
  */
 export function buildEngineDetailUpdate(
   engineId: string,
@@ -45,6 +46,11 @@ export function buildEngineDetailUpdate(
     if (key === "enabled" || Object.is(value, saved[key])) continue;
     if (isEmptyText(value)) {
       delete next[key];
+    } else if (typeof value === "number" && !Number.isFinite(value)) {
+      // lite's cap keeps its NaN so the lite merge below maps it to null and drops the stored
+      // cap; every other field means "not set" and stays out of the body.
+      if (engineId !== "lite" || key !== "maxToolLength") delete next[key];
+      else next[key] = value;
     } else {
       next[key] = value;
     }
@@ -82,7 +88,12 @@ export function forgetSentEdits(saved: FormValues, sent: FormValues): FormValues
   return next;
 }
 
-/** Form values without emptied text fields, so a preview config passes the settings schema. */
+/** Form values without emptied text fields or number inputs, so a preview config passes the
+ * settings schema. */
 export function withoutEmptyText(values: FormValues): FormValues {
-  return Object.fromEntries(Object.entries(values).filter(([, value]) => !isEmptyText(value)));
+  return Object.fromEntries(
+    Object.entries(values).filter(
+      ([, value]) => !isEmptyText(value) && !(typeof value === "number" && !Number.isFinite(value))
+    )
+  );
 }

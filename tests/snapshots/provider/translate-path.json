@@ -4785,16 +4785,19 @@
       "apiKey": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Pplx-Integration": "omniroute"
       },
       "nonStream": {
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Pplx-Integration": "omniroute"
       },
       "oauth": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Pplx-Integration": "omniroute"
       }
     },
     "url": {
@@ -4808,16 +4811,19 @@
       "apiKey": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Pplx-Integration": "omniroute"
       },
       "nonStream": {
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Pplx-Integration": "omniroute"
       },
       "oauth": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-Pplx-Integration": "omniroute"
       }
     },
     "url": {

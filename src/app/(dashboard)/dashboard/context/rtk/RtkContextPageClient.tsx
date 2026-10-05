@@ -63,6 +63,8 @@ function formatNumber(value: number | undefined): string {
 
 export default function RtkContextPageClient() {
   const t = useTranslations("contextRtk");
+  const tSettings = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const [filters, setFilters] = useState<RtkFilter[]>([]);
   const [config, setConfig] = useState<RtkConfig | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
@@ -71,13 +73,28 @@ export default function RtkContextPageClient() {
   const [saving, setSaving] = useState(false);
   const [viewMode, setViewMode] = useState<"simple" | "advanced">("simple");
   const [masterEnabled, setMasterEnabled] = useState<boolean | null>(null);
+  // The stored master flag decides the "master switch is OFF" banner, so a failed
+  // settings GET must not read as off. A retry re-runs the load; answers that arrive
+  // for the run it replaced are ignored.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
+    let ignore = false;
     fetch("/api/settings/compression")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setMasterEnabled(data?.enabled ?? false))
-      .catch(() => {});
-  }, []);
+      .then((data) => {
+        if (ignore) return;
+        if (data) setMasterEnabled(Boolean(data.enabled));
+        setLoadFailed(!data);
+      })
+      .catch(() => {
+        if (!ignore) setLoadFailed(true);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [loadAttempt]);
 
   const loadFilters = () =>
     fetch("/api/context/rtk/filters")
@@ -151,6 +168,25 @@ export default function RtkContextPageClient() {
     [t("requests"), formatNumber(rtkStats?.count ?? analytics?.totalRequests)],
     [t("avgSavings"), `${rtkStats?.avgSavingsPct ?? analytics?.avgSavingsPct ?? 0}%`],
   ];
+
+  if (loadFailed) {
+    return (
+      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            {tSettings("compressionTitle")}: {tCommon("failedToLoad")}
+          </p>
+          <button
+            type="button"
+            onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+            className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs text-text-main hover:bg-bg"
+          >
+            {tSettings("retry")}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">

@@ -64,9 +64,16 @@ function Toggle({
 
 export default function CompressionHub() {
   const t = useTranslations("contextCombos");
+  const tSettings = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const [settings, setSettings] = useState<CompressionSettings | null>(null);
   const [combos, setCombos] = useState<NamedCombo[]>([]);
   const [loading, setLoading] = useState(true);
+  // A failed settings load must not show the default-profile view: its select and
+  // Context Editing toggle would save the defaults over the stored row. A retry
+  // re-runs the load; answers that arrive for the run it replaced are ignored.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,9 +94,8 @@ export default function CompressionHub() {
       if (cancelled) return;
       if (settingsData) {
         setSettings(settingsData as CompressionSettings);
-      } else {
-        setSettings({ enabled: false, defaultMode: "off", contextEditing: { enabled: false } });
       }
+      setLoadFailed(!settingsData);
       if (Array.isArray(combosData?.combos)) {
         setCombos(combosData.combos as NamedCombo[]);
       }
@@ -99,7 +105,7 @@ export default function CompressionHub() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadAttempt]);
 
   // ── Settings mutations ───────────────────────────────────────────────────────
   const saveSettings = useCallback(
@@ -137,6 +143,28 @@ export default function CompressionHub() {
       <div className="flex items-center justify-center p-10 text-sm text-text-muted">
         {t("loading")}
       </div>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <section className="flex flex-col gap-5 rounded-xl border border-primary/30 bg-surface p-5">
+        <div className="flex items-center justify-between gap-4">
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            {tSettings("compressionTitle")}: {tCommon("failedToLoad")}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              setLoadAttempt((attempt) => attempt + 1);
+            }}
+            className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs text-text-main hover:bg-bg"
+          >
+            {tSettings("retry")}
+          </button>
+        </div>
+      </section>
     );
   }
 

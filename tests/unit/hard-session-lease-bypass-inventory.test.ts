@@ -97,6 +97,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/services/quotaAutoPing.ts": 1,
   },
   connection: {
+    // Read-only decision catalog: lists configured inventory and checks cooldown/lockout
+    // state without selecting, leasing or touching a connection. Dispatch stays on the
+    // gated selector in /v1/systemone.
+    "open-sse/handlers/systemOneModels.ts": 1,
     "open-sse/handlers/autoComboCandidates.ts": 1,
     "open-sse/handlers/chatCore.ts": 3,
     "open-sse/handlers/cursorCliProxy.ts": 1,
@@ -270,6 +274,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
     Object.keys(EXPECTED.connection).map((file) => [
       file,
       [
+        "open-sse/handlers/systemOneModels.ts",
         "open-sse/handlers/autoComboCandidates.ts",
         "open-sse/handlers/chatCore.ts",
         "open-sse/services/alibabaFreeTier.ts",

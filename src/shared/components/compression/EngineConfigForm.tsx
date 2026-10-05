@@ -25,6 +25,7 @@ export function EngineConfigForm({ schema, value, onChange: set }: EngineConfigF
                 type="number"
                 // NaN (an emptied field, "not set") renders as an empty input, never as 0.
                 value={typeof v === "number" && Number.isFinite(v) ? v : ""}
+                placeholder={f.defaultValue != null ? String(f.defaultValue) : ""}
                 min={f.min}
                 max={f.max}
                 onChange={(e) =>

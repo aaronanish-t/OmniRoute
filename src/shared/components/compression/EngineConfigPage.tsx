@@ -113,6 +113,14 @@ function renderDiffSegment(
 
 // ── Main component ────────────────────────────────────────────────────────
 
+// The engine config schemas are .strict() and reject empty strings where a string
+// field exists (ultra.modelPath is min(1)), but the form seeds string fields from
+// schema defaults like "". Strip empty strings so a default-state save/preview
+// doesn't fail validation for a value the operator never set.
+function withoutEmptyStrings(values: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(values).filter(([, v]) => v !== ""));
+}
+
 export function EngineConfigPage({ engineId }: { engineId: string }) {
   const locale = useLocale();
   const t = useTranslations("compressionEngineConfig");
@@ -210,7 +218,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
     // Strip the `enabled` key — engine on/off is the panel's responsibility.
     const { enabled: _ignored, ...formDetail } = configState;
     void _ignored;
-    let detail: Record<string, unknown> = formDetail;
+    let detail: Record<string, unknown> = withoutEmptyStrings(formDetail);
     if (engineId === "lite") {
       const raw = formDetail.maxToolLength;
       const compressToolResults = formDetail.compressToolResults !== false;
@@ -262,9 +270,9 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
               },
             }
           : engineId === "aggressive"
-            ? { aggressive: { ...configState } }
+            ? { aggressive: withoutEmptyStrings(configState) }
             : engineId === "ultra"
-              ? { ultra: { ...configState } }
+              ? { ultra: withoutEmptyStrings(configState) }
               : undefined;
       const res = await fetch("/api/compression/preview", {
         method: "POST",

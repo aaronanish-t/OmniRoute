@@ -78,7 +78,7 @@ export interface PassthroughModelsSectionProps {
   connectionId: string;
   /** #15690 — blacklist handler for models with error status */
   onBlacklistModel?: (modelId: string, fullModel: string) => Promise<void>;
-  blacklistingModelId?: string | null;
+  
   /** Controlled from the outer component so both sections share one checkbox (#3610). */
   autoHideFailed?: boolean;
   onAutoHideFailedChange?: (v: boolean) => void;
@@ -482,7 +482,7 @@ export default function PassthroughModelsSection({
                 testStatus={modelTestStatus?.[modelId] || null}
                 testingModel={testingModelId === modelId}
                 onBlacklistModel={onBlacklistModel}
-                blacklistingModelId={blacklistingModelId === modelId ? modelId : null}
+                /* removed */
               />
             ))}
           </div>

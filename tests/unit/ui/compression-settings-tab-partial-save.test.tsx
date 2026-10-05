@@ -337,6 +337,31 @@ describe("CompressionSettingsTab saves only what changed", () => {
     }
   );
 
+  it(
+    "sends no language save when the caveman page cannot re-read the row it loaded",
+    { timeout: 30_000 },
+    async () => {
+      const server = startServer();
+      server.write({
+        languageConfig: {
+          enabled: true,
+          defaultLanguage: "en",
+          autoDetect: true,
+          enabledPacks: ["en", "es"],
+        },
+      });
+      render(<CavemanContextPageClient />);
+      await settle();
+      // The page holds a loaded copy; a save built from that copy could be stale.
+      server.failReads();
+
+      fireEvent.click(screen.getByLabelText("autoDetect"));
+      await settle();
+
+      expect(server.puts).toEqual([]);
+    }
+  );
+
   it("leaves outputStyles saved from another tab in place", async () => {
     const server = startServer();
     await renderTab();

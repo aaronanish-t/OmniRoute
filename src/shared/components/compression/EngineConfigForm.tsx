@@ -4,11 +4,11 @@ import type { EngineConfigField } from "@omniroute/open-sse/services/compression
 export interface EngineConfigFormProps {
   schema: EngineConfigField[];
   value: Record<string, unknown>;
-  onChange: (next: Record<string, unknown>) => void;
+  // Called with one field at a time, so the caller can apply it to its latest state.
+  onChange: (key: string, value: unknown) => void;
 }
 
-export function EngineConfigForm({ schema, value, onChange }: EngineConfigFormProps) {
-  const set = (k: string, v: unknown) => onChange({ ...value, [k]: v });
+export function EngineConfigForm({ schema, value, onChange: set }: EngineConfigFormProps) {
   return (
     <div className="flex flex-col gap-3">
       {schema.map((f) => {
@@ -24,8 +24,7 @@ export function EngineConfigForm({ schema, value, onChange }: EngineConfigFormPr
               <input
                 type="number"
                 value={
-                  f.key === "maxToolLength" &&
-                  !(typeof v === "number" && Number.isFinite(v))
+                  f.key === "maxToolLength" && !(typeof v === "number" && Number.isFinite(v))
                     ? ""
                     : (v as number)
                 }

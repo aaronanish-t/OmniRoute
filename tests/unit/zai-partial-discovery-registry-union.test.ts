@@ -190,6 +190,11 @@ test("the tagged base joins the authoritative catalog without displacing discove
   assert.ok(tagged, "unioned row must expose its metadata");
   assert.equal(tagged.targetFormat, "openai");
   assert.ok(tagged.supportedThinkingEfforts?.includes("max"));
+  // The row and its effort array are process-lifetime singletons handed out
+  // by reference (model.ts assigns the array into runtime metadata), so both
+  // must be frozen — a normalize rebuild would otherwise discard the freeze.
+  assert.equal(Object.isFrozen(tagged), true);
+  assert.equal(Object.isFrozen(tagged.supportedThinkingEfforts), true);
   assert.equal(tagged.supportsVision, true);
   assert.equal(tagged.contextWindow, 1000000);
   assert.equal(tagged.outputTokenLimit, 131072);

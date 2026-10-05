@@ -240,7 +240,7 @@ function getRegistryDispatchRows(storedProviderId: string): SyncedAvailableModel
       name: model.name,
       targetFormat: model.targetFormat,
       ...(model.supportedThinkingEfforts
-        ? { supportedThinkingEfforts: Object.freeze([...model.supportedThinkingEfforts]) }
+        ? { supportedThinkingEfforts: [...model.supportedThinkingEfforts] }
         : {}),
       ...(model.supportsVision ? { supportsVision: true } : {}),
       ...(model.toolCalling ? { supportsTools: true } : {}),
@@ -255,10 +255,22 @@ function getRegistryDispatchRows(storedProviderId: string): SyncedAvailableModel
         : {}),
     })),
     storedProviderId
-  ).map((row) => Object.freeze({ ...row, catalogOrigin: "registry" as const }));
-  // Freeze the shared rows: they are handed out by reference on every catalog
-  // read, so copy-on-write is a structural guarantee, not a caller convention.
-  for (const row of rows) Object.freeze(row);
+  ).map((row): SyncedAvailableModel => {
+    // Freeze the row AND its effort array: both are process-lifetime
+    // singletons handed out by reference on every catalog read (model.ts
+    // assigns supportedThinkingEfforts into runtime metadata directly).
+    // normalizeSyncedAvailableModels rebuilds arrays, so the freeze must land
+    // here, after normalize. The cast documents that the runtime contract is
+    // frozen even though the field type stays a mutable string[].
+    const efforts = row.supportedThinkingEfforts
+      ? (Object.freeze([...row.supportedThinkingEfforts]) as string[])
+      : undefined;
+    return Object.freeze({
+      ...row,
+      catalogOrigin: "registry" as const,
+      ...(efforts ? { supportedThinkingEfforts: efforts } : {}),
+    });
+  });
   registryDispatchRowsCache.set(storedProviderId, rows);
   return rows;
 }

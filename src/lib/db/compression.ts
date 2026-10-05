@@ -597,8 +597,9 @@ function parseStoredEnginesMap(value: unknown): Record<string, EngineToggle> | n
 }
 
 // Derive the per-engine toggle map from the legacy compression fields so existing installs keep
-// their behavior before they ever write an `engines` row. Single-engine modes (caveman/rtk/ultra/
-// aggressive) come from their dedicated config blocks; structural engines (lite/headroom/
+// their behavior before they ever write an `engines` row. Single-engine modes (caveman/rtk/ultra)
+// come from their dedicated config blocks; aggressive has no enabled signal in its config and only
+// turns on via the `defaultMode` fallback below. Structural engines (lite/headroom/
 // session-dedup/ccr/llmlingua) come from the default-combo pipeline. `defaultMode` is a last-resort
 // signal that turns on its single-mode engine when nothing else already did.
 function deriveEnginesMap(config: CompressionConfig): Record<string, EngineToggle> {
@@ -633,7 +634,9 @@ function deriveEnginesMap(config: CompressionConfig): Record<string, EngineToggl
         enabled = config.ultra?.enabled === true;
         break;
       case "aggressive":
-        enabled = aggressiveEnabled(config.aggressive);
+        // No enabled signal: `normalizeAggressiveConfig` never emits one, so aggressive is off
+        // here even though the default combo may include it (dispatch reads the combo directly
+        // on the legacy path). Only the defaultMode fallback below turns it on in this map.
         break;
       default:
         // Structural engines (lite/headroom/session-dedup/ccr/llmlingua): on when present in the
@@ -652,12 +655,6 @@ function deriveEnginesMap(config: CompressionConfig): Record<string, EngineToggl
   }
 
   return engines;
-}
-
-// `aggressive` config doesn't carry a top-level `enabled` flag in its type, but legacy installs may
-// have stored one. Read it defensively for the derived engines map.
-function aggressiveEnabled(value: AggressiveConfig | undefined): boolean {
-  return toRecord(value).enabled === true;
 }
 
 export async function getCompressionSettings(): Promise<CompressionConfig> {

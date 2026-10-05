@@ -166,38 +166,28 @@ function main() {
 
   // 1) Bundle the worker the resolver expects: <standalone>/open-sse/.../onnxWorker.js
   const workerDest = join(STANDALONE, WORKER_REL);
-  if (!existsSync(workerDest)) {
-    mkdirSync(dirname(workerDest), { recursive: true });
-    try {
-      runBuildTool(
-        "esbuild",
-        "esbuild",
-        [
-          join(
-            ROOT,
-            "open-sse",
-            "services",
-            "compression",
-            "engines",
-            "llmlingua",
-            "onnxWorker.ts"
-          ),
-          "--bundle",
-          "--platform=node",
-          "--packages=external",
-          "--format=esm",
-          `--outfile=${workerDest}`,
-        ],
-        { stdio: "inherit" }
-      );
-      console.log("[colocate-standalone] ✅ LLMLingua worker bundled into standalone tree");
-    } catch (err) {
-      console.warn("[colocate-standalone] ⚠️  worker bundle error:", err.message);
-    }
-  } else {
-    console.log("[colocate-standalone] worker already present (skipping bundle)");
+  // A traced source placeholder may already exist here. Always overwrite it with
+  // the real bundle; otherwise the optional worker silently runs an empty module.
+  mkdirSync(dirname(workerDest), { recursive: true });
+  try {
+    runBuildTool(
+      "esbuild",
+      "esbuild",
+      [
+        join(ROOT, "open-sse", "services", "compression", "engines", "llmlingua", "onnxWorker.ts"),
+        "--bundle",
+        "--platform=node",
+        "--packages=external",
+        "--format=esm",
+        `--outfile=${workerDest}`,
+      ],
+      { stdio: "inherit" }
+    );
+    console.log("[colocate-standalone] ✅ LLMLingua worker bundled into standalone tree");
+    workerDirs.push(dirname(workerDest));
+  } catch (err) {
+    console.warn("[colocate-standalone] ⚠️  worker bundle error:", err.message);
   }
-  workerDirs.push(dirname(workerDest));
 
   // 2) Co-locate the optional-dep closure (NO-CLOBBER, same semantics as colocateOptionals.mjs)
   const srcNm = join(ROOT, "node_modules");

@@ -128,6 +128,26 @@ test("scoped layout runs a CJS server.js and an ESM worker.js side by side", () 
   }
 });
 
+test("colocate-standalone overwrites a traced LLMLingua placeholder", () => {
+  const root = mkdtempSync(join(tmpdir(), "colocate-onnx-placeholder-"));
+  try {
+    writeFileSync(join(root, "server.js"), "module.exports = {};\n");
+    const workerDir = join(root, "open-sse", "services", "compression", "engines", "llmlingua");
+    mkdirSync(workerDir, { recursive: true });
+    const placeholder = "// traced placeholder\nexport {};\n";
+    writeFileSync(join(workerDir, "onnxWorker.js"), placeholder);
+    execFileSync(process.execPath, ["scripts/build/colocate-standalone.mjs"], {
+      cwd: join(import.meta.dirname, "..", "..", ".."),
+      env: { ...process.env, OMNIROUTE_STANDALONE_DIR: root },
+      stdio: "pipe",
+    });
+    assert.notEqual(readFileSync(join(workerDir, "onnxWorker.js"), "utf8"), placeholder);
+    assert.equal(JSON.parse(readFileSync(join(workerDir, "package.json"), "utf8")).type, "module");
+  } finally {
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
 test("colocate-standalone bundles the required compression worker", () => {
   const root = mkdtempSync(join(tmpdir(), "colocate-compression-worker-"));
   try {

@@ -186,9 +186,15 @@ let idleTimer: NodeJS.Timeout | null = null;
 export function resolveWorkerFile(): { workerFile: string; execArgv: string[] } {
   const anchors = runtimeAnchors();
 
-  // Prod first: the esbuild'd .js under the install root.
+  // The tracked .js file is only a Turbopack build-time placeholder in the source tree.
+  // A colocated bundle has its own ESM scope, written by colocate-standalone.mjs.
   const jsRoot = firstAncestorWith(anchors, WORKER_JS_REL);
-  if (jsRoot) return { workerFile: path.join(jsRoot, WORKER_JS_REL), execArgv: [] };
+  if (
+    jsRoot &&
+    (!fs.existsSync(path.join(jsRoot, WORKER_TS_REL)) ||
+      fs.existsSync(path.join(path.dirname(path.join(jsRoot, WORKER_JS_REL)), "package.json")))
+  )
+    return { workerFile: path.join(jsRoot, WORKER_JS_REL), execArgv: [] };
 
   // Dev: the .ts source (tsx loader).
   const tsRoot = firstAncestorWith(anchors, WORKER_TS_REL);

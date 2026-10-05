@@ -512,10 +512,13 @@ export function enrichCodexModelsFromGithubCatalog(
   githubCatalogModels: CodexDiscoveryModel[]
 ): CodexDiscoveryModel[] {
   const byId = new Map(githubCatalogModels.map((model) => [model.id, model]));
-  return models.map((model) => {
+  const liveIds = new Set(models.map((model) => model.id));
+  const enriched = models.map((model) => {
     const githubModel = byId.get(model.id);
     return githubModel ? { ...githubModel, ...model } : model;
   });
+  const missingFromLive = githubCatalogModels.filter((model) => !liveIds.has(model.id));
+  return [...enriched, ...missingFromLive];
 }
 
 export async function fetchCodexDiscoveryModels({

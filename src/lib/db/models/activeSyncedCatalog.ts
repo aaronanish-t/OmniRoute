@@ -1,4 +1,7 @@
-import { providerUsesAuthoritativeLiveCatalog } from "@omniroute/open-sse/config/providerRegistry";
+import {
+  providerUsesAuthoritativeLiveCatalog,
+  getRegistryEntry,
+} from "@omniroute/open-sse/config/providerRegistry";
 import { getSearchProvider } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
 import {
@@ -205,6 +208,58 @@ async function unionCustomModels(
 }
 
 /**
+ * Partial discovery surfaces must not veto registry models that carry explicit
+ * per-model dispatch intent (`targetFormat`): z.ai's Anthropic-compat /models
+ * omits the coding-plan glm-5.3-flash family even though the provider serves
+ * it, and an authoritative snapshot built from that surface then rejected the
+ * model pre-dispatch ("model_not_in_catalog"). The union is bounded — registry
+ * rows join only for ids discovery did not report, so synced metadata keeps
+ * winning wherever discovery spoke, and untagged registry models stay
+ * discovery-gated. Same union shape as #12866 (siblings) and #12597
+ * (customModels).
+ */
+function unionRegistryDispatchModels(
+  storedProviderId: string,
+  models: SyncedAvailableModel[]
+): SyncedAvailableModel[] {
+  const entry = getRegistryEntry(storedProviderId);
+  const tagged = (entry?.models ?? []).filter(
+    (model) => typeof model.targetFormat === "string" && model.targetFormat.length > 0
+  );
+  if (tagged.length === 0) return models;
+  // Reconcile only against a discovery surface that actually reported
+  // something: an empty snapshot must keep the existing non-authoritative
+  // fallbacks, and custom rows alone must never establish authority (#12934).
+  if (models.length === 0) return models;
+
+  const registryRows = normalizeSyncedAvailableModels(
+    tagged.map((model) => ({
+      id: model.id,
+      name: model.name,
+      targetFormat: model.targetFormat,
+      ...(model.supportedThinkingEfforts
+        ? { supportedThinkingEfforts: [...model.supportedThinkingEfforts] }
+        : {}),
+      ...(model.supportsVision ? { supportsVision: true } : {}),
+      ...(typeof model.contextLength === "number" ? { contextWindow: model.contextLength } : {}),
+      ...(typeof model.maxOutputTokens === "number"
+        ? { outputTokenLimit: model.maxOutputTokens }
+        : {}),
+    })),
+    storedProviderId
+  );
+
+  const merged = new Map<string, SyncedAvailableModel>();
+  for (const model of models) {
+    if (model?.id) merged.set(model.id, model);
+  }
+  for (const row of registryRows) {
+    if (row?.id && !merged.has(row.id)) merged.set(row.id, row);
+  }
+  return merged.size === models.length ? models : Array.from(merged.values());
+}
+
+/**
  * Return the unioned synced catalog belonging only to active connections.
  *
  * A provider is authoritative only when at least one active connection has a
@@ -256,12 +311,16 @@ export async function getActiveSyncedCatalog(
   try {
     const lookupIds = catalogLookupIds(storedProviderId);
     const siblingCatalogs = await Promise.all(lookupIds.map(loadConnectionCatalog));
-    // #12866 unions the agy/antigravity sibling catalogs; #12934 then overlays the
-    // picker-added customModels so dispatch admits the same rows the picker REST shows.
+    // #12866 unions the agy/antigravity sibling catalogs; registry models with
+    // explicit dispatch intent join before #12934 overlays the picker-added
+    // customModels, so dispatch admits the same rows the picker REST shows.
     const discovered = unionModels(siblingCatalogs.map((catalog) => catalog.models));
+    const withRegistryDispatch = unionRegistryDispatchModels(storedProviderId, discovered);
     const models = enrichCursorCatalog(
       storedProviderId,
-      includeCustomModels ? await unionCustomModels(storedProviderId, discovered) : discovered,
+      includeCustomModels
+        ? await unionCustomModels(storedProviderId, withRegistryDispatch)
+        : withRegistryDispatch,
       includeCustomModels
     );
     if (models.length > 0) {

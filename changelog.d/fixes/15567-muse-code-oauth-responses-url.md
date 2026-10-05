@@ -1,0 +1,1 @@
+- **fix(muse):** native Muse Code OAuth connections (stored `baseUrl` from the key mint) now send Responses-format requests to `/responses` instead of `/chat/completions`, which Meta rejected with `unknown parameter \`input\`` ([#15567](https://github.com/diegosouzapw/OmniRoute/pull/15567))

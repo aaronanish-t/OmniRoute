@@ -764,29 +764,13 @@ async function saveCallLogOperation(entry: any): Promise<void> {
         protectedError !== null ||
         protectedPipelinePayloads !== null);
 
-    let detailState: CallLogDetailState = "none";
-    let artifactRelPath: string | null = null;
-    let artifactSizeBytes: number | null = null;
-    let artifactSha256: string | null = null;
-
-    if (detailExpected) {
-      const artifact = buildArtifact(
-        logEntry,
-        protectedRequestBody,
-        protectedResponseBody,
-        protectedError,
-        protectedPipelinePayloads
-      );
-      const artifactResult = await writeCallArtifactAsync(artifact);
-      if (artifactResult) {
-        detailState = "ready";
-        artifactRelPath = artifactResult.relPath;
-        artifactSizeBytes = artifactResult.sizeBytes;
-        artifactSha256 = artifactResult.sha256;
-      } else {
-        detailState = "missing";
-      }
-    }
+    // The row is inserted BEFORE its artifact is written: the artifact path is
+    // derived from (timestamp, id), so the id must be final — i.e. accepted by
+    // the UNIQUE primary key — before any file is published. Writing first and
+    // regenerating the id afterwards let a repeated explicit id + timestamp
+    // overwrite an earlier row's artifact. A row with details pending stays
+    // 'missing' until the artifact lands (the continuation bridge covers it).
+    const initialDetailState: CallLogDetailState = detailExpected ? "missing" : "none";
 
     // Optional column (migration 191) — only fixed identifiers are spliced in.
     const resilienceCol = hasResilienceColumn ? ", resilience_actions" : "";
@@ -828,10 +812,10 @@ async function saveCallLogOperation(entry: any): Promise<void> {
     const insertParams = {
       ...logEntry,
       errorSummary: toStoredErrorSummary(protectedError),
-      detailState,
-      artifactRelPath,
-      artifactSizeBytes,
-      artifactSha256,
+      detailState: initialDetailState,
+      artifactRelPath: null,
+      artifactSizeBytes: null,
+      artifactSha256: null,
       hasRequestBody: protectedRequestBody !== null ? 1 : 0,
       hasResponseBody: protectedResponseBody !== null ? 1 : 0,
       resilienceActions,
@@ -839,7 +823,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
       requestSummary,
     };
     // #14451: a 6-char dashboard traceId (or any reused explicit id) can collide.
-    // Keep the already-written artifact path; only the SQLite primary key is regenerated.
+    // Regenerate logEntry.id too, so the artifact summary and path use the final id.
     for (let attempt = 0; ; attempt++) {
       try {
         insertStmt.run(insertParams);
@@ -847,12 +831,34 @@ async function saveCallLogOperation(entry: any): Promise<void> {
       } catch (error) {
         if (!isCallLogIdCollision(error) || attempt >= CALL_LOG_ID_RETRY_LIMIT) throw error;
         insertParams.id = generateLogId();
+        logEntry.id = insertParams.id;
       }
     }
     // sink note: the sink is the unique consumer — reset only after a successful
     // INSERT, so a failed write (or a second persistence of the same
     // attempt) keeps the summary instead of silently writing NULL.
     resetResilienceActions();
+
+    let detailState: CallLogDetailState = initialDetailState;
+    if (detailExpected) {
+      const artifact = buildArtifact(
+        logEntry,
+        protectedRequestBody,
+        protectedResponseBody,
+        protectedError,
+        protectedPipelinePayloads
+      );
+      const artifactResult = await writeCallArtifactAsync(artifact);
+      if (artifactResult) {
+        db.prepare(
+          `UPDATE call_logs
+             SET detail_state = 'ready', artifact_relpath = ?,
+                 artifact_size_bytes = ?, artifact_sha256 = ?
+           WHERE id = ?`
+        ).run(artifactResult.relPath, artifactResult.sizeBytes, artifactResult.sha256, logEntry.id);
+        detailState = "ready";
+      }
+    }
 
     if (detailState === "ready" && typeof logEntry.responseId === "string") {
       // The durable row is now authoritative; drop the bridge entry instead

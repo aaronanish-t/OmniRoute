@@ -272,15 +272,20 @@ function ensureWorker(): Worker {
     pump();
   });
 
-  const failOpenAndRespawn = () => {
+  const failOpenAndRespawn = (detail: string) => {
     // Resolve every pending entry fail-open, then drop the worker so the next call respawns.
+    if (pending.size > 0) notifyCompressionFailOpen(detail);
     failAllPending();
     if (worker === w) worker = null;
     busy = false;
   };
 
-  w.on("error", failOpenAndRespawn);
-  w.on("exit", failOpenAndRespawn);
+  w.on("error", (error: Error) => {
+    failOpenAndRespawn(`llmlingua worker error: ${sanitizeErrorMessage(error.message)}`);
+  });
+  w.on("exit", (code: number) => {
+    failOpenAndRespawn(`llmlingua worker exit: ${code}`);
+  });
 
   worker = w;
   return w;

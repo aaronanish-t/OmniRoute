@@ -640,6 +640,40 @@ describe("llmlingua worker fail-open catch paths", () => {
     }
   });
 
+  it("warns when a worker errors with a pending request", async () => {
+    const broken = fakeWorker();
+    __setLlmlinguaWorkerHarnessForTests({ depsAvailable: true, factory: () => broken });
+    __resetCompressionFailOpenNotifierForTests();
+    const warn = captureWarn();
+    try {
+      const result = workerBackend("original prose", {});
+      assert.equal(broken.messages.length, 1);
+      broken.emit("error", new Error("worker module missing"));
+      assert.equal(await result, "original prose");
+      assert.equal(warn.lines.filter((line) => line.includes("llmlingua worker error")).length, 1);
+    } finally {
+      warn.restore();
+      restoreHarness();
+    }
+  });
+
+  it("warns when a worker exits with a pending request", async () => {
+    const broken = fakeWorker();
+    __setLlmlinguaWorkerHarnessForTests({ depsAvailable: true, factory: () => broken });
+    __resetCompressionFailOpenNotifierForTests();
+    const warn = captureWarn();
+    try {
+      const result = workerBackend("original prose", {});
+      assert.equal(broken.messages.length, 1);
+      broken.emit("exit", 1);
+      assert.equal(await result, "original prose");
+      assert.equal(warn.lines.filter((line) => line.includes("llmlingua worker exit")).length, 1);
+    } finally {
+      warn.restore();
+      restoreHarness();
+    }
+  });
+
   it("fails open and respawns when postMessage throws", async () => {
     let spawns = 0;
     const flaky = fakeWorker();

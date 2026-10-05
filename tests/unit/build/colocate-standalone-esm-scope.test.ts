@@ -5,7 +5,10 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
 
-import { writeEsmWorkerScopes } from "../../../scripts/build/colocate-standalone.mjs";
+import {
+  bundleOptionalWorker,
+  writeEsmWorkerScopes,
+} from "../../../scripts/build/colocate-standalone.mjs";
 
 /**
  * Regression coverage for the standalone CJS/ESM `package.json` conflict.
@@ -143,6 +146,21 @@ test("colocate-standalone overwrites a traced LLMLingua placeholder", () => {
     });
     assert.notEqual(readFileSync(join(workerDir, "onnxWorker.js"), "utf8"), placeholder);
     assert.equal(JSON.parse(readFileSync(join(workerDir, "package.json"), "utf8")).type, "module");
+  } finally {
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("failed LLMLingua bundling removes a traced placeholder", () => {
+  const root = mkdtempSync(join(tmpdir(), "colocate-onnx-failure-"));
+  try {
+    const workerFile = join(root, "onnxWorker.js");
+    writeFileSync(workerFile, "export {};\n");
+    const built = bundleOptionalWorker(workerFile, () => {
+      throw new Error("forced esbuild failure");
+    });
+    assert.equal(built, false);
+    assert.equal(existsSync(workerFile), false, "runtime must never select a traced placeholder");
   } finally {
     rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }

@@ -23,6 +23,8 @@ if (!process.env.API_KEY_SECRET) {
 const coreDb = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
+const { cloudSyncActionSchema } = await import("../../src/shared/validation/schemas/cloud.ts");
 
 function createAbortError(message = "aborted") {
   const error = new Error(message);
@@ -48,6 +50,7 @@ async function resetStorage() {
 
 test.beforeEach(async () => {
   await resetStorage();
+  await settingsDb.updateSettings({ cloudEnabled: true });
 });
 
 test.after(() => {
@@ -82,12 +85,70 @@ test.after(() => {
   }
 });
 
+test("fresh installations do not enable cloud sync", async () => {
+  await resetStorage();
+  assert.equal(await settingsDb.isCloudEnabled(), false);
+});
+
+test("disabled sync never uploads even with a configured URL", async () => {
+  process.env.CLOUD_URL = "https://cloud.example";
+  await settingsDb.updateSettings({ cloudEnabled: false });
+  globalThis.fetch = async () => {
+    throw new Error("Unexpected outbound request");
+  };
+  const cloudSync = await loadCloudSync("disabled");
+  assert.deepEqual(await cloudSync.syncToCloud("machine-1"), { error: "Cloud sync is disabled" });
+});
+
 test("cloudSync returns a configuration error when the cloud URL is missing", async () => {
   const cloudSync = await loadCloudSync("no-url");
 
   const result = await cloudSync.syncToCloud("machine-1");
 
   assert.deepEqual(result, { error: "NEXT_PUBLIC_CLOUD_URL is not configured" });
+});
+
+test("false URL disables the destination without falling back to the public URL", async () => {
+  process.env.CLOUD_URL = "false";
+  process.env.NEXT_PUBLIC_CLOUD_URL = "https://cloud.example";
+  globalThis.fetch = async () => {
+    throw new Error("Unexpected outbound request");
+  };
+  const cloudSync = await loadCloudSync("false-url");
+  assert.equal(cloudSync.CLOUD_URL, undefined);
+  assert.deepEqual(await cloudSync.syncToCloud("machine-1"), {
+    error: "NEXT_PUBLIC_CLOUD_URL is not configured",
+  });
+});
+
+test("explicit enable can perform the initial upload while disabled", async () => {
+  process.env.CLOUD_URL = "https://cloud.example";
+  await settingsDb.updateSettings({ cloudEnabled: false });
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return new Response(JSON.stringify({ changes: {}, data: {} }));
+  };
+  const cloudSync = await loadCloudSync("explicit-enable");
+  const result = await cloudSync.syncToCloud("machine-1", null, { explicitEnable: true });
+  assert.equal(result.success, true);
+  assert.equal(calls, 1);
+  assert.equal(await settingsDb.isCloudEnabled(), false);
+});
+
+test("enable requires explicit credential-upload acknowledgment", () => {
+  assert.equal(cloudSyncActionSchema.safeParse({ action: "enable" }).success, false);
+  assert.equal(
+    cloudSyncActionSchema.safeParse({ action: "enable", acknowledgeCredentialUpload: false })
+      .success,
+    false
+  );
+  assert.equal(
+    cloudSyncActionSchema.safeParse({ action: "enable", acknowledgeCredentialUpload: true })
+      .success,
+    true
+  );
+  assert.equal(cloudSyncActionSchema.safeParse({ action: "disable" }).success, true);
 });
 
 test("fetchWithTimeout aborts when the timeout elapses", async () => {

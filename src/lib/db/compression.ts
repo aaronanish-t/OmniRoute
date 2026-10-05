@@ -675,7 +675,9 @@ export async function getCompressionSettings(): Promise<CompressionConfig> {
 
   // Legacy per-engine rows (aggressiveConfig/ultraConfig/headroomConfig) share their read case
   // with the current keys. When both rows exist the current key must win, regardless of the
-  // order the storage engine happens to return them in.
+  // order the storage engine happens to return them in. Presence, not usability: a corrupt
+  // current row (BLOB/unparseable JSON) also suppresses the legacy row — the engine resets to
+  // defaults and the corruption warn below is the operator's signal to re-save.
   const rowKeys = new Set(
     rows.map((row) => toRecord(row).key).filter((key): key is string => typeof key === "string")
   );

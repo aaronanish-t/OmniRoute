@@ -13,10 +13,9 @@ import os from "node:os";
 import path from "node:path";
 
 import {
+  DEFAULT_AGGRESSIVE_CONFIG,
   DEFAULT_HEADROOM_CONFIG,
-  type AggressiveConfig,
-  type HeadroomConfig,
-  type UltraConfig,
+  DEFAULT_ULTRA_CONFIG,
 } from "../../../open-sse/services/compression/types.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-compression-legacy-keys-"));
@@ -58,28 +57,30 @@ after(() => {
 
 describe("current engine settings rows win over legacy rows", () => {
   it("aggressive beats legacy aggressiveConfig after a save", async () => {
-    seedRow("aggressiveConfig", { maxTokensPerMessage: 1111 } satisfies AggressiveConfig);
-    seedRow("aggressive", { maxTokensPerMessage: 2222 } satisfies AggressiveConfig);
+    seedRow("aggressiveConfig", { ...DEFAULT_AGGRESSIVE_CONFIG, maxTokensPerMessage: 1111 });
+    seedRow("aggressive", { ...DEFAULT_AGGRESSIVE_CONFIG, maxTokensPerMessage: 2222 });
 
-    await updateCompressionSettings({ aggressive: { maxTokensPerMessage: 4096 } });
+    await updateCompressionSettings({
+      aggressive: { ...DEFAULT_AGGRESSIVE_CONFIG, maxTokensPerMessage: 4096 },
+    });
 
     const settings = await getCompressionSettings();
     assert.equal(settings.aggressive?.maxTokensPerMessage, 4096);
   });
 
   it("ultra beats legacy ultraConfig after a save", async () => {
-    seedRow("ultraConfig", { compressionRate: 0.1 } satisfies UltraConfig);
-    seedRow("ultra", { compressionRate: 0.2 } satisfies UltraConfig);
+    seedRow("ultraConfig", { ...DEFAULT_ULTRA_CONFIG, compressionRate: 0.1 });
+    seedRow("ultra", { ...DEFAULT_ULTRA_CONFIG, compressionRate: 0.2 });
 
-    await updateCompressionSettings({ ultra: { compressionRate: 0.9 } });
+    await updateCompressionSettings({ ultra: { ...DEFAULT_ULTRA_CONFIG, compressionRate: 0.9 } });
 
     const settings = await getCompressionSettings();
     assert.equal(settings.ultra?.compressionRate, 0.9);
   });
 
   it("headroom beats legacy headroomConfig after a save", async () => {
-    seedRow("headroomConfig", { minRows: 3 } satisfies HeadroomConfig);
-    seedRow("headroom", { minRows: 4 } satisfies HeadroomConfig);
+    seedRow("headroomConfig", { minRows: 3 });
+    seedRow("headroom", { minRows: 4 });
 
     await updateCompressionSettings({ headroom: { minRows: 50 } });
 
@@ -87,11 +88,42 @@ describe("current engine settings rows win over legacy rows", () => {
     assert.equal(settings.headroom?.minRows, 50);
   });
 
-  it("legacy row still applies when no current row exists", async () => {
-    seedRow("aggressiveConfig", { maxTokensPerMessage: 1111 } satisfies AggressiveConfig);
+  it("legacy aggressiveConfig still applies when no current row exists", async () => {
+    seedRow("aggressiveConfig", { ...DEFAULT_AGGRESSIVE_CONFIG, maxTokensPerMessage: 1111 });
 
     const settings = await getCompressionSettings();
     assert.equal(settings.aggressive?.maxTokensPerMessage, 1111);
+  });
+
+  it("legacy ultraConfig still applies when no current row exists", async () => {
+    seedRow("ultraConfig", { ...DEFAULT_ULTRA_CONFIG, compressionRate: 0.1 });
+
+    const settings = await getCompressionSettings();
+    assert.equal(settings.ultra?.compressionRate, 0.1);
+  });
+
+  it("legacy headroomConfig still applies when no current row exists", async () => {
+    seedRow("headroomConfig", { minRows: 7 });
+
+    const settings = await getCompressionSettings();
+    assert.equal(settings.headroom?.minRows, 7);
+  });
+
+  it("a corrupt current row still shadows a valid legacy row (deliberate)", async () => {
+    // Presence, not usability: a BLOB current row (the #13456 corruption mode) is skipped
+    // by the read loop but still suppresses the legacy row — the engine resets to defaults
+    // and the corruption warn is the operator's signal to re-save.
+    seedRow("aggressiveConfig", { ...DEFAULT_AGGRESSIVE_CONFIG, maxTokensPerMessage: 1111 });
+    core
+      .getDbInstance()
+      .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+      .run("compression", "aggressive", Buffer.from("corrupt-blob"));
+
+    const settings = await getCompressionSettings();
+    assert.equal(
+      settings.aggressive?.maxTokensPerMessage,
+      DEFAULT_AGGRESSIVE_CONFIG.maxTokensPerMessage
+    );
   });
 
   it("non-object legacy value resets the engine to defaults", async () => {

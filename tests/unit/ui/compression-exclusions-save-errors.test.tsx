@@ -14,9 +14,9 @@ vi.mock("next-intl", () => {
 const STORED = ["openai/text-embedding-3-large"];
 const TYPED = "anthropic/*\ngpt-5-6";
 
-// An HTTP status, or "offline" for a fetch that rejects because the request never
-// reached the server.
-type Reply = number | "offline";
+// An HTTP status, "offline" for a fetch that rejects because the request never reached the
+// server, or "hang" for one that never answers until its signal aborts.
+type Reply = number | "offline" | "hang";
 
 interface ServerOptions {
   load?: Reply;
@@ -24,14 +24,24 @@ interface ServerOptions {
   loadBody?: unknown;
   // The reply to each PUT in turn; PUTs past the end succeed.
   saves?: Reply[];
+  // The GET waits for releaseLoad() before answering.
+  holdLoad?: boolean;
 }
 
 // Stands in for GET/PUT /api/settings/compression, which answers with the settings row
 // (a PUT with the row after the write), or with { error } and the failing status.
-function startServer({ load = 200, loadBody, saves = [] }: ServerOptions = {}) {
+function startServer({ load = 200, loadBody, saves = [], holdLoad = false }: ServerOptions = {}) {
   let stored: Record<string, unknown> = { exclusions: STORED };
   const puts: Array<Record<string, unknown>> = [];
-  const answer = (reply: Reply, okBody: () => unknown) => {
+  let releaseLoad: () => void = () => {};
+  // Like fetch, a request that never gets a reply rejects once its signal aborts, and at once
+  // when the signal has already aborted.
+  const stall = (signal?: AbortSignal | null) =>
+    new Promise<Response>((_, rejectReply) => {
+      if (signal?.aborted) rejectReply(signal.reason);
+      else signal?.addEventListener("abort", () => rejectReply(signal.reason));
+    });
+  const answer = (reply: Exclude<Reply, "hang">, okBody: () => unknown) => {
     if (reply === "offline") throw new TypeError("Failed to fetch");
     const body = reply === 200 ? okBody() : { error: "Internal Server Error" };
     return new Response(JSON.stringify(body), {
@@ -44,16 +54,27 @@ function startServer({ load = 200, loadBody, saves = [] }: ServerOptions = {}) {
     vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const { pathname } = new URL(String(input), "http://localhost");
       if (pathname !== "/api/settings/compression") return answer(404, () => null);
-      if (init?.method !== "PUT") return answer(load, () => loadBody ?? stored);
+      if (init?.method !== "PUT") {
+        if (holdLoad && load !== "hang") {
+          return new Promise<Response>((resolve) => {
+            releaseLoad = () => resolve(answer(load, () => loadBody ?? stored));
+          });
+        }
+        if (load === "hang") return stall(init?.signal);
+        return answer(load, () => loadBody ?? stored);
+      }
       const body = JSON.parse(String(init.body));
       puts.push(body);
-      return answer(saves[puts.length - 1] ?? 200, () => {
+      const reply = saves[puts.length - 1] ?? 200;
+      if (reply === "hang") return stall(init?.signal);
+      return answer(reply, () => {
         stored = { ...stored, ...body };
         return stored;
       });
     })
   );
-  return { puts };
+  // Late-bound: the stub assigns the real release only when the held GET actually runs.
+  return { puts, releaseLoad: () => releaseLoad() };
 }
 
 async function settle() {
@@ -69,6 +90,16 @@ async function renderPanel() {
     textarea: screen.getByTestId("compression-exclusions-textarea") as HTMLTextAreaElement,
     save: screen.getByTestId("compression-exclusions-save") as HTMLButtonElement,
   };
+}
+
+// jsdom's AbortSignal.timeout runs on a timer the fake clock cannot reach, so route it through
+// setTimeout, which the fake clock controls.
+function routeTimeoutsThroughFakeClock() {
+  vi.spyOn(AbortSignal, "timeout").mockImplementation((ms) => {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(new DOMException("Timed out", "TimeoutError")), ms);
+    return controller.signal;
+  });
 }
 
 // Any element whose own text holds the key as a whole word, so a message with more words
@@ -157,6 +188,50 @@ describe("ExclusionsPanel reports failed saves and loads", () => {
     await settle();
 
     expect(status.textContent).toBe("compressionExclusionsSaved");
+  });
+
+  it("shows no count while the stored list is still loading", async () => {
+    const server = startServer({ holdLoad: true });
+    const { textarea } = await renderPanel();
+    expect(textarea.disabled, "textarea disabled while loading").toBe(true);
+    const count = screen.getByTestId("compression-exclusions-count");
+    expect(count.textContent).toBe("");
+
+    server.releaseLoad();
+    await settle();
+    expect(textarea.disabled).toBe(false);
+    expect(count.textContent).toBe("compressionExclusionsCount");
+  });
+
+  it("a save that never gets a reply gives up and says the save failed", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    routeTimeoutsThroughFakeClock();
+    startServer({ saves: ["hang"] });
+    const { textarea, save } = await renderPanel();
+    fireEvent.change(textarea, { target: { value: TYPED } });
+
+    fireEvent.click(save);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_001);
+    });
+
+    expectShown("saveFailed");
+    expect(save.disabled, "Save usable again after the save gave up").toBe(false);
+  });
+
+  it("a load that never gets a reply gives up, says so, and keeps the editor locked", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    routeTimeoutsThroughFakeClock();
+    startServer({ load: "hang" });
+    render(<ExclusionsPanel />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_001);
+    });
+
+    expectShown("failedLoadWithStatus");
+    const textarea = screen.getByTestId("compression-exclusions-textarea") as HTMLTextAreaElement;
+    expect(textarea.disabled, "textarea locked after the load gave up").toBe(true);
   });
 
   it.each<[string, ServerOptions]>([

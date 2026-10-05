@@ -39,10 +39,21 @@ const FALLBACK_SETTINGS: CompressionSettings = {
   contextEditing: { enabled: false },
 };
 
-// Every mounted Hub shares one save queue. A Hub that unmounts with saves still queued keeps
-// sending them, and a Hub mounted afterwards loads and saves behind them, so it shows what the
-// server stored and an older value never lands after a newer one.
+// Every mounted Hub in this tab shares one save queue: a Hub that unmounts with saves still
+// queued keeps sending them, and a Hub mounted afterwards loads and saves behind them, so it
+// shows what the server stored and an older value never lands after a newer one. Another tab
+// has its own queue and its own last-saved copy, so it can still overwrite the server behind
+// this one.
 let saveQueue: Promise<void> = Promise.resolve();
+
+// A save still queued or in flight is lost if the page unloads, so the browser asks before
+// leaving while any save is pending.
+let pendingSaves = 0;
+function confirmLeave(event: BeforeUnloadEvent) {
+  event.preventDefault();
+  // Chrome and Edge before 119 show the prompt only when returnValue is set.
+  event.returnValue = true;
+}
 
 // ── Sub-components ──────────────────────────────────────────────────────────────
 
@@ -89,6 +100,8 @@ export default function CompressionHub() {
   // back only its own fields and never undoes a newer save.
   const savedRef = useRef(FALLBACK_SETTINGS);
   const queuedRef = useRef<Partial<CompressionSettings>[]>([]);
+  // The fields whose latest save failed; the error shows while any remain.
+  const failedRef = useRef(new Set<string>());
 
   // ── Initial load (parallel) ──────────────────────────────────────────────────
   useEffect(() => {
@@ -96,6 +109,9 @@ export default function CompressionHub() {
     async function load() {
       setLoading(true);
       await saveQueue;
+      // The queue can hold a stalled save for up to the save timeout; a Hub unmounted during
+      // that wait must not fetch.
+      if (cancelled) return;
       const asJson = (r: Response) => (r.ok ? r.json() : null);
       const [settingsData, combosData] = await Promise.all([
         fetch("/api/settings/compression")
@@ -131,7 +147,9 @@ export default function CompressionHub() {
         );
       queuedRef.current.push(patch);
       showQueued();
+      failedRef.current.clear();
       setError(null);
+      if (pendingSaves++ === 0) window.addEventListener("beforeunload", confirmLeave);
       saveQueue = saveQueue.then(async () => {
         // A later queued save that carries every key of this one replaces it on the server, so
         // skip this one.
@@ -156,16 +174,18 @@ export default function CompressionHub() {
           } catch {
             // A network error or the timeout counts as a failed save.
           }
-          if (ok) {
-            savedRef.current = { ...savedRef.current, ...patch };
-          } else {
-            // The error stays up until the next edit, so a later queued save that succeeds
-            // cannot hide the field this one just rolled back.
-            setError(t("saveSettingsFailed"));
+          // The error stays up until the next edit, or until later saves store every field that
+          // failed, so a later save of another field cannot hide the field this one rolled back.
+          for (const key of Object.keys(patch)) {
+            if (ok) failedRef.current.delete(key);
+            else failedRef.current.add(key);
           }
+          if (ok) savedRef.current = { ...savedRef.current, ...patch };
+          setError(failedRef.current.size > 0 ? t("saveSettingsFailed") : null);
         }
         queuedRef.current.shift();
         showQueued();
+        if (--pendingSaves === 0) window.removeEventListener("beforeunload", confirmLeave);
       });
     },
     [t]

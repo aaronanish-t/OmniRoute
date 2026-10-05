@@ -208,6 +208,44 @@ async function unionCustomModels(
 }
 
 /**
+ * Registry rows curated for dispatch, derived once per provider: the inputs
+ * (getRegistryEntry result and targetFormat tags) are static in-memory
+ * registry data, and getActiveSyncedCatalog runs on every model resolution.
+ */
+const registryDispatchRowsCache = new Map<string, SyncedAvailableModel[]>();
+
+function getRegistryDispatchRows(storedProviderId: string): SyncedAvailableModel[] {
+  let rows = registryDispatchRowsCache.get(storedProviderId);
+  if (rows) return rows;
+  const tagged = (getRegistryEntry(storedProviderId)?.models ?? []).filter(
+    (model) => typeof model.targetFormat === "string" && model.targetFormat.length > 0
+  );
+  rows = normalizeSyncedAvailableModels(
+    tagged.map((model) => ({
+      id: model.id,
+      name: model.name,
+      targetFormat: model.targetFormat,
+      ...(model.supportedThinkingEfforts
+        ? { supportedThinkingEfforts: [...model.supportedThinkingEfforts] }
+        : {}),
+      ...(model.supportsVision ? { supportsVision: true } : {}),
+      ...(typeof model.contextLength === "number" ? { contextWindow: model.contextLength } : {}),
+      // #6191: maxInputTokens is the preferred input budget when a registry
+      // model declares one; contextLength is the fallback.
+      ...(typeof model.maxInputTokens === "number"
+        ? { inputTokenLimit: model.maxInputTokens }
+        : {}),
+      ...(typeof model.maxOutputTokens === "number"
+        ? { outputTokenLimit: model.maxOutputTokens }
+        : {}),
+    })),
+    storedProviderId
+  ).map((row) => ({ ...row, catalogOrigin: "registry" as const }));
+  registryDispatchRowsCache.set(storedProviderId, rows);
+  return rows;
+}
+
+/**
  * Partial discovery surfaces must not veto registry models that carry explicit
  * per-model dispatch intent (`targetFormat`): z.ai's Anthropic-compat /models
  * omits the coding-plan glm-5.3-flash family even though the provider serves
@@ -222,32 +260,12 @@ function unionRegistryDispatchModels(
   storedProviderId: string,
   models: SyncedAvailableModel[]
 ): SyncedAvailableModel[] {
-  const entry = getRegistryEntry(storedProviderId);
-  const tagged = (entry?.models ?? []).filter(
-    (model) => typeof model.targetFormat === "string" && model.targetFormat.length > 0
-  );
-  if (tagged.length === 0) return models;
-  // Reconcile only against a discovery surface that actually reported
-  // something: an empty snapshot must keep the existing non-authoritative
-  // fallbacks, and custom rows alone must never establish authority (#12934).
+  // An empty discovery snapshot keeps the non-authoritative fallbacks: return
+  // before touching the registry so empty-discovery calls do no registry work
+  // and custom rows alone can never establish authority (#12934).
   if (models.length === 0) return models;
-
-  const registryRows = normalizeSyncedAvailableModels(
-    tagged.map((model) => ({
-      id: model.id,
-      name: model.name,
-      targetFormat: model.targetFormat,
-      ...(model.supportedThinkingEfforts
-        ? { supportedThinkingEfforts: [...model.supportedThinkingEfforts] }
-        : {}),
-      ...(model.supportsVision ? { supportsVision: true } : {}),
-      ...(typeof model.contextLength === "number" ? { contextWindow: model.contextLength } : {}),
-      ...(typeof model.maxOutputTokens === "number"
-        ? { outputTokenLimit: model.maxOutputTokens }
-        : {}),
-    })),
-    storedProviderId
-  );
+  const registryRows = getRegistryDispatchRows(storedProviderId);
+  if (registryRows.length === 0) return models;
 
   const merged = new Map<string, SyncedAvailableModel>();
   for (const model of models) {
@@ -399,9 +417,15 @@ export async function getAllActiveSyncedModels(): Promise<Record<string, SyncedA
       Array.from(connectionIdsByProvider.entries()).map(async ([providerId, connectionIds]) => {
         const modelsByConnection = await getSyncedAvailableModelsByConnection(providerId);
 
+        // Dispatch (getActiveSyncedCatalog) unions registry dispatch-tagged
+        // rows into discovery; listing must agree, or model pickers fed by
+        // enumeration surfaces cannot see a model dispatch will accept.
         const models = enrichCursorCatalog(
           providerId,
-          collectModelsForConnections(modelsByConnection, connectionIds)
+          unionRegistryDispatchModels(
+            providerId,
+            collectModelsForConnections(modelsByConnection, connectionIds)
+          )
         );
 
         if (models.length > 0) {

@@ -7,6 +7,13 @@ export interface SyncedAvailableModel {
   id: string;
   name: string;
   source: "imported";
+  /**
+   * Set on rows derived from the static registry (unionRegistryDispatchModels)
+   * rather than from provider discovery; absent on discovery-synced rows. Any
+   * future persist-back of catalog rows must never launder registry rows into
+   * the syncedAvailableModels snapshot.
+   */
+  catalogOrigin?: "registry";
   apiFormat?: string;
   targetFormat?: string;
   upstreamProtocol?: string;

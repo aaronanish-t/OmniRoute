@@ -104,6 +104,31 @@ test("a fresh partial catalog vetoes a dispatch-tagged registry model — the in
   // resolves against it and the model becomes available.
   assert.equal(resolved.provider, PROVIDER);
   assert.match(resolved.model ?? "", /^glm-5\.3-flash/);
+  // The dispatch-format handoff is the point of the fix: the resolved info
+  // must carry the registry's targetFormat so the request leaves on the
+  // OpenAI-compatible coding-plan surface, not the provider default.
+  assert.equal(resolved.targetFormat, "openai");
+});
+
+test("an empty-but-fresh discovery snapshot never becomes authoritative from tagged rows", async () => {
+  await replaceSyncedAvailableModelsForConnection(PROVIDER, CONNECTION_ID, []);
+  const { getActiveSyncedCatalog } = await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+
+  const catalog = await getActiveSyncedCatalog(PROVIDER);
+
+  assert.equal(catalog.authoritative, false);
+  assert.ok(!catalog.models.some((model) => model.id === MISSING_TAGGED_MODEL));
+});
+
+test("listing surfaces agree with dispatch: the tagged base is listed with registry provenance", async () => {
+  const { getAllActiveSyncedModels } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+
+  const listings = await getAllActiveSyncedModels();
+
+  const listed = (listings[PROVIDER] ?? []).find((model) => model.id === MISSING_TAGGED_MODEL);
+  assert.ok(listed, "a model dispatch accepts must be discoverable in listings");
+  assert.equal(listed.catalogOrigin, "registry");
 });
 
 test("the tagged base joins the authoritative catalog without displacing discovery rows", async () => {
@@ -134,6 +159,7 @@ test("the tagged base joins the authoritative catalog without displacing discove
   assert.ok(tagged.supportedThinkingEfforts?.includes("max"));
   assert.equal(tagged.supportsVision, true);
   assert.equal(tagged.contextWindow, 1000000);
+  assert.equal(tagged.outputTokenLimit, 131072);
 });
 
 test("an untagged registry model omitted from discovery stays vetoed", async () => {

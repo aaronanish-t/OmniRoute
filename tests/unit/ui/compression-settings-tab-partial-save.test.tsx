@@ -87,7 +87,7 @@ const PACKS = [
 // the stored one. /api/context/caveman/config re-exports the same handler.
 function startServer(failPut: (body: Settings) => boolean = () => false) {
   let stored: Settings = JSON.parse(JSON.stringify(STORED));
-  let readsFail = false;
+  let readsFail: false | "status" | "throw" = false;
   const puts: Settings[] = [];
   const respond = (data: unknown, status = 200) =>
     new Response(JSON.stringify(data), {
@@ -99,8 +99,10 @@ function startServer(failPut: (body: Settings) => boolean = () => false) {
     vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const { pathname } = new URL(String(input), "http://localhost");
       if (pathname === "/api/settings/compression" || pathname === "/api/context/caveman/config") {
-        if (init?.method !== "PUT")
+        if (init?.method !== "PUT") {
+          if (readsFail === "throw") throw new TypeError("Failed to fetch");
           return readsFail ? respond({ error: "Load failed" }, 500) : respond(stored);
+        }
         const body = JSON.parse(String(init.body)) as Settings;
         puts.push(body);
         if (failPut(body)) return respond({ error: "Save failed" }, 500);
@@ -128,9 +130,9 @@ function startServer(failPut: (body: Settings) => boolean = () => false) {
     write(patch: Settings) {
       stored = { ...stored, ...patch };
     },
-    // Every later read of the settings row fails.
-    failReads() {
-      readsFail = true;
+    // Every later read of the settings row fails, with an error status or a network error.
+    failReads(how: "status" | "throw" = "status") {
+      readsFail = how;
     },
   };
 }
@@ -337,30 +339,32 @@ describe("CompressionSettingsTab saves only what changed", () => {
     }
   );
 
-  it(
-    "sends no language save when the caveman page cannot re-read the row it loaded",
-    { timeout: 30_000 },
-    async () => {
-      const server = startServer();
-      server.write({
-        languageConfig: {
-          enabled: true,
-          defaultLanguage: "en",
-          autoDetect: true,
-          enabledPacks: ["en", "es"],
-        },
-      });
-      render(<CavemanContextPageClient />);
-      await settle();
-      // The page holds a loaded copy; a save built from that copy could be stale.
-      server.failReads();
+  for (const how of ["status", "throw"] as const) {
+    it(
+      `sends no language save when the caveman page cannot re-read the row it loaded (${how})`,
+      { timeout: 30_000 },
+      async () => {
+        const server = startServer();
+        server.write({
+          languageConfig: {
+            enabled: true,
+            defaultLanguage: "en",
+            autoDetect: true,
+            enabledPacks: ["en", "es"],
+          },
+        });
+        render(<CavemanContextPageClient />);
+        await settle();
+        // The page holds a loaded copy; a save built from that copy could be stale.
+        server.failReads(how);
 
-      fireEvent.click(screen.getByLabelText("autoDetect"));
-      await settle();
+        fireEvent.click(screen.getByLabelText("autoDetect"));
+        await settle();
 
-      expect(server.puts).toEqual([]);
-    }
-  );
+        expect(server.puts).toEqual([]);
+      }
+    );
+  }
 
   it("leaves outputStyles saved from another tab in place", async () => {
     const server = startServer();

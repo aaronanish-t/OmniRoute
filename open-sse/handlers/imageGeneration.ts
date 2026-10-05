@@ -1102,7 +1102,38 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
       contents: [
         {
           role: "user",
-          parts: [{ text: promptText }],
+          parts: [
+            ...((body as any).imageBytes
+              ? [
+                  {
+                    inlineData: {
+                      mimeType:
+                        (typeof (body as any).imageMime === "string" && (body as any).imageMime) ||
+                        "image/png",
+                      data: Buffer.isBuffer((body as any).imageBytes)
+                        ? (body as any).imageBytes.toString("base64")
+                        : String((body as any).imageBytes),
+                    },
+                  },
+                ]
+              : typeof (body as any).image_url === "string" &&
+                (body as any).image_url.startsWith("data:")
+              ? [
+                  {
+                    inlineData: {
+                      mimeType:
+                        (body as any).image_url.match(/^data:(image\/[a-zA-Z0-9+-]+);base64,/)?.[1] ||
+                        "image/png",
+                      data: (body as any).image_url.replace(
+                        /^data:image\/[a-zA-Z0-9+-]+;base64,/,
+                        ""
+                      ),
+                    },
+                  },
+                ]
+              : []),
+            { text: promptText },
+          ],
         },
       ],
       generationConfig: {

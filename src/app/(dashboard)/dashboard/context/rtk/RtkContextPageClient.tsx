@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { SegmentedControl, Collapsible } from "@/shared/components";
+import { useNotificationStore } from "@/store/notificationStore";
+import { rtkConfigSchema } from "@/shared/validation/compressionConfigSchemas";
 import RtkLearnDiscoverCard from "./RtkLearnDiscoverCard";
 import RtkTomlImportCard from "./RtkTomlImportCard";
 
@@ -73,17 +75,55 @@ const REQUEST_TIMEOUT_MS = 15_000;
 let configQueue = Promise.resolve();
 
 function queueConfigTask(task: () => Promise<void>) {
-  configQueue = configQueue.then(task);
+  // A task that throws anyway must not strand the saves queued behind it.
+  configQueue = configQueue.then(task, () => {});
 }
 
-// The stored config, or null when the request fails or gets no reply in time.
-function requestConfig(init?: RequestInit): Promise<RtkConfig | null> {
-  return fetch("/api/context/rtk/config", {
-    ...init,
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-  })
-    .then((res) => (res.ok ? res.json() : null))
-    .catch(() => null);
+// The route answers with the stored config; a body without the array that carries the filter
+// state is not one (a proxy or login page, a garbled body).
+function isRtkConfig(value: unknown): value is RtkConfig {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Array.isArray((value as RtkConfig).disabledFilters)
+  );
+}
+
+// Asks the config route. status is the HTTP status when the route refused the request, and null
+// when there is no usable answer: a dropped connection, no reply in time, or a 2xx body that is
+// not a config.
+async function fetchConfig(
+  init?: RequestInit
+): Promise<{ config: RtkConfig | null; status: number | null }> {
+  try {
+    const res = await fetch("/api/context/rtk/config", {
+      ...init,
+      signal: init?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+    if (!res.ok) return { config: null, status: res.status };
+    const data: unknown = await res.json().catch(() => null);
+    return isRtkConfig(data) ? { config: data, status: null } : { config: null, status: null };
+  } catch {
+    return { config: null, status: null };
+  }
+}
+
+// The range a number setting accepts, read from the schema the route validates with, so the
+// form and the server cannot disagree.
+function fieldBounds(key: keyof typeof rtkConfigSchema.shape): { min: number; max?: number } {
+  const field = rtkConfigSchema.shape[key].unwrap() as { minValue?: number; maxValue?: number };
+  return { min: field.minValue ?? 0, max: field.maxValue ?? undefined };
+}
+
+// Turns typed text into the value to save: an empty or unreadable edit saves nothing (the shown
+// value comes back), decimals round, and out-of-range values clamp into the schema's range.
+// Null saves nothing.
+function commitValue(draft: string, value: number, min: number, max?: number): number | null {
+  if (draft.trim() === "") return null;
+  const parsed = Math.round(Number(draft));
+  if (!Number.isFinite(parsed)) return null;
+  const next = Math.min(Math.max(parsed, min), max ?? parsed);
+  return next === value ? null : next;
 }
 
 // Keeps the typed text locally and saves once the edit is committed (blur or Enter), so typing a
@@ -94,20 +134,43 @@ function NumberSetting({
   min,
   max,
   onCommit,
+  onDraftChange,
 }: {
   label: string;
   value: number;
   min: number;
   max?: number;
   onCommit: (value: number) => void;
+  onDraftChange: (open: boolean) => void;
 }) {
   const [draft, setDraft] = useState<string | null>(null);
+  const draftRef = useRef<string | null>(null);
+  const commitRef = useRef<() => void>(() => {});
   const commit = () => {
-    if (draft === null) return;
-    const next = Number(draft) || min;
+    if (draftRef.current === null) return;
+    const pending = draftRef.current;
+    draftRef.current = null;
     setDraft(null);
-    if (next !== value) onCommit(next);
+    const next = commitValue(pending, value, min, max);
+    if (next !== null) onCommit(next);
   };
+  // The newest commit closure survives the component, so a number typed but not committed is
+  // still saved when the page unmounts.
+  useEffect(() => {
+    commitRef.current = commit;
+  });
+  useEffect(
+    () => () => {
+      commitRef.current();
+    },
+    []
+  );
+  const open = draft !== null;
+  useEffect(() => {
+    if (!open) return;
+    onDraftChange(true);
+    return () => onDraftChange(false);
+  }, [open, onDraftChange]);
   return (
     <label className="flex flex-col gap-1 text-sm text-text-main">
       {label}
@@ -116,7 +179,10 @@ function NumberSetting({
         min={min}
         max={max}
         value={draft ?? value}
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={(event) => {
+          draftRef.current = event.target.value;
+          setDraft(event.target.value);
+        }}
         onBlur={commit}
         onKeyDown={(event) => {
           if (event.key === "Enter") commit();
@@ -136,14 +202,43 @@ export default function RtkContextPageClient() {
   const [sample, setSample] = useState(SAMPLE_OUTPUT);
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
+  // Set when the stored config could not be read: the HTTP status, or "" when the request or its
+  // body failed. The page stays empty instead of showing a form that would save defaults over
+  // the stored config.
+  const [loadError, setLoadError] = useState<string | null>(null);
   // The form shows the config the server last confirmed plus the edits still queued, so the
   // newest edit stays on screen and a failed save rolls back only its own change. A queued edit is
   // worked out again from the confirmed config when its save goes out, so it never carries an
   // earlier edit that failed.
   const savedRef = useRef<RtkConfig | null>(null);
   const queuedRef = useRef<ConfigUpdate[]>([]);
+  // Number fields with text typed but not committed yet; the unload guard counts them.
+  const draftsRef = useRef(0);
+  const onDraftChange = useCallback((open: boolean) => {
+    draftsRef.current += open ? 1 : -1;
+  }, []);
+  // True until the page unmounts; a save that fails after that can only say so as a toast.
+  const mountedRef = useRef(true);
+  const addNotification = useNotificationStore((state) => state.addNotification);
   const [viewMode, setViewMode] = useState<"simple" | "advanced">("simple");
   const [masterEnabled, setMasterEnabled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    // A save still queued, or a number typed but not committed, would be lost by closing the
+    // tab, so the browser asks first; it renders its own prompt.
+    const guard = (event: BeforeUnloadEvent) => {
+      if (queuedRef.current.length > 0 || draftsRef.current > 0) event.preventDefault();
+    };
+    window.addEventListener("beforeunload", guard);
+    return () => window.removeEventListener("beforeunload", guard);
+  }, []);
 
   useEffect(() => {
     fetch("/api/settings/compression")
@@ -161,9 +256,13 @@ export default function RtkContextPageClient() {
   useEffect(() => {
     void loadFilters();
     queueConfigTask(async () => {
-      const data = await requestConfig();
-      savedRef.current = data;
-      setConfig(data);
+      const reply = await fetchConfig();
+      if (reply.config) {
+        savedRef.current = reply.config;
+        setConfig(reply.config);
+      } else {
+        setLoadError(reply.status === null ? "" : String(reply.status));
+      }
     });
     fetch("/api/context/analytics?since=7d")
       .then((res) => (res.ok ? res.json() : null))
@@ -184,6 +283,22 @@ export default function RtkContextPageClient() {
     return filters.filter((filter) => !config.disabledFilters.includes(filter.id)).length;
   }, [config, filters]);
 
+  // The human name of each editable setting, for a failure the user no longer sees on the page.
+  const settingLabels: Partial<Record<keyof RtkConfig, string>> = {
+    maxLinesPerResult: t("maxLines"),
+    maxCharsPerResult: t("maxChars"),
+    deduplicateThreshold: t("deduplicateThreshold"),
+    rawOutputMaxBytes: t("rawOutputMaxBytes"),
+    applyToToolResults: t("toolResults"),
+    applyToAssistantMessages: t("assistantMessages"),
+    applyToCodeBlocks: t("codeBlocks"),
+    customFiltersEnabled: t("customFilters"),
+    trustProjectFilters: t("trustProjectFilters"),
+    rawOutputRetention: t("rawOutputRetention"),
+    enabledFilters: t("filterCatalog"),
+    disabledFilters: t("filterCatalog"),
+  };
+
   const saveConfig = (patch: Partial<RtkConfig> | ConfigUpdate) => {
     if (!savedRef.current) return;
     const update = typeof patch === "function" ? patch : () => patch;
@@ -191,33 +306,60 @@ export default function RtkContextPageClient() {
       setConfig(
         queuedRef.current.reduce<RtkConfig>(
           (shown, queued) => ({ ...shown, ...queued(shown) }),
-          savedRef.current
+          savedRef.current as RtkConfig
         )
       );
+    const markFailed = (body: Partial<RtkConfig>) => {
+      setSaveFailed(true);
+      if (!mountedRef.current) {
+        const key = String(Object.keys(body)[0]) as keyof RtkConfig | "";
+        addNotification({
+          type: "error",
+          title: tSettings("saveFailed"),
+          message: (key && settingLabels[key]) || String(key),
+        });
+      }
+    };
     queuedRef.current.push(update);
     showQueued();
     setSaveFailed(false);
     queueConfigTask(async () => {
-      const body = update(savedRef.current);
-      const reply = await requestConfig({
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      // Without a reply the server may still have stored the change, so read back what it holds;
-      // the save failed only if the change is not there.
-      const stored = reply ?? (await requestConfig());
-      const kept =
-        reply !== null ||
-        (stored !== null &&
-          Object.entries(body).every(
-            ([key, value]) =>
-              JSON.stringify(stored[key as keyof RtkConfig]) === JSON.stringify(value)
-          ));
-      queuedRef.current.shift();
-      if (stored) savedRef.current = stored;
-      if (!kept) setSaveFailed(true);
-      showQueued();
+      try {
+        const body = update(savedRef.current as RtkConfig);
+        // One timeout budget covers the save and, when its answer is lost, the read-back.
+        const deadline = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+        const reply = await fetchConfig({
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          signal: deadline,
+        });
+        // A lost or unusable answer leaves the outcome unknown: the server may have stored the
+        // change, so read back what it holds, and the save failed only if the change is not
+        // there. A refused request stored nothing, so a 4xx answer is failed without a read;
+        // a 5xx may or may not have stored, so it reads back too.
+        const readBack =
+          reply.config === null && (reply.status === null || reply.status >= 500)
+            ? await fetchConfig({ signal: deadline })
+            : null;
+        const stored = reply.config ?? readBack?.config ?? null;
+        const kept =
+          reply.config !== null ||
+          (stored !== null &&
+            Object.entries(body).every(
+              ([key, value]) =>
+                JSON.stringify(stored[key as keyof RtkConfig]) === JSON.stringify(value)
+            ));
+        queuedRef.current.shift();
+        if (stored) savedRef.current = stored;
+        if (!kept) markFailed(body);
+        showQueued();
+      } catch {
+        // The request could not even be attempted; the edit counts as failed.
+        queuedRef.current.shift();
+        markFailed({});
+        showQueued();
+      }
     });
   };
 
@@ -283,6 +425,18 @@ export default function RtkContextPageClient() {
         </div>
       )}
 
+      {loadError !== null && (
+        <p
+          role="alert"
+          className="flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400"
+        >
+          <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+            error
+          </span>
+          {tSettings("failedLoadWithStatus", { status: loadError || tSettings("unknownError") })}
+        </p>
+      )}
+
       {config && (
         <section className="rounded-lg border border-border bg-surface p-4">
           {/* On/off + intensity now live in the panel (/dashboard/context/settings). This
@@ -301,19 +455,19 @@ export default function RtkContextPageClient() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {(
               [
-                ["maxLinesPerResult", t("maxLines"), 0, undefined],
-                ["maxCharsPerResult", t("maxChars"), 0, undefined],
-                ["deduplicateThreshold", t("deduplicateThreshold"), 2, 100],
-                ["rawOutputMaxBytes", t("rawOutputMaxBytes"), 1024, undefined],
+                ["maxLinesPerResult", t("maxLines")],
+                ["maxCharsPerResult", t("maxChars")],
+                ["deduplicateThreshold", t("deduplicateThreshold")],
+                ["rawOutputMaxBytes", t("rawOutputMaxBytes")],
               ] as const
-            ).map(([key, label, min, max]) => (
+            ).map(([key, label]) => (
               <NumberSetting
                 key={key}
                 label={label}
                 value={config[key]}
-                min={min}
-                max={max}
+                {...fieldBounds(key)}
                 onCommit={(value) => saveConfig({ [key]: value } as Partial<RtkConfig>)}
+                onDraftChange={onDraftChange}
               />
             ))}
           </div>

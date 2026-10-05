@@ -21,6 +21,10 @@ function parsePatterns(raw: string): string[] {
     .filter((line) => line.length > 0);
 }
 
+// A load or save that gets no reply in this time counts as failed, so one stalled request
+// cannot leave the panel locked or the save spinning for good.
+const REQUEST_TIMEOUT_MS = 15_000;
+
 export default function ExclusionsPanel() {
   const t = useTranslations("settings");
   const [raw, setRaw] = useState("");
@@ -33,7 +37,7 @@ export default function ExclusionsPanel() {
   const savedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
-    fetch("/api/settings/compression")
+    fetch("/api/settings/compression", { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
       .then(async (r) => {
         const data: { exclusions?: unknown } | null = r.ok ? await r.json() : null;
         if (Array.isArray(data?.exclusions)) setRaw(data.exclusions.join("\n"));
@@ -56,6 +60,7 @@ export default function ExclusionsPanel() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ exclusions: patterns }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       setStatus(res.ok ? "saved" : "error");
       if (res.ok) savedTimer.current = setTimeout(() => setStatus(""), 2000);
@@ -74,7 +79,10 @@ export default function ExclusionsPanel() {
     >
       <div className="flex flex-col gap-3">
         {loadError !== null && (
-          <p role="alert" className="flex items-center gap-1 text-xs font-medium text-red-500">
+          <p
+            role="alert"
+            className="flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400"
+          >
             <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
               error
             </span>
@@ -91,7 +99,8 @@ export default function ExclusionsPanel() {
         />
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs text-text-muted" data-testid="compression-exclusions-count">
-            {loadError === null &&
+            {!loading &&
+              loadError === null &&
               (patterns.length === 0
                 ? t("compressionExclusionsEmpty")
                 : t("compressionExclusionsCount", { count: patterns.length }))}
@@ -103,7 +112,7 @@ export default function ExclusionsPanel() {
             {status === "error" && (
               <span
                 role="alert"
-                className="flex items-center gap-1 text-xs font-medium text-red-500"
+                className="flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400"
               >
                 <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
                   error

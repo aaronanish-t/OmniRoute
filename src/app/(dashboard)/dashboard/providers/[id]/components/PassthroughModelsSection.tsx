@@ -191,6 +191,35 @@ export default function PassthroughModelsSection({
           ok++;
         } else {
           error++;
+          // Check for forbidden/per-model errors and offer quick hide notification
+          const errorMsg = entry?.error || "";
+          const forbiddenMatch = /Model\s+.+?\s+forbidden/i.test(errorMsg);
+          const accessMatch = /per-model\s+access/i.test(errorMsg) || /subscription/i.test(errorMsg);
+          if ((forbiddenMatch || accessMatch) && !outcome.shouldHide) {
+            const modelName = model.modelId.split('/').pop() || model.modelId;
+            notify.addNotification({
+              type: "warning",
+              title: providerText(t, "modelAccessError", "Access error"),
+              message: providerText(
+                t,
+                "modelForbiddenHideAction",
+                "Model {model} forbidden (per-model access). Click to hide.",
+                { model: modelName }
+              ),
+              duration: 15000,
+              onClick: async () => {
+                await onToggleHidden(model.modelId, true);
+                notify.success(
+                  providerText(
+                    t,
+                    "modelHiddenSuccess",
+                    "Hidden model {model} — it will no longer appear in the catalog.",
+                    { model: model.fullModel }
+                  )
+                );
+              },
+            });
+          }
           if (outcome.shouldHide) {
             await onToggleHidden(model.modelId, true);
             hiddenCount++;

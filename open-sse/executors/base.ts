@@ -924,11 +924,11 @@ export class BaseExecutor {
         capMs: this.config?.fetchStartTimeoutCapMs,
       });
       const fetchStartTimeoutMs = fetchStartTimeoutPolicy.timeoutMs;
-      if (fetchStartTimeoutPolicy.capped) {
-        log?.debug?.(
-          "TIMEOUT",
-          `fetch-start timeout capped ${fetchStartTimeoutPolicy.baseTimeoutMs}ms -> ${fetchStartTimeoutMs}ms (streaming)`
-        );
+      if (stream) {
+        const timeoutMessage = fetchStartTimeoutPolicy.capped
+          ? `fetch-start timeout capped ${fetchStartTimeoutPolicy.baseTimeoutMs}ms -> ${fetchStartTimeoutMs}ms (streaming)`
+          : `fetch-start timeout ${fetchStartTimeoutMs}ms (streaming)`;
+        log?.debug?.("TIMEOUT", timeoutMessage);
       }
 
       try {

@@ -1,0 +1,1 @@
+- **fix(db):** authoritative live catalogs no longer veto registry models curated for dispatch via a per-model `targetFormat`; a partial provider discovery surface (z.ai omitting the glm-5.3-flash family) no longer rejects dispatchable models with `model_not_in_catalog`

@@ -353,4 +353,94 @@ describe("CompressionHub overlapping saves", () => {
     expect(contextEditingToggle(container).getAttribute("aria-checked")).toBe("true");
     expect(container.textContent).toContain(saveFailed);
   });
+
+  it("clears the error when the user makes the next edit", async () => {
+    const { held } = setupFetchMock({ failPutKeys: ["activeComboId"], hold: true });
+    const container = await render();
+    await act(async () => {
+      setSelectValue(activeProfileSelect(container), "c1");
+    });
+    await releaseInOrder(held);
+    expect(container.textContent).toContain(saveFailed);
+
+    await act(async () => {
+      contextEditingToggle(container).click();
+    });
+    expect(container.textContent).not.toContain(saveFailed);
+    await releaseInOrder(held);
+    expect(container.textContent).not.toContain(saveFailed);
+  });
+
+  it("clears the error once a later save stores the field that failed", async () => {
+    const failPutKeys = ["activeComboId"];
+    const { held, server } = setupFetchMock({ failPutKeys, hold: true });
+    const container = await render();
+    for (const value of ["c1", "c2"]) {
+      await act(async () => {
+        setSelectValue(activeProfileSelect(container), value);
+      });
+    }
+    // "c1" fails while "c2" waits behind it; then the route accepts "c2".
+    await act(async () => held[0]());
+    for (let i = 0; i < 5; i++) await flush();
+    expect(container.textContent).toContain(saveFailed);
+    failPutKeys.length = 0;
+    await releaseInOrder(held);
+
+    expect(server.activeComboId).toBe("c2");
+    expect(activeProfileSelect(container).value).toBe("c2");
+    expect(container.textContent).not.toContain(saveFailed);
+  });
+
+  it("asks before the page unloads while a save is still queued or in flight", async () => {
+    const { held } = setupFetchMock({ hold: true });
+    const container = await render();
+    const leaveIsBlocked = () => {
+      const event = new Event("beforeunload", { cancelable: true });
+      window.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    expect(leaveIsBlocked()).toBe(false);
+
+    await act(async () => {
+      setSelectValue(activeProfileSelect(container), "c1");
+    });
+    await act(async () => {
+      contextEditingToggle(container).click();
+    });
+    expect(leaveIsBlocked()).toBe(true);
+
+    await releaseInOrder(held);
+    expect(leaveIsBlocked()).toBe(false);
+  });
+
+  it("an unmounted Hub sends no settings GET after the queue it waited on drains", async () => {
+    const { held } = setupFetchMock({ hold: true });
+    const respond = vi.mocked(globalThis.fetch).getMockImplementation()!;
+    let settingGets = 0;
+    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) => {
+      const isSettingGet =
+        String(input).includes("/api/settings/compression") &&
+        (init?.method ?? "GET").toUpperCase() === "GET";
+      if (isSettingGet) settingGets++;
+      return respond(input, init);
+    });
+    // A first Hub leaves a save in flight; a second Hub mounts and waits for the queue.
+    const first = await render();
+    await act(async () => {
+      setSelectValue(activeProfileSelect(first), "c1");
+    });
+    await act(async () => {
+      roots.pop()?.unmount();
+    });
+    const second = await render();
+    expect(activeProfileSelect(second)).toBeNull();
+    await act(async () => {
+      roots.pop()?.unmount();
+    });
+    const before = settingGets;
+
+    await releaseInOrder(held);
+    expect(settingGets).toBe(before);
+  });
 });

@@ -169,3 +169,33 @@ test("engineId=aggressive honors the sent config (maxTokensPerMessage forces the
     "configured run should summarize the early turn (maxTokensPerMessage 256 < its length)"
   );
 });
+
+test("pipeline=[aggressive] honors the sent config (maxTokensPerMessage forces the summarizer)", async () => {
+  // Mirrors the engineId=aggressive case against the pipeline branch's own
+  // aggressive thread: a regression confined to that copy must fail here too.
+  const EARLY = "consider the following record of events and observations ".repeat(50);
+  const requestBody = {
+    pipeline: ["aggressive"],
+    messages: [
+      { role: "user", content: EARLY },
+      { role: "assistant", content: "noted" },
+      { role: "user", content: "what next?" },
+    ],
+  };
+
+  const defaultRun = await preview(requestBody);
+  const configuredRun = await preview({
+    ...requestBody,
+    config: { aggressive: { maxTokensPerMessage: 256 } },
+  });
+
+  assert.notEqual(
+    configuredRun.compressed,
+    defaultRun.compressed,
+    "the sent aggressive config must change the pipeline output — it was ignored"
+  );
+  assert.ok(
+    configuredRun.compressed.includes("[COMPRESSED:summary]"),
+    "configured pipeline run should summarize the early turn"
+  );
+});

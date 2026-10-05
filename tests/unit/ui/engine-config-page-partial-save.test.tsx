@@ -42,15 +42,19 @@ function mergeLite(existing: unknown, incoming: Settings): Settings {
 
 // Stands in for /api/settings/compression. A PUT is checked against the real update schema,
 // and each key in its body replaces the stored sub-object whole, as updateCompressionSettings
-// does, except lite, which merges. `readsFail` makes GETs fail. `loseNextResponse` applies the
-// next PUT and then fails the request, as a dropped connection would. `holdWrites` keeps PUTs
-// waiting until the returned function runs. A preview's config is checked against the preview
-// route's schema.
+// does, except lite, which merges. `readsFail` makes GETs fail. `holdNextRead` keeps the next GET
+// waiting until the returned function runs, then fails it. `failNextWrite` answers the next PUT
+// with a 500, either before applying it ("rejected") or after ("applied"). `loseNextResponse`
+// applies the next PUT and then fails the request, as a dropped connection would. `holdWrites`
+// keeps PUTs waiting until the returned function runs. A preview's config is checked against the
+// preview route's schema.
 function startServer(initial: Settings) {
   let stored: Settings = JSON.parse(JSON.stringify(initial));
   let held: Promise<void> | null = null;
+  let heldRead: Promise<void> | null = null;
   const server = {
     readsFail: false,
+    failNextWrite: null as null | "rejected" | "applied",
     loseNextResponse: false,
     puts: [] as { body: Settings; status: number }[],
     previews: [] as { config: unknown; status: number }[],
@@ -71,6 +75,13 @@ function startServer(initial: Settings) {
       });
       return release;
     },
+    holdNextRead() {
+      let fail = () => {};
+      heldRead = new Promise((resolve) => {
+        fail = () => resolve();
+      });
+      return fail;
+    },
   };
   const respond = (data: unknown, status = 200) =>
     new Response(JSON.stringify(data), {
@@ -87,6 +98,12 @@ function startServer(initial: Settings) {
       }
       if (pathname === "/api/settings/compression") {
         if (init?.method !== "PUT") {
+          if (heldRead) {
+            const wait = heldRead;
+            heldRead = null;
+            await wait;
+            return respond({ error: "unavailable" }, 500);
+          }
           return server.readsFail ? respond({ error: "unavailable" }, 500) : respond(stored);
         }
         const body = JSON.parse(String(init.body)) as Settings;
@@ -94,9 +111,17 @@ function startServer(initial: Settings) {
         server.puts.push({ body, status: parsed.success ? 200 : 400 });
         if (!parsed.success) return respond({ error: "Invalid request" }, 400);
         if (held) await held;
+        if (server.failNextWrite === "rejected") {
+          server.failNextWrite = null;
+          return respond({ error: "unavailable" }, 500);
+        }
         const { lite, ...rest } = parsed.data as Settings;
         stored = { ...stored, ...rest };
         if (lite) stored.lite = mergeLite(stored.lite, lite as Settings);
+        if (server.failNextWrite === "applied") {
+          server.failNextWrite = null;
+          return respond({ error: "unavailable" }, 500);
+        }
         if (server.loseNextResponse) {
           server.loseNextResponse = false;
           throw new TypeError("Failed to fetch");
@@ -323,8 +348,93 @@ describe("EngineConfigPage saves only what the operator changed", () => {
     server.readsFail = true;
     await renderPage("aggressive");
 
-    expect(screen.getByText("Failed to load engine information.")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Failed to load the saved settings. The fields show defaults, and Save stays off until the page reloads."
+      )
+    ).toBeTruthy();
     expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("ignores a settings read that fails after the page reloads", async () => {
+    const server = startServer({
+      ultra: DEFAULT_ULTRA_CONFIG,
+      aggressive: DEFAULT_AGGRESSIVE_CONFIG,
+    });
+    const failFirstRead = server.holdNextRead();
+    const { rerender } = render(<EngineConfigPage engineId="ultra" />);
+    await settle();
+    // The page reloads before the first settings read answers.
+    rerender(<EngineConfigPage engineId="aggressive" />);
+    await settle();
+    failFirstRead();
+    await settle();
+
+    expect(screen.queryByText(/Failed to load/)).toBeNull();
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(
+      false
+    );
+  });
+
+  it("keeps an edit after a rejected save, so the next save sends it", async () => {
+    const server = startServer({ ultra: DEFAULT_ULTRA_CONFIG });
+    await renderPage("ultra");
+    server.failNextWrite = "rejected";
+
+    fireEvent.change(inputFor("Compression rate"), { target: { value: "0.4" } });
+    await save();
+    expect(screen.getByText("Failed to save configuration.")).toBeTruthy();
+    expect(server.stored.ultra).toEqual(DEFAULT_ULTRA_CONFIG);
+
+    await save();
+
+    expect(server.stored.ultra).toEqual({ ...DEFAULT_ULTRA_CONFIG, compressionRate: 0.4 });
+  });
+
+  it("sends a field again after a save the server applied but answered with an error", async () => {
+    const server = startServer({ ultra: DEFAULT_ULTRA_CONFIG });
+    await renderPage("ultra");
+    server.failNextWrite = "applied";
+
+    fireEvent.change(inputFor("Compression rate"), { target: { value: "0.4" } });
+    await save();
+    expect(screen.getByText("Failed to save configuration.")).toBeTruthy();
+    expect((server.stored.ultra as Settings).compressionRate).toBe(0.4);
+
+    // The operator puts the loaded value back and saves again.
+    fireEvent.change(inputFor("Compression rate"), {
+      target: { value: String(DEFAULT_ULTRA_CONFIG.compressionRate) },
+    });
+    await save();
+
+    expect(server.stored.ultra).toEqual(DEFAULT_ULTRA_CONFIG);
+  });
+
+  it("keeps another page's value when a keystroke lands as a save finishes", async () => {
+    const server = startServer({ aggressive: DEFAULT_AGGRESSIVE_CONFIG });
+    await renderPage("aggressive");
+    // Another page changes a field this page shows, after it loaded.
+    server.write({ aggressive: { ...DEFAULT_AGGRESSIVE_CONFIG, maxTokensPerMessage: 1024 } });
+    const release = server.holdWrites();
+    fireEvent.change(inputFor("Minimum savings threshold"), { target: { value: "0.2" } });
+    await save();
+
+    // The response arrives, and a keystroke lands before the page re-renders.
+    await act(async () => {
+      release();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      fireEvent.change(inputFor("Minimum savings threshold"), { target: { value: "0.3" } });
+    });
+    await settle();
+
+    expect(inputFor("Maximum tokens per message").value).toBe("1024");
+    await save();
+
+    expect(server.stored.aggressive).toEqual({
+      ...DEFAULT_AGGRESSIVE_CONFIG,
+      maxTokensPerMessage: 1024,
+      minSavingsThreshold: 0.3,
+    });
   });
 
   it("previews the Ultra engine on a default install that has no model path", async () => {

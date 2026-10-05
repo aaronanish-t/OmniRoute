@@ -15,6 +15,11 @@ const { compressionPreviewConfigSchema, compressionSettingsUpdateSchema } =
   await import("../../../src/shared/validation/compressionConfigSchemas.ts");
 const { aggressiveEngine, liteEngine, ultraEngine } =
   await import("../../../open-sse/services/compression/engines/cavemanAdapter.ts");
+const { headroomEngine } =
+  await import("../../../open-sse/services/compression/engines/headroom/index.ts");
+const { sessionDedupEngine } =
+  await import("../../../open-sse/services/compression/engines/session-dedup/index.ts");
+const { ccrEngine } = await import("../../../open-sse/services/compression/engines/ccr/index.ts");
 const {
   seedEngineForm,
   buildEngineDetailUpdate,
@@ -157,6 +162,25 @@ describe("engine config page save", () => {
       buildEngineDetailUpdate(aggressiveEngine.id, loaded, loaded, settings.aggressive),
       settings.aggressive
     );
+  });
+
+  it("saves every engine page sub-object back unchanged when nothing was edited", async () => {
+    // Each save starts from the stored copy the settings read returns, so that copy has to
+    // pass the strict update schema for every engine page.
+    const pages: [Engine, string][] = [
+      [liteEngine, "lite"],
+      [aggressiveEngine, "aggressive"],
+      [ultraEngine, "ultra"],
+      [headroomEngine, "headroom"],
+      [sessionDedupEngine, "sessionDedup"],
+      [ccrEngine, "ccr"],
+    ];
+    for (const [engine, subKey] of pages) {
+      const loadedSettings = await readSettings();
+
+      assert.equal(await pageSave(engine, subKey, loadedSettings, {}), 200, subKey);
+      assert.deepEqual((await readSettings())[subKey], loadedSettings[subKey], subKey);
+    }
   });
 
   it("keeps the lite switch another page changed when the lite page edits the cap", async () => {

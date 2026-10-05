@@ -1,0 +1,1 @@
+- **fix(sse):** Register batch quota trackers after imports resolve, so a cold chat route no longer dies with an empty HTTP 500 (`(0 , e.Zd) is not a function`).

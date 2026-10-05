@@ -761,6 +761,14 @@ export interface UsageEntry {
   agentContext?: AgentContext | null;
 }
 
+/** Upsert the request's agent session inside the caller's transaction; null when it has none. */
+function recordAgentSession(
+  db: Parameters<typeof recordAgentSessionUsage>[0],
+  usage: AgentSessionUsage | null
+): string | null {
+  return usage ? recordAgentSessionUsage(db, usage) : null;
+}
+
 /** Session counters for this request, priced now so reports keep the price at request time. */
 async function buildAgentSessionUsage(
   entry: UsageEntry,
@@ -870,9 +878,7 @@ export async function saveRequestUsage(entry: UsageEntry) {
         return; // duplicate — do not insert
       }
 
-      const agentSessionId = agentSessionUsage
-        ? recordAgentSessionUsage(db, agentSessionUsage)
-        : null;
+      const agentSessionId = recordAgentSession(db, agentSessionUsage);
 
       db.prepare(
         `

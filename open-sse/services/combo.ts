@@ -92,6 +92,7 @@ import {
   areAllPinnedTargetsModelScopedUnusable,
   canAutoResumeNativeCodexTurn,
   createPinnedModelUnavailableResponse,
+  createPinnedModelRetryResponse,
   getNativeCodexTurnPin,
   describePinnedTargetsLock,
   releaseNativeCodexTurnPin,
@@ -915,6 +916,12 @@ async function handleComboChatInner({
           activeNativeTurnPin = null;
           isAutoResuming = true;
         } else if (NATIVE_CODEX_AUTO_RESUME_UNSAFE_REASONS.has(autoResumeEligibility.reason)) {
+          const retryResponse = createPinnedModelRetryResponse(pinnedTargets);
+          if (retryResponse) {
+            targetResolution.quotaShareRelease?.();
+            log.warn("COMBO", "Pinned model temporarily unavailable; preserving turn for retry");
+            return retryResponse;
+          }
           // These specific rejection reasons mean the turn carries state (pending
           // tool calls, opaque provider-specific continuation state) or has
           // already exhausted its resume budget, so handing it to an untested

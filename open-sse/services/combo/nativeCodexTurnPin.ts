@@ -243,6 +243,56 @@ export function createPinnedModelUnavailableResponse(): Response {
   });
 }
 
+/** A timed capacity failure does not invalidate the client's continuation. */
+export function createPinnedModelRetryResponse(targets: ResolvedComboTarget[]): Response | null {
+  const retryableReasons = new Set([
+    "quota_exhausted",
+    "rate_limit",
+    "rate_limited",
+    "rate_limit_exceeded",
+    "server_error",
+    "overloaded",
+    "transient",
+    "circuit_open",
+  ]);
+  const locks = targets
+    .flatMap((target) => {
+      const info = getModelLockoutInfo(
+        target.provider,
+        target.connectionId || "",
+        parseModel(target.modelStr).model || target.modelStr
+      );
+      return info &&
+        Number.isFinite(info.remainingMs) &&
+        info.remainingMs > 0 &&
+        retryableReasons.has(info.reason)
+        ? [info]
+        : [];
+    })
+    .sort((a, b) => a.remainingMs - b.remainingMs);
+  const next = locks[0];
+  if (!next) return null;
+  const quota = ["quota_exhausted", "rate_limit", "rate_limited", "rate_limit_exceeded"].includes(
+    next.reason
+  );
+  const status = quota ? 429 : 503;
+  const seconds = Math.max(1, Math.ceil(next.remainingMs / 1000));
+  return new Response(
+    JSON.stringify(
+      buildErrorBody(
+        status,
+        "The model serving this turn is temporarily unavailable. Retry this same request after the cooldown; the turn binding is preserved.",
+        undefined,
+        {
+          code: "model_cooldown",
+          type: quota ? "rate_limit_error" : "server_error",
+        }
+      )
+    ),
+    { status, headers: { "Content-Type": "application/json", "Retry-After": String(seconds) } }
+  );
+}
+
 export interface CheckPinnedTargetsModelScopedUnusableOptions {
   pinnedTargets: ResolvedComboTarget[];
   resilienceSettings?: ResilienceSettings | null;
@@ -375,6 +425,8 @@ export async function isPinnedTargetModelScopedUnusable(args: {
    * without that wait, so for it a lock still means unusable.
    */
   allowWaitableLock?: boolean;
+  /** Pin failure requires model-specific evidence, not account availability. */
+  modelScopedOnly?: boolean;
 }): Promise<boolean> {
   const {
     target,
@@ -410,6 +462,14 @@ export async function isPinnedTargetModelScopedUnusable(args: {
 
   const lock = evaluatePinnedModelLock(target, resilienceSettings, args.allowWaitableLock);
   if (lock.modelLocked && !lock.lockWaitable) return true;
+
+  // Account quota, cooldown, capacity, and policy failures do not prove that
+  // the model itself is unusable. Keep the pin and let the normal dispatch
+  // gates return their retryable unavailability response. In particular, a
+  // boolean availability miss must not terminate opaque continuation state or
+  // switch a healthy model just because its accounts are temporarily blocked.
+  // Alternate selection still performs all availability checks below.
+  if (args.modelScopedOnly) return false;
 
   if (
     process.env.OMNIROUTE_QUOTA_AWARE_ROUTING === "1" &&
@@ -457,7 +517,12 @@ export async function areAllPinnedTargetsModelScopedUnusable(
   if (!options.pinnedTargets?.length) return false;
   for (const target of options.pinnedTargets) {
     if (
-      !(await isPinnedTargetModelScopedUnusable({ target, ...options, allowWaitableLock: true }))
+      !(await isPinnedTargetModelScopedUnusable({
+        target,
+        ...options,
+        allowWaitableLock: true,
+        modelScopedOnly: true,
+      }))
     ) {
       return false;
     }

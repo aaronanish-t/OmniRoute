@@ -8544,6 +8544,7 @@
   "compressionEngineConfig": {
     "loading": "Loading…",
     "loadFailed": "Failed to load engine information.",
+    "settingsLoadFailed": "Failed to load the saved settings. The fields show defaults, and Save stays off until the page reloads.",
     "engineNotFound": "Engine \"{engine}\" not found.",
     "saveFailed": "Failed to save configuration.",
     "previewFailed": "Preview failed.",

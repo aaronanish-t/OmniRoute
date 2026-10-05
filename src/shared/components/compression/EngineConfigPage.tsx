@@ -166,22 +166,21 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
           .catch(() => null) as Promise<Analytics | null>,
       ]);
 
-      let foundEngine: EngineEntry | null = null;
-      if (enginesData) {
-        foundEngine = enginesData.engines?.find((e) => e.id === engineId) ?? null;
-      } else {
-        setLoadError(t("loadFailed"));
-      }
+      const foundEngine = enginesData?.engines?.find((e) => e.id === engineId) ?? null;
 
       // Detailed config lives in the engine's settings sub-object (when it has one);
       // the on/off + level moved to the panel. A missing sub-object means schema defaults.
       const subKey = SETTINGS_SUBOBJECT[engineId];
       const stored = subKey ? settingsData?.[subKey] : undefined;
-      // Without the stored settings the form would show defaults as saved values, so the page
-      // reports the load error and Save stays off.
-      if (subKey && !settingsData) setLoadError(t("loadFailed"));
 
       if (!cancelled) {
+        if (!enginesData) {
+          setLoadError(t("loadFailed"));
+        } else if (subKey && !settingsData) {
+          // Without the stored settings the form would show defaults as saved values, so
+          // Save stays off.
+          setLoadError(t("settingsLoadFailed"));
+        }
         if (analyticsData) setAnalytics(analyticsData);
         setEngine(foundEngine);
         const seeded = seedEngineForm(engineId, foundEngine?.configSchema ?? [], stored);
@@ -209,7 +208,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       setSaveError(null);
       return;
     }
-    // Lite's cap must be a whole number in range before anything is sent.
+    // Lite's cap must be in range before anything is sent; the save floors it to a whole number.
     const cap = engineId === "lite" ? configState.maxToolLength : undefined;
     if (
       typeof cap === "number" &&
@@ -223,12 +222,12 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
     setSaving(true);
     setSaveError(null);
     try {
-      // The server replaces the whole sub-object, so the body starts from the copy stored
-      // now and changes only the fields edited here. A copy this page loaded earlier would
-      // write back fields another page saved since.
-      const current = (await fetch("/api/settings/compression").then((r) =>
-        r.ok ? r.json() : null
-      )) as CompressionSettings | null;
+      // The body starts from the copy stored now and changes only the fields edited here. The
+      // server replaces each sub-object whole (lite merges), so a copy this page loaded earlier
+      // would write back fields another page saved since.
+      const current = (await fetch("/api/settings/compression")
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null)) as CompressionSettings | null;
       if (!current) {
         setSaveError(t("saveFailed"));
         return;
@@ -255,7 +254,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       setSavedConfig(written);
       setConfigState((now) => formAfterSave(written, sent, now));
     } catch {
-      // The save may have reached the server before the request failed, so the next save
+      // The PUT may have reached the server before the request failed, so the next save
       // sends these fields again.
       setSavedConfig((saved) => forgetSentEdits(saved, sent));
       setSaveError(t("saveFailed"));
@@ -398,7 +397,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
           <EngineConfigForm
             schema={visibleConfigSchema}
             value={configState}
-            onChange={setConfigState}
+            onChange={(key, next) => setConfigState((prev) => ({ ...prev, [key]: next }))}
           />
         ) : (
           <p className="text-sm text-text-muted">{t("noAdditionalConfiguration")}</p>

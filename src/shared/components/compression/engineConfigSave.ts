@@ -19,9 +19,9 @@ export function seedEngineForm(
 ): FormValues {
   const current = asRecord(stored);
   const defaults: FormValues = Object.fromEntries(schema.map((f) => [f.key, f.defaultValue]));
-  // Do not seed lite.maxToolLength from the schema default. Persisting 2000
-  // would freeze the cap in settings and hide OMNIROUTE_LITE_MAX_TOOL_LENGTH.
-  // The form still shows 2000 via field.defaultValue until the operator edits it.
+  // Leave lite.maxToolLength out until a cap is stored. The baseline then has no cap, so an
+  // unset cap stays unset (OMNIROUTE_LITE_MAX_TOOL_LENGTH applies) and typing 2000 still counts
+  // as an edit. The form still shows 2000 through field.defaultValue.
   if (engineId === "lite" && current.maxToolLength === undefined) {
     delete defaults.maxToolLength;
   }
@@ -29,10 +29,10 @@ export function seedEngineForm(
 }
 
 /**
- * The sub-object an engine page PUTs on save. The server replaces the whole sub-object row, so
- * the body starts from the copy stored at save time and applies only the fields edited since
- * `saved`. The page hides `enabled`, so the form never writes it and the stored value passes
- * through. An emptied text field removes its key.
+ * The sub-object an engine page PUTs on save. The server replaces each sub-object row whole
+ * (lite merges), so the body starts from the copy stored at save time and applies only the fields
+ * edited since `saved`. The page hides `enabled`, so the form never writes it and the stored value
+ * passes through. An emptied text field removes its key.
  */
 export function buildEngineDetailUpdate(
   engineId: string,

@@ -136,3 +136,36 @@ test("pipeline=[ultra] honors the sent config (compressionRate 1 must stop pruni
     `pipeline ultra with compressionRate 1 must keep everything (savingsPct 0), got ${configuredRun.savingsPct} — the sent config was ignored`
   );
 });
+
+test("engineId=aggressive honors the sent config (maxTokensPerMessage forces the summarizer)", async () => {
+  // Aggressive is a no-op on single-message prose (the last user turn is always
+  // spared and aging leaves distance-2 turns verbatim), so exercise a multi-turn
+  // payload: the early turn is long enough to trip the fallback summarizer at the
+  // configured cap (256 tokens = 1024 chars) but short enough to stay under the
+  // 2048-token default cap (8192 chars), so only the configured run summarizes it.
+  const EARLY = "consider the following record of events and observations ".repeat(50);
+  const requestBody = {
+    engineId: "aggressive",
+    messages: [
+      { role: "user", content: EARLY },
+      { role: "assistant", content: "noted" },
+      { role: "user", content: "what next?" },
+    ],
+  };
+
+  const defaultRun = await preview(requestBody);
+  const configuredRun = await preview({
+    ...requestBody,
+    config: { aggressive: { maxTokensPerMessage: 256 } },
+  });
+
+  assert.notEqual(
+    configuredRun.compressed,
+    defaultRun.compressed,
+    "the sent aggressive config must change the engine output — it was ignored"
+  );
+  assert.ok(
+    configuredRun.compressed.includes("[COMPRESSED:summary]"),
+    "configured run should summarize the early turn (maxTokensPerMessage 256 < its length)"
+  );
+});

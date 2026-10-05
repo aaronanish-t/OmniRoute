@@ -345,10 +345,38 @@ export function useModelVisibilityHandlers({
         // extractApiErrorMessage coerces any object-shaped `error` (e.g. a Zod
         // format object) to a string so notify.error never hands the toast a
         // non-string child (React #31 → frozen page).
-        notify.error(
-          extractApiErrorMessage(data, providerText(t, "modelTestFailed", "Model test failed"))
-        );
+        const errorMsg = extractApiErrorMessage(data, providerText(t, "modelTestFailed", "Model test failed"));
+        notify.error(errorMsg);
         setModelTestStatus((prev) => ({ ...prev, [modelId]: "error" }));
+
+        // Check for common forbidden/per-model-access errors and offer quick hide
+        const forbiddenMatch = /Model\s+.+?\s+forbidden/i.test(errorMsg);
+        const accessMatch = /per-model\s+access/i.test(errorMsg) || /subscription/i.test(errorMsg);
+        if (forbiddenMatch || accessMatch) {
+          const modelName = fullModel.split('/').pop() || fullModel;
+          notify.addNotification({
+            type: "warning",
+            title: providerText(t, "modelAccessError", "Access error"),
+            message: providerText(
+              t,
+              "modelForbiddenHideAction",
+              "Model {model} forbidden (per-model access). Click to hide.",
+              { model: modelName }
+            ),
+            duration: 15000,
+            onClick: async () => {
+              await handleToggleModelHidden(providerId, modelId, true);
+              notify.success(
+                providerText(
+                  t,
+                  "modelHiddenSuccess",
+                  "Hidden model {model} — it will no longer appear in the catalog.",
+                  { model: fullModel }
+                )
+              );
+            },
+          });
+        }
       }
     } catch (err) {
       notify.error(providerText(t, "modelTestNetworkError", "Network error testing model"));
@@ -411,6 +439,35 @@ export function useModelVisibilityHandlers({
               ok++;
             } else {
               error++;
+              // Check for forbidden/per-model errors and offer quick hide notification
+              const errorMsg = entry?.error || "";
+              const forbiddenMatch = /Model\s+.+?\s+forbidden/i.test(errorMsg);
+              const accessMatch = /per-model\s+access/i.test(errorMsg) || /subscription/i.test(errorMsg);
+              if ((forbiddenMatch || accessMatch) && !outcome.shouldHide) {
+                const modelName = fullModel.split('/').pop() || fullModel;
+                notify.addNotification({
+                  type: "warning",
+                  title: providerText(t, "modelAccessError", "Access error"),
+                  message: providerText(
+                    t,
+                    "modelForbiddenHideAction",
+                    "Model {model} forbidden (per-model access). Click to hide.",
+                    { model: modelName }
+                  ),
+                  duration: 15000,
+                  onClick: async () => {
+                    await handleToggleModelHidden(providerId, modelId, true);
+                    notify.success(
+                      providerText(
+                        t,
+                        "modelHiddenSuccess",
+                        "Hidden model {model} — it will no longer appear in the catalog.",
+                        { model: fullModel }
+                      )
+                    );
+                  },
+                });
+              }
               if (outcome.shouldHide) {
                 // Hidden flag keyed by providerId — same as the manual eye toggle and the read
                 // (fetchProviderModelMeta). providerStorageAlias wrote it under the alias while the

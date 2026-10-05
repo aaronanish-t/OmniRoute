@@ -126,6 +126,32 @@ describe("current engine settings rows win over legacy rows", () => {
     );
   });
 
+  it("an unparseable-JSON current row still shadows a valid legacy row (deliberate)", async () => {
+    // The other #13456 corruption mode: a string value that fails JSON.parse is skipped by
+    // the read loop, but the key is still "present" — so the legacy row stays suppressed.
+    seedRow("aggressiveConfig", { ...DEFAULT_AGGRESSIVE_CONFIG, maxTokensPerMessage: 1111 });
+    core
+      .getDbInstance()
+      .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+      .run("compression", "aggressive", "{not valid json");
+
+    const settings = await getCompressionSettings();
+    assert.equal(
+      settings.aggressive?.maxTokensPerMessage,
+      DEFAULT_AGGRESSIVE_CONFIG.maxTokensPerMessage
+    );
+  });
+
+  it("an unparseable-JSON legacy row resets the engine to defaults", async () => {
+    core
+      .getDbInstance()
+      .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+      .run("compression", "ultraConfig", "{not valid json");
+
+    const settings = await getCompressionSettings();
+    assert.equal(settings.ultra?.compressionRate, DEFAULT_ULTRA_CONFIG.compressionRate);
+  });
+
   it("non-object legacy value resets the engine to defaults", async () => {
     seedRow("headroomConfig", 5);
 

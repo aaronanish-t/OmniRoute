@@ -673,6 +673,15 @@ export async function getCompressionSettings(): Promise<CompressionConfig> {
 
   const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = ?").all(NAMESPACE);
 
+  // Legacy per-engine rows (aggressiveConfig/ultraConfig/headroomConfig) share their read case
+  // with the current keys. When both rows exist the current key must win, regardless of the
+  // order the storage engine happens to return them in. Presence, not usability: a corrupt
+  // current row (BLOB/unparseable JSON) also suppresses the legacy row — the engine resets to
+  // defaults and the corruption warn below is the operator's signal to re-save.
+  const rowKeys = new Set(
+    rows.map((row) => toRecord(row).key).filter((key): key is string => typeof key === "string")
+  );
+
   const config: CompressionConfig = {
     ...DEFAULT_COMPRESSION_CONFIG,
     cavemanConfig: { ...DEFAULT_CAVEMAN_CONFIG },
@@ -807,12 +816,20 @@ export async function getCompressionSettings(): Promise<CompressionConfig> {
         config.languageConfig = normalizeLanguageConfig(parsed);
         break;
       case "aggressive":
-      case "aggressiveConfig":
         config.aggressive = normalizeAggressiveConfig(parsed);
         break;
+      case "aggressiveConfig":
+        if (!rowKeys.has("aggressive")) {
+          config.aggressive = normalizeAggressiveConfig(parsed);
+        }
+        break;
       case "ultra":
-      case "ultraConfig":
         config.ultra = normalizeUltraConfig(parsed);
+        break;
+      case "ultraConfig":
+        if (!rowKeys.has("ultra")) {
+          config.ultra = normalizeUltraConfig(parsed);
+        }
         break;
       case "lite": {
         const liteRecord = toRecord(parsed);
@@ -824,8 +841,12 @@ export async function getCompressionSettings(): Promise<CompressionConfig> {
         break;
       }
       case "headroom":
-      case "headroomConfig":
         config.headroom = normalizeHeadroomConfig(parsed);
+        break;
+      case "headroomConfig":
+        if (!rowKeys.has("headroom")) {
+          config.headroom = normalizeHeadroomConfig(parsed);
+        }
         break;
       case "sessionDedup":
       case "ccr":

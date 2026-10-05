@@ -17,6 +17,7 @@ process.env.DATA_DIR = tmpDataDir;
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 const { getCompressionSettings, updateCompressionSettings } =
   await import("../../src/lib/db/compression.ts");
+const { normalizeCcrConfig } = await import("../../src/lib/db/compressionDetailNormalizers.ts");
 
 test.after(() => {
   resetDbInstance();
@@ -43,6 +44,26 @@ test("retrievalRampFactor stays clamped to [1, 100]", async () => {
   await updateCompressionSettings({ ccr: { retrievalRampFactor: 0.5 } });
   const under = await getCompressionSettings();
   assert.equal(under.ccr.retrievalRampFactor, 1);
+});
+
+test("clamp boundaries 1 and 100 round-trip unchanged", async () => {
+  await updateCompressionSettings({ ccr: { retrievalRampFactor: 1 } });
+  const min = await getCompressionSettings();
+  assert.equal(min.ccr.retrievalRampFactor, 1);
+
+  await updateCompressionSettings({ ccr: { retrievalRampFactor: 100 } });
+  const max = await getCompressionSettings();
+  assert.equal(max.ccr.retrievalRampFactor, 100);
+});
+
+test("non-finite retrievalRampFactor falls back to the default (2)", () => {
+  // Direct call: JSON can't carry NaN/Infinity through a DB row (they encode as null),
+  // so only an in-memory object reaches the Number.isFinite disjunct.
+  assert.equal(normalizeCcrConfig({ retrievalRampFactor: Number.NaN }).retrievalRampFactor, 2);
+  assert.equal(
+    normalizeCcrConfig({ retrievalRampFactor: Number.POSITIVE_INFINITY }).retrievalRampFactor,
+    2
+  );
 });
 
 test("non-numeric retrievalRampFactor falls back to the default (2)", async () => {

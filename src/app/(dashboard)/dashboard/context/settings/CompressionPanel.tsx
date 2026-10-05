@@ -205,6 +205,19 @@ function AdaptiveContextBudgetDial({
   );
 }
 
+function derivedPreviewText(
+  derived: ReturnType<typeof deriveEffectivePreviewPlan>,
+  t: ReturnType<typeof useTranslations>
+): string {
+  if (derived.mode === "off") return t("compressionDerivedOff");
+  if (derived.stackedPipeline.length > 0) {
+    return t("compressionDerivedRuns", {
+      pipeline: derived.stackedPipeline.map((s) => s.engine).join(" → "),
+    });
+  }
+  return t("compressionDerivedMode", { mode: derived.mode });
+}
+
 export default function CompressionPanel() {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
@@ -235,9 +248,12 @@ export default function CompressionPanel() {
   const lastAckedGenRef = useRef(0);
 
   useEffect(() => {
+    // A retry re-runs these loads; answers that arrive for the run it replaced are ignored.
+    let ignore = false;
     fetch("/api/settings/compression")
       .then((r) => (r.ok ? r.json() : null))
       .then((data: Partial<CompressionConfig> | null) => {
+        if (ignore) return;
         if (data) {
           const hydrated: CompressionConfig = {
             ...DEFAULT_CONFIG,
@@ -252,25 +268,35 @@ export default function CompressionPanel() {
         }
         setLoadFailed(!data);
       })
-      .catch(() => setLoadFailed(true))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!ignore) setLoadFailed(true);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
 
     fetch("/api/settings/compression/mcp-accessibility")
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { enabled?: boolean } | null) => {
-        if (data && typeof data.enabled === "boolean") setMcpAccessibility(data.enabled);
+        if (!ignore && data && typeof data.enabled === "boolean") {
+          setMcpAccessibility(data.enabled);
+        }
       })
       .catch(() => {});
 
     fetch("/api/context/combos")
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { combos?: Array<{ id: string; pipeline: NamedCombos[string] }> } | null) => {
+        if (ignore) return;
         const combos = Array.isArray(data?.combos) ? data.combos : [];
         const map: NamedCombos = {};
         for (const combo of combos) map[combo.id] = combo.pipeline;
         setNamedCombos(map);
       })
       .catch(() => {});
+    return () => {
+      ignore = true;
+    };
   }, [loadAttempt]);
 
   // Persist a merge-patch. The DB persists `engines` as one whole row, so callers that
@@ -380,14 +406,7 @@ export default function CompressionPanel() {
   };
 
   const derived = deriveEffectivePreviewPlan(config, namedCombos);
-  const derivedText =
-    derived.mode === "off"
-      ? t("compressionDerivedOff")
-      : derived.stackedPipeline.length > 0
-        ? t("compressionDerivedRuns", {
-            pipeline: derived.stackedPipeline.map((s) => s.engine).join(" → "),
-          })
-        : t("compressionDerivedMode", { mode: derived.mode });
+  const derivedText = derivedPreviewText(derived, t);
   if (loading) {
     return (
       <Card className="p-6">
@@ -400,7 +419,7 @@ export default function CompressionPanel() {
     return (
       <Card className="p-6">
         <div className="flex items-center justify-between gap-4">
-          <p role="alert" className="text-sm text-red-500">
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
             {t("compressionTitle")}: {tCommon("failedToLoad")}
           </p>
           <Button

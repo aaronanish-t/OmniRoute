@@ -244,23 +244,33 @@ export default function CompressionSettingsTab() {
   const saveQueueRef = useRef(Promise.resolve());
 
   useEffect(() => {
+    // A retry re-runs these loads; answers that arrive for the run it replaced are ignored.
+    let ignore = false;
     fetch("/api/settings/compression")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
+        if (ignore) return;
         if (data) {
           savedRef.current = data;
           setConfig(data);
         }
         setLoadFailed(!data);
       })
-      .catch(() => setLoadFailed(true))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!ignore) setLoadFailed(true);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
     fetch("/api/compression/rules")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (Array.isArray(data?.rules)) setRuleMetadata(data.rules);
+        if (!ignore && Array.isArray(data?.rules)) setRuleMetadata(data.rules);
       })
       .catch(() => {});
+    return () => {
+      ignore = true;
+    };
   }, [loadAttempt]);
 
   const save = (updates: SettingsPatch<CompressionConfig>) => {
@@ -343,7 +353,7 @@ export default function CompressionSettingsTab() {
     return (
       <Card className="p-6">
         <div className="flex items-center justify-between gap-4">
-          <p role="alert" className="text-sm text-red-500">
+          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
             {t("compressionTitle")}: {tCommon("failedToLoad")}
           </p>
           <Button

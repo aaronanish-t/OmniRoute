@@ -222,15 +222,35 @@ describe("CompressionPanel", () => {
 });
 
 describe("CompressionPanel when the settings GET fails", () => {
-  // The panel's first request is the settings GET. It answers 500, as while the server
-  // restarts; later requests, including a retried GET, reach the stored config.
-  function failFirstSettingsGet() {
+  // The panel's first request is the settings GET, and it fails as it does while the server
+  // restarts. Later requests, including a retried GET, reach the stored config.
+  const FAILURES = {
+    "a 500": async () => new Response(JSON.stringify({ error: "unavailable" }), { status: 500 }),
+    "a network error": async () => {
+      throw new TypeError("Failed to fetch");
+    },
+  };
+
+  function failFirstSettingsGet(failure: keyof typeof FAILURES = "a 500") {
     const { puts } = setupFetchMock();
-    vi.mocked(globalThis.fetch).mockImplementationOnce(
-      async () => new Response(JSON.stringify({ error: "unavailable" }), { status: 500 })
-    );
+    vi.mocked(globalThis.fetch).mockImplementationOnce(FAILURES[failure]);
     // The mcp-accessibility toggle writes its own store, not the settings row.
     return () => puts.filter((p) => !p.url.includes("mcp-accessibility")).map((p) => p.body);
+  }
+
+  // Holds the next request open until the returned function lets `answer` reply to it.
+  function holdNextRequest(answer: typeof fetch) {
+    let release!: () => Promise<void>;
+    vi.mocked(globalThis.fetch).mockImplementationOnce(
+      (input, init) =>
+        new Promise<Response>((resolve) => {
+          release = async () => {
+            await act(async () => resolve(answer(input, init)));
+            await flush();
+          };
+        })
+    );
+    return () => release();
   }
 
   async function mountPanel() {
@@ -244,35 +264,47 @@ describe("CompressionPanel when the settings GET fails", () => {
     return container;
   }
 
-  it("offers no control that would save defaults over the stored settings", async () => {
-    const settingsPuts = failFirstSettingsGet();
-    const container = await mountPanel();
+  function retryButton(container: HTMLElement) {
+    return Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "retry"
+    );
+  }
 
-    // Without a loaded config the panel holds defaults: engines {}, outputStyles [], and the
-    // default contextBudget. A switch it still offers would PUT those defaults over the
-    // stored row, so press every one in page order.
-    for (const control of container.querySelectorAll<HTMLButtonElement>('[role="switch"]')) {
-      await act(async () => control.click());
-      await flush();
+  it.each(Object.keys(FAILURES) as Array<keyof typeof FAILURES>)(
+    "offers no control that would save defaults over the stored settings after %s",
+    async (failure) => {
+      const settingsPuts = failFirstSettingsGet(failure);
+      const container = await mountPanel();
+
+      // Without a loaded config the panel holds defaults: engines {}, outputStyles [], and the
+      // default contextBudget. A switch it still offers would PUT those defaults over the
+      // stored row, so press every one in page order.
+      for (const control of container.querySelectorAll<HTMLButtonElement>('[role="switch"]')) {
+        await act(async () => control.click());
+        await flush();
+      }
+
+      expect(settingsPuts(), "a save before any GET succeeds overwrites stored settings").toEqual(
+        []
+      );
+      expect(container.querySelectorAll("select, input")).toHaveLength(0);
+      expect(retryButton(container), "the load error offers a retry").toBeTruthy();
     }
-
-    expect(settingsPuts(), "a save before any GET succeeds overwrites stored settings").toEqual([]);
-    expect(container.querySelectorAll("select, input")).toHaveLength(0);
-  });
+  );
 
   it("shows a retry that loads the stored settings before the controls return", async () => {
     const settingsPuts = failFirstSettingsGet();
     const container = await mountPanel();
-
     expect(container.textContent).toContain("failedToLoad");
-    const retry = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent === "retry"
-    );
-    expect(retry, "the load error offers a retry").toBeTruthy();
 
-    await act(async () => retry!.click());
+    // The retried GET stays open, and the controls stay back until it answers.
+    const release = holdNextRequest(vi.mocked(globalThis.fetch).getMockImplementation()!);
+    await act(async () => retryButton(container)!.click());
     await flush();
+    expect(container.textContent).toContain("loading");
+    expect(container.querySelectorAll('[role="switch"], select, input')).toHaveLength(0);
 
+    await release();
     const rtkLevel = container.querySelector(
       `[data-testid="engine-row-rtk"] select`
     ) as HTMLSelectElement | null;
@@ -284,5 +316,24 @@ describe("CompressionPanel when the settings GET fails", () => {
     await act(async () => master.click());
     await flush();
     expect(settingsPuts()).toEqual([{ enabled: false }]);
+  });
+
+  it("ignores an answer from the load that a retry superseded", async () => {
+    failFirstSettingsGet();
+    // The first load's mcp-accessibility GET answers only after the retried load finished.
+    const answerStale = holdNextRequest(
+      async () => new Response(JSON.stringify({ enabled: false }), { status: 200 })
+    );
+    const container = await mountPanel();
+    await act(async () => retryButton(container)!.click());
+    await flush();
+
+    await answerStale();
+    const mcpToggle = container.querySelector(
+      `[data-testid="mcp-accessibility-toggle"] [role="switch"]`
+    );
+    expect(mcpToggle?.getAttribute("aria-checked"), "the retried load reported enabled").toBe(
+      "true"
+    );
   });
 });

@@ -80,9 +80,16 @@ const CONTEXT_BUDGET_POLICIES = new Set<ContextBudgetConfig["policy"]>([
 ]);
 const CAVEMAN_OUTPUT_LEVELS: CavemanIntensity[] = ["lite", "full", "ultra"];
 // A settings PUT that has not answered by then counts as failed, so one stalled save cannot hold
-// the controls disabled indefinitely. The server can still commit a PUT the panel gave up on; the
-// panel then shows the old value until the page reloads.
+// the controls disabled indefinitely. The server can still commit a PUT the panel gave up on;
+// after such a failure the panel re-reads the settings, so the next save starts from what the
+// server actually has.
 const SAVE_TIMEOUT_MS = 15_000;
+// How long the "Saved" badge stays up before clearing itself.
+const SAVED_STATUS_CLEAR_MS = 2_000;
+// The auto-trigger box's declared min/max; commits outside it keep the draft instead of
+// coercing the value into something the field never showed.
+const AUTO_TRIGGER_MIN = 0;
+const AUTO_TRIGGER_MAX = 100_000;
 
 const DEFAULT_CONFIG: CompressionConfig = {
   enabled: false,
@@ -108,6 +115,18 @@ function normalizeEngines(raw: unknown): Record<string, EngineToggle> {
       : { enabled: false };
   }
   return engines;
+}
+
+// Merge a stored settings row onto the defaults the panel renders.
+function toNormalizedConfig(data: Partial<CompressionConfig>): CompressionConfig {
+  return {
+    ...DEFAULT_CONFIG,
+    ...data,
+    engines: normalizeEngines(data.engines),
+    cavemanOutputMode: data.cavemanOutputMode ?? DEFAULT_CONFIG.cavemanOutputMode,
+    outputStyles: data.outputStyles ?? DEFAULT_CONFIG.outputStyles,
+    contextBudget: { ...DEFAULT_CONTEXT_BUDGET, ...(data.contextBudget ?? {}) },
+  };
 }
 
 function LiveZoneToggle({
@@ -150,19 +169,28 @@ function AutoTriggerInput({
   // The edit not saved yet, or null while the field shows the current value.
   const [draft, setDraft] = useState<string | null>(null);
   const commit = (text: string) => {
-    const tokens = parseInt(text) || 0;
+    const tokens = Number(text);
+    // Keep a value the field itself rejects (non-integer, negative, over max) in the box
+    // rather than coercing it; an empty box still means 0.
+    if (!Number.isInteger(tokens) || tokens < AUTO_TRIGGER_MIN || tokens > AUTO_TRIGGER_MAX) {
+      return;
+    }
     setDraft(null);
     if (tokens !== value) onCommit(tokens);
   };
   return (
     <input
       type="number"
-      min={0}
-      max={100000}
+      min={AUTO_TRIGGER_MIN}
+      max={AUTO_TRIGGER_MAX}
       value={draft ?? String(value)}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={(e) => commit(e.currentTarget.value)}
       onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          setDraft(null);
+          return;
+        }
         if (e.key === "Enter") commit(e.currentTarget.value);
       }}
       className="w-24 rounded border border-border bg-surface px-2 py-1 text-sm text-text-main"
@@ -263,22 +291,68 @@ export default function CompressionPanel() {
   // Saves still waiting on the server, oldest first.
   const pendingRef = useRef<Partial<CompressionConfig>[]>([]);
   const batchFailedRef = useRef(false);
+  // How many acked saves each top-level key has seen; a re-read answers only the keys no
+  // ack has bumped since the re-read was dispatched, so a stale snapshot can never
+  // overwrite a newer confirmed value.
+  const ackSeqByKeyRef = useRef(new Map<string, number>());
+
+  // The confirmed config with the saves still in flight laid over it, oldest first. The other
+  // controls disable while one of their saves is in flight. The auto-trigger box never
+  // disables, so its saves leave them enabled, and a click that ends an edit in the box still
+  // reaches the control it lands on.
+  const showSaves = () => {
+    setConfig(
+      pendingRef.current.reduce<CompressionConfig>(
+        (shown, pending) => ({ ...shown, ...pending }),
+        lastConfirmedRef.current
+      )
+    );
+    setSaving(
+      pendingRef.current.some((pending) =>
+        Object.keys(pending).some((key) => key !== "autoTriggerTokens")
+      )
+    );
+  };
+
+  // Re-read the settings after a save that threw. The server may have stored it after the
+  // panel gave up, and the next save of the same top-level key would otherwise overwrite that
+  // stored value with one built from the pre-save snapshot. Only the failed save's keys are
+  // uncertain, and only until one of them is acked again — an older answer for a key a newer
+  // ack already settled is dropped.
+  const resyncConfirmed = async (keys: string[]) => {
+    try {
+      const seqsAtDispatch = keys.map((key) => ackSeqByKeyRef.current.get(key) ?? 0);
+      const res = await fetch("/api/settings/compression", {
+        signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
+      });
+      if (!res.ok) return;
+      const fresh = toNormalizedConfig(await res.json());
+      const confirmed: CompressionConfig = { ...lastConfirmedRef.current };
+      keys.forEach((key, i) => {
+        if ((ackSeqByKeyRef.current.get(key) ?? 0) === seqsAtDispatch[i]) {
+          Object.assign(confirmed, { [key]: fresh[key as keyof CompressionConfig] });
+        }
+      });
+      lastConfirmedRef.current = confirmed;
+      showSaves();
+    } catch {
+      // The server is still unreachable; the next failing save retries the re-read.
+    }
+  };
 
   useEffect(() => {
     fetch("/api/settings/compression")
       .then((r) => (r.ok ? r.json() : null))
       .then((data: Partial<CompressionConfig> | null) => {
         if (data) {
-          const hydrated: CompressionConfig = {
-            ...DEFAULT_CONFIG,
-            ...data,
-            engines: normalizeEngines(data.engines),
-            cavemanOutputMode: data.cavemanOutputMode ?? DEFAULT_CONFIG.cavemanOutputMode,
-            outputStyles: data.outputStyles ?? DEFAULT_CONFIG.outputStyles,
-            contextBudget: { ...DEFAULT_CONTEXT_BUDGET, ...(data.contextBudget ?? {}) },
-          };
-          lastConfirmedRef.current = hydrated;
-          setConfig(hydrated);
+          lastConfirmedRef.current = toNormalizedConfig(data);
+          if (pendingRef.current.length > 0) {
+            // A save already started; show the confirmed base with it laid over, not the
+            // stale GET snapshot alone.
+            showSaves();
+          } else {
+            setConfig(lastConfirmedRef.current);
+          }
         }
       })
       .catch(() => {})
@@ -302,24 +376,6 @@ export default function CompressionPanel() {
       .catch(() => {});
   }, []);
 
-  // The confirmed config with the saves still in flight laid over it, oldest first. The other
-  // controls disable while one of their saves is in flight. The auto-trigger box never
-  // disables, so its saves leave them enabled, and a click that ends an edit in the box still
-  // reaches the control it lands on.
-  const showSaves = () => {
-    setConfig(
-      pendingRef.current.reduce<CompressionConfig>(
-        (shown, pending) => ({ ...shown, ...pending }),
-        lastConfirmedRef.current
-      )
-    );
-    setSaving(
-      pendingRef.current.some((pending) =>
-        Object.keys(pending).some((key) => key !== "autoTriggerTokens")
-      )
-    );
-  };
-
   // Persist a merge-patch. The server replaces each top-level key the PUT carries, so callers
   // that touch an engine pass the full engines map to avoid dropping the other engines.
   // Every save goes out at once. The server stores each save just before it answers, so a
@@ -327,7 +383,8 @@ export default function CompressionPanel() {
   // saves in flight, which rolls back only its own fields. Two overlapping saves of one field
   // can answer in a different order than the server stored them; the panel then shows the
   // value that answered last until the page reloads. "Save failed" shows from the first
-  // failure until a save starts with no other save in flight.
+  // failure until a save starts with no other save in flight. A save that threw (network
+  // error or the timeout) may still have been stored — the re-read below picks that up.
   const save = async (updates: Partial<CompressionConfig>) => {
     saveGenRef.current += 1;
     if (pendingRef.current.length === 0) {
@@ -337,6 +394,7 @@ export default function CompressionPanel() {
     pendingRef.current.push(updates);
     showSaves();
     let ok = false;
+    let threw = false;
     try {
       const res = await fetch("/api/settings/compression", {
         method: "PUT",
@@ -347,14 +405,19 @@ export default function CompressionPanel() {
       ok = res.ok;
     } catch (error) {
       // A network error or the timeout counts as a failed save.
+      threw = true;
       console.error("Failed to save compression settings:", error);
     }
     pendingRef.current = pendingRef.current.filter((pending) => pending !== updates);
     if (ok) {
+      for (const key of Object.keys(updates)) {
+        ackSeqByKeyRef.current.set(key, (ackSeqByKeyRef.current.get(key) ?? 0) + 1);
+      }
       lastConfirmedRef.current = { ...lastConfirmedRef.current, ...updates };
     } else {
       batchFailedRef.current = true;
       setStatus("error");
+      if (threw) void resyncConfirmed(Object.keys(updates));
     }
     showSaves();
     if (pendingRef.current.length > 0) return;
@@ -363,7 +426,7 @@ export default function CompressionPanel() {
     const latestGen = saveGenRef.current;
     setTimeout(() => {
       if (latestGen === saveGenRef.current) setStatus("");
-    }, 2000);
+    }, SAVED_STATUS_CLEAR_MS);
   };
 
   const setEngine = (id: string, patch: Partial<EngineToggle>) => {

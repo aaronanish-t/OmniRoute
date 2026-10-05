@@ -74,6 +74,9 @@ function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | n
     ...(toNonEmptyString(record.targetFormat)
       ? { targetFormat: toNonEmptyString(record.targetFormat)! }
       : {}),
+    // Union-origin marker (see SyncedAvailableModel.catalogOrigin); copied so
+    // the registry-vs-discovery distinction survives a normalize round-trip.
+    ...(record.catalogOrigin === "registry" ? { catalogOrigin: "registry" as const } : {}),
     ...(toNonEmptyString(record.upstreamProtocol)
       ? { upstreamProtocol: toNonEmptyString(record.upstreamProtocol)! }
       : {}),

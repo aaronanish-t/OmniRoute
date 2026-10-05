@@ -229,6 +229,7 @@ function getRegistryDispatchRows(storedProviderId: string): SyncedAvailableModel
         ? { supportedThinkingEfforts: [...model.supportedThinkingEfforts] }
         : {}),
       ...(model.supportsVision ? { supportsVision: true } : {}),
+      ...(model.toolCalling ? { supportsTools: true } : {}),
       ...(typeof model.contextLength === "number" ? { contextWindow: model.contextLength } : {}),
       // #6191: maxInputTokens is the preferred input budget when a registry
       // model declares one; contextLength is the fallback.
@@ -271,10 +272,17 @@ function unionRegistryDispatchModels(
   for (const model of models) {
     if (model?.id) merged.set(model.id, model);
   }
+  // Track admission explicitly instead of comparing Map size: this helper must
+  // stay correct even if a future caller passes rows it has not pre-filtered
+  // for falsy or duplicate ids.
+  let added = false;
   for (const row of registryRows) {
-    if (row?.id && !merged.has(row.id)) merged.set(row.id, row);
+    if (row?.id && !merged.has(row.id)) {
+      merged.set(row.id, row);
+      added = true;
+    }
   }
-  return merged.size === models.length ? models : Array.from(merged.values());
+  return added ? Array.from(merged.values()) : models;
 }
 
 /**

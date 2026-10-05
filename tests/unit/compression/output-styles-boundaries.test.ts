@@ -191,6 +191,7 @@ test("the boundary block keeps the spacing the last style's own text puts before
     ["zh", sel(["terse-prose", "full"], ["ponytail", "full"]), "。"],
     ["zh", sel(["terse-cjk", "full"]), "。"],
     ["hu", sel(["terse-prose", "full"], ["less-code", "full"]), " "],
+    ["ja", sel(["terse-prose", "ultra"], ["less-code", "ultra"]), "。"],
   ];
   for (const [language, selection, before] of cases) {
     const text = injected(

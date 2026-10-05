@@ -104,8 +104,10 @@ function resolveStyles(
 }
 
 /**
- * Build the combined instruction body (no marker, no boundary block), ending with the
- * separator the last style's own text puts before SHARED_BOUNDARIES. Pure / deterministic.
+ * Build the combined instruction body (no marker, no boundary block), ending with one
+ * space when the last style's own text puts whitespace (or nothing) before
+ * SHARED_BOUNDARIES, and with none when a non-whitespace character directly precedes
+ * it. Pure / deterministic.
  */
 function buildStyleInstructions(resolved: OutputStyleSelectionEntry[], language: string): string {
   const parts: string[] = [];
@@ -117,7 +119,7 @@ function buildStyleInstructions(resolved: OutputStyleSelectionEntry[], language:
     const text = levels[level];
     // Strip the per-style boundary so the combined boundary block is appended once below.
     parts.push(text.replace(SHARED_BOUNDARIES, "").trim());
-    // ja and zh texts run straight into SHARED_BOUNDARIES; the others put one space before it.
+    // The separator mirrors whatever spacing the style's own text puts before SHARED_BOUNDARIES.
     const at = text.indexOf(SHARED_BOUNDARIES);
     separator = at > 0 && !/\s/.test(text[at - 1]) ? "" : " ";
   }
@@ -168,9 +170,10 @@ export function applyOutputStyles(
   }
 
   // The boundary block follows the instruction body with the spacing the last style's own
-  // text uses (none in ja and zh), so a legacy single-style (terse-prose) injection matches
-  // the old caveman output mode below the marker line in every language (D-A5 back-compat):
-  // terse-prose declares no `boundaries`, so its block is exactly SHARED_BOUNDARIES as before.
+  // text puts before SHARED_BOUNDARIES, so a legacy single-style (terse-prose) injection
+  // matches the old caveman output mode below the marker line in every legacy language
+  // (D-A5 back-compat): terse-prose declares no `boundaries`, so its block is exactly
+  // SHARED_BOUNDARIES as before.
   // A style that declares one gets the shared clause AND its own, in catalog order.
   const combined = `${buildStyleInstructions(resolved, language)}${buildStyleBoundaries(resolved, language)}`;
   const instruction = `${OUTPUT_STYLE_MARKER}\n${combined}`;

@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "তৈরি করা কোর কনফিগারেশন গ্রহণকৃত ফাইলটি প্রতিস্থাপন করতে পারেনি; পাশে রাখা কপিটি রাখা হয়েছে।",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "জেনারেশনের সময় কিছু এন্ট্রি বাদ পড়েছে। সার্ভার লগ দেখুন।"
       },
       "description": "আপনার প্রক্সি সদস্যতা লিঙ্ক আটকান. একবার সক্ষম হলে, ট্রাফিককে প্রক্সি পুলের মাধ্যমে বিশ্বব্যাপী বা নিয়ম (নির্দিষ্ট প্রদানকারী) মোডে রুট করা হয়। সাবস্ক্রিপশন নোডগুলি স্বয়ংক্রিয়ভাবে প্রক্সি পুলে সিঙ্ক করা হয় এবং বিদ্যমান পোলিং, স্বাস্থ্য-পরীক্ষা এবং অ্যান্টি-লিক প্রক্রিয়াগুলি পুনরায় ব্যবহার করে।",
       "addSubscription": "সদস্যতা যোগ করুন",

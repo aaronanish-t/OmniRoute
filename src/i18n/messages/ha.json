@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "An tsarin da aka ƙirƙira ba zai iya maye gurbin fayil ɗin da aka karɓa ba; ma'anonin da ke gefen shi ne aka riƙe a mahaqu.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Wasu shigarwa an wuce su wani lokacin samarwa. Duba jarin sarfa."
       },
       "description": "Liƙa mahaɗin biyan kuɗin proxy ɗinka. Da zarar an kunna shi, za a bi da zirga-zirga ta cikin rukunin proxy a yanayin duniya ko na ƙa'ida (Provider da aka ƙayyade). Ana daidaita nodes na biyan kuɗi ta atomatik cikin rukunin proxy, kuma suna sake amfani da hanyoyin polling, health-check, da anti-leak da ake da su.",
       "addSubscription": "Ƙara Biyan Kuɗi",

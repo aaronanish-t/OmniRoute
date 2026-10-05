@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "የተፈጠረው ዋና ዋና ውሂብ አሰልጣኝ ተቀባይን ወርቀ ሊይዘው አልቻለም፤ ከዚያ በኋላ ያለው ቅጂ ተቀብሏል።",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "ገንዘቦች አልገቡም። የአገልጋይ መዝገብን ይመልከቱ።"
       },
       "description": "የፕሮክሲ ምዝገባ አገናኝዎን ይለጥፉ። አንዴ ከነቃ፣ ትራፊክ በዓለም አቀፍ ወይም በደንብ (የተወሰነ Provider) ሁነታ በፕሮክሲ ስብስቡ በኩል ይዘዋወራል። የምዝገባ ኖዶች በራስ-ሰር ወደ ፕሮክሲ ስብስቡ ይመሳሰላሉ፣ እንዲሁም ነባሮቹን የየጊዜው ማጣሪያ፣ የጤና ፍተሻ እና ፍሳሽ መከላከያ ዘዴዎች እንደገና ይጠቀማሉ።",
       "addSubscription": "ምዝገባ ያክሉ",

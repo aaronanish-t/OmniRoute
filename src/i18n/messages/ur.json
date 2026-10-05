@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "تیار کردہ بنیادی ترتیب اپنائی گئی فائل کی جگہ نہیں لے سکی؛ اس کے بجائے ساتھ والی نقل برقرار رکھی گئی۔",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "پیداوار کے دوران کچھ اندراجات چھوڑ دیے گئے۔ سرور لاگ دیکھیں۔"
       },
       "description": "اپنا پراکسی سبسکرپشن لنک چسپاں کریں۔ ایک بار فعال ہونے کے بعد، ٹریفک کو پراکسی پول کے ذریعے عالمی یا اصول (مخصوص فراہم کنندہ) موڈ میں روٹ کیا جاتا ہے۔ سبسکرپشن نوڈس خود بخود پراکسی پول میں مطابقت پذیر ہو جاتے ہیں اور موجودہ پولنگ، ہیلتھ چیک، اور اینٹی لیک میکانزم کو دوبارہ استعمال کرتے ہیں۔",
       "addSubscription": "سبسکرپشن شامل کریں۔",

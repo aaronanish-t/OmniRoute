@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "ការតភ្ជាប់គោលការណ៍ខ្នាតដែលបានបង្កើតមិនអាចជំនួសឯកសារដែលបានអនុម័តបានទេ។ មានការថតមួយនៅក្បែរនោះជំនួសវិញ។",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "ធាតុខ្លះត្រូវបានរំលងអំឡុងពេលបង្កើត។ មើលកំណត់ត្រាម៉ាស៊ីនមេ។"
       },
       "description": "បិទភ្ជាប់តំណការជាវប្រូកស៊ីរបស់អ្នក។ នៅពេលបើកដំណើរការ ចរាចរណ៍នឹងត្រូវបានកំណត់ផ្លូវតាមបណ្តុំប្រូកស៊ី ក្នុងរបៀបសកល ឬរបៀបតាមច្បាប់ (Provider ដែលបានបញ្ជាក់)។ node នៃការជាវនឹងត្រូវបានធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិទៅក្នុងបណ្តុំប្រូកស៊ី និងប្រើឡើងវិញនូវយន្តការស្ទង់ពិនិត្យ ការពិនិត្យសុខភាព និងការការពារការលេចធ្លាយដែលមានស្រាប់។",
       "addSubscription": "បន្ថែមការជាវ",

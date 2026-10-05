@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Konfigurasi teras yang dijana tidak dapat menggantikan fail yang diterima pakai; salinan di sebelahnya telah digunakan sebagai gantinya.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Beberapa entri dilangkau semasa penjanaan. Lihat log pelayan."
       },
       "description": "Tampalkan pautan langganan proksi anda. Setelah didayakan, trafik dihalakan melalui kumpulan proksi dalam mod global atau peraturan (Pembekal yang ditentukan). Nod langganan disegerakkan secara automatik ke dalam kumpulan proksi dan menggunakan semula mekanisme pengundian, pemeriksaan kesihatan dan anti-kebocoran sedia ada.",
       "addSubscription": "Tambah Langganan",

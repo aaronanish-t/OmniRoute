@@ -210,7 +210,7 @@ test("unassigned groups log one empty_group line per group", async () => {
       { coreConfigPath: target, localCoreEndpoint: THREE_ENDPOINTS },
       uriFeed(1)
     );
-    assert.equal(res, null);
+    assert.ok(res?.includes("CORE_CONFIG_ENTRIES_SKIPPED"), `got: ${res}`);
   } finally {
     cap.restore();
   }
@@ -287,7 +287,7 @@ test("repeated generations leave no accumulated state", async () => {
         { coreConfigPath: target, localCoreEndpoint: THREE_ENDPOINTS },
         uriFeed(1)
       );
-      assert.equal(res, null);
+      assert.ok(res?.includes("CORE_CONFIG_ENTRIES_SKIPPED"), `got: ${res}`);
     }
   } finally {
     cap.restore();

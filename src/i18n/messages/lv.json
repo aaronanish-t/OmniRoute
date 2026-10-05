@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Ģenerēto pamatkonfigurāciju neizdevās aizstāt pieņemto failu; tā vietā tika saglabāta kopija blakus.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Dažieraksti tika izlaisti ģenerēšanas laikā. Skatiet servera žurnālu."
       },
       "description": "Ielīmējiet savu proxy abonementa saiti. Pēc iespējošanas datplūsma tiek maršrutēta caur proxy kopu globālajā vai kārtulu režīmā (norādītajiem pakalpojumu sniedzējiem). Abonementa mezgli tiek automātiski sinhronizēti ar proxy kopu un izmanto esošos aptaujas, darbspējas pārbaudes un aizsardzības pret noplūdēm mehānismus.",
       "addSubscription": "Pievienot abonementu",

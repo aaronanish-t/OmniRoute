@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "La configuration de base générée n'a pas pu remplacer le fichier adopté ; la copie voisine a été conservée à la place.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Certaines entrées ont été ignorées pendant la génération. Consultez le journal du serveur."
       },
       "description": "Collez votre lien d'abonnement proxy. Une fois activé, le trafic est acheminé via le pool de proxy en mode global ou en mode règle (fournisseur spécifié). Les nœuds d'abonnement sont automatiquement synchronisés avec le pool de proxy et réutilisent les mécanismes d'interrogation, de contrôle de santé et anti-fuite existants.",
       "addSubscription": "Ajouter un abonnement",

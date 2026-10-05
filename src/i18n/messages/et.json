@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Genereeritud põhikonfiguratsioon ei suutnud vastuvõetud faili asendada; selle asemel jäeti kõrvalolev koopia alles.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Mõned kirjed jäid genereerimisel vahele. Vaata serverilogi."
       },
       "description": "Kleepige siia oma puhverserveri tellimuse link. Pärast lubamist marsruuditakse liiklus puhverserverite kogumi kaudu globaalses või reeglipõhises (määratud teenusepakkuja) režiimis. Tellimuse sõlmed sünkroonitakse automaatselt puhverserverite kogumisse ning nende puhul kasutatakse olemasolevaid küsitlus-, seisundikontrolli- ja lekkekaitsemehhanisme.",
       "addSubscription": "Lisa tellimus",

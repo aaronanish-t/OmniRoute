@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "ഉത്പാദിപ്പിച്ച കോർ കോൺഫിഗറേഷൻ സ്വീകരിച്ച ഫയൽ പകരമാക്കാൻ കഴിഞ്ഞില്ല; പകരം അടുത്തുള്ള കോപ്പി നിലനിർത്തി.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "ജനറേഷനിൽ ചില എൻട്രികൾ ഒഴിവാക്കപ്പെട്ടു. സെർവർ ലോഗ് കാണുക."
       },
       "description": "നിങ്ങളുടെ പ്രോക്സി സബ്സ്ക്രിപ്ഷൻ ലിങ്ക് ഒട്ടിക്കുക. പ്രവർത്തനക്ഷമമാക്കിയാൽ, ഗ്ലോബൽ അല്ലെങ്കിൽ റൂൾ (നിർദ്ദിഷ്ട Provider) മോഡിൽ ട്രാഫിക് പ്രോക്സി പൂളിലൂടെ റൂട്ട് ചെയ്യപ്പെടും. സബ്സ്ക്രിപ്ഷൻ നോഡുകൾ സ്വയമേവ പ്രോക്സി പൂളിലേക്ക് സമന്വയിപ്പിക്കുകയും നിലവിലുള്ള പോളിംഗ്, ഹെൽത്ത്-ചെക്ക്, ആന്റി-ലീക്ക് സംവിധാനങ്ങൾ തന്നെ ഉപയോഗിക്കുകയും ചെയ്യും.",
       "addSubscription": "സബ്സ്ക്രിപ്ഷൻ ചേർക്കുക",

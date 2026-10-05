@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Configurația generată nu a putut înlocui fișierul adoptat; copia de alături a fost păstrată în schimb.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Unele intrări au fost omise în timpul generării. Consultați jurnalul serverului."
       },
       "description": "Lipiți linkul de abonare proxy. Odată activat, traficul este direcționat prin grupul de proxy în modul global sau cu reguli (furnizor specificat). Nodurile de abonament sunt sincronizate automat în pool-ul de proxy și reutilizează mecanismele existente de sondare, verificare a stării de sănătate și anti-scurgere.",
       "addSubscription": "Adăugați abonament",

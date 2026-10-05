@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Генерираната основна конфигурация не можа да замени приетия файл; вместо това бе запазено копието до него.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Някои записи бяха пропуснати при генерирането. Вижте журнала на сървъра."
       },
       "description": "Поставете вашата връзка за абонамент за прокси. След като бъде активиран, трафикът се насочва през прокси пула в глобален режим или режим на правило (посочен доставчик). Абонаментните възли се синхронизират автоматично в прокси пула и използват повторно съществуващите механизми за анкетиране, проверка на изправността и анти-течове.",
       "addSubscription": "Добавяне на абонамент",

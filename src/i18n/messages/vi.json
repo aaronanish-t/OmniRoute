@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Cấu hình lõi được tạo ra không thể thay thế tệp đã chấp nhận; bản sao bên cạnh đã được giữ lại.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Một số mục đã bị bỏ qua trong quá trình tạo. Xem nhật ký máy chủ."
       },
       "description": "Dán liên kết đăng ký proxy của bạn. Sau khi được bật, lưu lượng truy cập sẽ được định tuyến qua nhóm proxy ở chế độ chung hoặc quy tắc (Nhà cung cấp được chỉ định). Các nút đăng ký được tự động đồng bộ hóa vào nhóm proxy và sử dụng lại các cơ chế bỏ phiếu, kiểm tra tình trạng và chống rò rỉ hiện có.",
       "addSubscription": "Thêm đăng ký",

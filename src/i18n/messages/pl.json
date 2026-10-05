@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Wygenerowana konfiguracja rdzenia nie mogła zastąpić przyjętego pliku; zamiast tego zachowano kopię obok.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Niektóre wpisy zostały pominięte podczas generowania. Zobacz log serwera."
       },
       "description": "Wklej link do subskrypcji proxy. Po włączeniu ruch jest kierowany przez pulę proxy w trybie globalnym lub regułowym (określony dostawca). Węzły subskrypcyjne są automatycznie synchronizowane z pulą proxy i ponownie wykorzystują istniejące mechanizmy odpytywania, sprawdzania stanu i zapobiegania wyciekom.",
       "addSubscription": "Dodaj subskrypcję",

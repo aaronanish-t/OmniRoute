@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Oluşturulan çekirdek yapılandırma, benimsenmiş dosyayı değiştiremedi; bunun yerine yanındaki kopya tutuldu.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Üretim sırasında bazı girdiler atlandı. Sunucu günlüğüne bakın."
       },
       "description": "Proxy abonelik bağlantınızı yapıştırın. Etkinleştirildiğinde trafik, genel veya kural (belirtilen Sağlayıcı) modunda proxy havuzu üzerinden yönlendirilir. Abonelik düğümleri otomatik olarak proxy havuzuyla senkronize edilir ve mevcut yoklama, durum kontrolü ve sızıntı önleme mekanizmalarını yeniden kullanır.",
       "addSubscription": "Abonelik Ekle",

@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Vygenerovanou konfiguraci jádra se nepodařilo nahradit přijatý soubor; místo toho byla zachována kopie vedle něj.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Některé položky byly během generování přeskočeny. Viz serverový log."
       },
       "description": "Vložte odkaz na předplatné proxy. Po povolení je provoz směrován přes fond proxy v globálním režimu nebo režimu pravidel (zadaný poskytovatel). Uzly předplatného se automaticky synchronizují do fondu proxy a znovu používají existující mechanismy dotazování, kontroly stavu a ochrany proti úniku.",
       "addSubscription": "Přidat předplatné",

@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "A generált alapkonfiguráció nem tudta helyettesíteni az elfogadott fájlt; helyette a mellette lévő másolat maradt meg.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Néhány bejegyzés kimaradt a generálás során. Lásd a kiszolgáló naplóját."
       },
       "description": "Illessze be a proxy előfizetési linkjét. Ha engedélyezve van, a forgalom a proxykészleten keresztül globális vagy szabály (meghatározott szolgáltató) módban kerül átirányításra. Az előfizetési csomópontok automatikusan szinkronizálódnak a proxykészlettel, és újra felhasználják a meglévő lekérdezési, állapot-ellenőrzési és szivárgásgátló mechanizmusokat.",
       "addSubscription": "Előfizetés hozzáadása",

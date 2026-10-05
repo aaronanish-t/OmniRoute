@@ -45,16 +45,58 @@ function logSkippedCounts(
     counts.set(entry.reason, (counts.get(entry.reason) ?? 0) + 1);
   }
   if (counts.size === 0) return;
-  const summary = [...counts.entries()]
-    .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
-    .map(([reason, count]) => `${reason}=${count}`)
+  const summary = orderSkippedReasons(counts)
+    .map((reason) => `${reason}=${counts.get(reason)}`)
     .join(", ");
   console.warn(`[ProxySubscription] core config skipped for ${label}: ${summary}`);
+}
+
+/** Warning code stored in the subscription `error` column when generation skips entries. */
+export type CoreConfigWarningCode = "CORE_CONFIG_ENTRIES_SKIPPED";
+
+/** Counts-only view of skipped entries, shared by the log line and the warning. */
+interface SkippedSummary {
+  count: number;
+  summary: string;
+}
+
+function orderSkippedReasons(counts: Map<string, number>): string[] {
+  return [...counts.entries()]
+    .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+    .map(([reason]) => reason);
+}
+
+function countSkipped(entries: Array<{ reason: string }>, pruned: number): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const entry of entries) counts.set(entry.reason, (counts.get(entry.reason) ?? 0) + 1);
+  if (pruned > 0) counts.set("core_rejected", (counts.get("core_rejected") ?? 0) + pruned);
+  return counts;
+}
+
+function formatSkippedDetail(counts: Map<string, number>, total: number): string {
+  return `skipped:${total}:${orderSkippedReasons(counts)
+    .map((reason) => `${reason}=${counts.get(reason)}`)
+    .join(",")}`;
+}
+
+function summarizeSkipped(
+  model: { skipped: Array<{ reason: string }> },
+  result: { skipped: Array<{ reason: string }> },
+  pruned: number
+): { count: number; summary: string } | null {
+  const counts = countSkipped([...model.skipped, ...result.skipped], pruned);
+  if (counts.size === 0) return null;
+  const total = [...counts.values()].reduce((sum, count) => sum + count, 0);
+  return { count: total, summary: formatSkippedDetail(counts, total) };
 }
 
 /** Encode a sync warning without importing the service (cycle-free). */
 function encodeWarning(code: string, detail?: string): string {
   return JSON.stringify(detail ? { code, detail } : { code });
+}
+
+function entriesSkippedWarning(summary: { count: number; summary: string }): string {
+  return encodeWarning("CORE_CONFIG_ENTRIES_SKIPPED", summary.summary);
 }
 
 function warn(reason: string): string {
@@ -65,7 +107,16 @@ function renderAndLog(
   sub: CoreConfigSub,
   model: ReturnType<typeof buildCoreModel>,
   existingText: string | null
-): string | null | { text: string; digest?: string; ownedIndex?: Array<string | null> } {
+):
+  | string
+  | null
+  | {
+      text: string;
+      digest?: string;
+      ownedIndex?: Array<string | null>;
+      skippedSummary: SkippedSummary | null;
+      resultSkipped: Array<{ reason: string }>;
+    } {
   const target = (sub.coreConfigPath ?? "").trim();
   const renderer = RENDERERS[DEFAULT_CORE];
   const result = renderer(model, existingText);
@@ -76,6 +127,8 @@ function renderAndLog(
     text: result.text,
     ...(result.membersDigest ? { digest: result.membersDigest } : {}),
     ...(result.ownedIndex ? { ownedIndex: result.ownedIndex } : {}),
+    skippedSummary: summarizeSkipped(model, result, 0),
+    resultSkipped: [...result.skipped],
   };
 }
 
@@ -165,23 +218,33 @@ export async function generateCoreConfigIntention(
       existingText.text,
       rendered,
       digest,
+      [...model.skipped, ...rendered.resultSkipped],
       opts
     );
-  return finishBeside(sub, target, rendered.text, digest);
+  return finishBeside(sub, target, rendered.text, digest, rendered.skippedSummary);
 }
 
 /** Verified-apply with prune retries, reporting the reload intention.
  * Runs the prune loop (bounded by MAX_PRUNE_ATTEMPTS) then maps the
  * warning to the reload intention: a clean pass (null warning) means replaced
- * with the rendered digest; anything else means no reload call. */
+ * with the rendered digest; anything else means no reload call.
+ *
+ * The initial render already counted its own `skipped` entries into
+ * `initialSkipped`, so the verified path merges them (plus any prune
+ * removals) instead of re-reading the mutated model. */
 async function finishVerifiedPrune(
   sub: CoreConfigSub,
   target: string,
   binaryPath: string,
   model: CoreModel,
   existingText: string | null,
-  rendered: { text: string; digest?: string; ownedIndex?: Array<string | null> },
+  rendered: {
+    text: string;
+    digest?: string;
+    ownedIndex?: Array<string | null>;
+  },
   digest: string | undefined,
+  initialSkipped: Array<{ reason: string }>,
   opts?: GenerateOptions
 ): Promise<CoreConfigIntention> {
   const fresh = RENDERERS[DEFAULT_CORE](model, existingText);
@@ -210,6 +273,7 @@ async function finishVerifiedPrune(
       ...(digest ? { membersDigest: digest } : {}),
       ...(ownedIndex ? { ownedIndex } : {}),
     } as RenderOk,
+    initialSkipped,
     opts
   );
   if (warning !== null)
@@ -228,14 +292,18 @@ function finishBeside(
   sub: CoreConfigSub,
   target: string,
   text: string,
-  digest: string | undefined
+  digest: string | undefined,
+  skippedSummary?: SkippedSummary | null
 ): CoreConfigIntention {
   if (sub.id && digest) setLastMembersDigest(sub.id, digest);
+  const warning = writeBeside(target, text);
+  if (warning !== null)
+    return { status: "none", digestChanged: false, configPath: target, warning };
   return {
     status: "none",
     digestChanged: false,
     configPath: target,
-    warning: writeBeside(target, text),
+    warning: skippedSummary ? entriesSkippedWarning(skippedSummary) : null,
   };
 }
 
@@ -291,9 +359,9 @@ function writeBeside(target: string, text: string): string | null {
  * When the check names an offending node, that node is pruned from the model
  * (recorded in `skipped` with reason `core_rejected`), the candidate is
  * re-rendered and the check runs again — bounded by MAX_PRUNE_ATTEMPTS
- * (1 initial check + up to 8 prune rounds). Pruned-away successes still warn
- * (`pruned:<n>:core_rejected`) so the removal surfaces in the subscription
- * warning; anything unattributable keeps the previous behaviour.
+ * (1 initial check + up to 8 prune rounds). A generation that skipped entries
+ * warns once with the skipped count and dominant reason; a clean generation
+ * stays silent; anything unattributable keeps the previous behaviour.
  */
 async function applyVerified(
   sub: CoreConfigSub,
@@ -302,6 +370,7 @@ async function applyVerified(
   model: CoreModel,
   existingText: string | null,
   first: RenderOk,
+  initialSkipped: Array<{ reason: string }>,
   opts?: GenerateOptions
 ): Promise<string | null> {
   const limit = opts?.maxPruneAttempts ?? MAX_PRUNE_ATTEMPTS;
@@ -309,7 +378,7 @@ async function applyVerified(
   let current = first;
   for (let round = 0; ; round += 1) {
     const outcome = await runVerifiedRound(sub, target, binaryPath, current, opts);
-    if (outcome === null) return prunedWarning(pruned);
+    if (outcome === null) return verifiedWarning(initialSkipped, model, pruned.length);
     if (outcome.done) return outcome.warning;
     const failed = outcome as {
       done: false;
@@ -322,7 +391,7 @@ async function applyVerified(
     if (next === null) {
       // Drained model: never serve an empty replacement — previous behaviour.
       if (model.nodes.length === 0) return warn("check_failed");
-      return pruned.length > 0 ? prunedWarning(pruned) : warn("check_failed");
+      return verifiedWarning(initialSkipped, model, pruned.length) ?? warn("check_failed");
     }
     current = next;
     console.warn(
@@ -331,9 +400,17 @@ async function applyVerified(
   }
 }
 
-/** Success-with-prunes still warns so the removal surfaces; clean pass is null. */
-function prunedWarning(done: Array<{ node: string; detail: string }>): string | null {
-  return done.length > 0 ? warn(`pruned:${done.length}:core_rejected`) : null;
+/** Skipped entries warn once so the removal surfaces; a clean pass is null. */
+function verifiedWarning(
+  initialSkipped: Array<{ reason: string }>,
+  model: CoreModel,
+  pruned: number
+): string | null {
+  const base = [...initialSkipped, ...model.skipped].filter(
+    (entry) => entry.reason !== "core_rejected"
+  );
+  const summary = summarizeSkipped({ skipped: base }, { skipped: [] }, pruned);
+  return summary ? entriesSkippedWarning(summary) : null;
 }
 
 /** One check round: replaced → null, beside without a tag → terminal warning. */

@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "생성된 코어 구성이 채택된 파일을 대체할 수 없었습니다. 대신 그 옆에 있는 사본이 유지되었습니다.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "생성 중 일부 항목이 건너뛰었습니다. 서버 로그를 참조하세요."
       },
       "description": "프록시 구독 링크를 붙여넣으세요. 활성화되면 트래픽은 전역 또는 규칙(지정된 공급자) 모드에서 프록시 풀을 통해 라우팅됩니다. 구독 노드는 프록시 풀에 자동으로 동기화되며 기존 폴링, 상태 확인 및 누출 방지 메커니즘을 재사용합니다.",
       "addSubscription": "구독 추가",

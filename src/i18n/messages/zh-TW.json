@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "產生的核心設定無法取代已採用的檔案；因此保留了其旁的副本。",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "產生期間略過了部分項目。請參閱伺服器日誌。"
       },
       "description": "貼上您的代理訂閱連結。啟用後，流量將透過代理程式池以全域或規則（指定提供者）模式路由。訂閱節點會自動同步到代理程式池中，並重複使用現有的輪詢、健康檢查和防洩漏機制。",
       "addSubscription": "新增訂閱",

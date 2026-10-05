@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "ಉತ್ಪಾದಿಸಲಾದ ಕೋರ್ ಕಾನ್ಫಿಗರೇಶನ್ ಅಳವಡಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ; ಬದಲಿಗೆ ಪಕ್ಕದಲ್ಲಿರುವ ಪ್ರತಿಯನ್ನು ಉಳಿಸಲಾಯಿತು.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "ಉತ್ಪಾದನೆಯ ಸಮಯದಲ್ಲಿ ಕೆಲವು ನಮೂದುಗಳನ್ನು ಕೈಬಿಡಲಾಗಿದೆ. ಸರ್ವರ್ ಲಾಗ್ ನೋಡಿ."
       },
       "description": "ನಿಮ್ಮ ಪ್ರಾಕ್ಸಿ ಚಂದಾದಾರಿಕೆ ಲಿಂಕ್ ಅನ್ನು ಅಂಟಿಸಿ. ಸಕ್ರಿಯಗೊಳಿಸಿದ ನಂತರ, ಟ್ರಾಫಿಕ್ ಅನ್ನು ಜಾಗತಿಕ ಅಥವಾ ನಿಯಮ (ನಿರ್ದಿಷ್ಟ Provider) ಮೋಡ್ನಲ್ಲಿ ಪ್ರಾಕ್ಸಿ ಪೂಲ್ ಮೂಲಕ ರೂಟ್ ಮಾಡಲಾಗುತ್ತದೆ. ಚಂದಾದಾರಿಕೆಯ ನೋಡ್ಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪ್ರಾಕ್ಸಿ ಪೂಲ್ಗೆ ಸಿಂಕ್ ಆಗುತ್ತವೆ ಮತ್ತು ಈಗಿರುವ ಪೋಲಿಂಗ್, ಆರೋಗ್ಯ ಪರಿಶೀಲನೆ ಹಾಗೂ ಸೋರಿಕೆ-ವಿರೋಧಿ ಕಾರ್ಯವಿಧಾನಗಳನ್ನು ಮರುಬಳಕೆ ಮಾಡುತ್ತವೆ.",
       "addSubscription": "ಚಂದಾದಾರಿಕೆಯನ್ನು ಸೇರಿಸಿ",

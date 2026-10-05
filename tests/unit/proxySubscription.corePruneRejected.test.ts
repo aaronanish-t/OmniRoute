@@ -123,7 +123,7 @@ test("rejected node is pruned and the check runs again (one rejection)", async (
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const calls: string[][] = [];
   const warning = await sub(target, binary, rejecting(["node-b"], calls));
-  assert.ok(warning?.includes("pruned:1:core_rejected"), `got: ${warning}`);
+  assert.ok(warning?.includes("CORE_CONFIG_ENTRIES_SKIPPED"), `got: ${warning}`);
   assert.deepEqual(nodeTags(target).sort(), ["omniroute-node-a", "omniroute-node-c"]);
   assert.ok(!fs.readFileSync(target, "utf8").includes("omniroute-node-b"));
   assert.equal(calls.length, 2);
@@ -135,7 +135,7 @@ test("two rejections take two rounds", async (t) => {
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const calls: string[][] = [];
   const warning = await sub(target, binary, rejecting(["node-a", "node-c"], calls));
-  assert.ok(warning?.includes("pruned:2:core_rejected"), `got: ${warning}`);
+  assert.ok(warning?.includes("CORE_CONFIG_ENTRIES_SKIPPED"), `got: ${warning}`);
   assert.deepEqual(nodeTags(target), ["omniroute-node-b"]);
   assert.equal(calls.length, 3);
 });
@@ -146,7 +146,7 @@ test("attempt bound keeps the previous behaviour", async (t) => {
   const calls: string[][] = [];
   const warning = await sub(target, binary, rejecting(["node-a", "node-b"], calls), 1);
   assert.ok(warning?.includes("check_failed"), `got: ${warning}`);
-  assert.ok(!warning?.includes("pruned:"));
+  assert.ok(!warning?.includes("CORE_CONFIG_ENTRIES_SKIPPED"));
   assert.deepEqual(fs.readFileSync(target), before);
   assert.equal(calls.length, 2);
 });

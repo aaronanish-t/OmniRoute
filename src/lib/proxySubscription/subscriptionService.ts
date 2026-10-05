@@ -26,7 +26,7 @@ import { getDbInstance } from "../db/core";
 import { backupDbFile } from "../db/backup";
 import { encrypt } from "../db/encryption";
 import { clearCoreReloadState, resolveRecordReloadMode } from "./coreConfig/reload";
-import { generateCoreConfigIntention } from "./coreConfig/sync";
+import { generateCoreConfigIntention, type CoreConfigWarningCode } from "./coreConfig/sync";
 import { reloadAfterReplace } from "./reloadSecret";
 import {
   addProxiesToScopePool,
@@ -69,6 +69,7 @@ export type ProxySubscriptionStatus = "ok" | "error" | "empty";
  * column (as JSON) so the dashboard can localize them via i18n instead of
  * showing server-side strings. */
 export type ProxySubscriptionErrorCode =
+  | CoreConfigWarningCode
   | "CORE_CONFIG_NOT_GENERATED"
   | "LOCAL_CORE_ENDPOINT_INVALID"
   | "NEEDS_CORE_NOT_CONFIGURED"

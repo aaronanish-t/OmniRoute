@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Aṣẹ-ọ̀pọ̀ ti ṣe ko le yí iwe wọ́le tó ti hàn padà; àwọn lẹ́yìn rẹ̀ la fi páyà.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Àwọn ẹ̀kún míì ṣíṣẹ̀ kò sí nínú ìdádúró. Wo àkójọ síọ́njú."
       },
       "description": "Lẹ̀ ìjápọ̀ ìforúkọsílẹ̀ aṣojú rẹ síbí. Nígbà tí o bá mú un ṣiṣẹ́, a máa darí ìrìn-àjò dátà gba inú àkójọpọ̀ aṣojú ní ipò àgbáyé tàbí ipò òfin (Olùpèsè tí a yàn). A máa mú àwọn node ìforúkọsílẹ̀ ṣiṣẹ́pọ̀ láìfọwọ́yí sínú àkójọpọ̀ aṣojú, wọ́n á sì tún lo àwọn ọ̀nà ìṣàyẹ̀wò déédéé, àyẹ̀wò ìlera, àti ìdènà ìjò dátà tó ti wà.",
       "addSubscription": "Ṣàfikún Ìforúkọsílẹ̀",

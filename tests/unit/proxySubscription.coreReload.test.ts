@@ -367,7 +367,10 @@ test("beside-write without a binary reports status none", async () => {
     );
     assert.equal(intention.status, "none");
     assert.equal(intention.digestChanged, false);
-    assert.equal(intention.warning, null);
+    assert.ok(
+      intention.warning?.includes("CORE_CONFIG_ENTRIES_SKIPPED"),
+      `got: ${intention.warning}`
+    );
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

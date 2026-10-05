@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "उत्पन्न मूल कॉन्फ़िगरेशन अपनाई गई फ़ाइल को प्रतिस्थापित नहीं कर सका; इसके बजाय उसके बगल वाली प्रति बनाए रखी गई।",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "उत्पादन के दौरान कुछ प्रविष्टियाँ छोड़ दी गईं। सर्वर लॉग देखें।"
       },
       "description": "अपना प्रॉक्सी सदस्यता लिंक चिपकाएँ. एक बार सक्षम होने पर, ट्रैफ़िक को प्रॉक्सी पूल के माध्यम से वैश्विक या नियम (निर्दिष्ट प्रदाता) मोड में रूट किया जाता है। सदस्यता नोड्स स्वचालित रूप से प्रॉक्सी पूल में सिंक हो जाते हैं और मौजूदा मतदान, स्वास्थ्य-जांच और एंटी-लीक तंत्र का पुन: उपयोग करते हैं।",
       "addSubscription": "सदस्यता जोड़ें",

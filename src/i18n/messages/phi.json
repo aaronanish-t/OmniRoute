@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Hindi maipapalit ng nabuo na core configuration ang inadopt na file; halip, itinabi ang kopya sa tabi nito.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "May mga entry na nilaktawan habang nagbibigay. Tingnan ang log ng server."
       },
       "description": "I-paste ang link ng iyong proxy na subscription. Kapag na-enable na, iruruta ang trapiko sa proxy pool sa pandaigdigang mode o panuntunan (tinukoy na Provider). Awtomatikong sini-sync ang mga node ng subscription sa proxy pool at muling ginagamit ang mga umiiral nang mekanismo ng botohan, pagsusuri sa kalusugan, at anti-leak.",
       "addSubscription": "Magdagdag ng Subscription",

@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "ဖန်တီးထားသော အခြေခံ ပြင်ဆင်ချက်သည် လက်ခံထားသော ဖိုင်ကို အစားမထိုးနိုင်ခဲ့ပါ။ ၎င်းအစား ဘေးနားရှိ မိတ္တူကို သိမ်းဆည်းထားပါသည်။",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "မျိုးစုံ စာရင်းများ ဖန်တီးနေစဉ်အတွင်း ချန်ထားခဲ့ပါသည်။ ဆာဗာ မှတ်တမ်းကို ကြည့်ပါ။"
       },
       "description": "သင့် proxy စာရင်းသွင်းမှုလင့်ခ်ကို ကူးထည့်ပါ။ ဖွင့်ပြီးသည်နှင့် အသွားအလာကို ကမ္ဘာလုံးဆိုင်ရာ သို့မဟုတ် စည်းမျဉ်း (သတ်မှတ်ထားသော Provider) မုဒ်တွင် proxy အစုမှတစ်ဆင့် လမ်းကြောင်းပို့မည်။ စာရင်းသွင်းမှု node များကို proxy အစုထဲသို့ အလိုအလျောက် ထပ်တူပြုပြီး လက်ရှိ polling၊ အခြေအနေစစ်ဆေးမှုနှင့် ယိုစိမ့်မှုတားဆီးရေး ယန္တရားများကို ပြန်လည်အသုံးပြုမည်။",
       "addSubscription": "စာရင်းသွင်းမှု ထည့်ရန်",

@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Generiranu osnovnu konfiguraciju nije bilo moguće zamijeniti prihvaćenu datoteku; umjesto toga zadržana je kopija pokraj nje.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Neke su stavke preskočene tijekom generiranja. Pogledajte zapisnik poslužitelja."
       },
       "description": "Zalijepite vezu pretplate za proxy. Nakon omogućavanja promet se usmjerava kroz skup proxyja u globalnom načinu ili načinu pravila (određeni Pružatelj). Čvorovi pretplate automatski se sinkroniziraju sa skupom proxyja i koriste postojeće mehanizme periodičkog dohvaćanja, provjere stanja i sprječavanja curenja.",
       "addSubscription": "Dodaj pretplatu",

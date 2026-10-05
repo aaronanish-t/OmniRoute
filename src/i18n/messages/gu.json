@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "બનાવેલા કોર કન્ફિગરેશનથી અપનાવેલી ફાઇલને બદલી શકાયું નહીં; બાજુમાં રાખેલી નકલ રાખવામાં આવી હતી.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "જનરેશન દરમિયાન કેટલીક એન્ટ્રીઓ છોડી દેવામાં આવી હતી. સર્વર લૉગ જુઓ."
       },
       "description": "તમારી પ્રોક્સી સબ્સ્ક્રિપ્શન લિંક પેસ્ટ કરો. એકવાર સક્ષમ થયા પછી, ટ્રાફિકને વૈશ્વિક અથવા નિયમ (ઉલ્લેખિત પ્રદાતા) મોડમાં પ્રોક્સી પૂલ દ્વારા રૂટ કરવામાં આવે છે. સબ્સ્ક્રિપ્શન નોડ્સ પ્રોક્સી પૂલમાં આપમેળે સમન્વયિત થાય છે અને હાલના મતદાન, આરોગ્ય-તપાસ અને એન્ટી-લીક મિકેનિઝમનો ફરીથી ઉપયોગ કરે છે.",
       "addSubscription": "સબ્સ્ક્રિપ્શન ઉમેરો",

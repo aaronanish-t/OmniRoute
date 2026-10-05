@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "De gegenereerde kernconfiguratie kon het overgenomen bestand niet vervangen; in plaats daarvan is de ernaast gemaakte kopie behouden.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Sommige items zijn overgeslagen tijdens het genereren. Zie de serverlog."
       },
       "description": "Plak uw proxy-abonnementslink. Eenmaal ingeschakeld, wordt het verkeer door de proxypool gerouteerd in de globale of regelmodus (gespecificeerde provider). Abonnementknooppunten worden automatisch gesynchroniseerd met de proxypool en hergebruiken bestaande polling-, statuscheck- en anti-lekmechanismen.",
       "addSubscription": "Abonnement toevoegen",

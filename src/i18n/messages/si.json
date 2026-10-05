@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "සකස් කළ ප්‍රධාන වින්‍යාසය ඇතුළත් කළ ගොනුව ආදේශ කළ නොහැකි විය; ඒ වෙනුවට යාබද පිටපත තබා ගන්නා ලදී.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "ජනනය කරන අතරතුර ඇතැම් ඇතුළත් කිරීම් මග හැර දැමුණි. සේවාදායක ලොග බලන්න."
       },
       "description": "ඔබේ ප්රොක්සි දායකත්ව සබැඳිය අලවන්න. සබල කළ පසු, ගමනාගමනය ගෝලීය හෝ රීති (නිශ්චිත Provider) ප්රකාරයේදී ප්රොක්සි සංචිතය හරහා මාර්ගගත කෙරේ. දායකත්ව නෝඩ ස්වයංක්රීයව ප්රොක්සි සංචිතයට සමමුහුර්ත කර, පවතින polling, health-check සහ anti-leak යාන්ත්රණ නැවත භාවිත කරයි.",
       "addSubscription": "දායකත්වයක් එක් කරන්න",

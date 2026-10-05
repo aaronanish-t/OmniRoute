@@ -6877,7 +6877,8 @@
         "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
         "CORE_CONFIG_NOT_APPLIED": "Το παραχθέν βασικό αρχείο ρυθμίσεων δεν ήταν δυνατό να αντικαταστήσει το υιοθετημένο αρχείο· διατηρήθηκε αντί αυτού το αντίγραφο δίπλα του.",
         "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh."
+        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_CONFIG_ENTRIES_SKIPPED": "Κάποιες καταχωρίσεις παραλείφθηκαν κατά τη δημιουργία. Δείτε το αρχείο καταγραφής του διακομιστή."
       },
       "description": "Επικολλήστε τον σύνδεσμο συνδρομής διακομιστή μεσολάβησης. Μόλις ενεργοποιηθεί, η κυκλοφορία δρομολογείται μέσω της δεξαμενής διακομιστών μεσολάβησης σε καθολική λειτουργία ή λειτουργία κανόνων (καθορισμένος Πάροχος). Οι κόμβοι συνδρομής συγχρονίζονται αυτόματα στη δεξαμενή και επαναχρησιμοποιούν τους υπάρχοντες μηχανισμούς κυκλικής εναλλαγής, ελέγχου εύρυθμης λειτουργίας και αποτροπής διαρροών.",
       "addSubscription": "Προσθήκη Συνδρομής",

@@ -127,8 +127,10 @@ function useCliVersionData(providerId: string | null, t: ProviderMessageTranslat
     // body is what react-hooks/set-state-in-effect forbids, and the caller
     // renders null for these kinds anyway.
     if (!providerId) return;
+    let cancelled = false;
     const run = async () => {
       const outcome = await fetchStatusSafe(providerId);
+      if (cancelled) return;
       if (outcome.ok && outcome.status) {
         setStatus(outcome.status);
         setDraft(outcome.status.version ?? "");
@@ -142,6 +144,9 @@ function useCliVersionData(providerId: string | null, t: ProviderMessageTranslat
       setLoadedProviderId(providerId);
     };
     void run();
+    return () => {
+      cancelled = true;
+    };
   }, [providerId, notify, t]);
 
   const save = useCallback(
@@ -223,9 +228,7 @@ function ActionButton(props: { label: string; onClick: () => void; disabled: boo
   );
 }
 
-export default function ProviderCliVersionSection({
-  providerId,
-}: ProviderCliVersionSectionProps) {
+export default function ProviderCliVersionSection({ providerId }: ProviderCliVersionSectionProps) {
   const t = useTranslations("providers");
   // Hooks run unconditionally (rules of hooks). The load effect is a no-op for
   // kinds with no override support, and nothing is rendered for them.
@@ -282,7 +285,11 @@ export default function ProviderCliVersionSection({
             e.preventDefault();
             void save(nextValue);
           }}
-          placeholder={providerText(t, "cliVersionInputPlaceholder", "Override version; blank clears")}
+          placeholder={providerText(
+            t,
+            "cliVersionInputPlaceholder",
+            "Override version; blank clears"
+          )}
           aria-label={providerText(t, "cliVersionInputLabel", "Override version")}
           className="flex-1 rounded-lg border border-border bg-sidebar/50 px-3 py-1.5 text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
         />

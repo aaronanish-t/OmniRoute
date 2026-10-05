@@ -110,6 +110,24 @@ describe("ProviderCliVersionSection", () => {
     vi.unstubAllGlobals();
   });
 
+  it("does not update state or notify after a pending load is unmounted", async () => {
+    let resolve!: (response: Response) => void;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        () =>
+          new Promise<Response>((done) => {
+            resolve = done;
+          })
+      )
+    );
+    renderComponent(<ProviderCliVersionSection providerId="claude" />);
+    cleanups.pop()?.();
+    resolve(jsonResponse({ error: "late failure" }, 500));
+    await flush();
+    expect(notifyError).not.toHaveBeenCalled();
+  });
+
   it("renders nothing for a provider with no override support and never fetches", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -138,7 +156,13 @@ describe("ProviderCliVersionSection", () => {
   it("renders the Codex card with the caller-forwarding caveat", async () => {
     vi.stubGlobal(
       "fetch",
-      stubGet({ key: "codex", version: null, effective: "0.155.0", source: "default", pinned: "0.155.0" })
+      stubGet({
+        key: "codex",
+        version: null,
+        effective: "0.155.0",
+        source: "default",
+        pinned: "0.155.0",
+      })
     );
 
     const container = renderComponent(<ProviderCliVersionSection providerId="codex" />);
@@ -351,7 +375,10 @@ describe("ProviderCliVersionSection", () => {
     const gate = new Promise((resolve) => {
       release = resolve;
     });
-    vi.stubGlobal("fetch", vi.fn(() => gate.then(() => jsonResponse({ items: [CLAUDE_ROW] }))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => gate.then(() => jsonResponse({ items: [CLAUDE_ROW] })))
+    );
 
     const container = renderComponent(<ProviderCliVersionSection providerId="claude" />);
     expect(container.querySelector(".animate-pulse"), "skeleton expected").toBeTruthy();

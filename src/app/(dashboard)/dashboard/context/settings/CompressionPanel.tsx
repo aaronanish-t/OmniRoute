@@ -138,8 +138,8 @@ function LiveZoneToggle({
 }
 
 // Saves on Enter or when the field loses focus, so typing a number sends one save with the
-// final value. A newly saved or rolled-back value replaces the draft unless the field holds
-// an edit that has not been saved.
+// final value. Until then the field shows the edit; otherwise it shows the current value,
+// including one a failed save rolled back.
 function AutoTriggerInput({
   value,
   onCommit,
@@ -147,16 +147,11 @@ function AutoTriggerInput({
   value: number;
   onCommit: (tokens: number) => void;
 }) {
-  const [draft, setDraft] = useState(String(value));
-  const [shown, setShown] = useState(value);
-  if (value !== shown) {
-    setShown(value);
-    if (draft === String(shown)) setDraft(String(value));
-  }
-  // The draft takes the committed number's own text, so a rollback can tell it holds no edit.
+  // The edit not saved yet, or null while the field shows the current value.
+  const [draft, setDraft] = useState<string | null>(null);
   const commit = (text: string) => {
     const tokens = parseInt(text) || 0;
-    setDraft(String(tokens));
+    setDraft(null);
     if (tokens !== value) onCommit(tokens);
   };
   return (
@@ -164,7 +159,7 @@ function AutoTriggerInput({
       type="number"
       min={0}
       max={100000}
-      value={draft}
+      value={draft ?? String(value)}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={(e) => commit(e.currentTarget.value)}
       onKeyDown={(e) => {
@@ -307,14 +302,23 @@ export default function CompressionPanel() {
       .catch(() => {});
   }, []);
 
-  // The confirmed config with the saves still in flight laid over it, oldest first.
-  const showSaves = () =>
+  // The confirmed config with the saves still in flight laid over it, oldest first. The other
+  // controls disable while one of their saves is in flight. The auto-trigger box never
+  // disables, so its saves leave them enabled, and a click that ends an edit in the box still
+  // reaches the control it lands on.
+  const showSaves = () => {
     setConfig(
       pendingRef.current.reduce<CompressionConfig>(
         (shown, pending) => ({ ...shown, ...pending }),
         lastConfirmedRef.current
       )
     );
+    setSaving(
+      pendingRef.current.some((pending) =>
+        Object.keys(pending).some((key) => key !== "autoTriggerTokens")
+      )
+    );
+  };
 
   // Persist a merge-patch. The server replaces each top-level key the PUT carries, so callers
   // that touch an engine pass the full engines map to avoid dropping the other engines.
@@ -332,7 +336,6 @@ export default function CompressionPanel() {
     }
     pendingRef.current.push(updates);
     showSaves();
-    setSaving(true);
     let ok = false;
     try {
       const res = await fetch("/api/settings/compression", {
@@ -355,7 +358,6 @@ export default function CompressionPanel() {
     }
     showSaves();
     if (pendingRef.current.length > 0) return;
-    setSaving(false);
     if (batchFailedRef.current) return;
     setStatus("saved");
     const latestGen = saveGenRef.current;

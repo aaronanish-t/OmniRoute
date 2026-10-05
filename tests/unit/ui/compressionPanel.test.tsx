@@ -430,4 +430,47 @@ describe("CompressionPanel", () => {
     expect(autoTrigger.value).toBe("500");
     expect(container.textContent).toContain("saveFailed");
   });
+
+  it("keeps an unsaved auto-trigger edit when an overlapping save of it fails", async () => {
+    const { puts, answer } = holdSettingsPuts();
+    const container = await renderPanel();
+    const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
+    await commitAutoTrigger(autoTrigger, "100");
+    await commitAutoTrigger(autoTrigger, "200");
+    await act(async () => {
+      fireEvent.change(autoTrigger, { target: { value: "100" } });
+    });
+
+    // The 200 save answers first; the 100 save then fails, which rolls the value back to 200.
+    await answer(1, 200);
+    await answer(0, 500);
+    expect(autoTrigger.value, "the unsaved edit stays in the box").toBe("100");
+    await act(async () => {
+      fireEvent.blur(autoTrigger);
+    });
+    expect(puts).toEqual([
+      { autoTriggerTokens: 100 },
+      { autoTriggerTokens: 200 },
+      { autoTriggerTokens: 100 },
+    ]);
+  });
+
+  it("delivers a click that ends an auto-trigger edit to the control it lands on", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const { puts } = holdSettingsPuts();
+    const container = await renderPanel();
+    const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
+    const cavemanToggle = container.querySelector(
+      `[data-testid="engine-toggle-caveman"] button`
+    ) as HTMLButtonElement;
+    const user = userEvent.setup();
+    await user.clear(autoTrigger);
+    await user.type(autoTrigger, "500");
+
+    // Pressing the toggle blurs the box, which saves 500 before the click lands.
+    await user.click(cavemanToggle);
+    expect(puts).toHaveLength(2);
+    expect(puts[0]).toEqual({ autoTriggerTokens: 500 });
+    expect((puts[1].engines as Record<string, { enabled: boolean }>).caveman.enabled).toBe(true);
+  });
 });

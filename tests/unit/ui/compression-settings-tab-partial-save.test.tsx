@@ -300,3 +300,84 @@ describe("CompressionSettingsTab saves only what changed", () => {
     expect(screen.getByText("saveFailed")).toBeTruthy();
   });
 });
+
+describe("CompressionSettingsTab when the settings GET fails", () => {
+  // The tab's first request is the settings GET, and it fails as it does while the server
+  // restarts. Later requests, including a retried GET, reach the stored row.
+  const FAILURES = {
+    "a 500": async () => new Response(JSON.stringify({ error: "unavailable" }), { status: 500 }),
+    "a network error": async () => {
+      throw new TypeError("Failed to fetch");
+    },
+  };
+
+  // Holds the next request open until the returned function lets `answer` reply to it.
+  function holdNextRequest(answer: typeof fetch) {
+    let release!: () => Promise<void>;
+    vi.mocked(fetch).mockImplementationOnce(
+      (input, init) =>
+        new Promise<Response>((resolve) => {
+          release = async () => {
+            resolve(answer(input, init));
+            await settle();
+          };
+        })
+    );
+    return () => release();
+  }
+
+  it.each(Object.keys(FAILURES) as Array<keyof typeof FAILURES>)(
+    "shows a retry in place of default settings after %s",
+    async (failure) => {
+      startServer();
+      vi.mocked(fetch).mockImplementationOnce(FAILURES[failure]);
+      await renderTab();
+
+      // The defaults would report every compression layer as off.
+      expect(screen.queryByText("tokenSaverTitle")).toBeNull();
+      expect(screen.getByText(/failedToLoad/)).toBeTruthy();
+      expect(screen.getByText("retry")).toBeTruthy();
+    }
+  );
+
+  it("shows loading while Retry reloads, then the stored settings", async () => {
+    startServer();
+    vi.mocked(fetch).mockImplementationOnce(FAILURES["a 500"]);
+    await renderTab();
+
+    // The retried GET stays open, and the form stays back until it answers.
+    const release = holdNextRequest(vi.mocked(fetch).getMockImplementation()!);
+    fireEvent.click(screen.getByText("retry"));
+    await settle();
+    expect(screen.getByText("loading")).toBeTruthy();
+    expect(screen.queryByText("compressionCacheTTL")).toBeNull();
+
+    await release();
+    expect(screen.queryByText(/failedToLoad/)).toBeNull();
+    // The stored row has compression enabled, which the defaults do not.
+    expect(inputFor("compressionCacheTTL")).toBeTruthy();
+  });
+
+  it("ignores rules from the load that a retry superseded", async () => {
+    startServer();
+    vi.mocked(fetch).mockImplementationOnce(FAILURES["a 500"]);
+    // The first load's rules GET answers only after the retried load finished.
+    const staleRule = {
+      name: "stale_rule",
+      category: "filler",
+      context: "all",
+      minIntensity: "lite",
+      description: "from the superseded load",
+    };
+    const answerStale = holdNextRequest(
+      async () => new Response(JSON.stringify({ rules: [staleRule] }), { status: 200 })
+    );
+    await renderTab();
+    fireEvent.click(screen.getByText("retry"));
+    await settle();
+    expect(inputFor("compressionCacheTTL")).toBeTruthy();
+
+    await answerStale();
+    expect(screen.queryByText("stale rule")).toBeNull();
+  });
+});

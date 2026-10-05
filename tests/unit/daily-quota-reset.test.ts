@@ -82,3 +82,13 @@ test("calendarWeekWindowMs follows DST: the spring-forward week is 167 hours", (
   assert.equal(new Date(week.resetMs).toISOString(), "2026-03-09T04:00:00.000Z");
   assert.equal((week.resetMs - week.startMs) / 3_600_000, 167);
 });
+
+test("calendarWeekWindowMs chooses the first occurrence of an ambiguous local midnight", () => {
+  // Antarctica/Vostok moved its offset at midnight on 2023-12-18. At this instant
+  // local time is already Monday 00:30, so the containing week must have started
+  // no later than the first Monday midnight occurrence.
+  const now = Date.parse("2023-12-17T17:30:00Z");
+  const week = calendarWeekWindowMs("Antarctica/Vostok", now);
+  assert.equal(new Date(week.startMs).toISOString(), "2023-12-17T17:00:00.000Z");
+  assert.ok(week.startMs <= now);
+});

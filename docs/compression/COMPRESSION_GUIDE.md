@@ -484,8 +484,9 @@ injected instead of English.
 On a body with `messages`, a content bypass (`shouldBypassCavemanOutputMode()` in
 `open-sse/services/compression/outputMode.ts`) checks the last three messages and skips
 the styles for the whole turn when they match its security, irreversible-action,
-clarification, or order-sensitive keywords. The bypass runs whatever the dashboard's
-**Auto-Clarity Bypass** toggle (`cavemanOutputMode.autoClarity`) is set to.
+clarification, or order-sensitive keywords. The bypass runs while the dashboard's
+**Auto-Clarity Bypass** toggle (`cavemanOutputMode.autoClarity`) is on, which is the
+default; with the toggle off, the selected styles apply on those turns too.
 
 When the bypass lets the turn through, `placeSystemInstruction()` (same file), which
 never creates a new `messages[0]`, places the block in the first of these it finds:

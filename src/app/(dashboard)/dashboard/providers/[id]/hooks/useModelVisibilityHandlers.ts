@@ -349,10 +349,10 @@ export function useModelVisibilityHandlers({
         notify.error(errorMsg);
         setModelTestStatus((prev) => ({ ...prev, [modelId]: "error" }));
 
-        // Check for common forbidden/per-model-access errors and offer quick hide
-        const forbiddenMatch = /Model\s+.+?\s+forbidden/i.test(errorMsg);
-        const accessMatch = /per-model\s+access/i.test(errorMsg) || /subscription/i.test(errorMsg);
-        if (forbiddenMatch || accessMatch) {
+        // Only suggest hide for forbidden or not-found errors, NOT quota/rate-limiting
+        const isForbidden = /Model\s+.+?\s+forbidden/i.test(errorMsg);
+        const isNotFound = /404|not found/i.test(errorMsg);
+        if ((isForbidden || isNotFound)) {
           const modelName = fullModel.split('/').pop() || fullModel;
           notify.addNotification({
             type: "warning",
@@ -360,8 +360,8 @@ export function useModelVisibilityHandlers({
             message: providerText(
               t,
               "modelForbiddenHideAction",
-              "Model {model} forbidden (per-model access). Click to hide.",
-              { model: modelName }
+              "Model {model} is {reason}. Click to hide it from this provider?",
+              { model: modelName, reason: isForbidden ? "forbidden" : "not found (404)" }
             ),
             duration: 15000,
             onClick: async () => {

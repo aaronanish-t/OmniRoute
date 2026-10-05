@@ -191,11 +191,11 @@ export default function PassthroughModelsSection({
           ok++;
         } else {
           error++;
-          // Check for forbidden/per-model errors and offer quick hide notification
+          // Only suggest hide for forbidden or not-found errors, NOT quota/rate-limiting
           const errorMsg = entry?.error || "";
-          const forbiddenMatch = /Model\s+.+?\s+forbidden/i.test(errorMsg);
-          const accessMatch = /per-model\s+access/i.test(errorMsg) || /subscription/i.test(errorMsg);
-          if ((forbiddenMatch || accessMatch) && !outcome.shouldHide) {
+          const isForbidden = /Model\s+.+?\s+forbidden/i.test(errorMsg);
+          const isNotFound = /404|not found/i.test(errorMsg);
+          if ((isForbidden || isNotFound) && !outcome.shouldHide) {
             const modelName = model.modelId.split('/').pop() || model.modelId;
             notify.addNotification({
               type: "warning",
@@ -203,8 +203,8 @@ export default function PassthroughModelsSection({
               message: providerText(
                 t,
                 "modelForbiddenHideAction",
-                "Model {model} forbidden (per-model access). Click to hide.",
-                { model: modelName }
+                "Model {model} is {reason}. Click to hide it from this provider?",
+                { model: modelName, reason: isForbidden ? "forbidden" : "not found (404)" }
               ),
               duration: 15000,
               onClick: async () => {

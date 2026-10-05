@@ -8639,9 +8639,6 @@
         "label": "Minimalan broj redaka za sažimanje",
         "description": "Minimalan broj redaka u homogenom JSON nizu potreban za pokretanje tabličnog sažimanja. Zadano: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Zadrži sistemsku poruku"
-      },
       "summarizerEnabled": {
         "label": "Omogući alat za sažimanje"
       },

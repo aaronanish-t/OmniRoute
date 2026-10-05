@@ -8639,9 +8639,6 @@
         "label": "Ahịrị kacha nta a ga-akpakọ",
         "description": "Ọnụọgụ ahịrị kacha nta achọrọ n'ime usoro JSON nwere otu nhazi iji malite mkpakọ tebụl. Ndabara: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Chekwaa system prompt"
-      },
       "summarizerEnabled": {
         "label": "Kwado summarizer"
       },

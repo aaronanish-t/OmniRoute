@@ -8639,9 +8639,6 @@
         "label": "Mafi ƙarancin layuka don matsewa",
         "description": "Mafi ƙarancin layuka a cikin jerin JSON mai tsari iri ɗaya da ake buƙata don fara matsewa zuwa jadawali. Tsoho: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Kiyaye umarnin tsarin"
-      },
       "summarizerEnabled": {
         "label": "Kunna mai taƙaitawa"
       },

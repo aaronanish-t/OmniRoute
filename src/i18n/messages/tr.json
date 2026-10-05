@@ -8639,9 +8639,6 @@
         "label": "Sıkıştırılacak minimum satır sayısı",
         "description": "Tablosal sıkıştırmayı tetiklemek için homojen bir JSON dizisinde gereken minimum satır sayısı. Varsayılan: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Sistem istemini koru"
-      },
       "summarizerEnabled": {
         "label": "Özetleyiciyi etkinleştir"
       },

@@ -114,8 +114,10 @@ describe("compression engine registry contract", () => {
     // System-prompt preservation is a global settings-level flag only: the engine
     // apply sites read it from the global config and the settings normalizers drop
     // any per-engine copy, so a per-engine checkbox never took effect and snapped
-    // back after save. Stored configs may still carry the key (validators and the
-    // strict Zod schemas keep accepting it); no engine may surface it as a field.
+    // back after save. Legacy data may still carry the key: the engine validators
+    // and the aggressive/ultra Zod step-config schemas keep accepting it (lite's
+    // strict liteConfigSchema never had a slot for it); no engine may surface it
+    // as a UI field.
     for (const engine of [liteEngine, aggressiveEngine, ultraEngine]) {
       assert.equal(
         engine.getConfigSchema().some((field) => field.key === "preserveSystemPrompt"),
@@ -123,5 +125,11 @@ describe("compression engine registry contract", () => {
         `${engine.id} config schema must not expose preserveSystemPrompt`
       );
     }
+    // The validators keep accepting legacy stored configs that carry the key —
+    // pinned so a future cleanup cannot silently drop that acceptance.
+    assert.equal(aggressiveEngine.validateConfig({ preserveSystemPrompt: true }).valid, true);
+    assert.equal(ultraEngine.validateConfig({ preserveSystemPrompt: true }).valid, true);
+    assert.equal(aggressiveEngine.validateConfig({ preserveSystemPrompt: "yes" }).valid, false);
+    assert.equal(ultraEngine.validateConfig({ preserveSystemPrompt: "yes" }).valid, false);
   });
 });

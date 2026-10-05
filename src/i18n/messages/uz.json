@@ -8639,9 +8639,6 @@
         "label": "Ixchamlash uchun eng kam satrlar soni",
         "description": "Jadval ko‘rinishida ixchamlashni ishga tushirish uchun bir xil tuzilishdagi JSON massivida talab qilinadigan eng kam satrlar soni. Standart: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Tizim ko‘rsatmasini saqlash"
-      },
       "summarizerEnabled": {
         "label": "Xulosalashni yoqish"
       },

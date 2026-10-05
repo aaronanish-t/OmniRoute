@@ -8639,9 +8639,6 @@
         "label": "Righe minime da compattare",
         "description": "Numero minimo di righe in un array JSON omogeneo richiesto per attivare la compattazione tabulare. Predefinito: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Preserva prompt di sistema"
-      },
       "summarizerEnabled": {
         "label": "Abilita summarizer"
       },

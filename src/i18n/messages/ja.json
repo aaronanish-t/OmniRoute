@@ -8639,9 +8639,6 @@
         "label": "圧縮する最小行数",
         "description": "表形式の圧縮をトリガーするために必要な、同質なJSON配列の最小行数。デフォルト: 8。"
       },
-      "preserveSystemPrompt": {
-        "label": "システムプロンプトを保持"
-      },
       "summarizerEnabled": {
         "label": "要約機能を有効化"
       },

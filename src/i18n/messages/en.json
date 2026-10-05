@@ -8639,9 +8639,6 @@
         "label": "Minimum rows to compact",
         "description": "Minimum rows in a homogeneous JSON array required to trigger tabular compaction. Default: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Preserve system prompt"
-      },
       "summarizerEnabled": {
         "label": "Enable summarizer"
       },

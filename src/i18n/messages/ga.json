@@ -8639,9 +8639,6 @@
         "label": "Íoslíon sraitheanna le comhdhlúthú",
         "description": "Íoslíon sraitheanna a chaithfidh a bheith in eagar JSON aonchineálach chun comhdhlúthú táblaíoch a spreagadh. Réamhshocrú: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Caomhnaigh leid an chórais"
-      },
       "summarizerEnabled": {
         "label": "Cumasaigh achoimreoir"
       },

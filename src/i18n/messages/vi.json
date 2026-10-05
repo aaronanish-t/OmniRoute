@@ -8639,9 +8639,6 @@
         "label": "Số hàng tối thiểu để nén",
         "description": "Số hàng tối thiểu trong một mảng JSON đồng nhất để kích hoạt nén dạng bảng. Mặc định: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Giữ nguyên prompt hệ thống"
-      },
       "summarizerEnabled": {
         "label": "Bật trình tóm tắt"
       },

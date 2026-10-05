@@ -8639,9 +8639,6 @@
         "label": "Număr minim de rânduri de compactat",
         "description": "Numărul minim de rânduri dintr-un tablou JSON omogen necesar pentru a declanșa compactarea tabulară. Implicit: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Păstrează promptul de sistem"
-      },
       "summarizerEnabled": {
         "label": "Activează rezumatorul"
       },

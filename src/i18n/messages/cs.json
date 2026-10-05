@@ -8639,9 +8639,6 @@
         "label": "Minimální počet řádků ke komprimaci",
         "description": "Minimální počet řádků v homogenním poli JSON vyžadovaný ke spuštění tabulkové komprimace. Výchozí: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Zachovat systémový prompt"
-      },
       "summarizerEnabled": {
         "label": "Povolit sumarizátor"
       },

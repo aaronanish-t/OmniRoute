@@ -8639,9 +8639,6 @@
         "label": "Għadd minimu ta' ringieli għall-kompattazzjoni",
         "description": "Għadd minimu ta' ringieli f'matriċi JSON omoġenja meħtieġ biex tinbeda l-kompattazzjoni tabulari. Valur predefinit: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Żomm il-prompt tas-sistema"
-      },
       "summarizerEnabled": {
         "label": "Ippermetti s-sommarizzatur"
       },

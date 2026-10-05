@@ -8639,9 +8639,6 @@
         "label": "Minimum rader å komprimere",
         "description": "Minimum antall rader i et homogent JSON-array som kreves for å utløse tabulær komprimering. Standard: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Bevar system-prompt"
-      },
       "summarizerEnabled": {
         "label": "Aktiver oppsummering"
       },

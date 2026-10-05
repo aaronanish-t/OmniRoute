@@ -8639,9 +8639,6 @@
         "label": "Minimum na row na iko-compact",
         "description": "Minimum na row sa isang homogeneous na JSON array na kinakailangan upang ma-trigger ang tabular compaction. Default: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Panatilihin ang system prompt"
-      },
       "summarizerEnabled": {
         "label": "Paganahin ang summarizer"
       },

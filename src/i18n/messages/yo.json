@@ -8639,9 +8639,6 @@
         "label": "Iye àwọn ìlà tó kéré jù láti fún pọ̀",
         "description": "Iye àwọn ìlà tó kéré jù nínú àkójọpọ̀ JSON onírú kan náà tí a nílò láti bẹ̀rẹ̀ ìfúnpọ̀ alátábìlì. Àkọ́kọ́: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Pa ìtọ́nisọ́nà ètò mọ́"
-      },
       "summarizerEnabled": {
         "label": "Mú olùṣàkótán ṣiṣẹ́"
       },

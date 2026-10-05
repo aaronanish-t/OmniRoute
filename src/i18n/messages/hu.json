@@ -8639,9 +8639,6 @@
         "label": "Tömörítendő sorok minimális száma",
         "description": "Egy homogén JSON-tömb minimális sorszáma a táblázatos tömörítés indításához. Alapértelmezett: 8."
       },
-      "preserveSystemPrompt": {
-        "label": "Rendszerüzenet megőrzése"
-      },
       "summarizerEnabled": {
         "label": "Összegző engedélyezése"
       },

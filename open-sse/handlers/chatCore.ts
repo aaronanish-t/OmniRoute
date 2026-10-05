@@ -1676,6 +1676,11 @@ async function handleChatCoreInner({
               "COMPRESSION",
               `Default compression combo applied: ${defaultCompressionCombo?.id}`
             );
+          } else if (compressionHeader) {
+            log?.debug?.(
+              "COMPRESSION",
+              `Default compression combo not applied (header: ${compressionHeader})`
+            );
           }
         } catch (err) {
           log?.debug?.(

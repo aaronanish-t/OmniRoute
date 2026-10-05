@@ -95,6 +95,55 @@ test("defaultComboForRequest yields to a plan the header chose", () => {
   );
 });
 
+test("defaultComboForRequest returns null for a non-null combo with an empty pipeline", () => {
+  const emptyPipelineCombo = {
+    id: "default-caveman",
+    pipeline: [],
+    languagePacks: ["en"],
+    outputMode: false,
+    outputModeIntensity: "full",
+  } as never;
+  assert.equal(
+    defaultComboForRequest(emptyPipelineCombo, { config: legacyConfig, header: null, combos: {} }),
+    null
+  );
+});
+
+test("defaultComboForRequest swaps a single lossy engine for the safe default pair", () => {
+  const singleLossy = { ...editedDefaultCombo, pipeline: [{ engine: "rtk" }] } as never;
+  const combo = defaultComboForRequest(singleLossy, {
+    config: legacyConfig,
+    header: null,
+    combos: {},
+  });
+  assert.deepEqual(combo?.pipeline, [{ engine: "session-dedup" }, { engine: "lite" }]);
+});
+
+test("defaultComboForRequest keeps a single safe engine as-is", () => {
+  const singleSafe = { ...editedDefaultCombo, pipeline: [{ engine: "lite" }] } as never;
+  const combo = defaultComboForRequest(singleSafe, {
+    config: legacyConfig,
+    header: null,
+    combos: {},
+  });
+  assert.deepEqual(combo?.pipeline, [{ engine: "lite" }]);
+});
+
+test("defaultComboForRequest yields when an engine:<id> header resolves a plan", () => {
+  const engineEnabledConfig = {
+    ...legacyConfig,
+    engines: { ...legacyConfig.engines, rtk: { enabled: true } },
+  } as never;
+  assert.equal(
+    defaultComboForRequest(editedDefaultCombo, {
+      config: engineEnabledConfig,
+      header: "engine:rtk",
+      combos: {},
+    }),
+    null
+  );
+});
+
 test("isStackedCompressionCombo true when the combo has >= 1 pipeline layer", () => {
   assert.equal(isStackedCompressionCombo(null), false);
   assert.equal(

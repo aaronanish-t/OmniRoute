@@ -1,10 +1,12 @@
 /**
- * chatCore compression-combo predicates (Quality Gate v2 / Fase 9 — chatCore god-file
+ * chatCore compression-combo helpers (Quality Gate v2 / Fase 9 — chatCore god-file
  * decomposition, #3501).
  *
- * Pure predicates extracted from handleChatCore's compression setup: detect the built-in
- * RTK→caveman stacked pipeline and whether a runtime combo has at least one pipeline layer.
- * No handler state is captured; behaviour is byte-identical to the previous inline closures.
+ * Extracted from handleChatCore's compression setup: the two predicates detect the built-in
+ * RTK→caveman stacked pipeline and whether a runtime combo has at least one pipeline layer
+ * (byte-identical to the original inline closures); defaultComboForRequest resolves the legacy
+ * default combo for one request — yielding to a plan the request header chose, otherwise
+ * applying the lossy request policy to the combo's pipeline. No handler state is captured.
  */
 
 import type {

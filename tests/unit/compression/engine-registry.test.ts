@@ -76,10 +76,9 @@ describe("compression engine registry contract", () => {
     assert.ok(aggressiveSchema.some((field) => field.key === "maxTokensPerMessage"));
     assert.ok(ultraSchema.some((field) => field.key === "compressionRate"));
 
-    // Lite exposes its OWN minimal schema (preserveSystemPrompt), NOT the aggressive
+    // Lite exposes its OWN minimal schema (tool truncation), NOT the aggressive
     // summarizer/threshold fields it previously leaked.
     const liteSchema = liteEngine.getConfigSchema();
-    assert.ok(liteSchema.some((field) => field.key === "preserveSystemPrompt"));
     assert.ok(
       liteSchema.some((field) => field.key === "compressToolResults" && field.defaultValue === true)
     );
@@ -109,5 +108,20 @@ describe("compression engine registry contract", () => {
     assert.equal(aggressiveEngine.validateConfig({ maxTokensPerMessage: 10 }).valid, false);
     assert.equal(ultraEngine.validateConfig({ compressionRate: 0.4 }).valid, true);
     assert.equal(ultraEngine.validateConfig({ compressionRate: 4 }).valid, false);
+  });
+
+  it("does not expose a per-engine preserveSystemPrompt control", () => {
+    // System-prompt preservation is a global settings-level flag only: the engine
+    // apply sites read it from the global config and the settings normalizers drop
+    // any per-engine copy, so a per-engine checkbox never took effect and snapped
+    // back after save. Stored configs may still carry the key (validators and the
+    // strict Zod schemas keep accepting it); no engine may surface it as a field.
+    for (const engine of [liteEngine, aggressiveEngine, ultraEngine]) {
+      assert.equal(
+        engine.getConfigSchema().some((field) => field.key === "preserveSystemPrompt"),
+        false,
+        `${engine.id} config schema must not expose preserveSystemPrompt`
+      );
+    }
   });
 });

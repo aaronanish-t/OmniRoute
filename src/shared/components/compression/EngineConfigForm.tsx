@@ -24,13 +24,15 @@ export function EngineConfigForm({ schema, value, onChange }: EngineConfigFormPr
               <input
                 type="number"
                 value={
-                  f.key === "maxToolLength" &&
-                  !(typeof v === "number" && Number.isFinite(v))
+                  f.key === "maxToolLength" && !(typeof v === "number" && Number.isFinite(v))
                     ? ""
                     : (v as number)
                 }
                 min={f.min}
                 max={f.max}
+                // Fractional settings (e.g. CCR retrievalRampFactor 1.5) must not fail
+                // the browser's step validation, whose default step is 1.
+                step="any"
                 onChange={(e) =>
                   set(
                     f.key,

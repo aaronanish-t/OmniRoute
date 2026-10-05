@@ -17,7 +17,12 @@ const ROOT = join(import.meta.dirname, "..", "..");
 const STANDALONE = join(ROOT, ".build", "next", "standalone");
 const WORKER_DIR = join(STANDALONE, "open-sse", "services", "compression", "engines", "llmlingua");
 const WORKER_FILE = join(WORKER_DIR, "onnxWorker.js");
-const OPTIONAL_SPECIFIERS = ["@atjsh/llmlingua-2", "@huggingface/transformers", "js-tiktoken"];
+const OPTIONAL_SPECIFIERS = [
+  "@atjsh/llmlingua-2",
+  "@huggingface/transformers",
+  "js-tiktoken/lite",
+  "js-tiktoken/ranks/o200k_base",
+];
 const hasOptionals = existsSync(
   join(ROOT, "node_modules", "@atjsh", "llmlingua-2", "package.json")
 );

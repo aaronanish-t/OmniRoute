@@ -633,7 +633,8 @@ function deriveEnginesMap(config: CompressionConfig): Record<string, EngineToggl
         enabled = config.ultra?.enabled === true;
         break;
       case "aggressive":
-        enabled = aggressiveEnabled(config.aggressive);
+        // No dedicated config signal: `normalizeAggressiveConfig` never emits an `enabled`
+        // flag, so aggressive is off here and only the defaultMode fallback below turns it on.
         break;
       default:
         // Structural engines (lite/headroom/session-dedup/ccr/llmlingua): on when present in the
@@ -652,12 +653,6 @@ function deriveEnginesMap(config: CompressionConfig): Record<string, EngineToggl
   }
 
   return engines;
-}
-
-// `aggressive` config doesn't carry a top-level `enabled` flag in its type, but legacy installs may
-// have stored one. Read it defensively for the derived engines map.
-function aggressiveEnabled(value: AggressiveConfig | undefined): boolean {
-  return toRecord(value).enabled === true;
 }
 
 export async function getCompressionSettings(): Promise<CompressionConfig> {

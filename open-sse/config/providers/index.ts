@@ -251,6 +251,7 @@ import { lyceumProvider } from "./registry/lyceum/index.ts";
 import { llmKiwiProvider } from "./registry/llm-kiwi/index.ts";
 import { literouterProvider } from "./registry/literouter/index.ts";
 import { greenptProvider } from "./registry/greenpt/index.ts";
+import { gondolaProvider } from "./registry/gondola/index.ts";
 import { eurouterProvider } from "./registry/eurouter/index.ts";
 import { mnnAiProvider } from "./registry/mnn-ai/index.ts";
 import { meganovaAiProvider } from "./registry/meganova-ai/index.ts";
@@ -529,6 +530,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "llm-kiwi": llmKiwiProvider,
   literouter: literouterProvider,
   greenpt: greenptProvider,
+  gondola: gondolaProvider,
   eurouter: eurouterProvider,
   "mnn-ai": mnnAiProvider,
   "meganova-ai": meganovaAiProvider,

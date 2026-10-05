@@ -240,7 +240,7 @@ function getRegistryDispatchRows(storedProviderId: string): SyncedAvailableModel
       name: model.name,
       targetFormat: model.targetFormat,
       ...(model.supportedThinkingEfforts
-        ? { supportedThinkingEfforts: [...model.supportedThinkingEfforts] }
+        ? { supportedThinkingEfforts: Object.freeze([...model.supportedThinkingEfforts]) }
         : {}),
       ...(model.supportsVision ? { supportsVision: true } : {}),
       ...(model.toolCalling ? { supportsTools: true } : {}),

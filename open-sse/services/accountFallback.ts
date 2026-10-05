@@ -1261,6 +1261,9 @@ export function recordProviderFailure(
   );
   if (!breaker) return;
 
+  // Skip while the breaker refuses traffic (OPEN, or HALF_OPEN with its probe in flight):
+  // the failures reported then include the gate's own "circuit breaker is open"
+  // rejections, and counting those reopens the breaker while the probe is still running.
   if (!breaker.canExecute()) return;
 
   breaker._onFailure();
@@ -1306,7 +1309,13 @@ export function recordProviderSuccess(
   if (connectionId) {
     lastConnectionFailure.delete(`${provider}:${connectionId}`);
     const providerBreaker = getProviderBreaker(provider);
-    if (providerBreaker && providerBreaker !== breaker && providerBreaker.canExecute()) {
+    // Not canExecute(): it is false while this very request holds the HALF_OPEN
+    // probe slot, so a successful probe was never credited and the breaker stuck.
+    if (
+      providerBreaker &&
+      providerBreaker !== breaker &&
+      providerBreaker.getStatus().state !== "OPEN"
+    ) {
       providerBreaker._onSuccess();
     }
   }

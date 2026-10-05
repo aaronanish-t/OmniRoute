@@ -79,6 +79,7 @@ import {
   releaseQualityClone,
   releaseRejectedQualityResponse,
 } from "./validateQuality.ts";
+import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
 import {
   isQuotaExhaustionResponse,
   recordQuotaExhaustionClassification,
@@ -386,7 +387,9 @@ export async function executeTargetAttempt(opts: {
         qualityClone,
         deps.clientRequestedStream,
         deps.log,
-        deps.config.responseValidation as ResponseValidationConfig | null | undefined
+        deps.config.responseValidation as ResponseValidationConfig | null | undefined,
+        null,
+        await isTrustedEmptyTurn(provider, result, target.connectionId)
       );
       releaseQualityClone(qualityClone, result, quality);
       if (!quality.valid) {

@@ -209,10 +209,11 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
       return;
     }
     // Lite's cap must be in range before anything is sent; the save floors it to a whole number.
+    // Only NaN (the emptied sentinel) skips the check — overflow like 1e999 fails the range below.
     const cap = engineId === "lite" ? configState.maxToolLength : undefined;
     if (
       typeof cap === "number" &&
-      Number.isFinite(cap) &&
+      !Number.isNaN(cap) &&
       (Math.floor(cap) < 256 || Math.floor(cap) > 1_000_000)
     ) {
       setSaveError(t("saveFailed"));

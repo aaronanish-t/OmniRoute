@@ -46,9 +46,10 @@ export function buildEngineDetailUpdate(
     if (key === "enabled" || Object.is(value, saved[key])) continue;
     if (isEmptyText(value)) {
       delete next[key];
-    } else if (typeof value === "number" && !Number.isFinite(value)) {
-      // lite's cap keeps its NaN so the lite merge below maps it to null and drops the stored
-      // cap; every other field means "not set" and stays out of the body.
+    } else if (typeof value === "number" && Number.isNaN(value)) {
+      // An emptied number input is the only source of NaN: it means "not set" and leaves the
+      // body, except lite's cap, which the lite merge below maps to null to drop the stored cap.
+      // Overflow input (Infinity) is a value, not an unset — it stays and the schema rejects it.
       if (engineId !== "lite" || key !== "maxToolLength") delete next[key];
       else next[key] = value;
     } else {
@@ -62,7 +63,7 @@ export function buildEngineDetailUpdate(
   return {
     compressToolResults: next.compressToolResults !== false,
     ...("maxToolLength" in next
-      ? { maxToolLength: typeof cap === "number" && Number.isFinite(cap) ? Math.floor(cap) : null }
+      ? { maxToolLength: typeof cap === "number" && Number.isNaN(cap) ? null : Math.floor(cap) }
       : {}),
   };
 }
@@ -88,12 +89,14 @@ export function forgetSentEdits(saved: FormValues, sent: FormValues): FormValues
   return next;
 }
 
-/** Form values without emptied text fields or number inputs, so a preview config passes the
- * settings schema. */
+/**
+ * Form values without emptied text fields or emptied number fields (NaN), so a preview config
+ * passes the settings schema. Overflow values stay, so the schema rejects them visibly.
+ */
 export function withoutEmptyText(values: FormValues): FormValues {
   return Object.fromEntries(
     Object.entries(values).filter(
-      ([, value]) => !isEmptyText(value) && !(typeof value === "number" && !Number.isFinite(value))
+      ([, value]) => !isEmptyText(value) && !(typeof value === "number" && Number.isNaN(value))
     )
   );
 }

@@ -78,6 +78,13 @@ export interface QuotaInfo {
   windowMonthly?: QuotaWindowInfo;
   /** True when the upstream usage endpoint explicitly reports exhausted quota. */
   limitReached?: boolean;
+  /**
+   * True when the provider reports NO cap at all (every reported window is unlimited). It is
+   * a real, known reading of full headroom, not a failed one: `null` from a quota fetcher
+   * means "could not read it", so unlimited plans are marked here instead of returning null
+   * (#15347). `percentUsed` is 0 on such a snapshot.
+   */
+  unlimited?: boolean;
 }
 
 export type QuotaFetcher = (

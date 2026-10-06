@@ -92,7 +92,8 @@ REQUIRE_API_KEY=true          # was false — lock the endpoint down
 APP_BIND_HOST=127.0.0.1       # keep loopback; see "Exposing" only if needed
 ```
 
-`REQUIRE_API_KEY=true` makes every `/v1` request require an API key, and the
+`REQUIRE_API_KEY=true` makes `/v1` requests require an API key (a logged-in
+dashboard session also works), and the
 dashboard require login once a password exists. On first visit you create the
 login password in the dashboard's onboarding wizard; skipping that step turns
 dashboard login off, even with `REQUIRE_API_KEY=true`. Docker

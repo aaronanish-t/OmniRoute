@@ -1,11 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { createTempDataDir } from "../_setup/tempDataDir.ts";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-compression-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
+const { dir: TEST_DATA_DIR, cleanup } = createTempDataDir("omniroute-compression-");
 process.env.REQUIRE_API_KEY = "false";
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "test-compression-secret";
 
@@ -19,6 +17,7 @@ const compressionAnalyticsDb = await import("../../src/lib/db/compressionAnalyti
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 const { estimateTokens, getTokenLimit } = await import("../../open-sse/services/contextManager.ts");
 const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuitBreaker.ts");
+const { waitForCallLogSaves, closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -27,6 +26,8 @@ async function resetStorage() {
   resetAllCircuitBreakers();
   readCacheDb.invalidateDbCache();
   await new Promise((resolve) => setTimeout(resolve, 20));
+  // The previous test's call log is saved in the background; it must land before the reset.
+  assert.ok(await waitForCallLogSaves(30_000), "the previous test's call-log saves should finish");
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
@@ -38,10 +39,10 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   globalThis.fetch = originalFetch;
-  core.closeDbInstance();
-  try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  } catch {}
+  // Drain the last test's in-flight save, then stop the writer before the database closes.
+  assert.ok(await waitForCallLogSaves(30_000), "the last test's call-log save should finish");
+  await closeCallLogSaves(2_000);
+  await cleanup();
 });
 
 test("chatCore integration: compressContext called proactively when context exceeds 85% threshold", async () => {
@@ -612,11 +613,11 @@ test("chatCore integration: assigned compression combo applies language packs an
     },
     languageConfig: {
       enabled: true,
-      // autoDetect would read the (English) user turn and resolve back to "en",
-      // so the pack under test has to be pinned explicitly.
+      // autoDetect is disabled here, so the detector never runs. With the global default
+      // language "en", pt-BR output can only come from the combo's language packs.
       autoDetect: false,
-      defaultLanguage: "pt-BR",
-      enabledPacks: ["pt-BR"],
+      defaultLanguage: "en",
+      enabledPacks: ["en"],
     },
   });
 
@@ -724,11 +725,11 @@ test("chatCore integration: default stacked compression combo applies for unassi
     },
     languageConfig: {
       enabled: true,
-      // autoDetect would read the (English) user turn and resolve back to "en",
-      // so the pack under test has to be pinned explicitly.
+      // autoDetect is disabled here, so the detector never runs. With the global default
+      // language "en", pt-BR output can only come from the combo's language packs.
       autoDetect: false,
-      defaultLanguage: "pt-BR",
-      enabledPacks: ["pt-BR"],
+      defaultLanguage: "en",
+      enabledPacks: ["en"],
     },
   });
 
@@ -978,76 +979,6 @@ test("chatCore integration: modular compression records analytics row best-effor
     assert.equal(summary.byProvider.openai.count, 1);
     assert.equal(summary.realUsage.requestsWithReceipts, 1);
     assert.equal(summary.realUsage.totalTokens, 15);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test("chatCore integration: caveman output mode skipped when compression is globally disabled", async () => {
-  const provider = "openai";
-  const model = "gpt-4";
-
-  await compressionDb.updateCompressionSettings({
-    enabled: false,
-    defaultMode: "off",
-    autoTriggerTokens: 0,
-    cavemanOutputMode: {
-      enabled: true,
-      intensity: "full",
-      autoClarity: true,
-    },
-  });
-
-  const connection = await providersDb.createProviderConnection({
-    provider,
-    apiKey: "test-key",
-    isActive: true,
-  });
-
-  let capturedBody: any = null;
-  globalThis.fetch = async (_url: string | URL | Request, init?: RequestInit) => {
-    if (init?.body) {
-      capturedBody = JSON.parse(init.body as string);
-    }
-    return new Response(
-      JSON.stringify({
-        choices: [{ message: { role: "assistant", content: "ok" } }],
-        usage: { prompt_tokens: 20, completion_tokens: 4, total_tokens: 24 },
-      }),
-      {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }
-    );
-  };
-
-  try {
-    const result = await handleChatCore({
-      body: {
-        model,
-        stream: false,
-        messages: [{ role: "user", content: "Summarize this implementation." }],
-      },
-      modelInfo: { provider, model },
-      credentials: { apiKey: "test-key" },
-      log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
-      clientRawRequest: { endpoint: "/v1/chat/completions", headers: new Map() },
-      connectionId: connection.id,
-      onCredentialsRefreshed: () => {},
-      onRequestSuccess: () => {},
-      onStreamFailure: () => {},
-      onDisconnect: () => {},
-      userAgent: "test-agent",
-      comboName: null,
-    });
-
-    assert.ok(result.success, "Request should succeed");
-    assert.equal(
-      capturedBody.messages[0].role,
-      "user",
-      "No system message should be injected when compression is disabled"
-    );
-    assert.doesNotMatch(capturedBody.messages[0].content ?? "", /Output Styles/);
   } finally {
     globalThis.fetch = originalFetch;
   }

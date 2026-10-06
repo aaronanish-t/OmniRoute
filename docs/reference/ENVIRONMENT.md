@@ -51,7 +51,7 @@ lastUpdated: 2026-08-18
 
 ## 1. Required Secrets
 
-Rows marked **Yes** must be set before the first run. Without them, the application will either refuse to start or operate with insecure defaults.
+Unset secrets marked **Yes** are auto-generated on the first run (`JWT_SECRET`, `API_KEY_SECRET`) and persisted to `server.env` in the data directory — set them explicitly when that directory is ephemeral. The exception is `OMNIROUTE_WS_BRIDGE_SECRET`: it is never generated, and production rejects all WS bridge requests while it is unset.
 
 | Variable                     | Required             | Default           | Source File                                        | Description                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------- | -------------------- | ----------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

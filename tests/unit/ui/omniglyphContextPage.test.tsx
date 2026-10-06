@@ -52,7 +52,14 @@ interface CapturedPut {
 }
 
 // putStatus(n) sets the HTTP status of the n-th PUT (1-based); every PUT succeeds by default.
-function setupFetchMock(options: { putStatus?: (n: number) => number } = {}): {
+// rejectPuts makes every PUT throw instead, the network-failure path.
+function setupFetchMock(
+  options: {
+    putStatus?: (n: number) => number;
+    rejectPuts?: boolean;
+    initialEngines?: Record<string, unknown>;
+  } = {}
+): {
   puts: CapturedPut[];
 } {
   const puts: CapturedPut[] = [];
@@ -63,7 +70,10 @@ function setupFetchMock(options: { putStatus?: (n: number) => number } = {}): {
   // so a test can check that a toggle PUT leaves them out.
   const initialConfig = {
     enabled: true,
-    engines: { rtk: { enabled: true, level: "standard" }, caveman: { enabled: false } },
+    engines: options.initialEngines ?? {
+      rtk: { enabled: true, level: "standard" },
+      caveman: { enabled: false },
+    },
   };
 
   vi.spyOn(globalThis, "fetch").mockImplementation(
@@ -72,6 +82,7 @@ function setupFetchMock(options: { putStatus?: (n: number) => number } = {}): {
       const method = (init?.method ?? "GET").toUpperCase();
       if (url.includes("/api/settings/compression")) {
         if (method === "PUT") {
+          if (options.rejectPuts) throw new TypeError("fetch failed");
           const body = JSON.parse(String(init?.body ?? "{}"));
           puts.push({ url, body });
           const status = options.putStatus?.(puts.length) ?? 200;
@@ -156,6 +167,37 @@ describe("OmniglyphContextPage", () => {
     // The server merges engines by id, so the page sends only the engine it changed and
     // cannot overwrite engines another page changed after this one loaded.
     expect(puts[0]!.body).toEqual({ engines: { omniglyph: { enabled: true } } });
+  });
+
+  it("disabling the engine PUTs only the omniglyph entry, off", async () => {
+    const { puts } = setupFetchMock({
+      initialEngines: {
+        omniglyph: { enabled: true, level: "standard" },
+        rtk: { enabled: true },
+      },
+    });
+    const container = await mountPage();
+    const toggle = enableToggle(container);
+    expect(toggle.getAttribute("aria-checked")).toBe("true");
+
+    await click(toggle);
+
+    expect(puts.length).toBe(1);
+    // The off toggle also sends only its own entry; a stored level survives server-side.
+    expect(puts[0]!.body).toEqual({ engines: { omniglyph: { enabled: false } } });
+    expect(toggle.getAttribute("aria-checked")).toBe("false");
+  });
+
+  it("a rejected fetch is a failed save: the switch rolls back and the error shows", async () => {
+    const { puts } = setupFetchMock({ rejectPuts: true });
+    const container = await mountPage();
+    const toggle = enableToggle(container);
+
+    await click(toggle);
+
+    expect(puts.length).toBe(0);
+    expect(toggle.getAttribute("aria-checked")).toBe("false");
+    expect(container.textContent).toContain("Could not save.");
   });
 
   it("a failed save puts the switch back and shows the error", async () => {

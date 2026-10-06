@@ -98,4 +98,30 @@ describe("updateCompressionSettings engines partial writes", () => {
     assert.equal(after.engines.caveman.enabled, true);
     assert.equal(after.engines.omniglyph.enabled, true);
   });
+
+  it("treats a stored non-text engines row as absent and merges over the legacy-derived map", async () => {
+    await updateCompressionSettings({ cavemanConfig: { enabled: true } } as SettingsUpdate);
+    core.resetDbInstance();
+
+    // A BLOB in the engines key: the read path skips non-text rows, so the write path must
+    // not pick the row up as a merge base either and falls back to the derived map.
+    core
+      .getDbInstance()
+      .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+      .run("compression", "engines", Buffer.from([0x00, 0xff]));
+    core.resetDbInstance();
+
+    const before = await getCompressionSettings();
+    assert.equal(before.enginesExplicit, false);
+    assert.equal(before.engines.caveman.enabled, true);
+    core.resetDbInstance();
+
+    await updateCompressionSettings({ engines: { omniglyph: { enabled: true } } });
+    core.resetDbInstance();
+
+    const after = await getCompressionSettings();
+    assert.equal(after.engines.caveman.enabled, true);
+    assert.equal(after.engines.omniglyph.enabled, true);
+    assert.equal(after.enginesExplicit, true);
+  });
 });

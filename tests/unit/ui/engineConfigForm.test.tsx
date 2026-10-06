@@ -193,7 +193,7 @@ describe("EngineConfigForm", () => {
       checkbox.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(onChange).toHaveBeenCalledWith({ ...INITIAL_VALUE, enabled: true });
+    expect(onChange).toHaveBeenCalledWith("enabled", true);
   });
 
   it("calls onChange with new number when number input changes", async () => {
@@ -217,7 +217,7 @@ describe("EngineConfigForm", () => {
       numInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
-    expect(onChange).toHaveBeenCalledWith({ ...INITIAL_VALUE, maxTokens: 2048 });
+    expect(onChange).toHaveBeenCalledWith("maxTokens", 2048);
   });
 
   it("calls onChange with updated array when a multiselect option is checked", async () => {
@@ -241,9 +241,6 @@ describe("EngineConfigForm", () => {
       stripCommentsCheckbox.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(onChange).toHaveBeenCalledWith({
-      ...INITIAL_VALUE,
-      techniques: ["strip-comments"],
-    });
+    expect(onChange).toHaveBeenCalledWith("techniques", ["strip-comments"]);
   });
 });

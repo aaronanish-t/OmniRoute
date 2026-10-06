@@ -265,4 +265,24 @@ describe("EngineConfigPage treats an emptied number field as not set", () => {
       String(DEFAULT_AGGRESSIVE_CONFIG.minSavingsThreshold)
     );
   });
+
+  it("keeps the stored value when a field reports badInput instead of unsetting it", async () => {
+    // A browser reports badInput with an empty value for unparseable entries ("1e", "1,5" in a
+    // comma-decimal locale); jsdom never sets the flag, so the test stubs it.
+    const server = startServer({
+      aggressive: { ...DEFAULT_AGGRESSIVE_CONFIG, minSavingsThreshold: 0.5 },
+    });
+    await renderPage("aggressive");
+    const input = inputFor("Minimum savings threshold");
+    Object.defineProperty(input, "validity", {
+      value: { ...input.validity, badInput: true },
+      configurable: true,
+    });
+
+    fireEvent.change(input, { target: { value: "1e" } });
+    await save();
+
+    expect(server.puts.at(-1)?.status).toBe(200);
+    expect((server.stored.aggressive as Settings).minSavingsThreshold).toBe(0.5);
+  });
 });

@@ -194,8 +194,8 @@ describe("CompressionPanel", () => {
       .pop();
     expect(lastEngines).toBeTruthy();
     expect(lastEngines!.caveman.enabled).toBe(true);
-    // Full engines map is sent (whole-row persistence), so rtk is not dropped.
-    expect(lastEngines!.rtk.enabled).toBe(true);
+    // The server merges engines by id, so only the toggled engine is sent.
+    expect(lastEngines!.rtk).toBeUndefined();
   });
 
   it("derived-pipeline preview reflects the enabled engines", async () => {

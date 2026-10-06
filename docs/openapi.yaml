@@ -2755,6 +2755,11 @@ paths:
     put:
       tags: [Compression]
       summary: Update global compression settings
+      description: >-
+        Partial update: only the sent top-level keys change. `engines` merges by engine id —
+        an entry overwrites only the fields it sends, engines left out are kept as-is, and
+        until an engines row is stored the merge base is the map derived from the legacy
+        per-engine settings.
       security:
         - ManagementSessionAuth: []
       requestBody:
@@ -2775,6 +2780,19 @@ paths:
                 autoTriggerTokens:
                   type: integer
                   minimum: 0
+                engines:
+                  type: object
+                  description: >-
+                    Per-engine toggles, merged by engine id into the stored map. Each entry
+                    needs `enabled`; `level` survives an entry that omits it.
+                  additionalProperties:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      level:
+                        type: string
+                    required: [enabled]
                 rtkConfig:
                   type: object
                   additionalProperties: true

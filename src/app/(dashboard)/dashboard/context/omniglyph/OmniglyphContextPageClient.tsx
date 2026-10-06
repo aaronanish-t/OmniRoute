@@ -9,7 +9,7 @@
 //
 // Card/Toggle are imported from their direct module paths (not the @/shared/components
 // barrel) — the barrel pulls a Node-only module that hangs vitest/jsdom.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Card from "@/shared/components/Card";
 import Toggle from "@/shared/components/Toggle";
@@ -19,8 +19,6 @@ interface CompressionConfigLite {
   engines?: Record<string, { enabled: boolean; level?: string }>;
   omniglyph?: { profile?: string };
 }
-
-type EngineMap = Record<string, { enabled: boolean; level?: string }>;
 
 /** Perfis do pacote, na ordem do mais permissivo ao mais restrito. O primeiro é
  *  o default: a política que os recibos publicados mediram. */
@@ -243,20 +241,18 @@ function EnableCard(props: {
 }
 
 export default function OmniglyphContextPageClient() {
-  const [engines, setEngines] = useState<EngineMap>({});
   const [enabled, setEnabled] = useState(false);
   const [profile, setProfile] = useState<ProfileId>("aggressive");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"" | "saved" | "error">("");
+  const saveGenRef = useRef(0);
 
   useEffect(() => {
     fetch("/api/settings/compression")
       .then((r) => (r.ok ? r.json() : null))
       .then((data: CompressionConfigLite | null) => {
-        const e = data?.engines ?? {};
-        setEngines(e);
-        setEnabled(e.omniglyph?.enabled === true);
+        setEnabled(data?.engines?.omniglyph?.enabled === true);
         const stored = data?.omniglyph?.profile;
         if (PROFILES.some((p) => p.id === stored)) setProfile(stored as ProfileId);
       })
@@ -264,62 +260,47 @@ export default function OmniglyphContextPageClient() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Persist the FULL engines map (the store keeps it as one JSON row — a partial patch
-  // of a single engine would drop the others). Mirrors CompressionPanel.setEngine.
-  const toggle = async (next: boolean) => {
-    setEnabled(next);
-    const nextEngines: EngineMap = {
-      ...engines,
-      omniglyph: { ...(engines.omniglyph ?? { enabled: false }), enabled: next },
-    };
-    setEngines(nextEngines);
+  // PUT one settings patch; a failed save runs `rollback`. The saved status clears after 2s
+  // unless a later save has started since, so it never clears that save's error.
+  const save = async (body: Record<string, unknown>, rollback: () => void) => {
+    const gen = ++saveGenRef.current;
     setSaving(true);
     setStatus("");
+    let ok = false;
     try {
       const res = await fetch("/api/settings/compression", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ engines: nextEngines }),
+        body: JSON.stringify(body),
       });
-      if (res.ok) {
-        setStatus("saved");
-        setTimeout(() => setStatus(""), 2000);
-      } else {
-        setStatus("error");
-      }
+      ok = res.ok;
     } catch {
-      setStatus("error");
-    } finally {
-      setSaving(false);
+      // A network failure is a failed save.
     }
+    setSaving(false);
+    if (!ok) {
+      rollback();
+      setStatus("error");
+      return;
+    }
+    setStatus("saved");
+    setTimeout(() => {
+      if (gen === saveGenRef.current) setStatus("");
+    }, 2000);
   };
 
-  // O perfil vive na config do engine (não no mapa `engines`), então é um PATCH
-  // próprio — misturá-lo no payload do toggle reescreveria o mapa inteiro.
-  const changeProfile = async (next: ProfileId) => {
+  // The server merges `engines` by engine id, so the toggle sends only the omniglyph entry.
+  const toggle = (next: boolean) => {
+    const previous = enabled;
+    setEnabled(next);
+    void save({ engines: { omniglyph: { enabled: next } } }, () => setEnabled(previous));
+  };
+
+  // O perfil vive na config do engine (não no mapa `engines`), então vai num PUT próprio.
+  const changeProfile = (next: ProfileId) => {
     const previous = profile;
     setProfile(next);
-    setSaving(true);
-    setStatus("");
-    try {
-      const res = await fetch("/api/settings/compression", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ omniglyph: { profile: next } }),
-      });
-      if (res.ok) {
-        setStatus("saved");
-        setTimeout(() => setStatus(""), 2000);
-      } else {
-        setProfile(previous);
-        setStatus("error");
-      }
-    } catch {
-      setProfile(previous);
-      setStatus("error");
-    } finally {
-      setSaving(false);
-    }
+    void save({ omniglyph: { profile: next } }, () => setProfile(previous));
   };
 
   return (

@@ -216,8 +216,8 @@ test("bootstrapEnv warns on placeholder spellings that differ by case or surroun
 });
 
 test("bootstrapEnv leaves ./.env to Next.js when another .env is preferred", () => {
-  // With DATA_DIR/.env preferred, bootstrap leaves ./.env to Next.js, so a directory there
-  // (a Docker bind-mount of a missing file) cannot stop startup.
+  // When another .env is preferred, bootstrap never reads ./.env, so a directory there
+  // cannot stop startup on this path.
   withTempEnv(({ tempCwd, dataDir }) => {
     process.env.DATA_DIR = dataDir;
     fs.mkdirSync(dataDir, { recursive: true });

@@ -40,6 +40,7 @@ import {
   shouldDefaultAllowClassifier,
   detectClassifierFormat,
   buildDefaultAllowClaudeMessage,
+  applyClaudeClassifierReasoningDefault,
 } from "./chatCore/claudeClassifierCompat.ts";
 import { buildPostCallGuardrailContext } from "./chatCore/postCallGuardrailContext.ts";
 import { storeSemanticCacheResponse } from "./chatCore/semanticCacheStore.ts";
@@ -821,13 +822,8 @@ async function handleChatCoreInner({
     return bypassResponse;
   }
 
-  // ── Claude Code auto-mode classifier compat (opt-in, default "off") ──
-  // Claude Code's `--permission-mode auto` sends an internal classifier request that
-  // requires the response to START with `<block>no</block>`/`<block>yes</block>`.
-  // When a combo/fallback route sends that call to a cheap model returning 200 with
-  // empty content, Claude Code fails closed on every gated action. Detect the
-  // classifier request and short-circuit with a synthetic ALLOW response, WITHOUT
-  // calling the upstream provider. See chatCore/claudeClassifierCompat.ts.
+  // Synthetic classifier ALLOW stays opt-in; ordinary classifier calls still go upstream
+  // with the native-thinking default applied below. See claudeClassifierCompat.ts.
   {
     const classifierSettings = cachedSettings ?? (await getCachedSettings());
     if (
@@ -845,6 +841,11 @@ async function handleChatCoreInner({
       return buildDefaultAllowClaudeMessage(requestedModel, classifierFormat);
     }
   }
+  body = applyClaudeClassifierReasoningDefault(
+    sourceFormat,
+    body as Record<string, unknown>,
+    { headers: clientRawRequest?.headers, resolvedThinkingEffort }
+  );
 
   // Detect source format and get target format
   // Model-specific targetFormat takes priority over provider default

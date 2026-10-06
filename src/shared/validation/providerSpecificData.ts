@@ -17,6 +17,7 @@ const CODEX_REASONING_EFFORT_VALUES = new Set(["none", "low", "medium", "high", 
 const REQUEST_DEFAULT_SERVICE_TIER_VALUES = new Set(["default", "priority", "fast", "flex"]);
 const CODEX_FINGERPRINT_MODE_VALUES = new Set(["off", "device", "session", "full"]);
 const CACHE_PASSTHROUGH_VALUES = new Set(["strip", "openai-format", "claude-format"]);
+const REASONING_CONTROL_VALUES = new Set(["chat-template", "openai"]);
 const PEAK_HOUR_PROTECTION_MODES = new Set(["block", "avoid"]);
 const PEAK_HOUR_PROTECTION_DAYS = new Set(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
 export const MAX_PROVIDER_SPECIFIC_TIMEOUT_MS = 86_400_000; // 24h — operator cap, anti-DoS
@@ -247,6 +248,19 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.preserveEncryptedReasoning must be a boolean",
       path: ["preserveEncryptedReasoning"],
+    });
+  }
+
+  const reasoningControl = data.reasoningControl;
+  if (
+    reasoningControl !== undefined &&
+    reasoningControl !== null &&
+    (typeof reasoningControl !== "string" || !REASONING_CONTROL_VALUES.has(reasoningControl))
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.reasoningControl must be chat-template, openai, or null",
+      path: ["reasoningControl"],
     });
   }
 

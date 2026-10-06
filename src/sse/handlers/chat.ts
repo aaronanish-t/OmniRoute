@@ -466,14 +466,6 @@ async function handleChatImplementation(
     delete body._omniroutePreviousResponseResumed;
   }
 
-  // Feature #6241: fold the canonical `effort` / `thinking` request params onto the
-  // per-provider reasoning fields (reasoning_effort / reasoning.effort / thinking) that the
-  // existing translators already consume. Done here — right after the body is first
-  // resolved, before any reasoning field is read below — so it flows uniformly into every
-  // downstream mapper (Anthropic / Gemini / xAI / Responses). An explicit client
-  // reasoning_effort / reasoning / object-shaped thinking always wins (backward compatible).
-  body = normalizeReasoningRequest(body);
-
   const sourceFormat = detectFormatFromUrl(body, request.url);
 
   // Early guard: an invalid `messages` field is rejected here with a clear
@@ -626,6 +618,11 @@ async function handleChatImplementation(
   // Freeze the client-facing model and reasoning intent before automatic routers
   // mutate the working request. Reasoning policies always match this stable input.
   const reasoningIntent = extractReasoningIntent(modelStr, body);
+
+  // Fold canonical and OpenRouter-style controls onto the common effort carriers only
+  // after routing captures the raw intent. This keeps a Codex model suffix stronger than
+  // the fallback `reasoning.enabled:false`, matching the Codex executor's precedence.
+  body = normalizeReasoningRequest(body);
 
   // Align body.model with the routing model immediately (see applyRoutingModelAlignment).
   body = RoutingModelOps.align(body, modelStr, log);

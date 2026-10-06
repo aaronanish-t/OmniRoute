@@ -45,11 +45,23 @@ function mergeLite(existing: unknown, incoming: Settings): Settings {
 // schema.
 function startServer(initial: Settings) {
   let stored: Settings = JSON.parse(JSON.stringify(initial));
+  let held: Promise<void> | null = null;
+  let releaseHeld: () => void = () => {};
   const server = {
     puts: [] as { body: Settings; status: number }[],
     previews: [] as { config: unknown; status: number }[],
     // The next PUT answers 500 without applying, as a transient server failure would.
     failNextPut: false,
+    // Keeps PUTs waiting until the returned release runs, as a slow server would.
+    holdWrites() {
+      held = new Promise((resolve) => {
+        releaseHeld = () => {
+          held = null;
+          resolve();
+        };
+      });
+      return releaseHeld;
+    },
     get stored() {
       return stored;
     },
@@ -77,6 +89,7 @@ function startServer(initial: Settings) {
           server.failNextPut = false;
           return respond({ error: "unavailable" }, 500);
         }
+        if (held) await held;
         const { lite, ...rest } = parsed.data as Settings;
         stored = { ...stored, ...rest };
         if (lite) stored.lite = mergeLite(stored.lite, lite as Settings);
@@ -284,5 +297,24 @@ describe("EngineConfigPage treats an emptied number field as not set", () => {
 
     expect(server.puts.at(-1)?.status).toBe(200);
     expect((server.stored.aggressive as Settings).minSavingsThreshold).toBe(0.5);
+  });
+
+  it("clears a cap emptied while a save was in flight", async () => {
+    const server = startServer({ lite: { compressToolResults: true, maxToolLength: 3000 } });
+    await renderPage("lite");
+    const release = server.holdWrites();
+
+    fireEvent.change(inputFor("Maximum tool-result length"), { target: { value: "3500" } });
+    await save();
+    // The cap is emptied while the first save is still out.
+    fireEvent.change(inputFor("Maximum tool-result length"), { target: { value: "" } });
+    release();
+    await settle();
+    expect((server.stored.lite as Settings).maxToolLength).toBe(3500);
+
+    await save();
+
+    expect(server.puts.at(-1)?.status).toBe(200);
+    expect(server.stored.lite).toEqual({ compressToolResults: true });
   });
 });

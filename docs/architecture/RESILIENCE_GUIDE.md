@@ -98,6 +98,13 @@ Regression guard: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 **Anti-thundering-herd guard:** prevents concurrent failures from over-extending cooldown or double-incrementing `backoffLevel`.
 
+**Stream content stalls do not cool the account.** When the content-stall watchdog
+(`open-sse/utils/streamHandler.ts`) gives up on a stream that sent no model output in
+time, `markAccountUnavailable()` records the error on the connection but sets no
+cooldown: the stall belongs to that request, most often a long reasoning turn with no
+output yet. Operators can opt back in with `resilienceSettings.streamStallCooldown.enabled`
+(default `false`).
+
 **Terminal states (NOT cooldowns):**
 
 - `banned` — set by banned-keyword / account-ban detection (see [BAN_DETECTION](../security/BAN_DETECTION.md)), and by three consecutive upstream per-request refusals (`request_rejected`, e.g. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); a single refusal only cools the connection down
@@ -261,6 +268,25 @@ Lists active lockouts with: provider, connection, model, reason, expiresAt. Oper
 
 - `GET /api/resilience/model-cooldowns` — list active lockouts
 - `DELETE /api/resilience/model-cooldowns` — manual re-enable. Body: `{provider, connection, model}`. Auth: management.
+
+### Cooldown Manager
+
+UI: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+
+One page for every connection that is out of routing for a transient reason, instead of
+opening each provider page. It lists connection cooldowns, model lockouts and terminal
+states, clears them per connection, for a selection, or for all connections of a provider,
+and edits the most-tuned cooldown rules: `streamStallCooldown.enabled` and the OAuth / API-key
+`connectionCooldown` base cooldown and maximum backoff steps (saved through
+`PATCH /api/resilience`). Terminal states (`banned`, `expired`, `credits_exhausted`) are
+listed but never cleared here.
+
+**REST API** (`src/lib/resilience/cooldownManager.ts`, auth: management):
+
+- `GET /api/resilience/cooldowns[?provider=]` — connections with status, remaining cooldown,
+  backoff level, last error type and model lockouts (no credentials)
+- `POST /api/resilience/cooldowns` — body `{connectionIds: string[]}` or
+  `{all: true, provider?}`; returns `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
 ### Lockout settings UI + success-decay recovery (v3.8.23)
 

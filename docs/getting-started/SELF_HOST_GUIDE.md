@@ -92,9 +92,10 @@ REQUIRE_API_KEY=true          # was false — lock the endpoint down
 APP_BIND_HOST=127.0.0.1       # keep loopback; see "Exposing" only if needed
 ```
 
-`REQUIRE_API_KEY=true` makes every `/v1` request and the dashboard require an
-API key / login. On first visit you create the login password in the dashboard's
-onboarding wizard; skipping that step turns dashboard login off. Docker
+`REQUIRE_API_KEY=true` makes every `/v1` request require an API key, and the
+dashboard require login once a password exists. On first visit you create the
+login password in the dashboard's onboarding wizard; skipping that step turns
+dashboard login off, even with `REQUIRE_API_KEY=true`. Docker
 port-forwarding makes your browser look non-local to the container, so after you
 submit the password the wizard asks for a one-time bootstrap token, which the
 container prints to its log at that moment:

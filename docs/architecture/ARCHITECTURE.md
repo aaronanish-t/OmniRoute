@@ -1097,7 +1097,7 @@ legacy compatibility. The current runtime contract uses:
 
 - `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) applies `src/shared/network/outboundUrlGuard.ts` to chat requests dispatched through `BaseExecutor.execute()`. In public-only mode (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` with the private flag off) it blocks private and loopback hosts and 169.254.0.0/16; in every other mode it blocks cloud-metadata hosts. It checks the hostname or IP literal as written, before any DNS lookup. Built-in local providers skip it.
 - Provider model discovery and validation routes use `src/shared/network/safeOutboundFetch.ts` which applies the guard before every outbound request
-- Guard errors surface as `URL_GUARD_BLOCKED` with HTTP 422 and are logged to the compliance audit trail via `providerAudit.ts`
+- Guard errors surface as `URL_GUARD_BLOCKED` with HTTP 503 (`getSafeOutboundFetchErrorStatus`; the model-discovery route returns 400), and genuine SSRF blocks during validation are logged to the audit trail as `provider.validation.ssrf_blocked` events
 
 ## Observability and Operational Signals
 

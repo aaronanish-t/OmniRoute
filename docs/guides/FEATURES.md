@@ -322,10 +322,10 @@ The config bundle is built by `src/lib/sync/bundle.ts`. Consumers compare the `E
 
 All provider validation and model discovery calls now go through a two-layer outbound guard:
 
-1. **URL guard** (`src/shared/network/outboundUrlGuard.ts`) — Checks the target's hostname or IP literal as written, before any DNS lookup. By default it blocks cloud-metadata hosts and 169.254.0.0/16; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blocks private and loopback hosts and 169.254.0.0/16 too; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (or the legacy `OUTBOUND_SSRF_GUARD_ENABLED=false`) turns the checks off. A value saved from a flag's dashboard toggle takes precedence over its variable, and built-in local providers skip the guard during key validation. See `docs/reference/ENVIRONMENT.md`.
+1. **URL guard** (`src/shared/network/outboundUrlGuard.ts`) — Checks the target's hostname or IP literal as written first; in public-only mode the safe-fetch wrapper also resolves the name and refuses private answers. By default it blocks cloud-metadata hosts and 169.254.0.0/16; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blocks private and loopback hosts and 169.254.0.0/16 too; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (or the legacy `OUTBOUND_SSRF_GUARD_ENABLED=false`) turns the checks off. A value saved from a flag's dashboard toggle takes precedence over its variable, and built-in local providers skip the guard during key validation. See `docs/reference/ENVIRONMENT.md`.
 2. **Safe fetch wrapper** (`src/shared/network/safeOutboundFetch.ts`) — Applies the URL guard, normalises timeouts, and retries transient errors with exponential backoff.
 
-Guard violations surface as HTTP 422 (`URL_GUARD_BLOCKED`) and are written to the compliance audit log via `providerAudit.ts`.
+Guard violations surface as `URL_GUARD_BLOCKED` — HTTP 503 via `getSafeOutboundFetchErrorStatus` (400 on the model-discovery route) — and genuine SSRF blocks during validation are written to the audit log as `provider.validation.ssrf_blocked` events.
 
 ---
 

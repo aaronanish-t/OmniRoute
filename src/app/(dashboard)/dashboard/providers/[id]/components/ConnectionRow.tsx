@@ -7,7 +7,7 @@
 import { readCookieExpiresAt } from "@/shared/utils/webCookieExpiry";
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Button, Toggle } from "@/shared/components";
+import { Badge, Button, ReorderControl, Toggle } from "@/shared/components";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
@@ -416,8 +416,7 @@ export default function ConnectionRow({
   // #11497: cookie rows with a decodable JWT credential carry a persisted
   // cookieExpiresAt — feed it into the same countdown badge OAuth rows use.
   const cookieExpiresAt = readCookieExpiresAt(connection.providerSpecificData);
-  const effectiveExpiresAt =
-    connection.tokenExpiresAt || connection.expiresAt || cookieExpiresAt;
+  const effectiveExpiresAt = connection.tokenExpiresAt || connection.expiresAt || cookieExpiresAt;
   const hasExpirySource = isOAuth || Boolean(cookieExpiresAt);
   const getTokenMinsLeft = () => {
     if (!hasExpirySource || !effectiveExpiresAt) return null;
@@ -529,9 +528,11 @@ export default function ConnectionRow({
 
   return (
     <div
-      className={`group flex items-center justify-between p-3 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${connection.isActive === false ? "opacity-60" : ""}`}
+      className={`group flex flex-wrap items-center justify-between gap-x-3 gap-y-2 p-3 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${connection.isActive === false ? "opacity-60" : ""}`}
     >
-      <div className="flex items-center gap-3 flex-1 min-w-0">
+      {/* basis-64 lets the action bar drop to its own line on narrow screens instead of
+          pushing the row past the viewport (the page clips x-overflow, so buttons vanished). */}
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 basis-64 min-w-0">
         {onToggleSelect && (
           <input
             type="checkbox"
@@ -540,28 +541,17 @@ export default function ConnectionRow({
             className="w-4 h-4 shrink-0 rounded border-border text-primary focus:ring-primary/30 cursor-pointer"
           />
         )}
-        {/* Priority arrows */}
-        <div className="flex flex-col">
-          <button
-            onClick={onMoveUp}
-            disabled={isFirst}
-            className={`p-0.5 rounded ${isFirst ? "text-text-muted/30 cursor-not-allowed" : "hover:bg-sidebar text-text-muted hover:text-primary"}`}
-          >
-            <span className="material-symbols-outlined text-sm">keyboard_arrow_up</span>
-          </button>
-          <button
-            onClick={onMoveDown}
-            disabled={isLast}
-            className={`p-0.5 rounded ${isLast ? "text-text-muted/30 cursor-not-allowed" : "hover:bg-sidebar text-text-muted hover:text-primary"}`}
-          >
-            <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
-          </button>
-        </div>
-        <span className="material-symbols-outlined text-base text-text-muted">
+        <ReorderControl
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+          isFirst={isFirst}
+          isLast={isLast}
+        />
+        <span className="material-symbols-outlined hidden text-base text-text-muted sm:inline-block">
           {isOAuth ? "lock" : "key"}
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{displayName}</p>
+          <p className="text-sm font-medium break-words sm:truncate">{displayName}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <Badge variant={statusPresentation.statusVariant as any} size="sm" dot>
               {statusPresentation.statusLabel}
@@ -628,7 +618,7 @@ export default function ConnectionRow({
               </span>
             )}
             {/* Rate Limit Protection — inline toggle with label */}
-            <span className="text-text-muted/30 select-none">|</span>
+            <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
             <button
               onClick={() => onToggleRateLimit(!rateLimitEnabled)}
               className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium transition-all cursor-pointer ${
@@ -651,7 +641,7 @@ export default function ConnectionRow({
             )}
             {onToggleAutoSync && (
               <>
-                <span className="text-text-muted/30 select-none">|</span>
+                <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
                 <button
                   onClick={() => onToggleAutoSync?.(!autoSyncEnabled)}
                   disabled={connection.isActive === false}
@@ -669,7 +659,7 @@ export default function ConnectionRow({
             )}
             {isClaude && (
               <>
-                <span className="text-text-muted/30 select-none">|</span>
+                <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
                 <button
                   onClick={() => onToggleClaudeExtraUsage?.(!claudeBlockExtraUsageEnabled)}
                   className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium transition-all cursor-pointer ${
@@ -694,7 +684,7 @@ export default function ConnectionRow({
                 one connection type it was actually built for. */}
             {(isClaude || isCcCompatible) && (
               <>
-                <span className="text-text-muted/30 select-none">|</span>
+                <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
                 <select
                   value={effectiveUpstreamProxyMode}
                   onChange={(e) =>
@@ -730,7 +720,7 @@ export default function ConnectionRow({
             )}
             {isCodex && (
               <>
-                <span className="text-text-muted/30 select-none">|</span>
+                <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
                 {codexServiceTierBadge && (
                   <span
                     className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium ${codexServiceTierBadge.className}`}
@@ -770,7 +760,7 @@ export default function ConnectionRow({
             )}
             {onToggleProxyEnabled && (
               <>
-                <span className="text-text-muted/30 select-none">|</span>
+                <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
                 <button
                   onClick={() => onToggleProxyEnabled(!proxyEnabled)}
                   aria-label={proxyEnabled ? t("proxyEnabledTitle") : t("proxyDisabledTitle")}
@@ -788,7 +778,7 @@ export default function ConnectionRow({
             )}
             {onTogglePerKeyProxyEnabled && (
               <>
-                <span className="text-text-muted/30 select-none">|</span>
+                <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
                 <button
                   onClick={() => onTogglePerKeyProxyEnabled(!perKeyProxyEnabled)}
                   aria-label={
@@ -832,7 +822,7 @@ export default function ConnectionRow({
                       : t("proxySourceKey");
                 return (
                   <>
-                    <span className="text-text-muted/30 select-none">|</span>
+                    <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
                     <span
                       className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium ${colorClass}`}
                       title={t("proxyConfiguredBySource", {
@@ -849,131 +839,129 @@ export default function ConnectionRow({
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          variant="ghost"
-          icon="refresh"
-          loading={isRetesting}
-          disabled={connection.isActive === false}
-          onClick={onRetest}
-          className="!h-7 !px-2 text-xs"
-          title={t("retestAuthentication")}
-        >
-          {t("retest")}
-        </Button>
-        {/* T12: Manual token refresh for OAuth accounts */}
-        {onRefreshToken && (
+      <div className="basis-full min-w-0 xl:basis-auto">
+        <div className="flex w-full flex-wrap items-center justify-between gap-0.5 sm:gap-1 xl:justify-end [&>button]:grow-0">
           <Button
             size="sm"
             variant="ghost"
-            icon="token"
-            loading={isRefreshing}
-            disabled={connection.isActive === false || isRefreshing}
-            onClick={onRefreshToken}
-            className="!h-7 !px-2 text-xs text-amber-500 hover:text-amber-400"
-            title={t("refreshOauthTokenTitle")}
-          >
-            {t("tokenShort")}
-          </Button>
-        )}
-        {isCodex && onApplyCodexAuthLocal && (
-          <Button
-            size="sm"
-            variant="ghost"
-            icon="download_done"
-            loading={isApplyingCodexAuthLocal}
-            disabled={isApplyingCodexAuthLocal}
-            onClick={onApplyCodexAuthLocal}
-            className="!h-7 !px-2 text-xs text-emerald-500 hover:text-emerald-400"
-            title={applyCodexAuthLabel}
-          >
-            {applyCodexAuthLabel}
-          </Button>
-        )}
-        {isCodex && onExportCodexAuthFile && (
-          <Button
-            size="sm"
-            variant="ghost"
-            icon="download"
-            loading={isExportingCodexAuthFile}
-            disabled={isExportingCodexAuthFile}
-            onClick={onExportCodexAuthFile}
-            className="!h-7 !px-2 text-xs text-sky-500 hover:text-sky-400"
-            title={exportCodexAuthLabel}
-          >
-            {exportCodexAuthLabel}
-          </Button>
-        )}
-        {isClaude && onApplyClaudeAuthLocal && (
-          <Button
-            size="sm"
-            variant="ghost"
-            icon="install_desktop"
-            loading={isApplyingClaudeAuthLocal}
-            disabled={isApplyingClaudeAuthLocal}
-            onClick={onApplyClaudeAuthLocal}
-            className="!h-7 !px-2 text-xs text-emerald-500 hover:text-emerald-400"
-            title={applyClaudeAuthLabel}
-          >
-            {applyClaudeAuthLabel}
-          </Button>
-        )}
-        {isClaude && onExportClaudeAuthFile && (
-          <Button
-            size="sm"
-            variant="ghost"
-            icon="download"
-            loading={isExportingClaudeAuthFile}
-            disabled={isExportingClaudeAuthFile}
-            onClick={onExportClaudeAuthFile}
-            className="!h-7 !px-2 text-xs text-sky-500 hover:text-sky-400"
-            title={exportClaudeAuthLabel}
-          >
-            {exportClaudeAuthLabel}
-          </Button>
-        )}
-        <Toggle
-          size="sm"
-          checked={connection.isActive ?? true}
-          onChange={onToggleActive}
-          title={(connection.isActive ?? true) ? t("disableConnection") : t("enableConnection")}
-        />
-        <div className="flex gap-1 ms-1 transition-opacity">
-          {onReauth && (
-            <button
-              onClick={onReauth}
-              className="p-2 hover:bg-amber-500/10 rounded text-amber-600 hover:text-amber-500"
-              title={t("reauthenticateConnection")}
-            >
-              <span className="material-symbols-outlined text-[18px]">passkey</span>
-            </button>
+            icon="refresh"
+            loading={isRetesting}
+            disabled={connection.isActive === false}
+            onClick={onRetest}
+            className="!size-7 !p-0 text-xs"
+            aria-label={t("retest")}
+            title={t("retestAuthentication")}
+          />
+          {/* T12: Manual token refresh for OAuth accounts */}
+          {onRefreshToken && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon="token"
+              loading={isRefreshing}
+              disabled={connection.isActive === false || isRefreshing}
+              onClick={onRefreshToken}
+              className="!size-7 !p-0 text-xs text-amber-500 hover:text-amber-400"
+              aria-label={t("tokenShort")}
+              title={t("refreshOauthTokenTitle")}
+            />
           )}
-          <button
-            onClick={onEdit}
-            className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary"
-            title={t("edit")}
-          >
-            <span className="material-symbols-outlined text-[18px]">edit</span>
-          </button>
-          <button
-            onClick={onProxy}
-            className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary"
-            title={t("proxyConfig")}
-          >
-            <span className="material-symbols-outlined text-[18px]">vpn_lock</span>
-          </button>
-          <button
-            onClick={onDelete}
-            className="p-2 hover:bg-red-500/10 rounded text-red-500"
-            title={t("delete")}
-          >
-            <span className="material-symbols-outlined text-[18px]">delete</span>
-          </button>
+          {isCodex && onApplyCodexAuthLocal && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon="download_done"
+              loading={isApplyingCodexAuthLocal}
+              disabled={isApplyingCodexAuthLocal}
+              onClick={onApplyCodexAuthLocal}
+              className="!size-7 !p-0 text-xs text-emerald-500 hover:text-emerald-400"
+              aria-label={applyCodexAuthLabel}
+              title={applyCodexAuthLabel}
+            />
+          )}
+          {isCodex && onExportCodexAuthFile && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon="download"
+              loading={isExportingCodexAuthFile}
+              disabled={isExportingCodexAuthFile}
+              onClick={onExportCodexAuthFile}
+              className="!size-7 !p-0 text-xs text-sky-500 hover:text-sky-400"
+              aria-label={exportCodexAuthLabel}
+              title={exportCodexAuthLabel}
+            />
+          )}
+          {isClaude && onApplyClaudeAuthLocal && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon="install_desktop"
+              loading={isApplyingClaudeAuthLocal}
+              disabled={isApplyingClaudeAuthLocal}
+              onClick={onApplyClaudeAuthLocal}
+              className="!size-7 !p-0 text-xs text-emerald-500 hover:text-emerald-400"
+              aria-label={applyClaudeAuthLabel}
+              title={applyClaudeAuthLabel}
+            />
+          )}
+          {isClaude && onExportClaudeAuthFile && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon="download"
+              loading={isExportingClaudeAuthFile}
+              disabled={isExportingClaudeAuthFile}
+              onClick={onExportClaudeAuthFile}
+              className="!size-7 !p-0 text-xs text-sky-500 hover:text-sky-400"
+              aria-label={exportClaudeAuthLabel}
+              title={exportClaudeAuthLabel}
+            />
+          )}
+          <Toggle
+            size="sm"
+            checked={connection.isActive ?? true}
+            onChange={onToggleActive}
+            title={(connection.isActive ?? true) ? t("disableConnection") : t("enableConnection")}
+          />
+          <div className="contents">
+            {onReauth && (
+              <button
+                onClick={onReauth}
+                className="inline-flex size-7 items-center justify-center rounded hover:bg-amber-500/10 text-amber-600 hover:text-amber-500"
+                title={t("reauthenticateConnection")}
+              >
+                <span className="material-symbols-outlined text-[18px]">passkey</span>
+              </button>
+            )}
+            <button
+              onClick={onEdit}
+              className="inline-flex size-7 items-center justify-center rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-primary"
+              title={t("edit")}
+            >
+              <span className="material-symbols-outlined text-[18px]">edit</span>
+            </button>
+            <button
+              onClick={onProxy}
+              className="inline-flex size-7 items-center justify-center rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-primary"
+              title={t("proxyConfig")}
+            >
+              <span className="material-symbols-outlined text-[18px]">vpn_lock</span>
+            </button>
+            <button
+              onClick={onDelete}
+              className="inline-flex size-7 items-center justify-center rounded hover:bg-red-500/10 text-red-500"
+              title={t("delete")}
+            >
+              <span className="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+          </div>
         </div>
       </div>
       {isCodex && connection.codexAccountPool ? (
-        <CodexAccountDetails pool={connection.codexAccountPool} />
+        <div className="basis-full min-w-0">
+          <CodexAccountDetails pool={connection.codexAccountPool} />
+        </div>
       ) : null}
     </div>
   );

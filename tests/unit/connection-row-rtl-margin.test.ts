@@ -38,9 +38,10 @@ const rowFile = path.join(
 test("ConnectionRow action-icon wrapper must use an RTL-mirroring (logical) spacing utility, not a physical one", () => {
   const source = readFileSync(rowFile, "utf8");
 
-  const match = source.match(
-    /<div className="flex gap-1 ([^"]*)transition-opacity">/
-  );
+  // The action-icon wrapper is the div that directly holds the retest button
+  // (the first icon of the cluster); match it by that anchor rather than by its
+  // exact class list, so layout changes keep the RTL check meaningful.
+  const match = source.match(/<div className="([^"]*)">\s*<Button\b[^>]*?icon="refresh"/);
   assert.ok(match, "expected to find the action-icon wrapper div in ConnectionRow.tsx");
 
   const spacingClasses = match![1];

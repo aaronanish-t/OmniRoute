@@ -50,6 +50,8 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   globalThis.fetch = originalFetch;
+  // Drain the last test's in-flight save before closing, so it lands instead of erroring.
+  assert.ok(await waitForCallLogSaves(30_000), "the last test's call-log save should finish");
   // Stops the call-log writer too, which otherwise keeps the process alive for its idle timeout.
   await closeCallLogSaves(2_000);
   await cleanup();

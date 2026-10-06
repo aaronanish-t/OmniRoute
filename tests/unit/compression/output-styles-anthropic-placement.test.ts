@@ -3,6 +3,9 @@
 // two shapes with a system prompt take the mid-conversation-system path, where only a leading
 // run of system turns is hoisted out of messages[]. Those two shapes also carry a later system
 // turn, which that path keeps in messages[] and the default Claude path would hoist.
+//
+// Scope: the placement contract is asserted for the English ("en") instruction only; the
+// localized instruction texts are not covered here.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -62,6 +65,8 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   globalThis.fetch = originalFetch;
+  // Drain the last test's in-flight save before closing, so it lands instead of erroring.
+  assert.ok(await waitForCallLogSaves(30_000), "the last test's call-log save should finish");
   // Stops the call-log writer too, which otherwise keeps the process alive for its idle timeout.
   await closeCallLogSaves(2_000);
   await cleanup();

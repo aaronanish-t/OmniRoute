@@ -35,6 +35,8 @@ test("disabled legacy mode and no styles → empty selection", () => {
 const LEGACY_MARKER = "[OmniRoute Caveman Output Mode]";
 
 // Runs one user turn through the legacy injector and the unified one with the same config.
+// Language scope: "en" only — the legacy-vs-unified identity contracts below are not asserted
+// for the localized (hu/ja/zh) instruction texts.
 function injectBoth(content: string, autoClarity: boolean) {
   const body = { messages: [{ role: "user", content }] };
   const config = { enabled: true, intensity: "full" as const, autoClarity };

@@ -1,11 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { createTempDataDir } from "../_setup/tempDataDir.ts";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-compression-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
+const { dir: TEST_DATA_DIR, cleanup } = createTempDataDir("omniroute-compression-");
 process.env.REQUIRE_API_KEY = "false";
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "test-compression-secret";
 
@@ -19,6 +17,7 @@ const compressionAnalyticsDb = await import("../../src/lib/db/compressionAnalyti
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 const { estimateTokens, getTokenLimit } = await import("../../open-sse/services/contextManager.ts");
 const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuitBreaker.ts");
+const { waitForCallLogSaves, closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -27,6 +26,8 @@ async function resetStorage() {
   resetAllCircuitBreakers();
   readCacheDb.invalidateDbCache();
   await new Promise((resolve) => setTimeout(resolve, 20));
+  // The previous test's call log is saved in the background; it must land before the reset.
+  assert.ok(await waitForCallLogSaves(30_000), "the previous test's call-log saves should finish");
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
@@ -38,10 +39,10 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   globalThis.fetch = originalFetch;
-  core.closeDbInstance();
-  try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  } catch {}
+  // Drain the last test's in-flight save, then stop the writer before the database closes.
+  assert.ok(await waitForCallLogSaves(30_000), "the last test's call-log save should finish");
+  await closeCallLogSaves(2_000);
+  await cleanup();
 });
 
 test("chatCore integration: compressContext called proactively when context exceeds 85% threshold", async () => {
@@ -612,9 +613,8 @@ test("chatCore integration: assigned compression combo applies language packs an
     },
     languageConfig: {
       enabled: true,
-      // autoDetect finds no pt-BR hint word in this short Portuguese turn and resolves to
-      // "en", so it stays off. The global default is English too, so pt-BR output can only
-      // come from the combo's language packs.
+      // autoDetect is disabled here, so the detector never runs. With the global default
+      // language "en", pt-BR output can only come from the combo's language packs.
       autoDetect: false,
       defaultLanguage: "en",
       enabledPacks: ["en"],
@@ -725,9 +725,8 @@ test("chatCore integration: default stacked compression combo applies for unassi
     },
     languageConfig: {
       enabled: true,
-      // autoDetect finds no pt-BR hint word in this short Portuguese turn and resolves to
-      // "en", so it stays off. The global default is English too, so pt-BR output can only
-      // come from the combo's language packs.
+      // autoDetect is disabled here, so the detector never runs. With the global default
+      // language "en", pt-BR output can only come from the combo's language packs.
       autoDetect: false,
       defaultLanguage: "en",
       enabledPacks: ["en"],

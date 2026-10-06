@@ -1,7 +1,7 @@
 ---
 title: "Feature Flags"
-version: 3.8.51
-lastUpdated: 2026-09-03
+version: 3.8.52
+lastUpdated: 2026-10-05
 ---
 
 # Feature Flags
@@ -88,7 +88,7 @@ used when neither a DB override nor an environment variable is present.
 | `OPENCODE_RATE_LIMITED_429_EARLY_STOP`          | boolean | `false` |         | OpenCode rotation: stop the account wave at the first 429 classified as a real rate limit (parseable `Retry-After`, or a body naming a rate/usage limit) and return that upstream 429 unchanged. Unclassified 429s keep rotating. Off by default: the free tier is limited per egress IP (#9611), so every 429 rotates and an exhausted wave returns the last upstream 429.                                                                             |
 | `MITM_DISABLE_TLS_VERIFY`                       | boolean | `false` | ✓       | Disable TLS certificate verification for the MITM proxy. **Danger.**                                                                                                                                                                                                                                                                                                                                                                                    |
 | `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`         | boolean | `false` |         | Turns off the outbound URL guard's host checks, cloud-metadata block included, on provider URL validation, model discovery, provider-node base URLs, and the proxy-fallback test, and allows private webhook targets. Local and LAN URLs already pass by default (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`).                                                                                                                                               |
-| `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`           | boolean | `true`  |         | Allow provider URLs on local/private addresses (127.0.0.1, localhost, LAN). On by default (local-first): the guard then blocks cloud-metadata hosts. Disable to block private and loopback hosts and 169.254.0.0/16 too.                                                                                                                                                                                                                                |
+| `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`           | boolean | `true`  |         | Allow provider URLs on local/private addresses (127.0.0.1, localhost, LAN). On by default (local-first): the guard then blocks cloud-metadata endpoints (all of 169.254.0.0/16, metadata.google.internal). Disable for strict public-only blocking: private and loopback hosts are blocked too.                                                                                                                                                         |
 | `ENABLE_CC_COMPATIBLE_PROVIDER`                 | boolean | `false` | ✓       | Enable Claude Code compatible provider mode.                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ### Policies (5)

@@ -214,7 +214,7 @@ test("bootstrapEnv leaves ./.env to Next.js when another .env is preferred", () 
     const output = captureStderr(() => bootstrapEnv());
 
     assert.match(output, /INITIAL_PASSWORD is unset here/);
-    assert.match(output, /Next\.js/);
+    assert.doesNotMatch(output, /CHANGEME/);
   });
 });
 

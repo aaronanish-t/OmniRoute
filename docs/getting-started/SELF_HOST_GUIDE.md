@@ -1,7 +1,7 @@
 ---
 title: "🚀 Self-Host Guide — OmniRoute (零月费自托管 / zero-fee self-host)"
-version: 3.8.51
-lastUpdated: 2026-09-27
+version: 3.8.52
+lastUpdated: 2026-10-05
 ---
 
 # 🚀 Self-Host Guide — OmniRoute

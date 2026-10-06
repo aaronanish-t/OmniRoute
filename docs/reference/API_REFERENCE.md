@@ -1,7 +1,7 @@
 ---
 title: "API Reference"
-version: 3.8.51
-lastUpdated: 2026-08-31
+version: 3.8.52
+lastUpdated: 2026-10-05
 ---
 
 # API Reference

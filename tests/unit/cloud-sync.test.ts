@@ -24,6 +24,8 @@ const coreDb = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
+const cloudRoute = await import("../../src/app/api/sync/cloud/route.ts");
+const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
 const { cloudSyncActionSchema } = await import("../../src/shared/validation/schemas/cloud.ts");
 
 function createAbortError(message = "aborted") {
@@ -83,6 +85,31 @@ test.after(() => {
   } else {
     process.env.OMNIROUTE_CLOUD_SYNC_SECRETS = ORIGINAL_CLOUD_SECRETS;
   }
+});
+
+test("cloud route rejects enabling without upload consent before any network call", async () => {
+  process.env.INITIAL_PASSWORD = "cloud-consent-test";
+  process.env.JWT_SECRET = "cloud-consent-test-jwt";
+  globalThis.fetch = async () => {
+    throw new Error("Unexpected outbound request");
+  };
+  const request = await makeManagementSessionRequest("http://localhost/api/sync/cloud", {
+    method: "POST",
+    body: { action: "enable" },
+  });
+  const response = await cloudRoute.POST(request);
+  assert.equal(response.status, 400);
+});
+
+test("cloud route rejects unauthenticated mutations", async () => {
+  process.env.INITIAL_PASSWORD = "cloud-consent-test";
+  const response = await cloudRoute.POST(
+    new Request("http://localhost/api/sync/cloud", {
+      method: "POST",
+      body: JSON.stringify({ action: "enable", acknowledgeCredentialUpload: true }),
+    })
+  );
+  assert.equal(response.status, 401);
 });
 
 test("fresh installations do not enable cloud sync", async () => {

@@ -275,7 +275,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
         engineId === "headroom"
           ? {
               headroom: {
-                ...(typeof configState.minRows === "number" && Number.isFinite(configState.minRows)
+                ...(typeof configState.minRows === "number" && !Number.isNaN(configState.minRows)
                   ? { minRows: configState.minRows }
                   : {}),
               },

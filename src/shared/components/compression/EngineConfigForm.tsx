@@ -23,14 +23,19 @@ export function EngineConfigForm({ schema, value, onChange: set }: EngineConfigF
             {f.type === "number" && (
               <input
                 type="number"
-                // NaN (an emptied field, "not set") renders as an empty input, never as 0.
+                // NaN (an emptied field, "not set") renders as an empty input, never as 0;
+                // overflow (Infinity) also renders empty and surfaces through the save error.
                 value={typeof v === "number" && Number.isFinite(v) ? v : ""}
                 placeholder={f.defaultValue != null ? String(f.defaultValue) : ""}
                 min={f.min}
                 max={f.max}
-                onChange={(e) =>
-                  set(f.key, e.target.value === "" ? Number.NaN : Number(e.target.value))
-                }
+                onChange={(e) => {
+                  // A browser reports badInput with an empty value for unparseable entries
+                  // ("1e", "1,5" in a comma-decimal locale): keep the last valid value rather
+                  // than mapping the entry to the unset sentinel.
+                  if (e.target.value === "" && e.target.validity.badInput) return;
+                  set(f.key, e.target.value === "" ? Number.NaN : Number(e.target.value));
+                }}
                 className="border border-border rounded px-2 py-1"
               />
             )}

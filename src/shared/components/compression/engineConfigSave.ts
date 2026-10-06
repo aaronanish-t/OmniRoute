@@ -49,7 +49,9 @@ export function buildEngineDetailUpdate(
     } else if (typeof value === "number" && Number.isNaN(value)) {
       // An emptied number input is the only source of NaN: it means "not set" and leaves the
       // body, except lite's cap, which the lite merge below maps to null to drop the stored cap.
-      // Overflow input (Infinity) is a value, not an unset — it stays and the schema rejects it.
+      // Overflow (Infinity) is a value, not an unset: it stays, and a non-lite schema rejects the
+      // wire-null it serializes to. lite's cap null IS the clear sentinel, so only the page's cap
+      // range guard stops an overflow cap from silently clearing the stored cap.
       if (engineId !== "lite" || key !== "maxToolLength") delete next[key];
       else next[key] = value;
     } else {

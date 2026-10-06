@@ -769,7 +769,8 @@ async function saveCallLogOperation(entry: any): Promise<void> {
     // the UNIQUE primary key — before any file is published. Writing first and
     // regenerating the id afterwards let a repeated explicit id + timestamp
     // overwrite an earlier row's artifact. A row with details pending stays
-    // 'missing' until the artifact lands (the continuation bridge covers it).
+    // 'missing' until the artifact lands — or forever if the write fails
+    // outright, the same fail-open end-state the write-first path had.
     const initialDetailState: CallLogDetailState = detailExpected ? "missing" : "none";
 
     // Optional column (migration 191) — only fixed identifiers are spliced in.

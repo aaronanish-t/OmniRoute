@@ -1899,17 +1899,12 @@ export async function getProviderCredentials(
     if (withQuota.length === 0 && exhaustedQuota.length > 0) {
       // All remaining eligible accounts are exhausted
       const earliestResetAt = getEarliestFutureDate(
-        exhaustedQuota.map((c) => {
-          if (resolveProviderId(provider) === "claude") {
-            return (
-              getClaudeQuotaPreflightResetAt(c.id, requestedModel, c.providerSpecificData) ||
-              getQuotaCache(c.id)?.nextResetAt ||
-              null
-            );
-          }
-          const entry = getQuotaCache(c.id);
-          return entry?.nextResetAt || null;
-        })
+        exhaustedQuota.map(
+          (c) =>
+            getClaudeQuotaPreflightResetAt(c.id, requestedModel, c.providerSpecificData) ||
+            getQuotaCache(c.id)?.nextResetAt ||
+            null
+        )
       );
       const earliestResetMs = parseFutureDateMs(earliestResetAt);
       const retryAfter = earliestResetMs

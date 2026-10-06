@@ -53,6 +53,7 @@ import {
   getQuotaWindowStatus,
   hydrateCodexQuotaCacheForRequest,
   isQuotaExhaustedForRequest,
+  getClaudeQuotaPreflightResetAt,
   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
 } from "@/domain/quotaCache";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
@@ -1899,6 +1900,13 @@ export async function getProviderCredentials(
       // All remaining eligible accounts are exhausted
       const earliestResetAt = getEarliestFutureDate(
         exhaustedQuota.map((c) => {
+          if (resolveProviderId(provider) === "claude") {
+            return (
+              getClaudeQuotaPreflightResetAt(c.id, requestedModel, c.providerSpecificData) ||
+              getQuotaCache(c.id)?.nextResetAt ||
+              null
+            );
+          }
           const entry = getQuotaCache(c.id);
           return entry?.nextResetAt || null;
         })
@@ -1913,7 +1921,7 @@ export async function getProviderCredentials(
         allRateLimited: true,
         retryAfter,
         retryAfterHuman: formatRetryAfter(retryAfter),
-        lastError: `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest reset ${formatRetryAfter(retryAfter)})`,
+        lastError: `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest ${formatRetryAfter(retryAfter)})`,
         lastErrorCode: 429,
       };
     }

@@ -438,6 +438,9 @@ function activeClaudeResetMs(quota: QuotaInfo, now: number): number | null {
 }
 
 function isActiveClaudeExhaustion(quota: QuotaInfo, now: number): boolean {
+  // Active critical limits can be predictive warnings while quota remains.
+  // Explicit upstream 429s still use activeClaudeResetMs without this preflight guard.
+  if (quota.fractionReported !== false && quota.remainingPercentage > 0) return false;
   return activeClaudeResetMs(quota, now) !== null;
 }
 
@@ -596,6 +599,35 @@ export function getCachedClaudeQuotaScopeDecision(input: {
   }
 
   return CONNECTION_SCOPED_CLAUDE_QUOTA;
+}
+
+export function getClaudeQuotaPreflightResetAt(
+  connectionId: string,
+  requestedModel: string | null,
+  providerSpecificData?: unknown
+): string | null {
+  const entry = getState().cache.get(connectionId);
+  if (!entry || resolveProviderId(entry.provider) !== "claude") return null;
+  const now = Date.now();
+  const config = readClaudeUsageLimitConfig(providerSpecificData);
+  const sessionRecoveryEnabled = config.lowPriorityMode || config.autoLimitReset;
+  const windows = [
+    ...Object.values(entry.quotas).filter(
+      (quota) =>
+        quota.claudeQuota &&
+        quota.claudeQuota.kind !== "weekly_scoped" &&
+        (quota.claudeQuota.kind !== "session" || !sessionRecoveryEnabled)
+    ),
+    ...Object.values(entry.modelQuotas).filter(
+      (quota) =>
+        requestedModel &&
+        quota.claudeQuota?.kind === "weekly_scoped" &&
+        claudeQuotaMatchesModel(quota.claudeQuota, requestedModel)
+    ),
+  ].filter((quota) => isActiveClaudeExhaustion(quota, now));
+  // All blocking windows on this account must reset before it can serve this model.
+  // The caller then chooses the earliest available account, not the cache park TTL.
+  return decisionForLatestClaudeReset(windows, "connection", now)?.resetAt ?? null;
 }
 
 export function isQuotaExhaustedForRequest(

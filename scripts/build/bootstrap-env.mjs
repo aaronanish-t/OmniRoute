@@ -328,8 +328,12 @@ export function bootstrapEnv({ dataDirOverride, quiet = false } = {}) {
   // Bootstrap reads process.env, one .env file, and server.env. Next.js can still fill
   // an unset INITIAL_PASSWORD from its own .env files, so the unset notice hedges.
   const initialPassword = merged.INITIAL_PASSWORD;
-  if (initialPassword === "CHANGEME") {
-    log("⚠️  INITIAL_PASSWORD is the .env.example placeholder 'CHANGEME', a publicly known");
+  // Placeholder variants (" changeme ", "Changeme") become equally guessable passwords,
+  // so the comparison normalizes case and surrounding whitespace.
+  const isPlaceholderLike =
+    typeof initialPassword === "string" && initialPassword.trim().toUpperCase() === "CHANGEME";
+  if (isPlaceholderLike) {
+    log("⚠️  INITIAL_PASSWORD matches the .env.example placeholder 'CHANGEME', a publicly known");
     log("   password. If no dashboard password is saved yet, CHANGEME becomes the password.");
     log("   Set your own INITIAL_PASSWORD before first boot. In Docker, do it before the");
     log("   container's first start: a host browser reaches the container as a remote client,");

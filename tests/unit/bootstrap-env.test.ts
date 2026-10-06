@@ -202,6 +202,19 @@ test("bootstrapEnv warns that the CHANGEME placeholder becomes the password", ()
   });
 });
 
+test("bootstrapEnv warns on placeholder spellings that differ by case or surrounding whitespace", () => {
+  withTempEnv(({ dataDir }) => {
+    process.env.DATA_DIR = dataDir;
+    process.env.INITIAL_PASSWORD = " changeme ";
+
+    const output = captureStderr(() => bootstrapEnv());
+
+    assert.match(output, /placeholder 'CHANGEME', a publicly known/);
+    assert.doesNotMatch(output, /is unset here/);
+    assert.doesNotMatch(output, /only whitespace/);
+  });
+});
+
 test("bootstrapEnv leaves ./.env to Next.js when another .env is preferred", () => {
   // With DATA_DIR/.env preferred, bootstrap leaves ./.env to Next.js, so a directory there
   // (a Docker bind-mount of a missing file) cannot stop startup.

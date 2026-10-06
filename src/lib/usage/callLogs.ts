@@ -10,6 +10,7 @@ import path from "node:path";
 import type { RequestPipelinePayloads } from "@omniroute/open-sse/utils/requestLogger.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import { getDbInstance } from "../db/core";
+import { failPendingCallLogDetail, publishPendingCallLogDetail } from "../db/callLogDetails";
 import { getRequestDetailLogByCallLogId } from "../db/detailedLogs";
 import { shouldPersistToDisk } from "./migrations";
 import { updateRequestTokensById } from "./usageHistory";
@@ -768,10 +769,10 @@ async function saveCallLogOperation(entry: any): Promise<void> {
     // derived from (timestamp, id), so the id must be final — i.e. accepted by
     // the UNIQUE primary key — before any file is published. Writing first and
     // regenerating the id afterwards let a repeated explicit id + timestamp
-    // overwrite an earlier row's artifact. A row with details pending stays
-    // 'missing' until the artifact lands — or forever if the write fails
-    // outright, the same fail-open end-state the write-first path had.
-    const initialDetailState: CallLogDetailState = detailExpected ? "missing" : "none";
+    // overwrite an earlier row's artifact. Pending is a durable export barrier;
+    // a failed or abandoned write becomes terminal missing instead.
+    const initialDetailState: CallLogDetailState = detailExpected ? "pending" : "none";
+    const detailPendingUntil = detailExpected ? Date.now() + 5 * 60_000 : null;
 
     // Optional column (migration 191) — only fixed identifiers are spliced in.
     const resilienceCol = hasResilienceColumn ? ", resilience_actions" : "";
@@ -787,7 +788,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
         reasoning_encrypted,
         cache_source, request_type, source_format, target_format, api_key_id, api_key_name,
         combo_name, combo_step_id, combo_execution_key, error_summary, detail_state,
-        artifact_relpath, artifact_size_bytes, artifact_sha256,
+        detail_pending_until, artifact_relpath, artifact_size_bytes, artifact_sha256,
         has_request_body, has_response_body, has_pipeline_details, request_summary,
         correlation_id, model_pinned, session_tag, response_id, error_type,
         video_content_removed, has_content, usage_provenance,
@@ -802,7 +803,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
         @reasoningEncrypted,
         @cacheSource, @requestType, @sourceFormat, @targetFormat, @apiKeyId, @apiKeyName,
         @comboName, @comboStepId, @comboExecutionKey, @errorSummary, @detailState,
-        @artifactRelPath, @artifactSizeBytes, @artifactSha256,
+        @detailPendingUntil, @artifactRelPath, @artifactSizeBytes, @artifactSha256,
         @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
         @correlationId, @modelPinned, @sessionTag, @responseId, @errorType,
         @videoContentRemoved, @hasContent, @usageProvenance,
@@ -814,6 +815,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
       ...logEntry,
       errorSummary: toStoredErrorSummary(protectedError),
       detailState: initialDetailState,
+      detailPendingUntil,
       artifactRelPath: null,
       artifactSizeBytes: null,
       artifactSha256: null,
@@ -842,22 +844,21 @@ async function saveCallLogOperation(entry: any): Promise<void> {
 
     let detailState: CallLogDetailState = initialDetailState;
     if (detailExpected) {
-      const artifact = buildArtifact(
-        logEntry,
-        protectedRequestBody,
-        protectedResponseBody,
-        protectedError,
-        protectedPipelinePayloads
-      );
-      const artifactResult = await writeCallArtifactAsync(artifact);
-      if (artifactResult) {
-        db.prepare(
-          `UPDATE call_logs
-             SET detail_state = 'ready', artifact_relpath = ?,
-                 artifact_size_bytes = ?, artifact_sha256 = ?
-           WHERE id = ?`
-        ).run(artifactResult.relPath, artifactResult.sizeBytes, artifactResult.sha256, logEntry.id);
-        detailState = "ready";
+      try {
+        const artifact = buildArtifact(
+          logEntry,
+          protectedRequestBody,
+          protectedResponseBody,
+          protectedError,
+          protectedPipelinePayloads
+        );
+        const artifactResult = await writeCallArtifactAsync(artifact);
+        if (artifactResult && publishPendingCallLogDetail(db, logEntry.id, artifactResult)) {
+          detailState = "ready";
+        }
+      } finally {
+        // A null result or a thrown write must not strand the export cursor.
+        failPendingCallLogDetail(db, logEntry.id);
       }
     }
 

@@ -334,10 +334,11 @@ export function bootstrapEnv({ dataDirOverride, quiet = false } = {}) {
     typeof initialPassword === "string" && initialPassword.trim().toUpperCase() === "CHANGEME";
   if (isPlaceholderLike) {
     log("⚠️  INITIAL_PASSWORD matches the .env.example placeholder 'CHANGEME', a publicly known");
-    log("   password. If no dashboard password is saved yet, CHANGEME becomes the password.");
+    log("   password. If no dashboard password is saved yet, that value becomes the password.");
     log("   Set your own INITIAL_PASSWORD before first boot. In Docker, do it before the");
     log("   container's first start: a host browser reaches the container as a remote client,");
-    log("   and the login refuses CHANGEME from remote clients. Elsewhere, change the password");
+    log("   and the login refuses the exact placeholder CHANGEME from remote clients (case or");
+    log("   whitespace variants are not refused remotely). Elsewhere, change the password");
     log("   right away: sign in from localhost and use Dashboard → Settings → Security, or run");
     log("   `omniroute reset-password` (`node bin/reset-password.mjs` in a source checkout)");
     log("   with DATA_DIR set to this server's data directory.");
